@@ -103,7 +103,9 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
             whitespace-nowrap
             ${
               badge.variant === "status"
-                ? `px-2 py-0.5 rounded-full text-xs font-semibold ${getStatusVariant(currentFormula?.status)}`
+                ? `px-2 py-0.5 rounded-full text-xs font-semibold ${getStatusVariant(
+                    currentFormula?.status
+                  )}`
                 : "text-sm font-medium text-white"
             }
           `}
