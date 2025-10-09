@@ -1,0 +1,99 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for react-query-builder */
+.query-builder-custom {
+  @apply border-0 bg-transparent;
+}
+
+.rule-group-custom {
+  @apply border border-gray-200 rounded-lg p-3 mb-2 bg-gray-50;
+}
+
+.rule-custom {
+  @apply border border-gray-200 rounded p-2 mb-2 bg-white flex items-center space-x-2;
+}
+
+.combinator-custom select {
+  @apply px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500;
+}
+
+.rule-custom select,
+.rule-custom input {
+  @apply px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500;
+}
+
+.add-rule-custom,
+.add-group-custom {
+  @apply px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition-colors cursor-pointer border-0;
+}
+
+.remove-rule-custom,
+.remove-group-custom {
+  @apply px-2 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition-colors cursor-pointer border-0;
+}
+
+/* Override default query builder styles */
+.queryBuilder .ruleGroup {
+  background-color: transparent !important;
+  border: none !important;
+}
+
+.queryBuilder .rule {
+  background-color: white !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 0.375rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.queryBuilder .ruleGroup-header {
+  margin-bottom: 0.5rem !important;
+}
+
+.queryBuilder button {
+  font-size: 0.875rem !important;
+  padding: 0.25rem 0.75rem !important;
+  border-radius: 0.375rem !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: background-color 0.2s !important;
+}
+
+.queryBuilder .ruleGroup-addRule,
+.queryBuilder .ruleGroup-addGroup {
+  background-color: #2563eb !important;
+  color: white !important;
+}
+
+.queryBuilder .ruleGroup-addRule:hover,
+.queryBuilder .ruleGroup-addGroup:hover {
+  background-color: #1d4ed8 !important;
+}
+
+.queryBuilder .ruleGroup-remove,
+.queryBuilder .rule-remove {
+  background-color: #dc2626 !important;
+  color: white !important;
+}
+
+.queryBuilder .ruleGroup-remove:hover,
+.queryBuilder .rule-remove:hover {
+  background-color: #b91c1c !important;
+}
+
+.queryBuilder select,
+.queryBuilder input {
+  padding: 0.25rem 0.5rem !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 0.375rem !important;
+  font-size: 0.875rem !important;
+}
+
+.queryBuilder select:focus,
+.queryBuilder input:focus {
+  outline: none !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2) !important;
+}
