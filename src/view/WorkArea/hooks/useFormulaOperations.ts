@@ -152,8 +152,9 @@ export const useFormulaOperations = ({
                 return prev;
             }
 
-            // Recalculate totals with merged rows
-            const dataWithRecalculatedTotals = calculateTotals(mergedRows, columns);
+            // Recalculate totals with merged rows - must include total rows in the data
+            const dataWithTotals = [...mergedRows, ...totalRows];
+            const dataWithRecalculatedTotals = calculateTotals(dataWithTotals, columns);
 
             toast.success(
                 `Merged ${mergedCount} duplicate ingredient${mergedCount > 1 ? "s" : ""

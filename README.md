@@ -1,6 +1,6 @@
 # Pega Formulation App
 
-A modern React-based fragrance formulation management system designed for perfumers and fragrance developers. This application provides comprehensive tools for managing ingredients, creating formulas, and analyzing fragrance compositions.
+A modern React-based fragrance formulation management system designed for perfumers and fragrance developers. This application provides comprehensive tools for managing ingredients, creating formulas, and analyzing fragrance compositions with real-time calculations and advanced data management.
 
 ## 🌟 Features
 
@@ -53,7 +53,17 @@ A modern React-based fragrance formulation management system designed for perfum
 - **Event-Driven**: Global event bus for component communication
 - **Mock Data**: Development-ready with comprehensive sample data
 
-## 🚀 Getting Started
+## � Documentation
+
+For detailed documentation, please refer to:
+
+- **[Architecture Guide](./docs/ARCHITECTURE.md)** - System design and technical architecture
+- **[Component Documentation](./docs/COMPONENTS.md)** - Detailed component reference
+- **[Routing Guide](./docs/ROUTING.md)** - Application routing and navigation
+- **[State Management](./docs/STATE_MANAGEMENT.md)** - Data flow and state patterns
+- **[Developer Guide](./docs/DEVELOPER_GUIDE.md)** - Development workflows and best practices
+
+## �🚀 Getting Started
 
 ### Prerequisites
 - Node.js 18+ 

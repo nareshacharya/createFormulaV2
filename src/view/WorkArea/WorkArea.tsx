@@ -156,6 +156,17 @@ const WorkArea = () => {
     });
   }, [editableFormula, setTableData]);
 
+  // Register event handlers for normalize and merge duplicates
+  useEffect(() => {
+    eventBus.on("normalize-formula", handleNormalize);
+    eventBus.on("merge-duplicates", handleMergeDuplicates);
+
+    return () => {
+      eventBus.off("normalize-formula", handleNormalize);
+      eventBus.off("merge-duplicates", handleMergeDuplicates);
+    };
+  }, [handleNormalize, handleMergeDuplicates]);
+
   useEffect(() => {
     const handleIngredientClick = (data: { ingredient: Ingredient }) => {
       // Check if ingredient already exists in the work area
@@ -989,123 +1000,6 @@ const WorkArea = () => {
       }, 0);
     };
 
-    const handleNormalize = () => {
-      if (!editableFormula) {
-        toast.error("No active formula to normalize");
-        return;
-      }
-
-      setTableData((prev) => {
-        // Find the target total for the active formula
-        const targetTotalRow = prev.find(
-          (row) => row.isTotal && row.totalType === "target"
-        );
-        const runningTotalRow = prev.find(
-          (row) => row.isTotal && row.totalType === "running"
-        );
-
-        if (!targetTotalRow || !runningTotalRow) {
-          toast.error("Could not find target or running total");
-          return prev;
-        }
-
-        const targetTotal = targetTotalRow[editableFormula];
-        const runningTotal = runningTotalRow[editableFormula];
-
-        if (!targetTotal || !runningTotal || runningTotal === 0) {
-          toast.error("Invalid target or running total");
-          return prev;
-        }
-
-        // Calculate the adjustment factor
-        const adjustmentFactor = targetTotal / runningTotal;
-
-        // Adjust all ingredient percentages
-        const newData = prev.map((row) => {
-          if (!row.isTotal && !row.isFormula) {
-            const currentValue = row[editableFormula] || 0;
-            const newValue = parseFloat(
-              (currentValue * adjustmentFactor).toFixed(2)
-            );
-            return { ...row, [editableFormula]: newValue };
-          }
-          return row;
-        });
-
-        // Recalculate totals
-        const finalData = calculateTotals(newData, columns);
-
-        toast.success(`Formula normalized to ${targetTotal.toFixed(2)}%`);
-        return finalData;
-      });
-    };
-
-    const handleMergeDuplicates = () => {
-      setTableData((prev) => {
-        // Filter out total rows
-        const ingredientRows = prev.filter((row) => !row.isTotal);
-        const totalRows = prev.filter((row) => row.isTotal);
-
-        // Group by description (case-insensitive)
-        const grouped = new Map<string, any[]>();
-        ingredientRows.forEach((row) => {
-          const key = row.description.toLowerCase().trim();
-          if (!grouped.has(key)) {
-            grouped.set(key, []);
-          }
-          grouped.get(key)!.push(row);
-        });
-
-        // Merge duplicates
-        const mergedRows: any[] = [];
-        let mergedCount = 0;
-
-        grouped.forEach((rows, key) => {
-          if (rows.length === 1) {
-            // No duplicates
-            mergedRows.push(rows[0]);
-          } else {
-            // Merge duplicates
-            mergedCount += rows.length - 1;
-
-            // Use the first row as the base
-            const mergedRow = { ...rows[0] };
-
-            // Get all formula column IDs
-            const formulaColumns = columns.filter(
-              (col) => col.group === "Formulas" && col.formulaId
-            );
-
-            // Sum up values for each formula column
-            formulaColumns.forEach((col) => {
-              const total = rows.reduce((sum, row) => {
-                const value = parseFloat(row[col.key]) || 0;
-                return sum + value;
-              }, 0);
-              mergedRow[col.key] = parseFloat(total.toFixed(2));
-            });
-
-            mergedRows.push(mergedRow);
-          }
-        });
-
-        if (mergedCount === 0) {
-          toast.error("No duplicate ingredients found");
-          return prev;
-        }
-
-        // Recalculate totals with merged data
-        const finalData = calculateTotals(mergedRows, columns);
-
-        toast.success(
-          `Merged ${mergedCount} duplicate ingredient${
-            mergedCount > 1 ? "s" : ""
-          }`
-        );
-        return finalData;
-      });
-    };
-
     eventBus.on("ingredient-selected", handleIngredientClick);
     eventBus.on("formula-selected", handleFormulaSelected);
     eventBus.on("attribute-selected", handleAttributeSelected);
@@ -1114,8 +1008,6 @@ const WorkArea = () => {
     eventBus.on("load-formula", handleLoadFormula);
     eventBus.on("new-formula-created", handleNewFormulaCreated);
     eventBus.on("formula-selected-for-column", handleFormulaSelectedForColumn);
-    eventBus.on("normalize-formula", handleNormalize);
-    eventBus.on("merge-duplicates", handleMergeDuplicates);
 
     return () => {
       eventBus.off("ingredient-selected", handleIngredientClick);
@@ -1129,8 +1021,6 @@ const WorkArea = () => {
         "formula-selected-for-column",
         handleFormulaSelectedForColumn
       );
-      eventBus.off("normalize-formula", handleNormalize);
-      eventBus.off("merge-duplicates", handleMergeDuplicates);
     };
   }, []); // Empty dependency array to prevent re-registration
 
