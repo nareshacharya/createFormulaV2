@@ -1,7 +1,6 @@
 import { useState } from "react";
 import type { Formula } from "../services/pega";
 import ListRow from "./ListRow";
-import Badge from "./Badge";
 import { eventBus } from "../utils/bus";
 
 interface FormulaListProps {
@@ -9,7 +8,7 @@ interface FormulaListProps {
   searchTerm?: string;
   searchQuery?: string;
   selectedFormulas: string[];
-  onSelectionChange: (selectedIds: string[]) => void;
+  onSelectionChange?: (selectedIds: string[]) => void;
   onFormulaSelect?: (formula: Formula) => void;
 }
 
@@ -17,20 +16,19 @@ const FormulaList = ({
   formulas,
   searchTerm = "",
   selectedFormulas,
-  onSelectionChange,
 }: FormulaListProps) => {
-  const [hoveredFormula, setHoveredFormula] = useState<string | null>(null);
+  const [, setHoveredFormula] = useState<string | null>(null);
 
-  const getStatusVariant = (status: string) => {
-    switch (status) {
+  const getStatusColor = (formula: Formula) => {
+    switch (formula.status) {
       case "active":
-        return "success";
+        return "bg-green-500";
       case "draft":
-        return "warning";
+        return "bg-yellow-500";
       case "archived":
-        return "default";
+        return "bg-gray-500";
       default:
-        return "default";
+        return "bg-blue-500";
     }
   };
 
@@ -56,12 +54,8 @@ const FormulaList = ({
     eventBus.emit("formula-selected", { formula });
   };
 
-  const handleFormulaSelect = (formulaId: string, selected: boolean) => {
-    if (selected) {
-      onSelectionChange([...selectedFormulas, formulaId]);
-    } else {
-      onSelectionChange(selectedFormulas.filter((id) => id !== formulaId));
-    }
+  const isFormulaSelected = (formulaId: string) => {
+    return selectedFormulas.includes(formulaId);
   };
 
   if (filteredFormulas.length === 0) {
@@ -77,36 +71,68 @@ const FormulaList = ({
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-0">
       {filteredFormulas.map((formula) => {
         if (!formula || !formula.id) return null;
 
-        const ingredientCount = formula.ingredients?.length || 0;
-        const avgPrice = 0; // Price calculation disabled as FormulaIngredient doesn't have price
+        const isSelected = isFormulaSelected(formula.id);
 
         return (
           <ListRow
             key={formula.id}
-            title={formula.name || "Untitled Formula"}
-            subtitle={`v${formula.version || "1.0"} • ${
-              formula.category || "Unknown"
-            } • ${ingredientCount} ingredients`}
-            price={`$${avgPrice.toFixed(2)}/kg`}
-            badge={
-              <Badge
-                variant={getStatusVariant(formula.status || "draft")}
-                size="sm"
-              >
-                {formula.status || "draft"}
-              </Badge>
+            onHover={(isHovered) =>
+              setHoveredFormula(isHovered ? formula.id : null)
             }
-            selected={selectedFormulas.includes(formula.id)}
-            onSelect={(selected) => handleFormulaSelect(formula.id, selected)}
             onClick={() => handleFormulaClick(formula)}
-            onMouseEnter={() => setHoveredFormula(formula.id)}
-            onMouseLeave={() => setHoveredFormula(null)}
-            hovered={hoveredFormula === formula.id}
-          />
+            compact={true}
+            className={
+              isSelected ? "bg-blue-50 border-l-2 border-blue-400" : ""
+            }
+          >
+            <div className="flex items-center justify-between w-full px-3">
+              <div className="flex items-center space-x-2 flex-1">
+                {/* Status Dot */}
+                <div
+                  className={`w-1.5 h-1.5 rounded-full ${getStatusColor(
+                    formula
+                  )} flex-shrink-0`}
+                  title={`Status: ${formula.status}`}
+                />
+
+                {/* Formula Info */}
+                <div className="flex-1 min-w-0">
+                  <h4
+                    className={`font-medium text-sm truncate ${
+                      isSelected ? "text-blue-900" : "text-gray-900"
+                    }`}
+                  >
+                    {formula.name}
+                    {isSelected && (
+                      <i className="ri-check-line text-blue-600 ml-1 text-xs"></i>
+                    )}
+                  </h4>
+                  <p
+                    className={`text-xs truncate font-normal ${
+                      isSelected ? "text-blue-600" : "text-gray-500"
+                    }`}
+                  >
+                    {formula.id}
+                  </p>
+                </div>
+
+                {/* Cost */}
+                <div className="text-right flex-shrink-0">
+                  <p
+                    className={`text-xs font-normal ${
+                      isSelected ? "text-blue-600" : "text-gray-500"
+                    }`}
+                  >
+                    ${formula.costPerKg?.toFixed(2) || "0.00"}/kg
+                  </p>
+                </div>
+              </div>
+            </div>
+          </ListRow>
         );
       })}
     </div>

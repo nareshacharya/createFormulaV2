@@ -31,6 +31,7 @@ export interface Formula {
   lastUpdated: string;
   category: string;
   totalPercentage: number;
+  costPerKg?: number;
   ingredients: FormulaIngredient[];
   notes: {
     top: string[];

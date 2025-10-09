@@ -262,7 +262,6 @@ const LibraryPanel = () => {
               searchQuery={searchQuery}
               onFormulaSelect={handleFormulaSelect}
               selectedFormulas={selectedFormulaIds}
-              onSelectionChange={setSelectedFormulaIds}
             />
           )}
 
