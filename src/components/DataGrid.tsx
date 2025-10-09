@@ -11,6 +11,7 @@ export interface Column {
   fixed?: boolean;
   width?: number;
   minWidth?: number;
+  maxWidth?: number;
   group?: string;
   formulaId?: string;
   attributeId?: string;
@@ -175,8 +176,19 @@ const DataGrid = ({
     const row = data.find((r) => r.id === rowId);
     const column = columns.find((col) => col.id === columnId);
 
-    // Prevent editing of total rows, non-editable columns, or fixed columns
-    if (row?.isTotal || !column?.editable || column?.fixed || row?.isEmpty)
+    // Allow editing target total in active formula, but prevent editing other total rows
+    const isTargetTotalInActiveFormula =
+      row?.isTotal &&
+      row?.totalType === "target" &&
+      column.id === editableFormula;
+
+    // Prevent editing of total rows (except target total in active formula), non-editable columns, or fixed columns
+    if (
+      (row?.isTotal && !isTargetTotalInActiveFormula) ||
+      !column?.editable ||
+      column?.fixed ||
+      row?.isEmpty
+    )
       return;
 
     // Only allow editing of active formula column

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import DataGrid from "../../components/DataGrid";
 import type { Column } from "../../components/DataGrid";
@@ -15,84 +15,78 @@ import type {
   IngredientAttribute,
 } from "../../services/pega";
 import { eventBus } from "../../utils/bus";
+import {
+  calculateTotals,
+  getEmptyStateData,
+} from "../../utils/formulaCalculations";
+import { useWorkAreaState } from "./hooks/useWorkAreaState";
+import { useDataGridHandlers } from "./hooks/useDataGridHandlers";
+import { useFormulaOperations } from "./hooks/useFormulaOperations";
 
 const WorkArea = () => {
-  const [activeFormula, setActiveFormula] = useState<Formula | null>(null);
-  const [availableFormulas, setAvailableFormulas] = useState<Formula[]>([]);
-  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
-  const [attributes, setAttributes] = useState<IngredientAttribute[]>([]);
-  const [showFormulaSelector, setShowFormulaSelector] = useState(false);
-  const formulasAutoLoadedRef = useRef(false); // Use ref instead of state to prevent StrictMode duplicates
-  const [showFormulaModal, setShowFormulaModal] = useState(false);
-  const [selectedFormulas, setSelectedFormulas] = useState<string[]>([]);
-  const [selectedAttributes, setSelectedAttributes] = useState<string[]>([]);
-  const [formulas, setFormulas] = useState<Formula[]>([]);
-  const [columns, setColumns] = useState<Column[]>([]);
-  const [tableData, setTableData] = useState<any[]>([]);
-  const [editableFormula, setEditableFormula] = useState<string>("");
-  const [maxAttributeSelections] = useState(5); // Configurable later
-  const [maxFormulaSelections] = useState(4); // Configurable later
-  const [selectedFormulaIds, setSelectedFormulaIds] = useState<string[]>([]); // Track selected formula IDs
-  const pendingFormulaIds = useRef<Set<string>>(new Set()); // Track in-flight additions synchronously
+  // Use custom hooks for state management
+  const state = useWorkAreaState();
+  const {
+    columns,
+    tableData,
+    formulas,
+    ingredients,
+    attributes,
+    editableFormula,
+    maxAttributeSelections,
+    maxFormulaSelections,
+    selectedFormulaIds,
+    pendingFormulaIds,
+    showFormulaModal,
+    showFormulaSelector,
+    availableFormulas,
+    activeFormula,
+    selectedAttributes,
+    selectedFormulas,
+    setColumns,
+    setTableData,
+    setFormulas,
+    setIngredients,
+    setAttributes,
+    setEditableFormula,
+    setSelectedFormulaIds,
+    setShowFormulaModal,
+    setShowFormulaSelector,
+    setAvailableFormulas,
+    setActiveFormula,
+    setSelectedAttributes,
+    setSelectedFormulas,
+  } = state;
 
-  // Initialize default columns but empty data
-  useEffect(() => {
-    const defaultColumns: Column[] = [
-      {
-        id: "description",
-        key: "description",
-        title: "Description",
-        type: "text",
-        sortable: true,
-        editable: false,
-        fixed: true,
-        width: 200,
-        minWidth: 150,
-      },
-      {
-        id: "formulaAdd",
-        key: "formulaAdd",
-        title: "",
-        type: "add-column",
-        group: "Formulas",
-        width: 40,
-        fixed: false,
-      },
-      {
-        id: "costKg",
-        key: "costKg",
-        title: "Cost/kg",
-        type: "number",
-        sortable: true,
-        editable: false,
-        group: "Cost",
-        width: 100,
-      },
-      {
-        id: "contCost",
-        key: "contCost",
-        title: "Cont. Cost",
-        type: "number",
-        sortable: true,
-        editable: false,
-        group: "Cost",
-        width: 100,
-      },
-      {
-        id: "attributeAdd",
-        key: "attributeAdd",
-        title: "",
-        type: "add-column",
-        group: "Attributes",
-        width: 40,
-        fixed: false,
-      },
-    ];
+  // Local state for attribute dialog
+  const [showAttributeDialog, setShowAttributeDialog] = useState(false);
 
-    setColumns(defaultColumns);
-    // Start with empty data - no default ingredients or attributes
-    setTableData([]);
-  }, []);
+  // Use custom hooks for handlers
+  const {
+    handleRowDelete,
+    handleCellEdit,
+    handleDeleteColumn,
+    handleColumnReorder,
+  } = useDataGridHandlers({
+    columns,
+    selectedFormulaIds,
+    editableFormula,
+    formulas,
+    pendingFormulaIds,
+    setTableData,
+    setColumns,
+    setSelectedFormulaIds,
+    setEditableFormula,
+  });
+
+  const { handleNormalize, handleMergeDuplicates, handleExplodeFormula } =
+    useFormulaOperations({
+      columns,
+      editableFormula,
+      formulas,
+      ingredients,
+      setTableData,
+    });
 
   useEffect(() => {
     const loadData = async () => {
@@ -380,7 +374,7 @@ const WorkArea = () => {
         }
 
         // Recalculate totals
-        return calculateTotals(newData);
+        return calculateTotals(newData, columns);
       });
 
       // Show success toast
@@ -630,13 +624,18 @@ const WorkArea = () => {
           return { ...row, [newColumnId]: 0 }; // Start with 0 for new formulas
         });
 
-        return calculateTotals(updatedData);
+        return calculateTotals(updatedData, columns);
       });
 
       // If this is the first formula column, automatically activate it
       if (currentFormulaColumns.length === 0) {
         setEditableFormula(newColumnId);
         eventBus.emit("active-formula-changed", { formula: data.formula });
+
+        // Immediately trigger totals calculation for the new active formula
+        setTimeout(() => {
+          setTableData((prev) => calculateTotals(prev, columns, [newColumnId]));
+        }, 0);
       }
 
       // Add the formula to the available formulas list
@@ -700,15 +699,223 @@ const WorkArea = () => {
         return [...prev, newColumn];
       });
 
-      setTableData((prev) => {
-        const updatedData = prev.map((row) => {
-          if (row.isTotal) {
-            return { ...row, [newColumnId]: null };
-          }
-          return { ...row, [newColumnId]: Math.floor(Math.random() * 30) + 5 }; // Random values for existing formulas
-        });
+      // Calculate formula cost per kg
+      let formulaCostPerKg = data.formula.costPerKg || 0;
+      if (!formulaCostPerKg && data.formula.ingredients) {
+        formulaCostPerKg = data.formula.ingredients.reduce((sum, ing) => {
+          const ingredient = ingredients.find((i) => i.id === ing.ingredientId);
+          const ingredientCost = ingredient?.price || 0;
+          return sum + (ingredientCost * ing.percentage) / 100;
+        }, 0);
+      }
 
-        return calculateTotals(updatedData);
+      setTableData((prev) => {
+        // Check if this is the first formula column being added
+        const isFirstColumn = currentFormulaColumns.length === 0;
+        const hasExistingData = prev.some((row) => !row.isTotal);
+
+        // If this is the first formula and we don't have ingredients yet, add them
+        if (isFirstColumn && !hasExistingData && data.formula.ingredients) {
+          // Create ingredient rows from the formula
+          const ingredientRows = data.formula.ingredients.map((ing, index) => {
+            const ingredient = ingredients.find(
+              (i) => i.id === ing.ingredientId
+            );
+            const ingredientCostPerKg = ingredient?.price || 0;
+
+            const rowData: any = {
+              id: `formula_ing_${data.formula.id}_${index}`,
+              description: ing.name,
+              costKg: ingredientCostPerKg,
+              contCost: (ing.percentage * ingredientCostPerKg) / 1000,
+              isTotal: false,
+              isFormula: false,
+              percentage: ing.percentage,
+              [newColumnId]: ing.percentage,
+            };
+
+            return rowData;
+          });
+
+          // Create total rows
+          const totalRows = [
+            {
+              id: "runningTotal",
+              description: "Running Total",
+              costKg: null,
+              contCost: null,
+              isTotal: true,
+              totalType: "running",
+              [newColumnId]: null,
+            },
+            {
+              id: "targetTotal",
+              description: "Target Total",
+              costKg: null,
+              contCost: null,
+              isTotal: true,
+              totalType: "target",
+              [newColumnId]: null,
+            },
+            {
+              id: "rmc",
+              description: "RMC (Raw Material Cost)",
+              costKg: null,
+              contCost: null,
+              isTotal: true,
+              totalType: "rmc",
+              [newColumnId]: null,
+            },
+            {
+              id: "weightedAvg",
+              description: "Weighted Average",
+              costKg: null,
+              contCost: null,
+              isTotal: true,
+              totalType: "weighted",
+              [newColumnId]: null,
+            },
+          ];
+
+          const updatedData = [...ingredientRows, ...totalRows];
+          return calculateTotals(updatedData, [newColumn]);
+        } else if (!hasExistingData && data.formula.ingredients) {
+          // If we have other columns but no data yet, still add ingredients
+          const ingredientRows = data.formula.ingredients.map((ing, index) => {
+            const ingredient = ingredients.find(
+              (i) => i.id === ing.ingredientId
+            );
+            const ingredientCostPerKg = ingredient?.price || 0;
+
+            const rowData: any = {
+              id: `formula_ing_${data.formula.id}_${index}`,
+              description: ing.name,
+              costKg: ingredientCostPerKg,
+              contCost: (ing.percentage * ingredientCostPerKg) / 1000,
+              isTotal: false,
+              isFormula: false,
+              percentage: ing.percentage,
+            };
+
+            // Add 0 for other formula columns
+            currentFormulaColumns.forEach((col) => {
+              rowData[col.id] = 0;
+            });
+
+            // Set the percentage for the new column
+            rowData[newColumnId] = ing.percentage;
+
+            return rowData;
+          });
+
+          // Add the new column data to existing rows
+          const updatedData = prev.map((row) => {
+            if (row.isTotal) {
+              return { ...row, [newColumnId]: null };
+            }
+            return { ...row, [newColumnId]: 0 };
+          });
+
+          // Insert ingredient rows before total rows
+          const totalIndex = updatedData.findIndex((row) => row.isTotal);
+          if (totalIndex !== -1) {
+            const finalData = [
+              ...updatedData.slice(0, totalIndex),
+              ...ingredientRows,
+              ...updatedData.slice(totalIndex),
+            ];
+            return calculateTotals(finalData, columns.concat(newColumn));
+          }
+
+          return calculateTotals(
+            [...updatedData, ...ingredientRows],
+            columns.concat(newColumn)
+          );
+        } else if (data.formula.ingredients) {
+          // We have existing data - add new formula's ingredients and merge with existing rows
+          const newIngredientRows = data.formula.ingredients.map(
+            (ing, index) => {
+              const ingredient = ingredients.find(
+                (i) => i.id === ing.ingredientId
+              );
+              const ingredientCostPerKg = ingredient?.price || 0;
+
+              const rowData: any = {
+                id: `formula_ing_${data.formula.id}_${index}`,
+                description: ing.name,
+                costKg: ingredientCostPerKg,
+                contCost: (ing.percentage * ingredientCostPerKg) / 1000,
+                isTotal: false,
+                isFormula: false,
+                percentage: ing.percentage,
+              };
+
+              // Add 0 for all existing formula columns
+              currentFormulaColumns.forEach((col) => {
+                rowData[col.id] = 0;
+              });
+
+              // Set the percentage for the new column
+              rowData[newColumnId] = ing.percentage;
+
+              return rowData;
+            }
+          );
+
+          // Separate existing rows into ingredients and totals
+          const existingIngredientRows = prev.filter((row) => !row.isTotal);
+          const existingTotalRows = prev.filter((row) => row.isTotal);
+
+          // Add new column to all existing rows
+          const updatedExistingIngredients = existingIngredientRows.map(
+            (row) => ({
+              ...row,
+              [newColumnId]: 0,
+            })
+          );
+
+          const updatedTotalRows = existingTotalRows.map((row) => ({
+            ...row,
+            [newColumnId]: null,
+          }));
+
+          // Merge new ingredients with existing ones
+          // Check if ingredients already exist by description (case-insensitive)
+          const mergedIngredients: any[] = [...updatedExistingIngredients];
+
+          newIngredientRows.forEach((newRow) => {
+            const existingRowIndex = mergedIngredients.findIndex(
+              (existing) =>
+                existing.description.toLowerCase().trim() ===
+                newRow.description.toLowerCase().trim()
+            );
+
+            if (existingRowIndex !== -1) {
+              // Ingredient already exists - update the new column value
+              mergedIngredients[existingRowIndex] = {
+                ...mergedIngredients[existingRowIndex],
+                [newColumnId]: newRow[newColumnId],
+              };
+            } else {
+              // New ingredient - add it to the list
+              mergedIngredients.push(newRow);
+            }
+          });
+
+          // Combine ingredients and totals
+          const finalData = [...mergedIngredients, ...updatedTotalRows];
+          return calculateTotals(finalData, columns.concat(newColumn));
+        } else {
+          // No ingredients in formula - just add the new column with 0 values
+          const updatedData = prev.map((row) => {
+            if (row.isTotal) {
+              return { ...row, [newColumnId]: null };
+            }
+            return { ...row, [newColumnId]: 0 };
+          });
+
+          return calculateTotals(updatedData, columns.concat(newColumn));
+        }
       });
 
       // Update selected formula IDs
@@ -719,6 +926,11 @@ const WorkArea = () => {
       if (currentFormulaColumns.length === 0) {
         setEditableFormula(newColumnId);
         eventBus.emit("active-formula-changed", { formula: data.formula });
+
+        // Immediately trigger totals calculation for the new active formula
+        setTimeout(() => {
+          setTableData((prev) => calculateTotals(prev, columns, [newColumnId]));
+        }, 0);
       }
 
       // Update formula selections count with selected IDs
@@ -729,6 +941,28 @@ const WorkArea = () => {
         count: newCount,
         selectedIds: newSelectedIds,
       });
+
+      // Show success toast
+      toast.success(
+        `Formula "${data.formula.name}" added with ${
+          data.formula.ingredients?.length || 0
+        } ingredients`
+      );
+
+      // Emit event to update selected ingredients in library after state update
+      setTimeout(() => {
+        setTableData((current) => {
+          const allIngredients = current
+            .filter((row) => !row.isTotal && !row.isFormula)
+            .map((row) => row.description);
+
+          if (allIngredients.length > 0) {
+            eventBus.emit("work-area-updated", { ingredients: allIngredients });
+          }
+
+          return current;
+        });
+      }, 0);
     };
 
     const handleNormalize = () => {
@@ -775,7 +1009,7 @@ const WorkArea = () => {
         });
 
         // Recalculate totals
-        const finalData = calculateTotals(newData);
+        const finalData = calculateTotals(newData, columns);
 
         toast.success(`Formula normalized to ${targetTotal.toFixed(2)}%`);
         return finalData;
@@ -837,7 +1071,7 @@ const WorkArea = () => {
         }
 
         // Recalculate totals with merged data
-        const finalData = calculateTotals(mergedRows);
+        const finalData = calculateTotals(mergedRows, columns);
 
         toast.success(
           `Merged ${mergedCount} duplicate ingredient${
@@ -958,8 +1192,6 @@ const WorkArea = () => {
   };
 
   // Modified handleAddAttributeColumn with max selection logic
-  const [showAttributeDialog, setShowAttributeDialog] = useState(false);
-
   const handleAddAttributeColumn = () => {
     // Check if we've reached the maximum number of attribute columns
     const currentAttributeColumns = columns.filter(
@@ -1044,218 +1276,6 @@ const WorkArea = () => {
     setShowAttributeDialog(false);
   };
 
-  const handleRowDelete = (rowId: string) => {
-    setTableData((prev) => {
-      const rowToDelete = prev.find((row) => row.id === rowId);
-      let newData = prev.filter((row) => row.id !== rowId);
-
-      // If deleting a formula group, also delete its ingredients and update tracking
-      if (rowToDelete?.isFormula) {
-        newData = newData.filter(
-          (row) => row.parentFormulaId !== rowToDelete.formulaId
-        );
-
-        // Remove from tracking sets and update state
-        // The useEffect will handle emitting both events
-        pendingFormulaIds.current.delete(rowToDelete.formulaId);
-        const updatedSelectedIds = selectedFormulaIds.filter(
-          (id) => id !== rowToDelete.formulaId
-        );
-        setSelectedFormulaIds(updatedSelectedIds);
-      }
-
-      return newData;
-    });
-  };
-
-  const handleCellEdit = (rowId: string, columnId: string, value: any) => {
-    setTableData((prev) => {
-      const updatedRow = prev.find((row) => row.id === rowId);
-      const newData = prev.map((row) => {
-        if (row.id === rowId) {
-          const newRow = { ...row, [columnId]: parseFloat(value) || 0 };
-
-          // If editing a formula column cell, recalculate contribution cost
-          const column = columns.find((col) => col.id === columnId);
-          if (column && column.group === "Formulas" && !row.isTotal) {
-            const percentage = parseFloat(value) || 0;
-            const costPerKg = row.costKg || 0;
-            // Contribution cost = (percentage in grams * cost per kg) / 1000
-            newRow.contCost = (percentage * costPerKg) / 1000;
-          }
-
-          return newRow;
-        }
-        return row;
-      });
-
-      // Show toast for target total updates
-      if (updatedRow?.totalType === "target") {
-        toast.success(
-          `Target total updated to ${parseFloat(value).toFixed(2)}%`
-        );
-      }
-
-      // Recalculate totals after any edit
-      return calculateTotals(newData);
-    });
-  };
-
-  const handleDeleteColumn = (columnId: string) => {
-    // Find the column to be deleted
-    const columnToDelete = columns.find((col) => col.id === columnId);
-    if (!columnToDelete) return;
-
-    // Remove the column from columns array
-    setColumns((prev) => prev.filter((col) => col.id !== columnId));
-
-    // Remove the column data from all rows
-    setTableData((prev) =>
-      prev.map((row) => {
-        const { [columnId]: deleted, ...rest } = row;
-        return rest;
-      })
-    );
-
-    // If it's a formula column, update selected formula IDs and counts
-    if (columnToDelete.formulaId) {
-      const newSelectedIds = selectedFormulaIds.filter(
-        (id) => id !== columnToDelete.formulaId
-      );
-      setSelectedFormulaIds(newSelectedIds);
-
-      // Update formula selections count
-      const newCount = columns.filter(
-        (col) =>
-          col.group === "Formulas" && col.formulaId && col.id !== columnId
-      ).length;
-      eventBus.emit("formula-selections-updated", {
-        count: newCount,
-        selectedIds: newSelectedIds,
-      });
-
-      // If this was the active formula, set another formula as active or clear it
-      if (editableFormula === columnId) {
-        const remainingFormulaColumns = columns.filter(
-          (col) =>
-            col.group === "Formulas" && col.formulaId && col.id !== columnId
-        );
-        if (remainingFormulaColumns.length > 0) {
-          setEditableFormula(remainingFormulaColumns[0].id);
-          const formula = formulas.find(
-            (f) => f.id === remainingFormulaColumns[0].formulaId
-          );
-          if (formula) {
-            eventBus.emit("active-formula-changed", { formula });
-          }
-        } else {
-          setEditableFormula("");
-          eventBus.emit("active-formula-changed", { formula: null });
-        }
-      }
-    }
-
-    // If it's an attribute column, update selected attributes
-    if (columnToDelete.attributeId) {
-      const remainingAttributeColumns = columns.filter(
-        (col) =>
-          col.group === "Attributes" && col.attributeId && col.id !== columnId
-      );
-      const newSelectedAttributes = remainingAttributeColumns.map(
-        (col) => col.attributeId!
-      );
-      eventBus.emit("work-area-attributes-updated", {
-        selectedAttributes: newSelectedAttributes,
-      });
-    }
-  };
-
-  const handleColumnReorder = (fromIndex: number, toIndex: number) => {
-    setColumns((prev) => {
-      const newColumns = [...prev];
-      const [movedColumn] = newColumns.splice(fromIndex, 1);
-      newColumns.splice(toIndex, 0, movedColumn);
-      return newColumns;
-    });
-  };
-
-  const handleExplodeFormula = (formulaId: string) => {
-    setTableData((prev) => {
-      const formula = formulas.find((f) => f.id === formulaId);
-      if (!formula) return prev;
-
-      // Find the formula group row to get the percentage
-      const formulaGroupRow = prev.find(
-        (row) => row.isFormula && row.formulaId === formulaId
-      );
-
-      if (!formulaGroupRow) return prev;
-
-      // Get the percentage from the active formula column
-      const percentage = formulaGroupRow[editableFormula] || 100;
-      const multiplier = percentage / 100;
-
-      // Remove the formula group and its nested ingredients
-      const newData = prev.filter(
-        (row) =>
-          !(row.isFormula && row.formulaId === formulaId) &&
-          row.parentFormulaId !== formulaId
-      );
-
-      // Add individual ingredients with adjusted percentages
-      const totalIndex = newData.findIndex((row) => row.isTotal);
-      const insertIndex = totalIndex !== -1 ? totalIndex : newData.length;
-
-      const formulaColumns = columns.filter(
-        (col) => col.group === "Formulas" && col.type === "number"
-      );
-
-      const individualIngredients = formula.ingredients.map((ing, index) => {
-        const ingredient = ingredients.find((i) => i.id === ing.ingredientId);
-        const rowData: any = {
-          id: `exploded_ing_${formulaId}_${index}`,
-          description: ing.name,
-          costKg: ingredient?.price || 0,
-          contCost: 0.0,
-          isTotal: false,
-          isFormula: false,
-          level: 0,
-        };
-
-        // Set the percentage for each formula column
-        formulaColumns.forEach((col) => {
-          if (col.id === editableFormula) {
-            // For active formula, apply the multiplier to ingredient percentage
-            rowData[col.id] = parseFloat(
-              (ing.percentage * multiplier).toFixed(2)
-            );
-          } else {
-            rowData[col.id] = 0;
-          }
-        });
-
-        return rowData;
-      });
-
-      newData.splice(insertIndex, 0, ...individualIngredients);
-
-      // Remove the formula from tracking sets and update state
-      // The useEffect will handle emitting both events
-      pendingFormulaIds.current.delete(formulaId);
-      const newSelectedIds = selectedFormulaIds.filter(
-        (id) => id !== formulaId
-      );
-      setSelectedFormulaIds(newSelectedIds);
-
-      // Show success toast
-      toast.success(
-        `Formula "${formula.name}" exploded with ${percentage}% of ingredients`
-      );
-
-      return calculateTotals(newData);
-    });
-  };
-
   // Add the missing handleToggleFormulaExpansion function
   const handleToggleFormulaExpansion = (formulaId: string) => {
     setTableData((prev) =>
@@ -1267,93 +1287,8 @@ const WorkArea = () => {
     );
   };
 
-  // Add function to calculate totals with proper column handling and 2 decimal places
-  const calculateTotals = (data: any[], formulaColumnIds?: string[]) => {
-    const ingredientRows = data.filter((row) => !row.isTotal);
-    const totalRows = data.filter((row) => row.isTotal);
-
-    // Get formula columns from current columns state or passed parameter
-    const formulaColumns = formulaColumnIds
-      ? formulaColumnIds.map((id) => ({ key: id }))
-      : columns.filter(
-          (col) => col.group === "Formulas" && col.type === "number"
-        );
-
-    const updatedTotals = totalRows.map((totalRow) => {
-      const updatedRow = { ...totalRow };
-
-      formulaColumns.forEach((col) => {
-        const columnValues = ingredientRows
-          .filter((row) => !row.isFormula) // Only count individual ingredients, not formula groups
-          .map((row) => parseFloat(row[col.key]) || 0)
-          .filter((val) => !isNaN(val));
-
-        switch (totalRow.totalType) {
-          case "running":
-            updatedRow[col.key] = parseFloat(
-              columnValues.reduce((sum, val) => sum + val, 0).toFixed(2)
-            );
-            break;
-          case "target":
-            updatedRow[col.key] = 100.0; // Target is typically 100%
-            break;
-          case "rmc":
-            // Calculate raw material cost based on percentages and costs
-            const rmcValue = ingredientRows
-              .filter((row) => !row.isFormula)
-              .reduce((sum, row) => {
-                const percentage = parseFloat(row[col.key]) || 0;
-                const cost = parseFloat(row.costKg) || 0;
-                return sum + (percentage * cost) / 100;
-              }, 0);
-            updatedRow[col.key] = parseFloat(rmcValue.toFixed(2));
-            break;
-          case "weighted":
-            // Calculate weighted average
-            const totalPercentage = columnValues.reduce(
-              (sum, val) => sum + val,
-              0
-            );
-            const weightedSum = ingredientRows
-              .filter((row) => !row.isFormula)
-              .reduce((sum, row) => {
-                const percentage = parseFloat(row[col.key]) || 0;
-                const cost = parseFloat(row.costKg) || 0;
-                return sum + percentage * cost;
-              }, 0);
-            updatedRow[col.key] =
-              totalPercentage > 0
-                ? parseFloat((weightedSum / totalPercentage).toFixed(2))
-                : 0;
-            break;
-        }
-      });
-
-      return updatedRow;
-    });
-
-    return [...ingredientRows, ...updatedTotals];
-  };
-
   // Check if we have any ingredient data to show
   const hasIngredients = tableData.some((row) => !row.isTotal);
-
-  // Empty state row for the table
-  const getEmptyStateData = () => {
-    if (hasIngredients) return tableData;
-
-    // Return a single row that spans all columns with the empty message
-    return [
-      {
-        id: "empty-state",
-        description: "",
-        costKg: null,
-        contCost: null,
-        isTotal: false,
-        isEmpty: true,
-      },
-    ];
-  };
 
   const handleSetActiveFormula = (columnId: string) => {
     setEditableFormula(columnId);
@@ -1405,7 +1340,7 @@ const WorkArea = () => {
     <div className="h-full bg-white">
       <DataGrid
         columns={getDisplayColumns()}
-        data={getEmptyStateData()}
+        data={getEmptyStateData(tableData, hasIngredients)}
         onAddColumn={(columnType) => {
           if (columnType === "formula") {
             handleAddFormulaColumn();
