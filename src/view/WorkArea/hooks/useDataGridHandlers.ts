@@ -58,12 +58,17 @@ export const useDataGridHandlers = ({
                 if (row.id === rowId) {
                     const newRow = { ...row, [columnId]: parseFloat(value) || 0 };
 
-                    // If editing a formula column cell, recalculate contribution cost
+                    // If editing the active formula column cell, recalculate contribution cost
                     const column = columns.find((col) => col.id === columnId);
-                    if (column && column.group === "Formulas" && !row.isTotal) {
+                    if (
+                        column &&
+                        column.group === "Formulas" &&
+                        columnId === editableFormula &&
+                        !row.isTotal
+                    ) {
                         const percentage = parseFloat(value) || 0;
                         const costPerKg = row.costKg || 0;
-                        newRow.contCost = (percentage * costPerKg) / 1000;
+                        newRow.contCost = parseFloat(((percentage * costPerKg) / 1000).toFixed(4));
                     }
 
                     return newRow;

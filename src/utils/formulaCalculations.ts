@@ -95,3 +95,31 @@ export const getEmptyStateData = (tableData: any[], hasIngredients: boolean) => 
         },
     ];
 };
+
+/**
+ * Calculate contribution cost for all rows based on the active formula
+ * Formula: (percentage in active formula * cost per kg) / 1000
+ */
+export const recalculateContributionCosts = (
+    data: any[],
+    editableFormulaId: string
+): any[] => {
+    if (!editableFormulaId) return data;
+
+    return data.map((row) => {
+        // Skip total rows
+        if (row.isTotal) {
+            return row;
+        }
+
+        // Calculate contribution cost based on active formula percentage
+        const percentage = parseFloat(row[editableFormulaId]) || 0;
+        const costPerKg = parseFloat(row.costKg) || 0;
+        const contCost = (percentage * costPerKg) / 1000;
+
+        return {
+            ...row,
+            contCost: parseFloat(contCost.toFixed(4)),
+        };
+    });
+};

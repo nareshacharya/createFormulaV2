@@ -132,6 +132,30 @@ const WorkArea = () => {
     });
   }, [tableData]);
 
+  // Recalculate contribution costs when active formula changes
+  useEffect(() => {
+    if (!editableFormula) return;
+
+    setTableData((prev) => {
+      return prev.map((row) => {
+        // Skip total rows
+        if (row.isTotal) {
+          return row;
+        }
+
+        // Calculate contribution cost based on active formula percentage
+        const percentage = parseFloat(row[editableFormula]) || 0;
+        const costPerKg = parseFloat(row.costKg) || 0;
+        const contCost = (percentage * costPerKg) / 1000;
+
+        return {
+          ...row,
+          contCost: parseFloat(contCost.toFixed(4)),
+        };
+      });
+    });
+  }, [editableFormula, setTableData]);
+
   useEffect(() => {
     const handleIngredientClick = (data: { ingredient: Ingredient }) => {
       // Check if ingredient already exists in the work area

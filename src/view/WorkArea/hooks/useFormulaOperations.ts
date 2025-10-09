@@ -87,12 +87,15 @@ export const useFormulaOperations = ({
                     mergedRows.push(rows[0]);
                 } else {
                     mergedCount += rows.length - 1;
+                    // Start with the first row as base
                     const mergedRow = { ...rows[0] };
 
+                    // Get all formula columns
                     const formulaColumns = columns.filter(
                         (col) => col.group === "Formulas" && col.formulaId
                     );
 
+                    // Sum up values for each formula column
                     formulaColumns.forEach((col) => {
                         const total = rows.reduce((sum, row) => {
                             const value = parseFloat(row[col.key]) || 0;
@@ -100,6 +103,13 @@ export const useFormulaOperations = ({
                         }, 0);
                         mergedRow[col.key] = parseFloat(total.toFixed(2));
                     });
+
+                    // Recalculate contribution cost based on active formula
+                    if (editableFormula) {
+                        const percentage = parseFloat(mergedRow[editableFormula]) || 0;
+                        const costPerKg = parseFloat(mergedRow.costKg) || 0;
+                        mergedRow.contCost = parseFloat(((percentage * costPerKg) / 1000).toFixed(4));
+                    }
 
                     mergedRows.push(mergedRow);
                 }
