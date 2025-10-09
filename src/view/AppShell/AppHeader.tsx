@@ -97,6 +97,13 @@ const AppHeader = () => {
                 <i className="ri-add-line text-white text-xs absolute -top-1 -right-1"></i>
               </div>
             </button>
+            <button
+              onClick={() => eventBus.emit("merge-duplicates")}
+              className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-purple-700 transition-colors cursor-pointer"
+              title="Merge Duplicates"
+            >
+              <i className="ri-git-merge-line text-white text-sm"></i>
+            </button>
           </div>
 
           <HeaderActions />

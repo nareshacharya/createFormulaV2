@@ -633,9 +633,11 @@ const WorkArea = () => {
         return calculateTotals(updatedData);
       });
 
-      // Set this as the active/editable formula and emit to header
-      setEditableFormula(newColumnId);
-      eventBus.emit("active-formula-changed", { formula: data.formula });
+      // If this is the first formula column, automatically activate it
+      if (currentFormulaColumns.length === 0) {
+        setEditableFormula(newColumnId);
+        eventBus.emit("active-formula-changed", { formula: data.formula });
+      }
 
       // Add the formula to the available formulas list
       setFormulas((prev) => [...prev, data.formula]);
@@ -713,6 +715,12 @@ const WorkArea = () => {
       const newSelectedIds = [...selectedFormulaIds, data.formula.id];
       setSelectedFormulaIds(newSelectedIds);
 
+      // If this is the first formula column, automatically activate it
+      if (currentFormulaColumns.length === 0) {
+        setEditableFormula(newColumnId);
+        eventBus.emit("active-formula-changed", { formula: data.formula });
+      }
+
       // Update formula selections count with selected IDs
       const newCount =
         columns.filter((col) => col.group === "Formulas" && col.formulaId)
@@ -774,6 +782,72 @@ const WorkArea = () => {
       });
     };
 
+    const handleMergeDuplicates = () => {
+      setTableData((prev) => {
+        // Filter out total rows
+        const ingredientRows = prev.filter((row) => !row.isTotal);
+        const totalRows = prev.filter((row) => row.isTotal);
+
+        // Group by description (case-insensitive)
+        const grouped = new Map<string, any[]>();
+        ingredientRows.forEach((row) => {
+          const key = row.description.toLowerCase().trim();
+          if (!grouped.has(key)) {
+            grouped.set(key, []);
+          }
+          grouped.get(key)!.push(row);
+        });
+
+        // Merge duplicates
+        const mergedRows: any[] = [];
+        let mergedCount = 0;
+
+        grouped.forEach((rows, key) => {
+          if (rows.length === 1) {
+            // No duplicates
+            mergedRows.push(rows[0]);
+          } else {
+            // Merge duplicates
+            mergedCount += rows.length - 1;
+
+            // Use the first row as the base
+            const mergedRow = { ...rows[0] };
+
+            // Get all formula column IDs
+            const formulaColumns = columns.filter(
+              (col) => col.group === "Formulas" && col.formulaId
+            );
+
+            // Sum up values for each formula column
+            formulaColumns.forEach((col) => {
+              const total = rows.reduce((sum, row) => {
+                const value = parseFloat(row[col.key]) || 0;
+                return sum + value;
+              }, 0);
+              mergedRow[col.key] = parseFloat(total.toFixed(2));
+            });
+
+            mergedRows.push(mergedRow);
+          }
+        });
+
+        if (mergedCount === 0) {
+          toast.error("No duplicate ingredients found");
+          return prev;
+        }
+
+        // Recalculate totals with merged data
+        const finalData = calculateTotals(mergedRows);
+
+        toast.success(
+          `Merged ${mergedCount} duplicate ingredient${
+            mergedCount > 1 ? "s" : ""
+          }`
+        );
+        return finalData;
+      });
+    };
+
     eventBus.on("ingredient-selected", handleIngredientClick);
     eventBus.on("formula-selected", handleFormulaSelected);
     eventBus.on("attribute-selected", handleAttributeSelected);
@@ -783,6 +857,7 @@ const WorkArea = () => {
     eventBus.on("new-formula-created", handleNewFormulaCreated);
     eventBus.on("formula-selected-for-column", handleFormulaSelectedForColumn);
     eventBus.on("normalize-formula", handleNormalize);
+    eventBus.on("merge-duplicates", handleMergeDuplicates);
 
     return () => {
       eventBus.off("ingredient-selected", handleIngredientClick);
@@ -797,6 +872,7 @@ const WorkArea = () => {
         handleFormulaSelectedForColumn
       );
       eventBus.off("normalize-formula", handleNormalize);
+      eventBus.off("merge-duplicates", handleMergeDuplicates);
     };
   }, []); // Empty dependency array to prevent re-registration
 
