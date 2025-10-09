@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Formula } from "../services/pega";
 import ListRow from "./ListRow";
+import FormulaQuickView from "./FormulaQuickView";
 import { eventBus } from "../utils/bus";
 
 interface FormulaListProps {
@@ -17,7 +18,9 @@ const FormulaList = ({
   searchTerm = "",
   selectedFormulas,
 }: FormulaListProps) => {
-  const [, setHoveredFormula] = useState<string | null>(null);
+  const [hoveredFormula, setHoveredFormula] = useState<string | null>(null);
+  const [selectedFormulaForView, setSelectedFormulaForView] =
+    useState<Formula | null>(null);
 
   const getStatusColor = (formula: Formula) => {
     switch (formula.status) {
@@ -52,6 +55,11 @@ const FormulaList = ({
 
   const handleFormulaClick = (formula: Formula) => {
     eventBus.emit("formula-selected", { formula });
+  };
+
+  const handleViewClick = (e: React.MouseEvent, formula: Formula) => {
+    e.stopPropagation();
+    setSelectedFormulaForView(formula);
   };
 
   const isFormulaSelected = (formulaId: string) => {
@@ -131,10 +139,28 @@ const FormulaList = ({
                   </p>
                 </div>
               </div>
+
+              {/* Eye Icon - Only visible on hover */}
+              {hoveredFormula === formula.id && (
+                <button
+                  className="ml-2 p-1 rounded hover:bg-gray-100 cursor-pointer flex-shrink-0"
+                  onClick={(e) => handleViewClick(e, formula)}
+                  aria-label={`View details for ${formula.name}`}
+                >
+                  <i className="ri-eye-line text-gray-400 text-lg"></i>
+                </button>
+              )}
             </div>
           </ListRow>
         );
       })}
+
+      {/* Quick View Modal */}
+      <FormulaQuickView
+        formula={selectedFormulaForView}
+        isOpen={!!selectedFormulaForView}
+        onClose={() => setSelectedFormulaForView(null)}
+      />
     </div>
   );
 };
