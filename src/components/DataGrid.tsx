@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import Button from "./Button";
 import Badge from "./Badge";
 
 export interface Column {
@@ -34,7 +33,6 @@ interface DataGridProps {
   editableFormula?: string;
   className?: string;
   showEmptyState?: boolean;
-  onLoadFormula?: () => void;
 }
 
 const DataGrid = ({
@@ -51,7 +49,6 @@ const DataGrid = ({
   editableFormula,
   className = "",
   showEmptyState = false,
-  onLoadFormula,
 }: DataGridProps) => {
   const [sortConfig, setSortConfig] = useState<{
     key: string;
@@ -313,18 +310,11 @@ const DataGrid = ({
             </h3>
             <p className="text-sm text-gray-500 mb-4">
               Start building your formula by adding ingredients from the library
-              panel or loading an existing formula.
+              panel.
             </p>
-            <div className="space-y-2">
-              <div className="flex items-center justify-center text-sm text-gray-600">
-                <i className="ri-arrow-left-line mr-2 text-blue-500"></i>
-                Select ingredients from the library panel
-              </div>
-              <div className="text-xs text-gray-400">or</div>
-              <Button onClick={onLoadFormula} variant="secondary" size="sm">
-                <i className="ri-folder-open-line mr-1.5"></i>
-                Load Formula
-              </Button>
+            <div className="flex items-center justify-center text-sm text-gray-600">
+              <i className="ri-arrow-left-line mr-2 text-blue-500"></i>
+              Select ingredients from the library panel
             </div>
           </div>
         );
@@ -360,7 +350,7 @@ const DataGrid = ({
                 className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-orange-600 cursor-pointer"
                 title="Explode Formula"
               >
-                <i className="ri-share-forward-line text-sm"></i>
+                <i className="ri-bubble-chart-line text-sm"></i>
               </button>
             </div>
           )}
@@ -377,11 +367,6 @@ const DataGrid = ({
             >
               {value || ""}
             </span>
-            {row.isFormula && (
-              <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
-                {row.percentage ? `${row.percentage}%` : "100%"}
-              </span>
-            )}
           </div>
         </div>
       );
@@ -442,6 +427,40 @@ const DataGrid = ({
 
     // Number type handling
     if (column.type === "number") {
+      // Formula rows in formula columns - show editable percentage
+      if (row.isFormula && isFormulaColumn && isActiveFormula) {
+        if (isEditing) {
+          return (
+            <div className="flex items-center">
+              <input
+                type="number"
+                value={editValue}
+                onChange={(e) => setEditValue(parseFloat(e.target.value) || 0)}
+                onBlur={handleCellSave}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleCellSave();
+                  } else if (e.key === "Escape") {
+                    handleCellCancel();
+                  }
+                }}
+                className="w-full px-2 py-1 text-sm border border-blue-500 rounded focus:outline-none"
+                autoFocus
+                min="0"
+                max="100"
+              />
+              <span className="ml-1 text-sm text-gray-500">%</span>
+            </div>
+          );
+        }
+        return (
+          <div className="flex items-center">
+            <span className="text-sm">{value || 0}</span>
+            <span className="ml-1 text-sm text-gray-500">%</span>
+          </div>
+        );
+      }
+
       // Comparison glyphs for non-active formulas
       if (isFormulaColumn && !isActiveFormula && !isTotal) {
         const activeValue = row[editableFormula] || 0;
@@ -799,10 +818,16 @@ const DataGrid = ({
                     </div>
                   </td>
 
-                  {columns.map((column) => (
-                    <td
-                      key={`${row.id}-${column.id}`}
-                      className={`
+                  {columns.map((column, colIndex) => {
+                    // For empty state, only render the first column (description) with full colspan
+                    if (row.isEmpty && colIndex > 0) {
+                      return null;
+                    }
+
+                    return (
+                      <td
+                        key={`${row.id}-${column.id}`}
+                        className={`
                         px-3 py-2 border-r border-gray-100 last:border-r-0 font-sans
                         ${
                           column.editable &&
@@ -834,28 +859,37 @@ const DataGrid = ({
                             : ""
                         }
                       `}
-                      onClick={() => {
-                        if (column.type !== "add-column") {
-                          if (
-                            row.isTotal &&
-                            row.totalType === "target" &&
-                            column.id === editableFormula
-                          ) {
-                            handleCellClick(row.id, column.id, row[column.key]);
-                          } else {
-                            handleCellClick(row.id, column.id, row[column.key]);
+                        onClick={() => {
+                          if (column.type !== "add-column") {
+                            if (
+                              row.isTotal &&
+                              row.totalType === "target" &&
+                              column.id === editableFormula
+                            ) {
+                              handleCellClick(
+                                row.id,
+                                column.id,
+                                row[column.key]
+                              );
+                            } else {
+                              handleCellClick(
+                                row.id,
+                                column.id,
+                                row[column.key]
+                              );
+                            }
                           }
+                        }}
+                        colSpan={
+                          row.isEmpty && column.key === "description"
+                            ? columns.length
+                            : 1
                         }
-                      }}
-                      colSpan={
-                        row.isEmpty && column.key === "description"
-                          ? columns.length
-                          : 1
-                      }
-                    >
-                      {renderCell(row, column)}
-                    </td>
-                  ))}
+                      >
+                        {renderCell(row, column)}
+                      </td>
+                    );
+                  })}
                 </tr>
               );
             })}

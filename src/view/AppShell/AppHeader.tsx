@@ -59,10 +59,6 @@ const AppHeader = () => {
     );
   };
 
-  const handleLoadFormula = () => {
-    eventBus.emit("load-formula");
-  };
-
   const handleFormulaModalCreateFormula = (formula: Omit<Formula, "id">) => {
     const newFormula: Formula = {
       ...formula,
@@ -100,13 +96,6 @@ const AppHeader = () => {
                 <i className="ri-flask-line text-white text-sm"></i>
                 <i className="ri-add-line text-white text-xs absolute -top-1 -right-1"></i>
               </div>
-            </button>
-            <button
-              onClick={handleLoadFormula}
-              className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-purple-700 transition-colors cursor-pointer"
-              title="Load Formula"
-            >
-              <i className="ri-folder-open-line text-white text-sm"></i>
             </button>
           </div>
 

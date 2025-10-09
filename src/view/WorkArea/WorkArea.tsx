@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
+import toast from "react-hot-toast";
 import DataGrid from "../../components/DataGrid";
 import type { Column } from "../../components/DataGrid";
-import FormulaDataGrid from "../../components/FormulaDataGrid";
 import AttributeSelector from "../../components/AttributeSelector";
 import Dialog from "../../components/Dialog";
 import Modal from "../../components/Modal";
@@ -33,6 +33,7 @@ const WorkArea = () => {
   const [maxAttributeSelections] = useState(5); // Configurable later
   const [maxFormulaSelections] = useState(4); // Configurable later
   const [selectedFormulaIds, setSelectedFormulaIds] = useState<string[]>([]); // Track selected formula IDs
+  const pendingFormulaIds = useRef<Set<string>>(new Set()); // Track in-flight additions synchronously
 
   // Initialize default columns but empty data
   useEffect(() => {
@@ -110,155 +111,32 @@ const WorkArea = () => {
         // Emit available formulas to header
         eventBus.emit("available-formulas-updated", { formulas: formulasData });
 
-        // Auto-load two formulas for testing (only once to prevent StrictMode duplicates)
-        if (formulasData.length >= 2 && !formulasAutoLoadedRef.current) {
-          formulasAutoLoadedRef.current = true; // Set flag to prevent duplicate loading
-          const testFormulas = [formulasData[0], formulasData[1]]; // First two formulas
-          const formulaColumnIds: string[] = [];
-          const selectedIds: string[] = [];
-
-          // Add formula columns
-          testFormulas.forEach((formula, index) => {
-            const newColumnId = `formula_${Date.now()}_${index}`;
-            formulaColumnIds.push(newColumnId);
-            selectedIds.push(formula.id);
-            const newColumn: Column = {
-              id: newColumnId,
-              key: newColumnId,
-              title: formula.name,
-              formulaId: formula.id,
-              type: "number",
-              sortable: true,
-              editable: true,
-              group: "Formulas",
-              width: 120,
-            };
-
-            setColumns((prev) => {
-              const formulaAddIndex = prev.findIndex(
-                (col) => col.id === "formulaAdd"
-              );
-              if (formulaAddIndex !== -1) {
-                return [
-                  ...prev.slice(0, formulaAddIndex),
-                  newColumn,
-                  ...prev.slice(formulaAddIndex),
-                ];
-              }
-              return [...prev, newColumn];
-            });
-          });
-
-          // Update selected formula IDs
-          setSelectedFormulaIds(selectedIds);
-
-          // Update formula selections count with selected IDs
-          eventBus.emit("formula-selections-updated", {
-            count: testFormulas.length,
-            selectedIds,
-          });
-
-          // DO NOT auto-load any attributes - start with empty attributes
-
-          // Load ingredients from the first formula
-          const firstFormula = testFormulas[0];
-          const formulaIngredients = firstFormula.ingredients.map(
-            (ing, index) => {
-              const ingredient = ingredientsData.find(
-                (i) => i.id === ing.ingredientId
-              );
-              const rowData: any = {
-                id: `formula_ing_${index}`,
-                description: ing.name,
-                costKg: ingredient?.price || 0,
-                contCost: 0.0,
-                isTotal: false,
-              };
-
-              // Add formula column data
-              formulaColumnIds.forEach((columnId, colIndex) => {
-                if (colIndex === 0) {
-                  rowData[columnId] = ing.percentage; // First formula actual percentages
-                } else {
-                  rowData[columnId] = Math.floor(Math.random() * 30) + 5; // Random for others
-                }
-              });
-
-              // No attribute data since we're not loading any attributes by default
-
-              return rowData;
-            }
-          );
-
-          const totalRows = [
-            {
-              id: "runningTotal",
-              description: "Running Total",
-              costKg: null,
-              contCost: null,
-              isTotal: true,
-              totalType: "running",
-            },
-            {
-              id: "targetTotal",
-              description: "Target Total",
-              costKg: null,
-              contCost: null,
-              isTotal: true,
-              totalType: "target",
-            },
-            {
-              id: "rmc",
-              description: "RMC (Raw Material Cost)",
-              costKg: null,
-              contCost: null,
-              isTotal: true,
-              totalType: "rmc",
-            },
-            {
-              id: "weightedAvg",
-              description: "Weighted Average",
-              costKg: null,
-              contCost: null,
-              isTotal: true,
-              totalType: "weighted",
-            },
-          ];
-
-          // Set the data with a slight delay to ensure columns are set first
-          setTimeout(() => {
-            const initialData = [...formulaIngredients, ...totalRows];
-            const calculatedData = calculateTotals(
-              initialData,
-              formulaColumnIds
-            );
-            setTableData(calculatedData);
-
-            // Set first formula as active/editable and emit to header
-            if (formulaColumnIds.length > 0) {
-              setEditableFormula(formulaColumnIds[0]);
-              eventBus.emit("active-formula-changed", {
-                formula: testFormulas[0],
-              });
-            }
-
-            // Update selected ingredients in library
-            const ingredientNames = formulaIngredients.map(
-              (ing) => ing.description
-            );
-            eventBus.emit("work-area-updated", {
-              ingredients: ingredientNames,
-            });
-          }, 100);
-        }
+        // DO NOT auto-load formulas - let user select them manually
       } catch (error) {
         console.error("Failed to load data:", error);
       }
     };
 
     loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array - formulasAutoLoadedRef doesn't need to be in deps
+  }, []);
+
+  // Sync selected formula IDs with LibraryPanel whenever they change
+  useEffect(() => {
+    eventBus.emit("formula-selections-updated", {
+      count: selectedFormulaIds.length,
+      selectedIds: selectedFormulaIds,
+    });
+  }, [selectedFormulaIds]);
+
+  // Sync selected ingredients with LibraryPanel whenever tableData changes
+  useEffect(() => {
+    const ingredientNames = tableData
+      .filter((row) => !row.isTotal && !row.isFormula)
+      .map((row) => row.description);
+    eventBus.emit("work-area-updated", {
+      ingredients: ingredientNames,
+    });
+  }, [tableData]);
 
   useEffect(() => {
     const handleIngredientClick = (data: { ingredient: Ingredient }) => {
@@ -343,25 +221,48 @@ const WorkArea = () => {
       eventBus.emit("work-area-updated", {
         ingredients: [...currentIngredients, data.ingredient.name],
       });
+
+      // Show success toast
+      toast.success(`Ingredient "${data.ingredient.name}" added to work area`);
     };
 
     const handleFormulaSelected = (data: { formula: Formula }) => {
-      // Check if formula already exists in the work area
-      const existingFormula = tableData.find(
-        (row) => row.isFormula && row.formulaId === data.formula.id
-      );
-
-      if (existingFormula) {
-        console.log(`${data.formula.name} is already in the work area`);
+      // Check if formula is already selected or being added (prevents race condition)
+      if (
+        selectedFormulaIds.includes(data.formula.id) ||
+        pendingFormulaIds.current.has(data.formula.id)
+      ) {
+        toast.error(
+          `Formula "${data.formula.name}" is already in the work area`
+        );
         return;
+      }
+
+      // Mark this formula as being added (synchronous)
+      pendingFormulaIds.current.add(data.formula.id);
+
+      // Immediately update selected formula IDs to prevent race conditions on rapid clicks
+      // The useEffect will handle emitting the event
+      const newSelectedIds = [...selectedFormulaIds, data.formula.id];
+      setSelectedFormulaIds(newSelectedIds);
+
+      // Find or calculate formula cost per kg from ingredients
+      let formulaCostPerKg = data.formula.costPerKg || 0;
+      if (!formulaCostPerKg && data.formula.ingredients) {
+        // Calculate from ingredients if not provided
+        formulaCostPerKg = data.formula.ingredients.reduce((sum, ing) => {
+          const ingredient = ingredients.find((i) => i.id === ing.ingredientId);
+          const ingredientCost = ingredient?.price || 0;
+          return sum + (ingredientCost * ing.percentage) / 100;
+        }, 0);
       }
 
       // Create formula group row with default 100% percentage
       const formulaGroupRow = {
         id: `formula_group_${Date.now()}`,
         description: data.formula.name,
-        costKg: null,
-        contCost: null,
+        costKg: formulaCostPerKg,
+        contCost: 0.0,
         isTotal: false,
         isFormula: true,
         formulaId: data.formula.id,
@@ -370,26 +271,32 @@ const WorkArea = () => {
         percentage: 100, // Default to 100% of the formula
       };
 
-      // Add formula percentage to active formula column
+      // Add formula percentage to active formula column (100% default)
       const formulaColumns = columns.filter(
         (col) => col.group === "Formulas" && col.type === "number"
       );
-      formulaColumns.forEach((col) => {
-        if (col.id === editableFormula) {
-          formulaGroupRow[col.id] = 100; // Set 100% in active formula
-        } else {
-          formulaGroupRow[col.id] = 0; // Set 0% in other formulas
-        }
-      });
+
+      // If there's no active formula column yet, we need to add one first
+      if (formulaColumns.length === 0) {
+        // This formula is being added as the first column - don't set percentage yet
+        formulaGroupRow[`temp_formula`] = 100;
+      } else if (editableFormula) {
+        // Set 100% in active formula column
+        formulaGroupRow[editableFormula] = 100;
+        // Calculate contribution cost: (percentage * cost/kg) / 1000
+        formulaGroupRow.contCost = (100 * formulaCostPerKg) / 1000;
+      }
 
       // Create ingredient rows for the formula
       const formulaIngredientRows = data.formula.ingredients.map(
         (ing, index) => {
           const ingredient = ingredients.find((i) => i.id === ing.ingredientId);
-          const rowData = {
+          const ingredientCostPerKg = ingredient?.price || 0;
+
+          const rowData: any = {
             id: `formula_ing_${data.formula.id}_${index}`,
             description: ing.name,
-            costKg: ingredient?.price || 0,
+            costKg: ingredientCostPerKg,
             contCost: 0.0,
             isTotal: false,
             isFormula: false,
@@ -398,9 +305,20 @@ const WorkArea = () => {
             percentage: ing.percentage,
           };
 
-          // Add formula column data for ingredients (they don't have values in formula columns)
+          // Set ingredient values in formula columns
           formulaColumns.forEach((col) => {
-            rowData[col.id] = null;
+            if (col.id === editableFormula) {
+              // For active formula: ingredient percentage = (ingredient % in formula * formula % in column) / 100
+              const ingredientPercentageInColumn = (ing.percentage * 100) / 100; // Since formula is 100%
+              rowData[col.id] = parseFloat(
+                ingredientPercentageInColumn.toFixed(2)
+              );
+              // Calculate contribution cost for ingredient
+              rowData.contCost =
+                (ingredientPercentageInColumn * ingredientCostPerKg) / 1000;
+            } else {
+              rowData[col.id] = 0;
+            }
           });
 
           return rowData;
@@ -408,6 +326,8 @@ const WorkArea = () => {
       );
 
       setTableData((prev) => {
+        let newData = [...prev];
+
         // If this is the first item, also add the total rows
         if (prev.length === 0) {
           const totalRows = [
@@ -444,29 +364,27 @@ const WorkArea = () => {
               totalType: "weighted",
             },
           ];
-          return [formulaGroupRow, ...formulaIngredientRows, ...totalRows];
+          newData = [formulaGroupRow, ...formulaIngredientRows, ...totalRows];
+        } else {
+          const totalIndex = prev.findIndex((row) => row.isTotal);
+          if (totalIndex !== -1) {
+            newData = [
+              ...prev.slice(0, totalIndex),
+              formulaGroupRow,
+              ...formulaIngredientRows,
+              ...prev.slice(totalIndex),
+            ];
+          } else {
+            newData = [...prev, formulaGroupRow, ...formulaIngredientRows];
+          }
         }
 
-        const totalIndex = prev.findIndex((row) => row.isTotal);
-        if (totalIndex !== -1) {
-          return [
-            ...prev.slice(0, totalIndex),
-            formulaGroupRow,
-            ...formulaIngredientRows,
-            ...prev.slice(totalIndex),
-          ];
-        }
-        return [...prev, formulaGroupRow, ...formulaIngredientRows];
+        // Recalculate totals
+        return calculateTotals(newData);
       });
 
-      // Update selected ingredients in library
-      const currentIngredients = tableData
-        .filter((row) => !row.isTotal && !row.isFormula)
-        .map((row) => row.description);
-      const newIngredients = data.formula.ingredients.map((ing) => ing.name);
-      eventBus.emit("work-area-updated", {
-        ingredients: [...currentIngredients, ...newIngredients],
-      });
+      // Show success toast
+      toast.success(`Formula "${data.formula.name}" added to work area`);
     };
 
     // Add handler for expand/collapse toggle
@@ -805,6 +723,57 @@ const WorkArea = () => {
       });
     };
 
+    const handleNormalize = () => {
+      if (!editableFormula) {
+        toast.error("No active formula to normalize");
+        return;
+      }
+
+      setTableData((prev) => {
+        // Find the target total for the active formula
+        const targetTotalRow = prev.find(
+          (row) => row.isTotal && row.totalType === "target"
+        );
+        const runningTotalRow = prev.find(
+          (row) => row.isTotal && row.totalType === "running"
+        );
+
+        if (!targetTotalRow || !runningTotalRow) {
+          toast.error("Could not find target or running total");
+          return prev;
+        }
+
+        const targetTotal = targetTotalRow[editableFormula];
+        const runningTotal = runningTotalRow[editableFormula];
+
+        if (!targetTotal || !runningTotal || runningTotal === 0) {
+          toast.error("Invalid target or running total");
+          return prev;
+        }
+
+        // Calculate the adjustment factor
+        const adjustmentFactor = targetTotal / runningTotal;
+
+        // Adjust all ingredient percentages
+        const newData = prev.map((row) => {
+          if (!row.isTotal && !row.isFormula) {
+            const currentValue = row[editableFormula] || 0;
+            const newValue = parseFloat(
+              (currentValue * adjustmentFactor).toFixed(2)
+            );
+            return { ...row, [editableFormula]: newValue };
+          }
+          return row;
+        });
+
+        // Recalculate totals
+        const finalData = calculateTotals(newData);
+
+        toast.success(`Formula normalized to ${targetTotal.toFixed(2)}%`);
+        return finalData;
+      });
+    };
+
     eventBus.on("ingredient-selected", handleIngredientClick);
     eventBus.on("formula-selected", handleFormulaSelected);
     eventBus.on("attribute-selected", handleAttributeSelected);
@@ -813,6 +782,7 @@ const WorkArea = () => {
     eventBus.on("load-formula", handleLoadFormula);
     eventBus.on("new-formula-created", handleNewFormulaCreated);
     eventBus.on("formula-selected-for-column", handleFormulaSelectedForColumn);
+    eventBus.on("normalize-formula", handleNormalize);
 
     return () => {
       eventBus.off("ingredient-selected", handleIngredientClick);
@@ -826,6 +796,7 @@ const WorkArea = () => {
         "formula-selected-for-column",
         handleFormulaSelectedForColumn
       );
+      eventBus.off("normalize-formula", handleNormalize);
     };
   }, []); // Empty dependency array to prevent re-registration
 
@@ -1002,18 +973,20 @@ const WorkArea = () => {
       const rowToDelete = prev.find((row) => row.id === rowId);
       let newData = prev.filter((row) => row.id !== rowId);
 
-      // If deleting a formula group, also delete its ingredients
+      // If deleting a formula group, also delete its ingredients and update tracking
       if (rowToDelete?.isFormula) {
         newData = newData.filter(
           (row) => row.parentFormulaId !== rowToDelete.formulaId
         );
-      }
 
-      // Update selected ingredients in library
-      const ingredientNames = newData
-        .filter((row) => !row.isTotal && !row.isFormula)
-        .map((row) => row.description);
-      eventBus.emit("work-area-updated", { ingredients: ingredientNames });
+        // Remove from tracking sets and update state
+        // The useEffect will handle emitting both events
+        pendingFormulaIds.current.delete(rowToDelete.formulaId);
+        const updatedSelectedIds = selectedFormulaIds.filter(
+          (id) => id !== rowToDelete.formulaId
+        );
+        setSelectedFormulaIds(updatedSelectedIds);
+      }
 
       return newData;
     });
@@ -1021,9 +994,31 @@ const WorkArea = () => {
 
   const handleCellEdit = (rowId: string, columnId: string, value: any) => {
     setTableData((prev) => {
-      const newData = prev.map((row) =>
-        row.id === rowId ? { ...row, [columnId]: parseFloat(value) || 0 } : row
-      );
+      const updatedRow = prev.find((row) => row.id === rowId);
+      const newData = prev.map((row) => {
+        if (row.id === rowId) {
+          const newRow = { ...row, [columnId]: parseFloat(value) || 0 };
+
+          // If editing a formula column cell, recalculate contribution cost
+          const column = columns.find((col) => col.id === columnId);
+          if (column && column.group === "Formulas" && !row.isTotal) {
+            const percentage = parseFloat(value) || 0;
+            const costPerKg = row.costKg || 0;
+            // Contribution cost = (percentage in grams * cost per kg) / 1000
+            newRow.contCost = (percentage * costPerKg) / 1000;
+          }
+
+          return newRow;
+        }
+        return row;
+      });
+
+      // Show toast for target total updates
+      if (updatedRow?.totalType === "target") {
+        toast.success(
+          `Target total updated to ${parseFloat(value).toFixed(2)}%`
+        );
+      }
 
       // Recalculate totals after any edit
       return calculateTotals(newData);
@@ -1113,6 +1108,17 @@ const WorkArea = () => {
       const formula = formulas.find((f) => f.id === formulaId);
       if (!formula) return prev;
 
+      // Find the formula group row to get the percentage
+      const formulaGroupRow = prev.find(
+        (row) => row.isFormula && row.formulaId === formulaId
+      );
+
+      if (!formulaGroupRow) return prev;
+
+      // Get the percentage from the active formula column
+      const percentage = formulaGroupRow[editableFormula] || 100;
+      const multiplier = percentage / 100;
+
       // Remove the formula group and its nested ingredients
       const newData = prev.filter(
         (row) =>
@@ -1120,13 +1126,17 @@ const WorkArea = () => {
           row.parentFormulaId !== formulaId
       );
 
-      // Add individual ingredients
+      // Add individual ingredients with adjusted percentages
       const totalIndex = newData.findIndex((row) => row.isTotal);
       const insertIndex = totalIndex !== -1 ? totalIndex : newData.length;
 
+      const formulaColumns = columns.filter(
+        (col) => col.group === "Formulas" && col.type === "number"
+      );
+
       const individualIngredients = formula.ingredients.map((ing, index) => {
         const ingredient = ingredients.find((i) => i.id === ing.ingredientId);
-        return {
+        const rowData: any = {
           id: `exploded_ing_${formulaId}_${index}`,
           description: ing.name,
           costKg: ingredient?.price || 0,
@@ -1135,17 +1145,38 @@ const WorkArea = () => {
           isFormula: false,
           level: 0,
         };
+
+        // Set the percentage for each formula column
+        formulaColumns.forEach((col) => {
+          if (col.id === editableFormula) {
+            // For active formula, apply the multiplier to ingredient percentage
+            rowData[col.id] = parseFloat(
+              (ing.percentage * multiplier).toFixed(2)
+            );
+          } else {
+            rowData[col.id] = 0;
+          }
+        });
+
+        return rowData;
       });
 
       newData.splice(insertIndex, 0, ...individualIngredients);
 
-      // Update selected ingredients in library
-      const ingredientNames = newData
-        .filter((row) => !row.isTotal && !row.isFormula)
-        .map((row) => row.description);
-      eventBus.emit("work-area-updated", { ingredients: ingredientNames });
+      // Remove the formula from tracking sets and update state
+      // The useEffect will handle emitting both events
+      pendingFormulaIds.current.delete(formulaId);
+      const newSelectedIds = selectedFormulaIds.filter(
+        (id) => id !== formulaId
+      );
+      setSelectedFormulaIds(newSelectedIds);
 
-      return newData;
+      // Show success toast
+      toast.success(
+        `Formula "${formula.name}" exploded with ${percentage}% of ingredients`
+      );
+
+      return calculateTotals(newData);
     });
   };
 
@@ -1316,7 +1347,6 @@ const WorkArea = () => {
         editableFormula={editableFormula}
         className="h-full"
         showEmptyState={!hasIngredients}
-        onLoadFormula={() => setShowFormulaSelector(true)}
       />
 
       {/* Formula Modal */}
