@@ -95,7 +95,7 @@ export const useFormulaOperations = ({
                     mergedRows.push(rows[0]);
                 } else {
                     mergedCount += rows.length - 1;
-                    
+
                     // Create base merged row with only non-formula properties
                     const mergedRow: any = {
                         id: rows[0].id,
