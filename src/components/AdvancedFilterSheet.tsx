@@ -1,11 +1,12 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Modal from './Modal';
-import QueryBuilder, { FilterGroup } from './QueryBuilder';
+import QueryBuilder from './QueryBuilder';
+import type { FilterGroup } from './QueryBuilder';
 import IngredientTable from './IngredientTable';
 import MultiSelectDropdown from './MultiSelectDropdown';
 import Button from './Button';
-import { Ingredient } from '../services/pega';
+import type { Ingredient } from '../services/pega';
 import { eventBus } from '../utils/bus';
 import { evaluateQuery } from '../utils/queryEvaluator';
 

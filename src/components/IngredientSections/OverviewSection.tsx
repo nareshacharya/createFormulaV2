@@ -1,6 +1,6 @@
 
 import Badge from '../Badge';
-import { Ingredient } from '../../services/pega';
+import type { Ingredient } from '../services/pega'';
 
 interface OverviewSectionProps {
   ingredient: Ingredient;

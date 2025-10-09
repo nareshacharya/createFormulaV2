@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import ListRow from './ListRow';
 import IngredientQuickView from './IngredientQuickView';
-import { Ingredient } from '../services/pega';
+import type { Ingredient } from '../services/pega';
 import { eventBus } from '../utils/bus';
 
 interface IngredientListProps {

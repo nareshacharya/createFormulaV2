@@ -1,7 +1,6 @@
-
-import { useState } from 'react';
-import { IngredientAttribute } from '../services/pega';
-import SearchBar from './SearchBar';
+import { useState } from "react";
+import type { IngredientAttribute } from "../services/pega";
+import SearchBar from "./SearchBar";
 
 interface AttributeDataGridProps {
   attributes: IngredientAttribute[];
@@ -14,22 +13,23 @@ const AttributeDataGrid = ({
   attributes = [],
   selectedAttributes = [],
   onSelectionChange,
-  maxSelections = 4
+  maxSelections = 4,
 }: AttributeDataGridProps) => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Filter attributes based on search
-  const filteredAttributes = attributes.filter(attribute => 
-    !searchQuery || 
-    attribute.name?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredAttributes = attributes.filter(
+    (attribute) =>
+      !searchQuery ||
+      attribute.name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleAttributeToggle = (attributeId: string) => {
     const isSelected = selectedAttributes.includes(attributeId);
-    
+
     if (isSelected) {
       // Remove from selection
-      onSelectionChange(selectedAttributes.filter(id => id !== attributeId));
+      onSelectionChange(selectedAttributes.filter((id) => id !== attributeId));
     } else if (selectedAttributes.length < maxSelections) {
       // Add to selection
       onSelectionChange([...selectedAttributes, attributeId]);
@@ -65,32 +65,40 @@ const AttributeDataGrid = ({
 
       {/* Attribute List */}
       <div className="space-y-3 max-h-96 overflow-y-auto">
-        {filteredAttributes.map(attribute => {
+        {filteredAttributes.map((attribute) => {
           const isSelected = selectedAttributes.includes(attribute.id);
-          const isDisabled = !isSelected && selectedAttributes.length >= maxSelections;
-          
+          const isDisabled =
+            !isSelected && selectedAttributes.length >= maxSelections;
+
           return (
             <label
               key={attribute.id}
               className={`
                 flex items-center space-x-3 p-4 rounded-lg border cursor-pointer transition-all
-                ${isSelected 
-                  ? 'bg-blue-50 border-blue-200' 
-                  : isDisabled 
-                    ? 'bg-gray-50 border-gray-200 opacity-50 cursor-not-allowed' 
-                    : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300'
+                ${
+                  isSelected
+                    ? "bg-blue-50 border-blue-200"
+                    : isDisabled
+                    ? "bg-gray-50 border-gray-200 opacity-50 cursor-not-allowed"
+                    : "bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300"
                 }
               `}
             >
               <input
                 type="checkbox"
                 checked={isSelected}
-                onChange={() => !isDisabled && handleAttributeToggle(attribute.id)}
+                onChange={() =>
+                  !isDisabled && handleAttributeToggle(attribute.id)
+                }
                 disabled={isDisabled}
                 className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
               />
-              
-              <span className={`text-sm font-medium ${isSelected ? 'text-blue-900' : 'text-gray-900'}`}>
+
+              <span
+                className={`text-sm font-medium ${
+                  isSelected ? "text-blue-900" : "text-gray-900"
+                }`}
+              >
                 {attribute.name}
               </span>
             </label>

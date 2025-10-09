@@ -1,12 +1,11 @@
-
-import { useState, useEffect } from 'react';
-import { headerTokens } from '../../utils/tokens';
-import HeaderBadges from './Header.Badges';
-import HeaderActions from './Header.Actions';
-import FormulaModal from '../../components/FormulaModal';
-import { eventBus } from '../../utils/bus';
-import { Formula } from '../../services/pega';
-import { useModal } from '../../App';
+import { useState, useEffect } from "react";
+import { headerTokens } from "../../utils/tokens";
+import HeaderBadges from "./Header.Badges";
+import HeaderActions from "./Header.Actions";
+import FormulaModal from "../../components/FormulaModal";
+import { eventBus } from "../../utils/bus";
+import type { Formula } from "../../services/pega";
+import { useModal } from "../../App";
 
 const AppHeader = () => {
   const { showModal, hideModal } = useModal();
@@ -20,7 +19,10 @@ const AppHeader = () => {
       setActiveFormula(data.formula);
     };
 
-    const handleFormulaSelectionsUpdate = (data: { count: number, selectedIds?: string[] }) => {
+    const handleFormulaSelectionsUpdate = (data: {
+      count: number;
+      selectedIds?: string[];
+    }) => {
       setCurrentFormulaSelections(data.count);
       if (data.selectedIds) {
         setSelectedFormulaIds(data.selectedIds);
@@ -31,14 +33,14 @@ const AppHeader = () => {
       setAvailableFormulas(data.formulas);
     };
 
-    eventBus.on('active-formula-changed', handleActiveFormulaChange);
-    eventBus.on('formula-selections-updated', handleFormulaSelectionsUpdate);
-    eventBus.on('available-formulas-updated', handleAvailableFormulasUpdate);
-    
+    eventBus.on("active-formula-changed", handleActiveFormulaChange);
+    eventBus.on("formula-selections-updated", handleFormulaSelectionsUpdate);
+    eventBus.on("available-formulas-updated", handleAvailableFormulasUpdate);
+
     return () => {
-      eventBus.off('active-formula-changed', handleActiveFormulaChange);
-      eventBus.off('formula-selections-updated', handleFormulaSelectionsUpdate);
-      eventBus.off('available-formulas-updated', handleAvailableFormulasUpdate);
+      eventBus.off("active-formula-changed", handleActiveFormulaChange);
+      eventBus.off("formula-selections-updated", handleFormulaSelectionsUpdate);
+      eventBus.off("available-formulas-updated", handleAvailableFormulasUpdate);
     };
   }, []);
 
@@ -58,23 +60,23 @@ const AppHeader = () => {
   };
 
   const handleLoadFormula = () => {
-    eventBus.emit('load-formula');
+    eventBus.emit("load-formula");
   };
 
-  const handleFormulaModalCreateFormula = (formula: Omit<Formula, 'id'>) => {
+  const handleFormulaModalCreateFormula = (formula: Omit<Formula, "id">) => {
     const newFormula: Formula = {
       ...formula,
-      id: `FORM${Date.now()}`
+      id: `FORM${Date.now()}`,
     };
 
     // Emit event to add this formula as a new column in the work area
-    eventBus.emit('new-formula-created', { formula: newFormula });
+    eventBus.emit("new-formula-created", { formula: newFormula });
     hideModal();
   };
 
   const handleFormulaModalSelectFormula = (formula: Formula) => {
     // Emit event to add this formula as a new column in the work area
-    eventBus.emit('formula-selected-for-column', { formula });
+    eventBus.emit("formula-selected-for-column", { formula });
     hideModal();
   };
 
@@ -82,11 +84,13 @@ const AppHeader = () => {
     <div className="w-full bg-purple-800 border-b border-purple-700 relative z-1">
       {/* Purple bar */}
       <div className="h-1 bg-purple-600 w-full"></div>
-      
+
       {/* Header content */}
-      <header className={`${headerTokens.height} ${headerTokens.padding} flex items-center justify-between w-full`}>
+      <header
+        className={`${headerTokens.height} ${headerTokens.padding} flex items-center justify-between w-full`}
+      >
         <HeaderBadges activeFormula={activeFormula} />
-        
+
         <div className="flex items-center space-x-4">
           {/* Formula Actions */}
           <div className="flex items-center gap-1">
@@ -108,7 +112,7 @@ const AppHeader = () => {
               <i className="ri-folder-open-line text-white text-sm"></i>
             </button>
           </div>
-          
+
           <HeaderActions />
         </div>
       </header>

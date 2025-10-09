@@ -1,8 +1,7 @@
-
-import { useState, useEffect } from 'react';
-import { Formula } from '../services/pega';
-import Badge from './Badge';
-import SearchBar from './SearchBar';
+import { useState, useEffect } from "react";
+import type { Formula } from "../services/pega";
+import Badge from "./Badge";
+import SearchBar from "./SearchBar";
 
 interface FormulaDataGridProps {
   formulas: Formula[];
@@ -21,17 +20,17 @@ const FormulaDataGrid = ({
 }: FormulaDataGridProps) => {
   const [sortConfig, setSortConfig] = useState<{
     key: string;
-    direction: 'asc' | 'desc';
+    direction: "asc" | "desc";
   } | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [displayColumns] = useState<string[]>([
-    'name',
-    'version',
-    'formulaId',
-    'status',
-    'category',
-    'costPerKg',
+    "name",
+    "version",
+    "formulaId",
+    "status",
+    "category",
+    "costPerKg",
   ]);
 
   const itemsPerPage = 10;
@@ -61,13 +60,13 @@ const FormulaDataGrid = ({
     if (bVal == null) return -1;
 
     // Numeric comparison if both are numbers, otherwise use localeCompare for strings
-    if (typeof aVal === 'number' && typeof bVal === 'number') {
-      return sortConfig.direction === 'asc' ? aVal - bVal : bVal - aVal;
+    if (typeof aVal === "number" && typeof bVal === "number") {
+      return sortConfig.direction === "asc" ? aVal - bVal : bVal - aVal;
     }
 
     const aStr = String(aVal);
     const bStr = String(bVal);
-    return sortConfig.direction === 'asc'
+    return sortConfig.direction === "asc"
       ? aStr.localeCompare(bStr)
       : bStr.localeCompare(aStr);
   });
@@ -82,9 +81,9 @@ const FormulaDataGrid = ({
    * --------------------------------------------------------------------- */
   const handleSort = (key: string) => {
     const direction =
-      sortConfig && sortConfig.key === key && sortConfig.direction === 'asc'
-        ? 'desc'
-        : 'asc';
+      sortConfig && sortConfig.key === key && sortConfig.direction === "asc"
+        ? "desc"
+        : "asc";
     setSortConfig({ key, direction });
     setCurrentPage(1);
   };
@@ -122,7 +121,10 @@ const FormulaDataGrid = ({
       // Only select formulas that are not already highlighted
       const availableIds = paginatedFormulas
         .filter((f) => !highlightedFormulas.includes(f.id))
-        .slice(0, maxSelections ? maxSelections - selectedFormulas.length : undefined)
+        .slice(
+          0,
+          maxSelections ? maxSelections - selectedFormulas.length : undefined
+        )
         .map((f) => f.id);
       onSelectionChange([...selectedFormulas, ...availableIds]);
     }
@@ -156,25 +158,25 @@ const FormulaDataGrid = ({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active':
-        return 'success';
-      case 'draft':
-        return 'warning';
-      case 'archived':
-        return 'default';
+      case "active":
+        return "success";
+      case "draft":
+        return "warning";
+      case "archived":
+        return "default";
       default:
-        return 'default';
+        return "default";
     }
   };
 
   const getColumnLabel = (col: string) => {
     const map: Record<string, string> = {
-      name: 'Name',
-      version: 'Version',
-      formulaId: 'Formula ID',
-      status: 'Status',
-      category: 'Category',
-      costPerKg: 'Cost per kg',
+      name: "Name",
+      version: "Version",
+      formulaId: "Formula ID",
+      status: "Status",
+      category: "Category",
+      costPerKg: "Cost per kg",
     };
     return map[col] ?? col;
   };
@@ -182,16 +184,16 @@ const FormulaDataGrid = ({
   const renderCellValue = (formula: Formula, column: string) => {
     const value = formula[column as keyof Formula];
     switch (column) {
-      case 'status':
+      case "status":
         return (
           <Badge variant={getStatusColor(value as string)} size="sm">
             {value as string}
           </Badge>
         );
-      case 'costPerKg':
-        return typeof value === 'number' ? `$${value.toFixed(2)}` : '-';
+      case "costPerKg":
+        return typeof value === "number" ? `$${value.toFixed(2)}` : "-";
       default:
-        return value ?? '-';
+        return value ?? "-";
     }
   };
 
@@ -223,7 +225,7 @@ const FormulaDataGrid = ({
           />
         </div>
         <div className="text-sm text-gray-500">
-          {selectedFormulas.length} of {maxSelections || 'unlimited'} selected
+          {selectedFormulas.length} of {maxSelections || "unlimited"} selected
         </div>
       </div>
 
@@ -239,7 +241,8 @@ const FormulaDataGrid = ({
                   onChange={handleSelectAll}
                   disabled={
                     maxSelections
-                      ? selectedFormulas.length >= maxSelections && !isAllCurrentPageSelected
+                      ? selectedFormulas.length >= maxSelections &&
+                        !isAllCurrentPageSelected
                       : false
                   }
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50 cursor-pointer"
@@ -256,7 +259,7 @@ const FormulaDataGrid = ({
                     {sortConfig?.key === column.key ? (
                       <i
                         className={`ri-arrow-${
-                          sortConfig.direction === 'asc' ? 'up' : 'down'
+                          sortConfig.direction === "asc" ? "up" : "down"
                         }-line text-xs text-blue-600`}
                       />
                     ) : (
@@ -273,16 +276,22 @@ const FormulaDataGrid = ({
               const isHighlighted = highlightedFormulas.includes(formula.id);
               const isDisabled =
                 isHighlighted ||
-                (maxSelections && selectedFormulas.length >= maxSelections && !isSelected);
+                (maxSelections &&
+                  selectedFormulas.length >= maxSelections &&
+                  !isSelected);
 
               return (
                 <tr
                   key={formula.id}
                   className={`
                     hover:bg-gray-50 cursor-pointer
-                    ${isSelected ? 'bg-blue-50 border-blue-200' : ''}
-                    ${isHighlighted ? 'bg-yellow-50 border-yellow-200' : ''}
-                    ${isDisabled && !isSelected && !isHighlighted ? 'opacity-50' : ''}
+                    ${isSelected ? "bg-blue-50 border-blue-200" : ""}
+                    ${isHighlighted ? "bg-yellow-50 border-yellow-200" : ""}
+                    ${
+                      isDisabled && !isSelected && !isHighlighted
+                        ? "opacity-50"
+                        : ""
+                    }
                   `}
                   onClick={() => !isDisabled && handleRowClick(formula.id)}
                 >
@@ -302,8 +311,10 @@ const FormulaDataGrid = ({
                   </td>
                   {displayColumns.map((col) => (
                     <td key={col} className="px-3 py-2 text-sm font-medium">
-                      {col === 'name' ? (
-                        <span className="font-medium">{renderCellValue(formula, col)}</span>
+                      {col === "name" ? (
+                        <span className="font-medium">
+                          {renderCellValue(formula, col)}
+                        </span>
                       ) : (
                         renderCellValue(formula, col)
                       )}
@@ -320,8 +331,8 @@ const FormulaDataGrid = ({
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-500">
-            Showing {startIndex + 1} to{' '}
-            {Math.min(endIndex, sortedFormulas.length)} of{' '}
+            Showing {startIndex + 1} to{" "}
+            {Math.min(endIndex, sortedFormulas.length)} of{" "}
             {sortedFormulas.length} formulas
           </div>
           <div className="flex items-center space-x-2">
@@ -351,8 +362,8 @@ const FormulaDataGrid = ({
                     onClick={() => setCurrentPage(pageNum)}
                     className={`px-3 py-1 text-sm border rounded-md cursor-pointer ${
                       currentPage === pageNum
-                        ? 'bg-blue-600 text-white border-blue-600'
-                        : 'border-gray-300 hover:bg-gray-50'
+                        ? "bg-blue-600 text-white border-blue-600"
+                        : "border-gray-300 hover:bg-gray-50"
                     }`}
                   >
                     {pageNum}

@@ -1,16 +1,15 @@
-
-import { useState } from 'react';
-import Modal from './Modal';
-import Button from './Button';
-import Badge from './Badge';
-import PillTabs from './PillTabs';
-import FormulaDataGrid from './FormulaDataGrid';
-import { Formula } from '../services/pega';
+import { useState } from "react";
+import Modal from "./Modal";
+import Button from "./Button";
+import Badge from "./Badge";
+import PillTabs from "./PillTabs";
+import FormulaDataGrid from "./FormulaDataGrid";
+import type { Formula } from "../services/pega";
 
 interface FormulaModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreateFormula: (formula: Omit<Formula, 'id'>) => void;
+  onCreateFormula: (formula: Omit<Formula, "id">) => void;
   onSelectFormula: (formula: Formula) => void;
   availableFormulas: Formula[];
   maxSelections?: number;
@@ -26,45 +25,45 @@ const FormulaModal = ({
   availableFormulas,
   maxSelections = 4,
   currentSelections = 0,
-  selectedFormulaIds = []
+  selectedFormulaIds = [],
 }: FormulaModalProps) => {
-  const [activeTab, setActiveTab] = useState<'create' | 'select'>('select');
+  const [activeTab, setActiveTab] = useState<"create" | "select">("select");
   const [selectedFormulas, setSelectedFormulas] = useState<string[]>([]);
   const [newFormulaData, setNewFormulaData] = useState({
-    name: '',
-    category: 'Eau de Toilette',
-    description: '',
-    createdBy: 'Current User',
-    projectName: ''
+    name: "",
+    category: "Eau de Toilette",
+    description: "",
+    createdBy: "Current User",
+    projectName: "",
   });
 
   const categories = [
-    'Eau de Toilette',
-    'Eau de Parfum',
-    'Eau de Cologne',
-    'Parfum',
-    'Eau Fraiche'
+    "Eau de Toilette",
+    "Eau de Parfum",
+    "Eau de Cologne",
+    "Parfum",
+    "Eau Fraiche",
   ];
 
   const projects = [
-    'Project Alpha',
-    'Project Beta',
-    'Project Gamma',
-    'Project Delta',
-    'Project Epsilon'
+    "Project Alpha",
+    "Project Beta",
+    "Project Gamma",
+    "Project Delta",
+    "Project Epsilon",
   ];
 
   const remainingSelections = maxSelections - currentSelections;
 
   const handleClose = () => {
-    setActiveTab('select');
+    setActiveTab("select");
     setSelectedFormulas([]);
     setNewFormulaData({
-      name: '',
-      category: 'Eau de Toilette',
-      description: '',
-      createdBy: 'Current User',
-      projectName: ''
+      name: "",
+      category: "Eau de Toilette",
+      description: "",
+      createdBy: "Current User",
+      projectName: "",
     });
     onClose();
   };
@@ -74,12 +73,12 @@ const FormulaModal = ({
       return;
     }
 
-    const newFormula: Omit<Formula, 'id'> = {
+    const newFormula: Omit<Formula, "id"> = {
       name: newFormulaData.name,
-      version: '1.0',
-      status: 'draft',
+      version: "1.0",
+      status: "draft",
       createdBy: newFormulaData.createdBy,
-      lastUpdated: new Date().toISOString().split('T')[0],
+      lastUpdated: new Date().toISOString().split("T")[0],
       category: newFormulaData.category,
       totalPercentage: 0,
       costPerKg: 0,
@@ -88,8 +87,8 @@ const FormulaModal = ({
       notes: {
         top: [],
         middle: [],
-        base: []
-      }
+        base: [],
+      },
     };
 
     onCreateFormula(newFormula);
@@ -97,14 +96,16 @@ const FormulaModal = ({
   };
 
   const handleSelectFormulas = () => {
-    const formulasToSelect = availableFormulas.filter(f => selectedFormulas.includes(f.id));
-    formulasToSelect.forEach(formula => onSelectFormula(formula));
+    const formulasToSelect = availableFormulas.filter((f) =>
+      selectedFormulas.includes(f.id)
+    );
+    formulasToSelect.forEach((formula) => onSelectFormula(formula));
     handleClose();
   };
 
   const tabs = [
-    { id: 'select', label: 'Select Existing', count: availableFormulas.length },
-    { id: 'create', label: 'Create New' }
+    { id: "select", label: "Select Existing", count: availableFormulas.length },
+    { id: "create", label: "Create New" },
   ];
 
   const CreateFormulaForm = () => (
@@ -119,7 +120,9 @@ const FormulaModal = ({
             <input
               type="text"
               value={newFormulaData.name}
-              onChange={(e) => setNewFormulaData(prev => ({ ...prev, name: e.target.value }))}
+              onChange={(e) =>
+                setNewFormulaData((prev) => ({ ...prev, name: e.target.value }))
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Enter formula name"
               autoFocus
@@ -132,10 +135,15 @@ const FormulaModal = ({
             </label>
             <select
               value={newFormulaData.category}
-              onChange={(e) => setNewFormulaData(prev => ({ ...prev, category: e.target.value }))}
+              onChange={(e) =>
+                setNewFormulaData((prev) => ({
+                  ...prev,
+                  category: e.target.value,
+                }))
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-8"
             >
-              {categories.map(category => (
+              {categories.map((category) => (
                 <option key={category} value={category}>
                   {category}
                 </option>
@@ -150,11 +158,16 @@ const FormulaModal = ({
             <div className="space-y-2">
               <select
                 value={newFormulaData.projectName}
-                onChange={(e) => setNewFormulaData(prev => ({ ...prev, projectName: e.target.value }))}
+                onChange={(e) =>
+                  setNewFormulaData((prev) => ({
+                    ...prev,
+                    projectName: e.target.value,
+                  }))
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-8"
               >
                 <option value="">Select existing project</option>
-                {projects.map(project => (
+                {projects.map((project) => (
                   <option key={project} value={project}>
                     {project}
                   </option>
@@ -164,7 +177,12 @@ const FormulaModal = ({
               <input
                 type="text"
                 value={newFormulaData.projectName}
-                onChange={(e) => setNewFormulaData(prev => ({ ...prev, projectName: e.target.value }))}
+                onChange={(e) =>
+                  setNewFormulaData((prev) => ({
+                    ...prev,
+                    projectName: e.target.value,
+                  }))
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Enter new project name"
               />
@@ -181,7 +199,12 @@ const FormulaModal = ({
             <input
               type="text"
               value={newFormulaData.createdBy}
-              onChange={(e) => setNewFormulaData(prev => ({ ...prev, createdBy: e.target.value }))}
+              onChange={(e) =>
+                setNewFormulaData((prev) => ({
+                  ...prev,
+                  createdBy: e.target.value,
+                }))
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Enter creator name"
             />
@@ -193,7 +216,12 @@ const FormulaModal = ({
             </label>
             <textarea
               value={newFormulaData.description}
-              onChange={(e) => setNewFormulaData(prev => ({ ...prev, description: e.target.value }))}
+              onChange={(e) =>
+                setNewFormulaData((prev) => ({
+                  ...prev,
+                  description: e.target.value,
+                }))
+              }
               rows={6}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
               placeholder="Enter formula description (optional)"
@@ -210,7 +238,8 @@ const FormulaModal = ({
         {remainingSelections > 0 ? (
           <>
             <div className="text-sm text-gray-600">
-              Select up to {remainingSelections} formula{remainingSelections !== 1 ? 's' : ''} to add as columns.
+              Select up to {remainingSelections} formula
+              {remainingSelections !== 1 ? "s" : ""} to add as columns.
             </div>
             <div className="max-h-96 overflow-auto">
               <FormulaDataGrid
@@ -237,7 +266,7 @@ const FormulaModal = ({
   );
 
   const getFooterActions = () => {
-    if (activeTab === 'create') {
+    if (activeTab === "create") {
       return (
         <div className="flex justify-end space-x-3">
           <Button variant="outline" onClick={handleClose}>
@@ -253,7 +282,7 @@ const FormulaModal = ({
       );
     }
 
-    if (activeTab === 'select') {
+    if (activeTab === "select") {
       if (remainingSelections === 0) {
         return (
           <div className="flex justify-end">
@@ -273,7 +302,8 @@ const FormulaModal = ({
             onClick={handleSelectFormulas}
             disabled={selectedFormulas.length === 0}
           >
-            Add {selectedFormulas.length} Formula{selectedFormulas.length !== 1 ? 's' : ''}
+            Add {selectedFormulas.length} Formula
+            {selectedFormulas.length !== 1 ? "s" : ""}
           </Button>
         </div>
       );
@@ -295,13 +325,13 @@ const FormulaModal = ({
           <PillTabs
             tabs={tabs}
             activeTab={activeTab}
-            onTabChange={(tabId) => setActiveTab(tabId as 'create' | 'select')}
+            onTabChange={(tabId) => setActiveTab(tabId as "create" | "select")}
           />
         </div>
-        
+
         <div className="min-h-[400px]">
-          {activeTab === 'create' && <CreateFormulaForm />}
-          {activeTab === 'select' && <SelectFormulaForm />}
+          {activeTab === "create" && <CreateFormulaForm />}
+          {activeTab === "select" && <SelectFormulaForm />}
         </div>
       </div>
     </Modal>

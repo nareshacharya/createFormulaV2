@@ -1,5 +1,5 @@
 
-import { Ingredient } from '../../services/pega';
+import type { Ingredient } from '../services/pega'';
 
 interface PhysicalPropertiesSectionProps {
   ingredient: Ingredient;

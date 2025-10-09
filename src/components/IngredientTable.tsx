@@ -1,9 +1,8 @@
-
-import { useState } from 'react';
-import { Ingredient } from '../services/pega';
-import Badge from './Badge';
-import Button from './Button';
-import { eventBus } from '../utils/bus';
+import { useState } from "react";
+import type { Ingredient } from "../services/pega";
+import Badge from "./Badge";
+import Button from "./Button";
+import { eventBus } from "../utils/bus";
 
 interface IngredientTableProps {
   ingredients: Ingredient[];
@@ -20,39 +19,52 @@ const IngredientTable = ({
   onSelectionChange,
   displayColumns,
   showActionsBar = true,
-  enableAdvancedFeatures = false
+  enableAdvancedFeatures = false,
 }: IngredientTableProps) => {
-  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
+  const [sortConfig, setSortConfig] = useState<{
+    key: string;
+    direction: "asc" | "desc";
+  } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = enableAdvancedFeatures ? 15 : 10;
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'success';
-      case 'inactive': return 'default';
-      case 'palette': return 'success';
-      case 'analytical': return 'warning';
-      case 'sers_review': return 'info';
-      default: return 'default';
+      case "active":
+        return "success";
+      case "inactive":
+        return "default";
+      case "palette":
+        return "success";
+      case "analytical":
+        return "warning";
+      case "sers_review":
+        return "info";
+      default:
+        return "default";
     }
   };
 
   const getStatusDotColor = (ingredient: Ingredient) => {
     const { status, mac } = ingredient;
 
-    if (mac < 0) return 'bg-red-500'; // Non-Compliant
-    if (status === 'inactive') return 'bg-gray-400'; // Inactive
-    if (status === 'active' || status === 'palette') return 'bg-green-500'; // Active/Palette
-    if (status === 'analytical') return 'bg-purple-500'; // Analytical
-    if (status === 'sers_review') return 'bg-blue-500'; // SERS Review
+    if (mac < 0) return "bg-red-500"; // Non-Compliant
+    if (status === "inactive") return "bg-gray-400"; // Inactive
+    if (status === "active" || status === "palette") return "bg-green-500"; // Active/Palette
+    if (status === "analytical") return "bg-purple-500"; // Analytical
+    if (status === "sers_review") return "bg-blue-500"; // SERS Review
 
-    return 'bg-green-500'; // Default to active
+    return "bg-green-500"; // Default to active
   };
 
   const handleSort = (key: string) => {
-    let direction: 'asc' | 'desc' = 'asc';
-    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
+    let direction: "asc" | "desc" = "asc";
+    if (
+      sortConfig &&
+      sortConfig.key === key &&
+      sortConfig.direction === "asc"
+    ) {
+      direction = "desc";
     }
     setSortConfig({ key, direction });
     setCurrentPage(1); // Reset to first page when sorting
@@ -67,7 +79,7 @@ const IngredientTable = ({
     if (aVal === null || aVal === undefined) return 1;
     if (bVal === null || bVal === undefined) return -1;
 
-    if (sortConfig.direction === 'asc') {
+    if (sortConfig.direction === "asc") {
       return aVal > bVal ? 1 : -1;
     } else {
       return aVal < bVal ? 1 : -1;
@@ -83,18 +95,23 @@ const IngredientTable = ({
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
     if (checked) {
-      onSelectionChange(paginatedIngredients.map(ing => ing.id));
+      onSelectionChange(paginatedIngredients.map((ing) => ing.id));
     } else {
       onSelectionChange([]);
     }
   };
 
-  const handleRowSelect = (e: React.ChangeEvent<HTMLInputElement>, ingredientId: string) => {
+  const handleRowSelect = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    ingredientId: string
+  ) => {
     const checked = e.target.checked;
     if (checked) {
       onSelectionChange([...selectedIngredients, ingredientId]);
     } else {
-      onSelectionChange(selectedIngredients.filter(id => id !== ingredientId));
+      onSelectionChange(
+        selectedIngredients.filter((id) => id !== ingredientId)
+      );
     }
   };
 
@@ -102,16 +119,20 @@ const IngredientTable = ({
     e.stopPropagation();
 
     if (selectedIngredients.includes(ingredientId)) {
-      onSelectionChange(selectedIngredients.filter(id => id !== ingredientId));
+      onSelectionChange(
+        selectedIngredients.filter((id) => id !== ingredientId)
+      );
     } else {
       onSelectionChange([...selectedIngredients, ingredientId]);
     }
   };
 
   const handleAddToFormula = () => {
-    const ingredientsToAdd = ingredients.filter(ing => selectedIngredients.includes(ing.id));
-    ingredientsToAdd.forEach(ingredient => {
-      eventBus.emit('ingredient-selected', { ingredient });
+    const ingredientsToAdd = ingredients.filter((ing) =>
+      selectedIngredients.includes(ing.id)
+    );
+    ingredientsToAdd.forEach((ingredient) => {
+      eventBus.emit("ingredient-selected", { ingredient });
     });
     onSelectionChange([]); // Clear selection after adding
   };
@@ -120,24 +141,28 @@ const IngredientTable = ({
     const value = ingredient[column as keyof Ingredient];
 
     switch (column) {
-      case 'status':
+      case "status":
         return (
           <div className="flex items-center space-x-2">
-            <div className={`w-2 h-2 rounded-full ${getStatusDotColor(ingredient)}`} />
+            <div
+              className={`w-2 h-2 rounded-full ${getStatusDotColor(
+                ingredient
+              )}`}
+            />
             <Badge variant={getStatusColor(value as string)} size="sm">
               {value as string}
             </Badge>
           </div>
         );
-      case 'price':
+      case "price":
         return `$${(value as number).toFixed(2)}`;
-      case 'mac':
-        return value === -1 ? 'No limit' : value;
-      case 'allergens':
+      case "mac":
+        return value === -1 ? "No limit" : value;
+      case "allergens":
         const allergens = value as string[];
         return allergens && allergens.length > 0 ? (
           <div className="flex flex-wrap gap-1">
-            {allergens.slice(0, 2).map(allergen => (
+            {allergens.slice(0, 2).map((allergen) => (
               <Badge key={allergen} variant="warning" size="xs">
                 {allergen}
               </Badge>
@@ -148,37 +173,45 @@ const IngredientTable = ({
               </Badge>
             )}
           </div>
-        ) : '-';
-      case 'type':
+        ) : (
+          "-"
+        );
+      case "type":
         return (
           <Badge
-            variant={value === 'natural' ? 'success' : value === 'synthetic' ? 'info' : 'default'}
+            variant={
+              value === "natural"
+                ? "success"
+                : value === "synthetic"
+                ? "info"
+                : "default"
+            }
             size="sm"
           >
             {value as string}
           </Badge>
         );
       default:
-        return value || '-';
+        return value || "-";
     }
   };
 
   const getColumnLabel = (column: string) => {
     const labels: Record<string, string> = {
-      name: 'Name',
-      code: 'Code',
-      price: 'Price',
-      type: 'Type',
-      category: 'Category',
-      supplier: 'Supplier',
-      status: 'Status',
-      mac: 'MAC',
-      odorProfile: 'Odor Profile',
-      volatility: 'Volatility',
-      allergens: 'Allergens',
-      ifraCategory: 'IFRA Category',
-      casNumber: 'CAS Number',
-      unit: 'Unit'
+      name: "Name",
+      code: "Code",
+      price: "Price",
+      type: "Type",
+      category: "Category",
+      supplier: "Supplier",
+      status: "Status",
+      mac: "MAC",
+      odorProfile: "Odor Profile",
+      volatility: "Volatility",
+      allergens: "Allergens",
+      ifraCategory: "IFRA Category",
+      casNumber: "CAS Number",
+      unit: "Unit",
     };
     return labels[column] || column;
   };
@@ -227,12 +260,16 @@ const IngredientTable = ({
               <th className="w-12 px-3 py-3 text-left">
                 <input
                   type="checkbox"
-                  checked={selectedIngredients.length === paginatedIngredients.length && paginatedIngredients.length > 0}
+                  checked={
+                    selectedIngredients.length ===
+                      paginatedIngredients.length &&
+                    paginatedIngredients.length > 0
+                  }
                   onChange={handleSelectAll}
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                 />
               </th>
-              {displayColumns.map(column => (
+              {displayColumns.map((column) => (
                 <th
                   key={column}
                   className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
@@ -241,7 +278,11 @@ const IngredientTable = ({
                   <div className="flex items-center space-x-1">
                     <span>{getColumnLabel(column)}</span>
                     {sortConfig?.key === column ? (
-                      <i className={`ri-arrow-${sortConfig.direction === 'asc' ? 'up' : 'down'}-line text-xs text-blue-600`}></i>
+                      <i
+                        className={`ri-arrow-${
+                          sortConfig.direction === "asc" ? "up" : "down"
+                        }-line text-xs text-blue-600`}
+                      ></i>
                     ) : (
                       <i className="ri-expand-up-down-line text-xs text-gray-400 opacity-0 group-hover:opacity-100"></i>
                     )}
@@ -251,15 +292,20 @@ const IngredientTable = ({
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {paginatedIngredients.map(ingredient => (
+            {paginatedIngredients.map((ingredient) => (
               <tr
                 key={ingredient.id}
                 className={`hover:bg-gray-50 cursor-pointer ${
-                  selectedIngredients.includes(ingredient.id) ? 'bg-blue-50 border-blue-200' : ''
+                  selectedIngredients.includes(ingredient.id)
+                    ? "bg-blue-50 border-blue-200"
+                    : ""
                 }`}
                 onClick={(e) => handleRowClick(e, ingredient.id)}
               >
-                <td className="w-12 px-3 py-3" onClick={(e) => e.stopPropagation()}>
+                <td
+                  className="w-12 px-3 py-3"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <input
                     type="checkbox"
                     checked={selectedIngredients.includes(ingredient.id)}
@@ -267,8 +313,11 @@ const IngredientTable = ({
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                   />
                 </td>
-                {displayColumns.map(column => (
-                  <td key={column} className="px-3 py-3 text-sm text-gray-900 font-sans">
+                {displayColumns.map((column) => (
+                  <td
+                    key={column}
+                    className="px-3 py-3 text-sm text-gray-900 font-sans"
+                  >
                     {renderCellValue(ingredient, column)}
                   </td>
                 ))}
@@ -283,7 +332,9 @@ const IngredientTable = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className="text-sm text-gray-500">
-              Showing {startIndex + 1} to {Math.min(endIndex, sortedIngredients.length)} of {sortedIngredients.length} ingredients
+              Showing {startIndex + 1} to{" "}
+              {Math.min(endIndex, sortedIngredients.length)} of{" "}
+              {sortedIngredients.length} ingredients
             </div>
           </div>
           <div className="flex items-center space-x-2">
@@ -295,7 +346,7 @@ const IngredientTable = ({
               <i className="ri-skip-back-line"></i>
             </button>
             <button
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
               className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
@@ -321,8 +372,8 @@ const IngredientTable = ({
                     onClick={() => setCurrentPage(pageNum)}
                     className={`px-3 py-1 text-sm border rounded-md cursor-pointer ${
                       currentPage === pageNum
-                        ? 'bg-blue-600 text-white border-blue-600'
-                        : 'border-gray-300 hover:bg-gray-50'
+                        ? "bg-blue-600 text-white border-blue-600"
+                        : "border-gray-300 hover:bg-gray-50"
                     }`}
                   >
                     {pageNum}
@@ -332,7 +383,9 @@ const IngredientTable = ({
             </div>
 
             <button
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
               disabled={currentPage === totalPages}
               className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >

@@ -1,9 +1,8 @@
-
-import { useState, useEffect } from 'react';
-import { Formula } from '../services/pega';
-import ListRow from './ListRow';
-import Badge from './Badge';
-import { eventBus } from '../utils/bus';
+import { useState, useEffect } from "react";
+import type { Formula } from "../services/pega";
+import ListRow from "./ListRow";
+import Badge from "./Badge";
+import { eventBus } from "../utils/bus";
 
 interface FormulaListProps {
   formulas: Formula[];
@@ -12,43 +11,54 @@ interface FormulaListProps {
   onSelectionChange: (selectedIds: string[]) => void;
 }
 
-const FormulaList = ({ formulas, searchTerm = '', selectedFormulas, onSelectionChange }: FormulaListProps) => {
+const FormulaList = ({
+  formulas,
+  searchTerm = "",
+  selectedFormulas,
+  onSelectionChange,
+}: FormulaListProps) => {
   const [hoveredFormula, setHoveredFormula] = useState<string | null>(null);
 
   const getStatusVariant = (status: string) => {
     switch (status) {
-      case 'active': return 'success';
-      case 'draft': return 'warning';
-      case 'archived': return 'default';
-      default: return 'default';
+      case "active":
+        return "success";
+      case "draft":
+        return "warning";
+      case "archived":
+        return "default";
+      default:
+        return "default";
     }
   };
 
-  const filteredFormulas = formulas.filter(formula => {
+  const filteredFormulas = formulas.filter((formula) => {
     if (!formula) return false;
-    
+
     // Ensure searchTerm is defined and is a string
-    if (!searchTerm || typeof searchTerm !== 'string') return true;
-    
+    if (!searchTerm || typeof searchTerm !== "string") return true;
+
     const searchLower = searchTerm.toLowerCase();
-    const name = formula.name || '';
-    const category = formula.category || '';
-    const id = formula.id || '';
-    
-    return name.toLowerCase().includes(searchLower) ||
-           category.toLowerCase().includes(searchLower) ||
-           id.toLowerCase().includes(searchLower);
+    const name = formula.name || "";
+    const category = formula.category || "";
+    const id = formula.id || "";
+
+    return (
+      name.toLowerCase().includes(searchLower) ||
+      category.toLowerCase().includes(searchLower) ||
+      id.toLowerCase().includes(searchLower)
+    );
   });
 
   const handleFormulaClick = (formula: Formula) => {
-    eventBus.emit('formula-selected', { formula });
+    eventBus.emit("formula-selected", { formula });
   };
 
   const handleFormulaSelect = (formulaId: string, selected: boolean) => {
     if (selected) {
       onSelectionChange([...selectedFormulas, formulaId]);
     } else {
-      onSelectionChange(selectedFormulas.filter(id => id !== formulaId));
+      onSelectionChange(selectedFormulas.filter((id) => id !== formulaId));
     }
   };
 
@@ -66,23 +76,32 @@ const FormulaList = ({ formulas, searchTerm = '', selectedFormulas, onSelectionC
 
   return (
     <div className="space-y-2">
-      {filteredFormulas.map(formula => {
+      {filteredFormulas.map((formula) => {
         if (!formula || !formula.id) return null;
-        
+
         const ingredientCount = formula.ingredients?.length || 0;
-        const avgPrice = ingredientCount > 0 
-          ? (formula.ingredients.reduce((sum, ing) => sum + (ing.price || 0), 0) / ingredientCount)
-          : 0;
-        
+        const avgPrice =
+          ingredientCount > 0
+            ? formula.ingredients.reduce(
+                (sum, ing) => sum + (ing.price || 0),
+                0
+              ) / ingredientCount
+            : 0;
+
         return (
           <ListRow
             key={formula.id}
-            title={formula.name || 'Untitled Formula'}
-            subtitle={`v${formula.version || '1.0'} • ${formula.category || 'Unknown'} • ${ingredientCount} ingredients`}
+            title={formula.name || "Untitled Formula"}
+            subtitle={`v${formula.version || "1.0"} • ${
+              formula.category || "Unknown"
+            } • ${ingredientCount} ingredients`}
             price={`$${avgPrice.toFixed(2)}/kg`}
             badge={
-              <Badge variant={getStatusVariant(formula.status || 'draft')} size="sm">
-                {formula.status || 'draft'}
+              <Badge
+                variant={getStatusVariant(formula.status || "draft")}
+                size="sm"
+              >
+                {formula.status || "draft"}
               </Badge>
             }
             selected={selectedFormulas.includes(formula.id)}
