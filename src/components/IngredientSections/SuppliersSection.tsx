@@ -1,105 +1,116 @@
-
-import Badge from '../Badge';
-import type { Ingredient } from '../services/pega'';
+import Badge from "../Badge";
+import type { Ingredient } from "../../services/pega";
 
 interface SuppliersSectionProps {
   ingredient: Ingredient;
 }
 
-const SuppliersSection = ({ ingredient }: SuppliersSectionProps) => {
+const SuppliersSection = ({ ingredient: _ingredient }: SuppliersSectionProps) => {
   // Mock suppliers data
   const mockSuppliers = [
     {
-      id: 'SUP001',
-      name: 'Givaudan',
-      status: 'Preferred',
-      price: 23.40,
-      currency: 'USD',
-      unit: 'kg',
-      leadTime: '2-3 weeks',
-      minOrder: '25 kg',
-      lastOrder: '2024-01-15',
-      quality: 'Premium',
-      certifications: ['ISO 9001', 'IFRA', 'Kosher'],
+      id: "SUP001",
+      name: "Givaudan",
+      status: "Preferred",
+      price: 23.4,
+      currency: "USD",
+      unit: "kg",
+      leadTime: "2-3 weeks",
+      minOrder: "25 kg",
+      lastOrder: "2024-01-15",
+      quality: "Premium",
+      certifications: ["ISO 9001", "IFRA", "Kosher"],
       contact: {
-        name: 'Sarah Johnson',
-        email: 'sarah.johnson@givaudan.com',
-        phone: '+1-555-0123'
-      }
+        name: "Sarah Johnson",
+        email: "sarah.johnson@givaudan.com",
+        phone: "+1-555-0123",
+      },
     },
     {
-      id: 'SUP002',
-      name: 'Firmenich',
-      status: 'Approved',
-      price: 22.80,
-      currency: 'USD',
-      unit: 'kg',
-      leadTime: '3-4 weeks',
-      minOrder: '50 kg',
-      lastOrder: '2023-12-10',
-      quality: 'Standard',
-      certifications: ['ISO 9001', 'REACH'],
+      id: "SUP002",
+      name: "Firmenich",
+      status: "Approved",
+      price: 22.8,
+      currency: "USD",
+      unit: "kg",
+      leadTime: "3-4 weeks",
+      minOrder: "50 kg",
+      lastOrder: "2023-12-10",
+      quality: "Standard",
+      certifications: ["ISO 9001", "REACH"],
       contact: {
-        name: 'Michael Chen',
-        email: 'michael.chen@firmenich.com',
-        phone: '+1-555-0124'
-      }
+        name: "Michael Chen",
+        email: "michael.chen@firmenich.com",
+        phone: "+1-555-0124",
+      },
     },
     {
-      id: 'SUP003',
-      name: 'IFF',
-      status: 'Alternative',
-      price: 24.10,
-      currency: 'USD',
-      unit: 'kg',
-      leadTime: '1-2 weeks',
-      minOrder: '10 kg',
-      lastOrder: '2023-11-20',
-      quality: 'Premium',
-      certifications: ['ISO 9001', 'IFRA', 'Halal', 'Kosher'],
+      id: "SUP003",
+      name: "IFF",
+      status: "Alternative",
+      price: 24.1,
+      currency: "USD",
+      unit: "kg",
+      leadTime: "1-2 weeks",
+      minOrder: "10 kg",
+      lastOrder: "2023-11-20",
+      quality: "Premium",
+      certifications: ["ISO 9001", "IFRA", "Halal", "Kosher"],
       contact: {
-        name: 'Emma Rodriguez',
-        email: 'emma.rodriguez@iff.com',
-        phone: '+1-555-0125'
-      }
-    }
+        name: "Emma Rodriguez",
+        email: "emma.rodriguez@iff.com",
+        phone: "+1-555-0125",
+      },
+    },
   ];
 
   const getStatusVariant = (status: string) => {
     const statusMap = {
-      'Preferred': 'success',
-      'Approved': 'info',
-      'Alternative': 'warning',
-      'Inactive': 'default'
+      Preferred: "success",
+      Approved: "info",
+      Alternative: "warning",
+      Inactive: "default",
     } as const;
-    
-    return statusMap[status as keyof typeof statusMap] || 'default';
+
+    return statusMap[status as keyof typeof statusMap] || "default";
   };
 
   const getQualityVariant = (quality: string) => {
-    return quality === 'Premium' ? 'purple' : 'default';
+    return quality === "Premium" ? "purple" : "default";
   };
 
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Available Suppliers</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          Available Suppliers
+        </h3>
         <div className="space-y-4">
           {mockSuppliers.map((supplier) => (
-            <div key={supplier.id} className="border border-gray-200 rounded-lg p-4">
+            <div
+              key={supplier.id}
+              className="border border-gray-200 rounded-lg p-4"
+            >
               {/* Supplier Header */}
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <div className="flex items-center space-x-3 mb-2">
-                    <h4 className="text-lg font-medium text-gray-900">{supplier.name}</h4>
+                    <h4 className="text-lg font-medium text-gray-900">
+                      {supplier.name}
+                    </h4>
                     <Badge variant={getStatusVariant(supplier.status)}>
                       {supplier.status}
                     </Badge>
-                    <Badge variant={getQualityVariant(supplier.quality)} size="sm">
+                    <Badge
+                      variant={getQualityVariant(supplier.quality)}
+                      size="sm"
+                    >
                       {supplier.quality}
                     </Badge>
                   </div>
-                  <p className="text-sm text-gray-600">Supplier ID: {supplier.id}</p>
+                  <p className="text-sm text-gray-600">
+                    Supplier ID: {supplier.id}
+                  </p>
                 </div>
                 <div className="text-right">
                   <p className="text-lg font-semibold text-gray-900">
@@ -133,7 +144,9 @@ const SuppliersSection = ({ ingredient }: SuppliersSectionProps) => {
                   <label className="block text-xs font-medium text-gray-500 mb-1">
                     Contact
                   </label>
-                  <p className="text-sm text-gray-900">{supplier.contact.name}</p>
+                  <p className="text-sm text-gray-900">
+                    {supplier.contact.name}
+                  </p>
                 </div>
               </div>
 
@@ -159,11 +172,15 @@ const SuppliersSection = ({ ingredient }: SuppliersSectionProps) => {
                 <div className="space-y-1">
                   <div className="flex items-center space-x-2">
                     <i className="ri-mail-line text-gray-400 text-sm"></i>
-                    <span className="text-sm text-gray-700">{supplier.contact.email}</span>
+                    <span className="text-sm text-gray-700">
+                      {supplier.contact.email}
+                    </span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <i className="ri-phone-line text-gray-400 text-sm"></i>
-                    <span className="text-sm text-gray-700">{supplier.contact.phone}</span>
+                    <span className="text-sm text-gray-700">
+                      {supplier.contact.phone}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -186,15 +203,20 @@ const SuppliersSection = ({ ingredient }: SuppliersSectionProps) => {
 
       {/* Supplier Performance */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Supplier Performance</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          Supplier Performance
+        </h3>
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-start">
             <i className="ri-bar-chart-line text-blue-600 mt-0.5 mr-2"></i>
             <div>
-              <p className="text-sm text-blue-800 font-medium">Performance Metrics</p>
+              <p className="text-sm text-blue-800 font-medium">
+                Performance Metrics
+              </p>
               <p className="text-sm text-blue-700 mt-1">
-                Detailed supplier performance analytics including delivery times, quality scores, 
-                and pricing trends would be available through integration with procurement systems.
+                Detailed supplier performance analytics including delivery
+                times, quality scores, and pricing trends would be available
+                through integration with procurement systems.
               </p>
             </div>
           </div>

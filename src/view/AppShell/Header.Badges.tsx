@@ -30,13 +30,13 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
   const getStatusVariant = (status?: string) => {
     switch (status) {
       case "active":
-        return "bg-green-100 text-green-800";
+        return "bg-green-400/30 text-green-300 border border-green-400/50";
       case "draft":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-yellow-400/30 text-yellow-300 border border-yellow-400/50";
       case "archived":
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-400/30 text-gray-300 border border-gray-400/50";
       default:
-        return "bg-blue-100 text-blue-800";
+        return "bg-blue-400/30 text-blue-300 border border-blue-400/50";
     }
   };
 
@@ -55,23 +55,13 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
 
   const badges = [
     {
-      label: "Project",
-      value: "Fragrance Lab Pro",
-      variant: "default" as const,
-    },
-    {
-      label: "Status",
-      value: currentFormula?.status?.toUpperCase() || "NEW",
-      variant: "status" as const,
-    },
-    {
-      label: "Market",
-      value: "EU",
-      variant: "default" as const,
-    },
-    {
       label: "Formula ID",
       value: currentFormula?.id || "-",
+      variant: "default" as const,
+    },
+    {
+      label: "Project",
+      value: "Fragrance Lab Pro",
       variant: "default" as const,
     },
     {
@@ -94,22 +84,27 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
       value: formatDate(currentFormula?.lastUpdated),
       variant: "default" as const,
     },
+    {
+      label: "Status",
+      value: currentFormula?.status?.toUpperCase() || "NEW",
+      variant: "status" as const,
+    },
   ];
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-6">
       {badges.map((badge, index) => (
-        <div key={index} className="flex flex-col items-start gap-1 min-w-0">
-          <span className="text-white/60 text-xs font-medium uppercase tracking-wide">
+        <div key={index} className="flex flex-col items-start gap-0.5 min-w-0">
+          <span className="text-white/50 text-[10px] font-medium uppercase tracking-wider">
             {badge.label}
           </span>
           <div
             className={`
-            px-2.5 py-1 rounded-md text-xs font-semibold whitespace-nowrap
+            whitespace-nowrap
             ${
               badge.variant === "status"
-                ? getStatusVariant(currentFormula?.status)
-                : "bg-white/10 text-white border border-white/20"
+                ? `px-2 py-0.5 rounded-full text-xs font-semibold ${getStatusVariant(currentFormula?.status)}`
+                : "text-sm font-medium text-white"
             }
           `}
           >

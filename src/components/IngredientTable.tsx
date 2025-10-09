@@ -158,7 +158,7 @@ const IngredientTable = ({
         return `$${(value as number).toFixed(2)}`;
       case "mac":
         return value === -1 ? "No limit" : value;
-      case "allergens":
+      case "allergens": {
         const allergens = value as string[];
         return allergens && allergens.length > 0 ? (
           <div className="flex flex-wrap gap-1">
@@ -176,6 +176,7 @@ const IngredientTable = ({
         ) : (
           "-"
         );
+      }
       case "type":
         return (
           <Badge

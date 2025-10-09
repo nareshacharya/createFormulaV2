@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import DataGrid from "../../components/DataGrid";
 import type { Column } from "../../components/DataGrid";
 import FormulaDataGrid from "../../components/FormulaDataGrid";
@@ -23,6 +23,7 @@ const WorkArea = () => {
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [attributes, setAttributes] = useState<IngredientAttribute[]>([]);
   const [showFormulaSelector, setShowFormulaSelector] = useState(false);
+  const formulasAutoLoadedRef = useRef(false); // Use ref instead of state to prevent StrictMode duplicates
   const [showFormulaModal, setShowFormulaModal] = useState(false);
   const [selectedFormulas, setSelectedFormulas] = useState<string[]>([]);
   const [selectedAttributes, setSelectedAttributes] = useState<string[]>([]);
@@ -110,8 +111,9 @@ const WorkArea = () => {
         // Emit available formulas to header
         eventBus.emit("available-formulas-updated", { formulas: formulasData });
 
-        // Auto-load two formulas for testing
-        if (formulasData.length >= 2) {
+        // Auto-load two formulas for testing (only once to prevent StrictMode duplicates)
+        if (formulasData.length >= 2 && !formulasAutoLoadedRef.current) {
+          formulasAutoLoadedRef.current = true; // Set flag to prevent duplicate loading
           const testFormulas = [formulasData[0], formulasData[1]]; // First two formulas
           const formulaColumnIds: string[] = [];
           const selectedIds: string[] = [];
@@ -256,7 +258,8 @@ const WorkArea = () => {
     };
 
     loadData();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty dependency array - formulasAutoLoadedRef doesn't need to be in deps
 
   useEffect(() => {
     const handleIngredientClick = (data: { ingredient: Ingredient }) => {
@@ -526,23 +529,22 @@ const WorkArea = () => {
               else if (data.attribute.id === "ATTR011")
                 sampleValue = Math.floor(Math.random() * 100) + 10; // Price
               else if (data.attribute.id === "ATTR016")
-                sampleValue =
-                  Math.floor(Math.random() * 500) + 50; // Molecular Weight
+                sampleValue = Math.floor(Math.random() * 500) + 50;
+              // Molecular Weight
               else if (data.attribute.id === "ATTR017")
-                sampleValue =
-                  Math.floor(Math.random() * 200) + 100; // Boiling Point
+                sampleValue = Math.floor(Math.random() * 200) + 100;
+              // Boiling Point
               else if (data.attribute.id === "ATTR018")
-                sampleValue =
-                  Math.floor(Math.random() * 100) - 20; // Melting Point
+                sampleValue = Math.floor(Math.random() * 100) - 20;
+              // Melting Point
               else if (data.attribute.id === "ATTR019")
                 sampleValue = (Math.random() * 2 + 0.5).toFixed(2); // Density
               else if (data.attribute.id === "ATTR020")
-                sampleValue = (Math.random() * 0.5 + 1.3).toFixed(
-                  3
-                ); // Refractive Index
+                sampleValue = (Math.random() * 0.5 + 1.3).toFixed(3);
+              // Refractive Index
               else if (data.attribute.id === "ATTR021")
-                sampleValue =
-                  Math.floor(Math.random() * 150) + 50; // Flash Point
+                sampleValue = Math.floor(Math.random() * 150) + 50;
+              // Flash Point
               else if (data.attribute.id === "ATTR025")
                 sampleValue = Math.floor(Math.random() * 36) + 12; // Shelf Life
               else if (data.attribute.id === "ATTR026")
@@ -550,31 +552,26 @@ const WorkArea = () => {
               else if (data.attribute.id === "ATTR027")
                 sampleValue = (Math.random() * 8 + 3).toFixed(1); // pH
               else if (data.attribute.id === "ATTR028")
-                sampleValue =
-                  Math.floor(Math.random() * 1000) + 10; // Solubility
+                sampleValue = Math.floor(Math.random() * 1000) + 10;
+              // Solubility
               else if (data.attribute.id === "ATTR029")
-                sampleValue = (Math.random() * 100).toFixed(
-                  2
-                ); // Vapor Pressure
+                sampleValue = (Math.random() * 100).toFixed(2);
+              // Vapor Pressure
               else if (data.attribute.id === "ATTR030")
-                sampleValue = (Math.random() * 50 + 20).toFixed(
-                  1
-                ); // Surface Tension
+                sampleValue = (Math.random() * 50 + 20).toFixed(1);
+              // Surface Tension
               else if (data.attribute.id === "ATTR031")
-                sampleValue = (Math.random() * 2).toFixed(
-                  3
-                ); // Thermal Conductivity
+                sampleValue = (Math.random() * 2).toFixed(3);
+              // Thermal Conductivity
               else if (data.attribute.id === "ATTR032")
-                sampleValue = (Math.random() * 3 + 1).toFixed(
-                  2
-                ); // Specific Heat
+                sampleValue = (Math.random() * 3 + 1).toFixed(2);
+              // Specific Heat
               else if (data.attribute.id === "ATTR033")
-                sampleValue = (Math.random() * 50 + 2).toFixed(
-                  1
-                ); // Dielectric Constant
+                sampleValue = (Math.random() * 50 + 2).toFixed(1);
+              // Dielectric Constant
               else if (data.attribute.id === "ATTR034")
-                sampleValue =
-                  Math.floor(Math.random() * 20) + 1; // Concentration Limit
+                sampleValue = Math.floor(Math.random() * 20) + 1;
+              // Concentration Limit
               else if (data.attribute.id === "ATTR035")
                 sampleValue = Math.floor(Math.random() * 10) + 90; // Purity
               else sampleValue = Math.floor(Math.random() * 100) + 1;
@@ -831,14 +828,14 @@ const WorkArea = () => {
         handleFormulaSelectedForColumn
       );
     };
-  }, [tableData, columns, editableFormula, ingredients]);
+  }, []); // Empty dependency array to prevent re-registration
 
   const handleLoadFormulaFromModal = (formula: Formula) => {
     // Load formula ingredients into the work area
     const formulaIngredients = formula.ingredients.map((ing, index) => ({
       id: `formula_ing_${index}`,
       description: ing.name,
-      costKg: ing.price || 0,
+      costKg: 0, // Price not available in FormulaIngredient
       contCost: 0.0,
       isTotal: false,
     }));
@@ -1161,7 +1158,7 @@ const WorkArea = () => {
       if (!formula) return prev;
 
       // Remove the formula group and its nested ingredients
-      let newData = prev.filter(
+      const newData = prev.filter(
         (row) =>
           !(row.isFormula && row.formulaId === formulaId) &&
           row.parentFormulaId !== formulaId

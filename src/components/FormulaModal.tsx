@@ -1,7 +1,6 @@
 import { useState } from "react";
 import Modal from "./Modal";
 import Button from "./Button";
-import Badge from "./Badge";
 import PillTabs from "./PillTabs";
 import FormulaDataGrid from "./FormulaDataGrid";
 import type { Formula } from "../services/pega";
@@ -81,7 +80,6 @@ const FormulaModal = ({
       lastUpdated: new Date().toISOString().split("T")[0],
       category: newFormulaData.category,
       totalPercentage: 0,
-      costPerKg: 0,
       description: newFormulaData.description,
       ingredients: [],
       notes: {

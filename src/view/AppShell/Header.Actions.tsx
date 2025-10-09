@@ -1,7 +1,7 @@
 
 const HeaderActions = () => {
   return (
-    <div className="flex items-center">
+    <div className="flex items-center gap-4">
       {/* Action Icons */}
       <div className="flex items-center gap-1">
         <button
@@ -35,9 +35,6 @@ const HeaderActions = () => {
           <i className="ri-more-2-line text-white text-sm"></i>
         </button>
       </div>
-      
-      {/* Divider */}
-      <div className="w-px h-6 bg-purple-600 mx-3"></div>
       
       {/* Primary Action */}
       <button

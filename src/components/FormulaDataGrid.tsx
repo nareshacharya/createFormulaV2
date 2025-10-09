@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import type { Formula } from "../services/pega";
 import Badge from "./Badge";
-import SearchBar from "./SearchBar";
+// import SearchBar from "./SearchBar";
 
 interface FormulaDataGridProps {
   formulas: Formula[];
@@ -44,7 +44,7 @@ const FormulaDataGrid = ({
     return (
       formula.name?.toLowerCase().includes(lower) ||
       formula.version?.toLowerCase().includes(lower) ||
-      formula.formulaId?.toLowerCase().includes(lower) ||
+      formula.id?.toLowerCase().includes(lower) ||
       formula.category?.toLowerCase().includes(lower)
     );
   });
@@ -192,8 +192,21 @@ const FormulaDataGrid = ({
         );
       case "costPerKg":
         return typeof value === "number" ? `$${value.toFixed(2)}` : "-";
+      case "ingredients":
+        return Array.isArray(value) ? `${value.length} ingredients` : "-";
+      case "notes":
+        if (value && typeof value === "object" && "top" in value) {
+          const notes = value as any;
+          return `Top: ${notes.top?.length || 0}, Mid: ${
+            notes.middle?.length || 0
+          }, Base: ${notes.base?.length || 0}`;
+        }
+        return "-";
       default:
-        return value ?? "-";
+        if (Array.isArray(value)) {
+          return value.join(", ");
+        }
+        return String(value ?? "-");
     }
   };
 

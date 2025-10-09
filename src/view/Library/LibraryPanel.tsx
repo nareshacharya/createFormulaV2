@@ -246,7 +246,7 @@ const LibraryPanel = () => {
 
       {/* Content */}
       <div className="flex-1 overflow-hidden">
-        <div className="flex-1 overflow-auto px-4 pb-4">
+        <div className="flex-1 overflow-auto px-0 pb-4">
           {activeTab === "ingredients" && (
             <IngredientList
               ingredients={filteredIngredients}
@@ -261,7 +261,8 @@ const LibraryPanel = () => {
               formulas={filteredFormulas}
               searchQuery={searchQuery}
               onFormulaSelect={handleFormulaSelect}
-              selectedFormulas={selectedFormulaIds} // Pass selected formula IDs
+              selectedFormulas={selectedFormulaIds}
+              onSelectionChange={setSelectedFormulaIds}
             />
           )}
 

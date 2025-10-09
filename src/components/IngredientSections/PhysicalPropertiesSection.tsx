@@ -1,45 +1,71 @@
-
-import type { Ingredient } from '../services/pega'';
+import type { Ingredient } from "../../services/pega";
 
 interface PhysicalPropertiesSectionProps {
   ingredient: Ingredient;
 }
 
-const PhysicalPropertiesSection = ({ ingredient }: PhysicalPropertiesSectionProps) => {
+const PhysicalPropertiesSection = ({
+  ingredient: _ingredient,
+}: PhysicalPropertiesSectionProps) => {
   // Mock physical properties data
   const mockData = {
-    appearance: 'Colorless to pale yellow liquid',
-    odor: 'Fresh, citrusy, bergamot-like',
-    density: '0.876 g/cm³ at 20°C',
-    boilingPoint: '176°C',
-    meltingPoint: '-96°C',
-    flashPoint: '48°C',
-    solubility: 'Insoluble in water, soluble in alcohol and oils',
-    refractiveIndex: '1.474 at 20°C',
-    opticalRotation: '+15° to +25°',
-    viscosity: '1.2 cP at 20°C'
+    appearance: "Colorless to pale yellow liquid",
+    odor: "Fresh, citrusy, bergamot-like",
+    density: "0.876 g/cm³ at 20°C",
+    boilingPoint: "176°C",
+    meltingPoint: "-96°C",
+    flashPoint: "48°C",
+    solubility: "Insoluble in water, soluble in alcohol and oils",
+    refractiveIndex: "1.474 at 20°C",
+    opticalRotation: "+15° to +25°",
+    viscosity: "1.2 cP at 20°C",
   };
 
   const properties = [
-    { label: 'Appearance', value: mockData.appearance, icon: 'ri-eye-line' },
-    { label: 'Odor', value: mockData.odor, icon: 'ri-nose-line' },
-    { label: 'Density', value: mockData.density, icon: 'ri-scales-3-line' },
-    { label: 'Boiling Point', value: mockData.boilingPoint, icon: 'ri-temp-hot-line' },
-    { label: 'Melting Point', value: mockData.meltingPoint, icon: 'ri-temp-cold-line' },
-    { label: 'Flash Point', value: mockData.flashPoint, icon: 'ri-fire-line' },
-    { label: 'Solubility', value: mockData.solubility, icon: 'ri-drop-line' },
-    { label: 'Refractive Index', value: mockData.refractiveIndex, icon: 'ri-focus-3-line' },
-    { label: 'Optical Rotation', value: mockData.opticalRotation, icon: 'ri-refresh-line' },
-    { label: 'Viscosity', value: mockData.viscosity, icon: 'ri-water-percent-line' }
+    { label: "Appearance", value: mockData.appearance, icon: "ri-eye-line" },
+    { label: "Odor", value: mockData.odor, icon: "ri-nose-line" },
+    { label: "Density", value: mockData.density, icon: "ri-scales-3-line" },
+    {
+      label: "Boiling Point",
+      value: mockData.boilingPoint,
+      icon: "ri-temp-hot-line",
+    },
+    {
+      label: "Melting Point",
+      value: mockData.meltingPoint,
+      icon: "ri-temp-cold-line",
+    },
+    { label: "Flash Point", value: mockData.flashPoint, icon: "ri-fire-line" },
+    { label: "Solubility", value: mockData.solubility, icon: "ri-drop-line" },
+    {
+      label: "Refractive Index",
+      value: mockData.refractiveIndex,
+      icon: "ri-focus-3-line",
+    },
+    {
+      label: "Optical Rotation",
+      value: mockData.opticalRotation,
+      icon: "ri-refresh-line",
+    },
+    {
+      label: "Viscosity",
+      value: mockData.viscosity,
+      icon: "ri-water-percent-line",
+    },
   ];
 
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Physical Properties</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          Physical Properties
+        </h3>
         <div className="space-y-4">
           {properties.map((property) => (
-            <div key={property.label} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+            <div
+              key={property.label}
+              className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg"
+            >
               <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                 <i className={`${property.icon} text-blue-600 text-sm`}></i>
               </div>
@@ -56,14 +82,21 @@ const PhysicalPropertiesSection = ({ ingredient }: PhysicalPropertiesSectionProp
 
       {/* Safety Information */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Safety & Handling</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          Safety & Handling
+        </h3>
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
           <div className="flex items-start">
             <i className="ri-alert-line text-yellow-600 mt-0.5 mr-2"></i>
             <div>
-              <p className="text-sm text-yellow-800 font-medium">Safety Considerations</p>
+              <p className="text-sm text-yellow-800 font-medium">
+                Safety Considerations
+              </p>
               <ul className="text-sm text-yellow-700 mt-2 space-y-1">
-                <li>• Flash point: {mockData.flashPoint} - Keep away from heat sources</li>
+                <li>
+                  • Flash point: {mockData.flashPoint} - Keep away from heat
+                  sources
+                </li>
                 <li>• Store in cool, dry place away from direct sunlight</li>
                 <li>• Use appropriate ventilation when handling</li>
                 <li>• Avoid contact with eyes and skin</li>
@@ -75,9 +108,13 @@ const PhysicalPropertiesSection = ({ ingredient }: PhysicalPropertiesSectionProp
 
       {/* Test Methods */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Test Methods</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          Test Methods
+        </h3>
         <div className="bg-gray-50 rounded-lg p-4">
-          <p className="text-sm text-gray-600 mb-3">Standard test methods used for property determination:</p>
+          <p className="text-sm text-gray-600 mb-3">
+            Standard test methods used for property determination:
+          </p>
           <ul className="text-sm text-gray-700 space-y-1">
             <li>• Density: ASTM D4052</li>
             <li>• Refractive Index: ASTM D1218</li>

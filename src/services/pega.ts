@@ -74,7 +74,7 @@ export class PegaService {
   static async getFormulas(filters?: any): Promise<Formula[]> {
     // TODO: Replace with actual API call
     const { mockFormulas } = await import('../mocks/formulas');
-    return mockFormulas;
+    return mockFormulas as any;
   }
 
   static async getIngredientAttributes(): Promise<IngredientAttribute[]> {
@@ -85,7 +85,7 @@ export class PegaService {
 
   static async searchIngredients(query: string, type?: string): Promise<Ingredient[]> {
     // TODO: Replace with actual API call
-    return mockIngredients.filter(ingredient => 
+    return mockIngredients.filter(ingredient =>
       ingredient.name.toLowerCase().includes(query.toLowerCase()) &&
       (!type || ingredient.type === type)
     );
@@ -94,16 +94,16 @@ export class PegaService {
   static async searchFormulas(query: string, filters?: any): Promise<Formula[]> {
     // TODO: Replace with actual API call
     const { mockFormulas } = await import('../mocks/formulas');
-    return mockFormulas.filter(formula => 
+    return mockFormulas.filter(formula =>
       formula.name.toLowerCase().includes(query.toLowerCase()) ||
       formula.description.toLowerCase().includes(query.toLowerCase())
-    );
+    ) as any;
   }
 
   static async searchAttributes(query: string, filters?: any): Promise<IngredientAttribute[]> {
     // TODO: Replace with actual API call
     const { mockIngredientAttributes } = await import('../mocks/ingredientAttributes');
-    return mockIngredientAttributes.filter(attribute => 
+    return mockIngredientAttributes.filter(attribute =>
       attribute.name.toLowerCase().includes(query.toLowerCase()) ||
       attribute.description.toLowerCase().includes(query.toLowerCase())
     );
@@ -118,7 +118,7 @@ export class PegaService {
     // TODO: Replace with actual API call
     const { mockFormulas } = await import('../mocks/formulas');
     const existing = mockFormulas.find(f => f.id === id);
-    return { ...existing!, ...updates };
+    return { ...existing!, ...updates } as any;
   }
 }
 

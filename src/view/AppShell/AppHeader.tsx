@@ -82,16 +82,13 @@ const AppHeader = () => {
 
   return (
     <div className="w-full bg-purple-800 border-b border-purple-700 relative z-1">
-      {/* Purple bar */}
-      <div className="h-1 bg-purple-600 w-full"></div>
-
       {/* Header content */}
       <header
         className={`${headerTokens.height} ${headerTokens.padding} flex items-center justify-between w-full`}
       >
         <HeaderBadges activeFormula={activeFormula} />
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center gap-4">
           {/* Formula Actions */}
           <div className="flex items-center gap-1">
             <button

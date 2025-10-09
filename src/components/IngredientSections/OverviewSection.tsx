@@ -1,6 +1,5 @@
-
-import Badge from '../Badge';
-import type { Ingredient } from '../services/pega'';
+import Badge from "../Badge";
+import type { Ingredient } from "../../services/pega";
 
 interface OverviewSectionProps {
   ingredient: Ingredient;
@@ -9,12 +8,13 @@ interface OverviewSectionProps {
 const OverviewSection = ({ ingredient }: OverviewSectionProps) => {
   // Mock additional data that would come from API
   const mockData = {
-    description: 'A natural essential oil extracted from bergamot citrus fruit, commonly used in perfumery for its fresh, citrusy, and slightly floral aroma.',
-    odorProfile: ['Fresh', 'Citrus', 'Floral'],
-    volatility: 'Top Note',
-    strength: 'Medium',
-    lastUpdated: '2024-01-15',
-    createdBy: 'John Smith'
+    description:
+      "A natural essential oil extracted from bergamot citrus fruit, commonly used in perfumery for its fresh, citrusy, and slightly floral aroma.",
+    odorProfile: ["Fresh", "Citrus", "Floral"],
+    volatility: "Top Note",
+    strength: "Medium",
+    lastUpdated: "2024-01-15",
+    createdBy: "John Smith",
   };
 
   const getStatusBadge = () => {
@@ -25,13 +25,13 @@ const OverviewSection = ({ ingredient }: OverviewSectionProps) => {
 
   const getTypeBadge = () => {
     const variants = {
-      natural: 'success',
-      synthetic: 'info',
-      base: 'warning'
+      natural: "success",
+      synthetic: "info",
+      base: "warning",
     } as const;
-    
+
     return (
-      <Badge variant={variants[ingredient.type] || 'default'}>
+      <Badge variant={variants[ingredient.type] || "default"}>
         {ingredient.type.charAt(0).toUpperCase() + ingredient.type.slice(1)}
       </Badge>
     );
@@ -41,7 +41,9 @@ const OverviewSection = ({ ingredient }: OverviewSectionProps) => {
     <div className="space-y-6">
       {/* Basic Info */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          Basic Information
+        </h3>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -71,7 +73,9 @@ const OverviewSection = ({ ingredient }: OverviewSectionProps) => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Cost per {ingredient.unit}
             </label>
-            <p className="text-sm text-gray-900 font-medium">${ingredient.price.toFixed(2)}</p>
+            <p className="text-sm text-gray-900 font-medium">
+              ${ingredient.price.toFixed(2)}
+            </p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -84,13 +88,19 @@ const OverviewSection = ({ ingredient }: OverviewSectionProps) => {
 
       {/* Description */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Description</h3>
-        <p className="text-sm text-gray-700 leading-relaxed">{mockData.description}</p>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          Description
+        </h3>
+        <p className="text-sm text-gray-700 leading-relaxed">
+          {mockData.description}
+        </p>
       </div>
 
       {/* Olfactory Properties */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Olfactory Properties</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          Olfactory Properties
+        </h3>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -108,7 +118,9 @@ const OverviewSection = ({ ingredient }: OverviewSectionProps) => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Volatility
             </label>
-            <Badge variant="purple" size="sm">{mockData.volatility}</Badge>
+            <Badge variant="purple" size="sm">
+              {mockData.volatility}
+            </Badge>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">

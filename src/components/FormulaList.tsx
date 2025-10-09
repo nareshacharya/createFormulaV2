@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { Formula } from "../services/pega";
 import ListRow from "./ListRow";
 import Badge from "./Badge";
@@ -6,9 +6,11 @@ import { eventBus } from "../utils/bus";
 
 interface FormulaListProps {
   formulas: Formula[];
-  searchTerm: string;
+  searchTerm?: string;
+  searchQuery?: string;
   selectedFormulas: string[];
   onSelectionChange: (selectedIds: string[]) => void;
+  onFormulaSelect?: (formula: Formula) => void;
 }
 
 const FormulaList = ({
@@ -80,13 +82,7 @@ const FormulaList = ({
         if (!formula || !formula.id) return null;
 
         const ingredientCount = formula.ingredients?.length || 0;
-        const avgPrice =
-          ingredientCount > 0
-            ? formula.ingredients.reduce(
-                (sum, ing) => sum + (ing.price || 0),
-                0
-              ) / ingredientCount
-            : 0;
+        const avgPrice = 0; // Price calculation disabled as FormulaIngredient doesn't have price
 
         return (
           <ListRow
