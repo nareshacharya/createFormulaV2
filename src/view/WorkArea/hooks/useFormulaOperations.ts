@@ -1,0 +1,188 @@
+import type { Dispatch, SetStateAction } from "react";
+import toast from "react-hot-toast";
+import type { Column } from "../../../components/DataGrid";
+import type { Formula, Ingredient } from "../../../services/pega";
+import { calculateTotals } from "../../../utils/formulaCalculations";
+
+interface UseFormulaOperationsProps {
+    columns: Column[];
+    editableFormula: string;
+    formulas: Formula[];
+    ingredients: Ingredient[];
+    setTableData: Dispatch<SetStateAction<any[]>>;
+}
+
+export const useFormulaOperations = ({
+    columns,
+    editableFormula,
+    formulas,
+    ingredients,
+    setTableData,
+}: UseFormulaOperationsProps) => {
+    const handleNormalize = () => {
+        if (!editableFormula) {
+            toast.error("No active formula to normalize");
+            return;
+        }
+
+        setTableData((prev) => {
+            const targetTotalRow = prev.find(
+                (row) => row.isTotal && row.totalType === "target"
+            );
+            const runningTotalRow = prev.find(
+                (row) => row.isTotal && row.totalType === "running"
+            );
+
+            if (!targetTotalRow || !runningTotalRow) {
+                toast.error("Could not find target or running total");
+                return prev;
+            }
+
+            const targetTotal = targetTotalRow[editableFormula];
+            const runningTotal = runningTotalRow[editableFormula];
+
+            if (!targetTotal || !runningTotal || runningTotal === 0) {
+                toast.error("Invalid target or running total");
+                return prev;
+            }
+
+            const adjustmentFactor = targetTotal / runningTotal;
+
+            const newData = prev.map((row) => {
+                if (!row.isTotal && !row.isFormula) {
+                    const currentValue = row[editableFormula] || 0;
+                    const newValue = parseFloat(
+                        (currentValue * adjustmentFactor).toFixed(2)
+                    );
+                    return { ...row, [editableFormula]: newValue };
+                }
+                return row;
+            });
+
+            const finalData = calculateTotals(newData, columns);
+
+            toast.success(`Formula normalized to ${targetTotal.toFixed(2)}%`);
+            return finalData;
+        });
+    };
+
+    const handleMergeDuplicates = () => {
+        setTableData((prev) => {
+            const ingredientRows = prev.filter((row) => !row.isTotal);
+
+            const grouped = new Map<string, any[]>();
+            ingredientRows.forEach((row) => {
+                const key = row.description.toLowerCase().trim();
+                if (!grouped.has(key)) {
+                    grouped.set(key, []);
+                }
+                grouped.get(key)!.push(row);
+            });
+
+            const mergedRows: any[] = [];
+            let mergedCount = 0;
+
+            grouped.forEach((rows) => {
+                if (rows.length === 1) {
+                    mergedRows.push(rows[0]);
+                } else {
+                    mergedCount += rows.length - 1;
+                    const mergedRow = { ...rows[0] };
+
+                    const formulaColumns = columns.filter(
+                        (col) => col.group === "Formulas" && col.formulaId
+                    );
+
+                    formulaColumns.forEach((col) => {
+                        const total = rows.reduce((sum, row) => {
+                            const value = parseFloat(row[col.key]) || 0;
+                            return sum + value;
+                        }, 0);
+                        mergedRow[col.key] = parseFloat(total.toFixed(2));
+                    });
+
+                    mergedRows.push(mergedRow);
+                }
+            });
+
+            if (mergedCount === 0) {
+                toast.error("No duplicate ingredients found");
+                return prev;
+            }
+
+            const finalData = calculateTotals(mergedRows, columns);
+
+            toast.success(
+                `Merged ${mergedCount} duplicate ingredient${mergedCount > 1 ? "s" : ""
+                }`
+            );
+            return finalData;
+        });
+    };
+
+    const handleExplodeFormula = (formulaId: string) => {
+        setTableData((prev) => {
+            const formula = formulas.find((f) => f.id === formulaId);
+            if (!formula) return prev;
+
+            const formulaGroupRow = prev.find(
+                (row) => row.isFormula && row.formulaId === formulaId
+            );
+
+            if (!formulaGroupRow) return prev;
+
+            const percentage = formulaGroupRow[editableFormula] || 100;
+            const multiplier = percentage / 100;
+
+            const newData = prev.filter(
+                (row) =>
+                    !(row.isFormula && row.formulaId === formulaId) &&
+                    row.parentFormulaId !== formulaId
+            );
+
+            const totalIndex = newData.findIndex((row) => row.isTotal);
+            const insertIndex = totalIndex !== -1 ? totalIndex : newData.length;
+
+            const formulaColumns = columns.filter(
+                (col) => col.group === "Formulas" && col.type === "number"
+            );
+
+            const individualIngredients = formula.ingredients.map((ing, index) => {
+                const ingredient = ingredients.find((i) => i.id === ing.ingredientId);
+                const rowData: any = {
+                    id: `exploded_ing_${formulaId}_${index}`,
+                    description: ing.name,
+                    costKg: ingredient?.price || 0,
+                    contCost: 0.0,
+                    isTotal: false,
+                    isFormula: false,
+                    level: 0,
+                };
+
+                formulaColumns.forEach((col) => {
+                    if (col.id === editableFormula) {
+                        rowData[col.key] = parseFloat((ing.percentage * multiplier).toFixed(2));
+                    } else {
+                        rowData[col.key] = 0;
+                    }
+                });
+
+                return rowData;
+            });
+
+            newData.splice(insertIndex, 0, ...individualIngredients);
+
+            toast.success(
+                `Formula "${formula.name}" exploded with ${percentage}% of ingredients`
+            );
+
+            return calculateTotals(newData, columns);
+        });
+    };
+
+    return {
+        handleNormalize,
+        handleMergeDuplicates,
+        handleExplodeFormula,
+    };
+};
