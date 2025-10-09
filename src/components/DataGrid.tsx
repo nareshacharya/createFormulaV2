@@ -30,6 +30,7 @@ interface DataGridProps {
   onSetActiveFormula?: (columnId: string) => void;
   onExplodeFormula?: (formulaId: string) => void;
   onToggleFormulaExpansion?: (formulaId: string) => void;
+  onColumnReorder?: (fromIndex: number, toIndex: number) => void;
   editableFormula?: string;
   className?: string;
   showEmptyState?: boolean;
@@ -46,6 +47,7 @@ const DataGrid = ({
   onSetActiveFormula,
   onExplodeFormula,
   onToggleFormulaExpansion,
+  onColumnReorder,
   editableFormula,
   className = "",
   showEmptyState = false,
@@ -126,6 +128,48 @@ const DataGrid = ({
     setSortConfig({ key: columnId, direction });
   };
 
+  // Sort data based on sortConfig
+  const getSortedData = () => {
+    if (!sortConfig) return data;
+
+    const { key, direction } = sortConfig;
+    const column = columns.find((col) => col.id === key);
+    if (!column) return data;
+
+    // Separate total rows from regular rows
+    const totalRows = data.filter((row) => row.isTotal);
+    const regularRows = data.filter((row) => !row.isTotal);
+
+    // Sort only regular rows
+    const sortedRegularRows = [...regularRows].sort((a, b) => {
+      const aValue = a[column.key];
+      const bValue = b[column.key];
+
+      // Handle null/undefined values
+      if (aValue == null && bValue == null) return 0;
+      if (aValue == null) return direction === "asc" ? 1 : -1;
+      if (bValue == null) return direction === "asc" ? -1 : 1;
+
+      // Sort based on column type
+      if (column.type === "number") {
+        const aNum = typeof aValue === "number" ? aValue : parseFloat(aValue);
+        const bNum = typeof bValue === "number" ? bValue : parseFloat(bValue);
+        return direction === "asc" ? aNum - bNum : bNum - aNum;
+      }
+
+      // Text sorting
+      const aStr = String(aValue).toLowerCase();
+      const bStr = String(bValue).toLowerCase();
+
+      if (aStr < bStr) return direction === "asc" ? -1 : 1;
+      if (aStr > bStr) return direction === "asc" ? 1 : -1;
+      return 0;
+    });
+
+    // Return sorted regular rows followed by total rows
+    return [...sortedRegularRows, ...totalRows];
+  };
+
   const handleCellClick = (
     rowId: string,
     columnId: string,
@@ -188,7 +232,11 @@ const DataGrid = ({
     const draggedCol = columns[draggedColumn];
     const targetCol = columns[columnIndex];
 
-    if (draggedCol?.group === targetCol?.group) {
+    // Only allow drag over for Formula and Attributes groups within the same group
+    if (
+      draggedCol?.group === targetCol?.group &&
+      (draggedCol?.group === "Formulas" || draggedCol?.group === "Attributes")
+    ) {
       setDragOverColumn(columnIndex);
     }
   };
@@ -196,7 +244,17 @@ const DataGrid = ({
   const handleDrop = (e: React.DragEvent, columnIndex: number) => {
     e.preventDefault();
     if (draggedColumn !== null && draggedColumn !== columnIndex) {
-      // onColumnReorder?.(draggedColumn, columnIndex);
+      // Check if columns are in the same group before reordering
+      const draggedCol = columns[draggedColumn];
+      const targetCol = columns[columnIndex];
+
+      // Only allow reordering within Formula and Attributes groups
+      if (
+        draggedCol?.group === targetCol?.group &&
+        (draggedCol?.group === "Formulas" || draggedCol?.group === "Attributes")
+      ) {
+        onColumnReorder?.(draggedColumn, columnIndex);
+      }
     }
     setDraggedColumn(null);
     setDragOverColumn(null);
@@ -551,10 +609,17 @@ const DataGrid = ({
                 <i className="ri-settings-3-line text-gray-400"></i>
               </th>
 
-              {columns.map((column, index) => (
-                <th
-                  key={column.id}
-                  className={`
+              {columns.map((column, index) => {
+                const isDraggable =
+                  column.type !== "add-column" &&
+                  !column.fixed &&
+                  (column.group === "Formulas" ||
+                    column.group === "Attributes");
+
+                return (
+                  <th
+                    key={column.id}
+                    className={`
                     relative px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider
                     cursor-pointer select-none border-r border-gray-200 last:border-r-0
                     ${
@@ -563,133 +628,136 @@ const DataGrid = ({
                         : "bg-gray-50 hover:bg-gray-100"
                     }
                     ${dragOverColumn === index ? "bg-blue-100" : ""}
+                    ${draggedColumn === index ? "opacity-50" : ""}
                     ${column.type === "add-column" ? "bg-gray-100" : ""}
                     ${column.fixed ? "bg-gray-100" : ""}
+                    ${isDraggable ? "cursor-move" : ""}
                   `}
-                  draggable={column.type !== "add-column" && !column.fixed}
-                  onDragStart={(e) => handleDragStart(e, index)}
-                  onDragOver={(e) => handleDragOver(e, index)}
-                  onDrop={(e) => handleDrop(e, index)}
-                  onClick={(e) =>
-                    column.type !== "add-column" &&
-                    !column.fixed &&
-                    handleColumnHeaderClick(e, column.id)
-                  }
-                >
-                  {/* Column header content */}
-                  {column.type === "add-column" ? (
-                    <div className="flex items-center justify-center">
-                      <div className="relative group">
-                        <button
-                          className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded cursor-pointer"
-                          onClick={() =>
-                            handleAddColumn(
-                              column.group === "Formulas"
-                                ? "formula"
-                                : "attribute"
-                            )
-                          }
-                        >
-                          <i className="ri-add-line text-sm"></i>
-                        </button>
-                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                          {column.group === "Formulas"
-                            ? "Add Formula"
-                            : "Add Attribute"}
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <div className="flex flex-col">
-                          <span className="truncate">{column.title}</span>
-                          {column.formulaId && (
-                            <span className="text-xs text-gray-400 font-normal">
-                              {column.formulaId}
-                            </span>
-                          )}
-                        </div>
-                        {column.fixed && (
-                          <i className="ri-lock-line text-xs text-gray-400"></i>
-                        )}
-                        {column.sortable && (
+                    draggable={isDraggable}
+                    onDragStart={(e) => handleDragStart(e, index)}
+                    onDragOver={(e) => handleDragOver(e, index)}
+                    onDrop={(e) => handleDrop(e, index)}
+                    onClick={(e) =>
+                      column.type !== "add-column" &&
+                      !column.fixed &&
+                      handleColumnHeaderClick(e, column.id)
+                    }
+                  >
+                    {/* Column header content */}
+                    {column.type === "add-column" ? (
+                      <div className="flex items-center justify-center">
+                        <div className="relative group">
                           <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleSort(column.id);
-                            }}
-                            className="text-gray-400 hover:text-gray-600"
-                          >
-                            {sortConfig?.key === column.id ? (
-                              sortConfig.direction === "asc" ? (
-                                <i className="ri-arrow-up-line text-xs"></i>
-                              ) : (
-                                <i className="ri-arrow-down-line text-xs"></i>
+                            className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded cursor-pointer"
+                            onClick={() =>
+                              handleAddColumn(
+                                column.group === "Formulas"
+                                  ? "formula"
+                                  : "attribute"
                               )
-                            ) : (
-                              <i className="ri-expand-up-down-line text-xs"></i>
-                            )}
+                            }
+                          >
+                            <i className="ri-add-line text-sm"></i>
                           </button>
-                        )}
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                            {column.group === "Formulas"
+                              ? "Add Formula"
+                              : "Add Attribute"}
+                          </div>
+                        </div>
                       </div>
-
-                      <div className="flex items-center space-x-1">
-                        {/* Actions menu for formula columns */}
-                        {column.id.startsWith("formula") && !column.fixed && (
-                          <div className="relative">
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <div className="flex flex-col">
+                            <span className="truncate">{column.title}</span>
+                            {column.formulaId && (
+                              <span className="text-xs text-gray-400 font-normal">
+                                {column.formulaId}
+                              </span>
+                            )}
+                          </div>
+                          {column.fixed && (
+                            <i className="ri-lock-line text-xs text-gray-400"></i>
+                          )}
+                          {column.sortable && (
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setShowColumnActions(
-                                  showColumnActions === column.id
-                                    ? null
-                                    : column.id
-                                );
+                                handleSort(column.id);
                               }}
-                              className="text-gray-400 hover:text-gray-600 p-1"
+                              className="text-gray-400 hover:text-gray-600"
                             >
-                              <i className="ri-more-2-line text-xs"></i>
+                              {sortConfig?.key === column.id ? (
+                                sortConfig.direction === "asc" ? (
+                                  <i className="ri-arrow-up-line text-xs"></i>
+                                ) : (
+                                  <i className="ri-arrow-down-line text-xs"></i>
+                                )
+                              ) : (
+                                <i className="ri-expand-up-down-line text-xs"></i>
+                              )}
                             </button>
+                          )}
+                        </div>
 
-                            {showColumnActions === column.id && (
-                              <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-20 min-w-32">
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    onSetActiveFormula?.(column.id);
-                                    setShowColumnActions(null);
-                                  }}
-                                  className="w-full px-3 py-2 text-left text-sm text-blue-600 hover:bg-blue-50 flex items-center space-x-2"
-                                >
-                                  <i className="ri-edit-line text-xs"></i>
-                                  <span>Set Active</span>
-                                </button>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    onDeleteColumn?.(column.id);
-                                    setShowColumnActions(null);
-                                  }}
-                                  className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
-                                >
-                                  <i className="ri-delete-bin-line text-xs"></i>
-                                  <span>Delete</span>
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        )}
+                        <div className="flex items-center space-x-1">
+                          {/* Actions menu for formula columns */}
+                          {column.id.startsWith("formula") && !column.fixed && (
+                            <div className="relative">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setShowColumnActions(
+                                    showColumnActions === column.id
+                                      ? null
+                                      : column.id
+                                  );
+                                }}
+                                className="text-gray-400 hover:text-gray-600 p-1"
+                              >
+                                <i className="ri-more-2-line text-xs"></i>
+                              </button>
+
+                              {showColumnActions === column.id && (
+                                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-20 min-w-32">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onSetActiveFormula?.(column.id);
+                                      setShowColumnActions(null);
+                                    }}
+                                    className="w-full px-3 py-2 text-left text-sm text-blue-600 hover:bg-blue-50 flex items-center space-x-2"
+                                  >
+                                    <i className="ri-edit-line text-xs"></i>
+                                    <span>Set Active</span>
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onDeleteColumn?.(column.id);
+                                      setShowColumnActions(null);
+                                    }}
+                                    className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
+                                  >
+                                    <i className="ri-delete-bin-line text-xs"></i>
+                                    <span>Delete</span>
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </th>
-              ))}
+                    )}
+                  </th>
+                );
+              })}
             </tr>
           </thead>
 
           <tbody className="bg-white divide-y divide-gray-200">
-            {data.map((row, rowIndex) => {
+            {getSortedData().map((row, _rowIndex) => {
               // Hide child ingredients if parent formula is collapsed
               const shouldHide =
                 row.parentFormulaId &&

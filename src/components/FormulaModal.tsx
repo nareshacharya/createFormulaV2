@@ -107,7 +107,7 @@ const FormulaModal = ({
   ];
 
   const CreateFormulaForm = () => (
-    <div className="p-6">
+    <div className="px-6 pt-3 pb-6">
       <div className="grid grid-cols-2 gap-6">
         {/* Left Column */}
         <div className="space-y-4">
@@ -231,24 +231,16 @@ const FormulaModal = ({
   );
 
   const SelectFormulaForm = () => (
-    <div className="p-6">
+    <div className="px-6 pt-3 pb-6">
       <div className="space-y-4">
         {remainingSelections > 0 ? (
-          <>
-            <div className="text-sm text-gray-600">
-              Select up to {remainingSelections} formula
-              {remainingSelections !== 1 ? "s" : ""} to add as columns.
-            </div>
-            <div className="max-h-96 overflow-auto">
-              <FormulaDataGrid
-                formulas={availableFormulas}
-                selectedFormulas={selectedFormulas}
-                onSelectionChange={setSelectedFormulas}
-                maxSelections={remainingSelections}
-                highlightedFormulas={selectedFormulaIds} // Pass already selected formulas to highlight
-              />
-            </div>
-          </>
+          <FormulaDataGrid
+            formulas={availableFormulas}
+            selectedFormulas={selectedFormulas}
+            onSelectionChange={setSelectedFormulas}
+            maxSelections={remainingSelections}
+            highlightedFormulas={selectedFormulaIds} // Pass already selected formulas to highlight
+          />
         ) : (
           <div className="text-center py-8">
             <div className="text-gray-500 mb-2">
@@ -319,7 +311,7 @@ const FormulaModal = ({
       footerActions={getFooterActions()}
     >
       <div className="space-y-0">
-        <div className="px-6 pt-6 pb-4">
+        <div className="px-6 pt-6 pb-3">
           <PillTabs
             tabs={tabs}
             activeTab={activeTab}

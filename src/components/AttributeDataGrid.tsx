@@ -49,22 +49,35 @@ const AttributeDataGrid = ({
   }
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Search Bar */}
-      <SearchBar
-        value={searchQuery}
-        onChange={setSearchQuery}
-        placeholder="Search attributes..."
-        className="w-full"
-      />
+    <div className="space-y-4">
+      {/* Header Section - Instruction and Search */}
+      <div className="space-y-3">
+        <p className="text-sm text-gray-600">
+          Select up to {maxSelections} attributes to add as columns. You can
+          select multiple attributes.
+        </p>
 
-      {/* Selection Counter */}
-      <div className="text-sm text-gray-600 text-center">
-        {selectedAttributes.length} of {maxSelections} selected
+        {/* Search Bar */}
+        <SearchBar
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search attributes..."
+          className="w-full"
+        />
+
+        {/* Selection Counter */}
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-gray-500">
+            {filteredAttributes.length} attributes available
+          </span>
+          <span className="font-medium text-blue-600">
+            {selectedAttributes.length} of {maxSelections} selected
+          </span>
+        </div>
       </div>
 
-      {/* Attribute List */}
-      <div className="space-y-3 max-h-96 overflow-y-auto">
+      {/* Attribute List - 3 Column Grid */}
+      <div className="grid grid-cols-3 gap-2 max-h-[400px] overflow-y-auto pr-2">
         {filteredAttributes.map((attribute) => {
           const isSelected = selectedAttributes.includes(attribute.id);
           const isDisabled =
@@ -74,13 +87,13 @@ const AttributeDataGrid = ({
             <label
               key={attribute.id}
               className={`
-                flex items-center space-x-3 p-4 rounded-lg border cursor-pointer transition-all
+                flex items-start space-x-2 p-3 rounded-md border cursor-pointer transition-all
                 ${
                   isSelected
-                    ? "bg-blue-50 border-blue-200"
+                    ? "bg-blue-50 border-blue-300 shadow-sm"
                     : isDisabled
                     ? "bg-gray-50 border-gray-200 opacity-50 cursor-not-allowed"
-                    : "bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300"
+                    : "bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm"
                 }
               `}
             >
@@ -91,12 +104,12 @@ const AttributeDataGrid = ({
                   !isDisabled && handleAttributeToggle(attribute.id)
                 }
                 disabled={isDisabled}
-                className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
+                className="mt-0.5 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-offset-0 disabled:opacity-50 flex-shrink-0 cursor-pointer"
               />
 
               <span
-                className={`text-sm font-medium ${
-                  isSelected ? "text-blue-900" : "text-gray-900"
+                className={`text-sm leading-tight ${
+                  isSelected ? "text-blue-900 font-medium" : "text-gray-700"
                 }`}
               >
                 {attribute.name}
@@ -113,11 +126,6 @@ const AttributeDataGrid = ({
           <p className="text-sm">No attributes found for "{searchQuery}"</p>
         </div>
       )}
-
-      {/* Results Summary */}
-      <div className="text-xs text-gray-500 text-center pt-4 border-t border-gray-200">
-        {filteredAttributes.length} attributes available
-      </div>
     </div>
   );
 };

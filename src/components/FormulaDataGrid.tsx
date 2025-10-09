@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import type { Formula } from "../services/pega";
 import Badge from "./Badge";
-// import SearchBar from "./SearchBar";
+import Alert from "./Alert";
 
 interface FormulaDataGridProps {
   formulas: Formula[];
@@ -152,9 +152,6 @@ const FormulaDataGrid = ({
   const isAllCurrentPageSelected =
     paginatedFormulas.length > 0 &&
     paginatedFormulas.every((f) => selectedFormulas.includes(f.id));
-  const isSomeCurrentPageSelected = paginatedFormulas.some((f) =>
-    selectedFormulas.includes(f.id)
-  );
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -217,33 +214,45 @@ const FormulaDataGrid = ({
   }));
 
   return (
-    <div className="space-y-4">
-      {/* Search bar & selection counter */}
-      <div className="flex items-center justify-between">
-        <div className="relative flex-1 max-w-md">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <i className="ri-search-line text-gray-400 text-sm"></i>
+    <div className="space-y-3">
+      {/* Alert info */}
+      <Alert variant="info">
+        Select up to <strong>{maxSelections}</strong> formulas to compare.
+      </Alert>
+
+      {/* Compact Search and Counter Row */}
+      <div className="flex items-center gap-3">
+        <div className="flex-1">
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <i className="ri-search-line text-gray-400 text-sm"></i>
+            </div>
+            <input
+              type="text"
+              placeholder="Search formulas..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="
+                w-full pl-10 py-2 text-sm border border-gray-300 rounded-md
+                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                placeholder-gray-500
+                pr-4
+              "
+            />
           </div>
-          <input
-            type="text"
-            placeholder="Search formulas..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="
-              w-full pl-10 py-2 text-sm border border-gray-300 rounded-md
-              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-              placeholder-gray-500
-              pr-4
-            "
-          />
         </div>
-        <div className="text-sm text-gray-500">
-          {selectedFormulas.length} of {maxSelections || "unlimited"} selected
+        <div className="flex items-center gap-4 text-xs whitespace-nowrap">
+          <span className="text-gray-500">
+            {filteredFormulas.length} available
+          </span>
+          <span className="font-medium text-blue-600">
+            {selectedFormulas.length} / {maxSelections || "∞"} selected
+          </span>
         </div>
       </div>
 
       {/* Table */}
-      <div className="max-h-80 overflow-y-auto border border-gray-200 rounded-lg">
+      <div className="max-h-96 overflow-y-auto border border-gray-200 rounded-lg">
         <table className="w-full">
           <thead className="bg-gray-50 sticky top-0">
             <tr>
@@ -316,17 +325,15 @@ const FormulaDataGrid = ({
                       disabled={isDisabled}
                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50 cursor-pointer"
                     />
-                    {isHighlighted && (
-                      <div className="text-xs text-yellow-600 mt-1">
-                        Already selected
-                      </div>
-                    )}
                   </td>
                   {displayColumns.map((col) => (
                     <td key={col} className="px-3 py-2 text-sm font-medium">
                       {col === "name" ? (
-                        <span className="font-medium">
+                        <span className="font-medium flex items-center gap-1">
                           {renderCellValue(formula, col)}
+                          {isHighlighted && (
+                            <i className="ri-check-line text-yellow-600 text-base"></i>
+                          )}
                         </span>
                       ) : (
                         renderCellValue(formula, col)
@@ -395,11 +402,6 @@ const FormulaDataGrid = ({
           </div>
         </div>
       )}
-
-      {/* Summary */}
-      <div className="text-xs text-gray-500 text-center">
-        {filteredFormulas.length} formulas found
-      </div>
     </div>
   );
 };

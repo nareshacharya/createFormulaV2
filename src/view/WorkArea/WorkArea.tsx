@@ -2,9 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import DataGrid from "../../components/DataGrid";
 import type { Column } from "../../components/DataGrid";
 import FormulaDataGrid from "../../components/FormulaDataGrid";
-import AttributeDataGrid from "../../components/AttributeDataGrid";
-import FormulaModal from "../../components/FormulaModal";
+import AttributeSelector from "../../components/AttributeSelector";
+import Dialog from "../../components/Dialog";
 import Modal from "../../components/Modal";
+import FormulaModal from "../../components/FormulaModal";
 import Button from "../../components/Button";
 import Badge from "../../components/Badge";
 import { PegaService } from "../../services/pega";
@@ -14,10 +15,8 @@ import type {
   IngredientAttribute,
 } from "../../services/pega";
 import { eventBus } from "../../utils/bus";
-import { useModal } from "../../App";
 
 const WorkArea = () => {
-  const { showModal, hideModal } = useModal();
   const [activeFormula, setActiveFormula] = useState<Formula | null>(null);
   const [availableFormulas, setAvailableFormulas] = useState<Formula[]>([]);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
@@ -912,6 +911,8 @@ const WorkArea = () => {
   };
 
   // Modified handleAddAttributeColumn with max selection logic
+  const [showAttributeDialog, setShowAttributeDialog] = useState(false);
+
   const handleAddAttributeColumn = () => {
     // Check if we've reached the maximum number of attribute columns
     const currentAttributeColumns = columns.filter(
@@ -922,61 +923,7 @@ const WorkArea = () => {
     }
 
     setSelectedAttributes([]);
-
-    const AttributeSelectionModal = () => (
-      <div className="space-y-4">
-        <div className="text-sm text-gray-600">
-          Select up to {maxAttributeSelections} attributes to add as columns.
-          You can select multiple attributes.
-        </div>
-        <div className="max-h-96 overflow-auto">
-          <AttributeDataGrid
-            attributes={attributes}
-            selectedAttributes={selectedAttributes}
-            onSelectionChange={setSelectedAttributes}
-            maxSelections={
-              maxAttributeSelections - currentAttributeColumns.length
-            }
-          />
-        </div>
-      </div>
-    );
-
-    const FooterActions = () => (
-      <div className="flex justify-end space-x-3">
-        <Button
-          variant="outline"
-          onClick={() => {
-            setSelectedAttributes([]);
-            hideModal();
-          }}
-        >
-          Cancel
-        </Button>
-        <Button
-          onClick={handleAddAttributes}
-          disabled={selectedAttributes.length === 0}
-        >
-          Add {selectedAttributes.length} Attribute
-          {selectedAttributes.length !== 1 ? "s" : ""}
-        </Button>
-      </div>
-    );
-
-    showModal(
-      <Modal
-        isOpen={true}
-        onClose={() => {
-          setSelectedAttributes([]);
-          hideModal();
-        }}
-        title="Add Attribute Columns"
-        size="xl"
-        footerActions={<FooterActions />}
-      >
-        <AttributeSelectionModal />
-      </Modal>
-    );
+    setShowAttributeDialog(true);
   };
 
   const handleAddAttributes = () => {
@@ -1047,7 +994,7 @@ const WorkArea = () => {
     });
 
     setSelectedAttributes([]);
-    hideModal();
+    setShowAttributeDialog(false);
   };
 
   const handleRowDelete = (rowId: string) => {
@@ -1150,6 +1097,15 @@ const WorkArea = () => {
         selectedAttributes: newSelectedAttributes,
       });
     }
+  };
+
+  const handleColumnReorder = (fromIndex: number, toIndex: number) => {
+    setColumns((prev) => {
+      const newColumns = [...prev];
+      const [movedColumn] = newColumns.splice(fromIndex, 1);
+      newColumns.splice(toIndex, 0, movedColumn);
+      return newColumns;
+    });
   };
 
   const handleExplodeFormula = (formulaId: string) => {
@@ -1356,6 +1312,7 @@ const WorkArea = () => {
         onSetActiveFormula={handleSetActiveFormula}
         onExplodeFormula={handleExplodeFormula}
         onToggleFormulaExpansion={handleToggleFormulaExpansion}
+        onColumnReorder={handleColumnReorder}
         editableFormula={editableFormula}
         className="h-full"
         showEmptyState={!hasIngredients}
@@ -1417,6 +1374,49 @@ const WorkArea = () => {
           </div>
         </div>
       </Modal>
+
+      {/* Attribute Selection Dialog */}
+      <Dialog
+        isOpen={showAttributeDialog}
+        onClose={() => {
+          setSelectedAttributes([]);
+          setShowAttributeDialog(false);
+        }}
+        title="Add Attribute Columns"
+        size="xl"
+        footer={
+          <>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSelectedAttributes([]);
+                setShowAttributeDialog(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleAddAttributes}
+              disabled={selectedAttributes.length === 0}
+            >
+              Add {selectedAttributes.length} Attribute
+              {selectedAttributes.length !== 1 ? "s" : ""}
+            </Button>
+          </>
+        }
+      >
+        <AttributeSelector
+          attributes={attributes}
+          selectedIds={selectedAttributes}
+          onSelectionChange={setSelectedAttributes}
+          maxSelections={
+            maxAttributeSelections -
+            columns.filter(
+              (col) => col.group === "Attributes" && col.attributeId
+            ).length
+          }
+        />
+      </Dialog>
     </div>
   );
 };
