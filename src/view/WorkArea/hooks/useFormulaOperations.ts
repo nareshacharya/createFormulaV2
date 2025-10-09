@@ -68,7 +68,15 @@ export const useFormulaOperations = ({
 
     const handleMergeDuplicates = () => {
         setTableData((prev) => {
+            // Separate ingredient rows and total rows
             const ingredientRows = prev.filter((row) => !row.isTotal);
+            const totalRows = prev.filter((row) => row.isTotal);
+
+            // Check if we have any total rows to preserve
+            if (totalRows.length === 0) {
+                toast.error("Table structure is incomplete. Please add formulas first.");
+                return prev;
+            }
 
             const grouped = new Map<string, any[]>();
             ingredientRows.forEach((row) => {
@@ -87,8 +95,15 @@ export const useFormulaOperations = ({
                     mergedRows.push(rows[0]);
                 } else {
                     mergedCount += rows.length - 1;
-                    // Start with the first row as base
-                    const mergedRow = { ...rows[0] };
+                    
+                    // Create base merged row with only non-formula properties
+                    const mergedRow: any = {
+                        id: rows[0].id,
+                        description: rows[0].description,
+                        costKg: rows[0].costKg,
+                        isTotal: false,
+                        isFormula: false,
+                    };
 
                     // Get all formula columns
                     const formulaColumns = columns.filter(
@@ -104,11 +119,28 @@ export const useFormulaOperations = ({
                         mergedRow[col.key] = parseFloat(total.toFixed(2));
                     });
 
+                    // Copy any other properties from first row (like level, parentFormulaId, etc.)
+                    Object.keys(rows[0]).forEach((key) => {
+                        if (
+                            key !== 'id' &&
+                            key !== 'description' &&
+                            key !== 'costKg' &&
+                            key !== 'contCost' &&
+                            key !== 'isTotal' &&
+                            key !== 'isFormula' &&
+                            !formulaColumns.find((col) => col.key === key)
+                        ) {
+                            mergedRow[key] = rows[0][key];
+                        }
+                    });
+
                     // Recalculate contribution cost based on active formula
                     if (editableFormula) {
                         const percentage = parseFloat(mergedRow[editableFormula]) || 0;
                         const costPerKg = parseFloat(mergedRow.costKg) || 0;
                         mergedRow.contCost = parseFloat(((percentage * costPerKg) / 1000).toFixed(4));
+                    } else {
+                        mergedRow.contCost = 0;
                     }
 
                     mergedRows.push(mergedRow);
@@ -120,13 +152,14 @@ export const useFormulaOperations = ({
                 return prev;
             }
 
-            const finalData = calculateTotals(mergedRows, columns);
+            // Recalculate totals with merged rows
+            const dataWithRecalculatedTotals = calculateTotals(mergedRows, columns);
 
             toast.success(
                 `Merged ${mergedCount} duplicate ingredient${mergedCount > 1 ? "s" : ""
                 }`
             );
-            return finalData;
+            return dataWithRecalculatedTotals;
         });
     };
 
