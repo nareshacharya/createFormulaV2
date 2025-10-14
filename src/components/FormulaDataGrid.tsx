@@ -331,7 +331,9 @@ const FormulaDataGrid = ({
                         <span className="font-medium flex items-center gap-1.5">
                           {renderCellValue(formula, col)}
                           {isHighlighted && (
-                            <i className={`ri-check-line text-base ${selectionStyles.selected.icon}`}></i>
+                            <i
+                              className={`ri-check-line text-base ${selectionStyles.selected.icon}`}
+                            ></i>
                           )}
                         </span>
                       ) : (

@@ -4,17 +4,17 @@
  */
 
 export interface IngredientCostData {
-  id: string;
-  name: string;
-  amount: number; // Percentage
-  costPerKg: number;
+    id: string;
+    name: string;
+    amount: number; // Percentage
+    costPerKg: number;
 }
 
 export interface AttributeData {
-  id: string;
-  name: string;
-  value: number;
-  amount: number; // Percentage for weighted calculation
+    id: string;
+    name: string;
+    value: number;
+    amount: number; // Percentage for weighted calculation
 }
 
 /**
@@ -25,15 +25,15 @@ export interface AttributeData {
  * @returns Total RMC value
  */
 export function calculateRMC(ingredients: IngredientCostData[]): number {
-  if (!ingredients || ingredients.length === 0) {
-    return 0;
-  }
+    if (!ingredients || ingredients.length === 0) {
+        return 0;
+    }
 
-  const totalCost = ingredients.reduce((sum, ingredient) => {
-    return sum + (ingredient.amount * ingredient.costPerKg) / 100;
-  }, 0);
+    const totalCost = ingredients.reduce((sum, ingredient) => {
+        return sum + (ingredient.amount * ingredient.costPerKg) / 100;
+    }, 0);
 
-  return Number(totalCost.toFixed(4));
+    return Number(totalCost.toFixed(4));
 }
 
 /**
@@ -44,23 +44,23 @@ export function calculateRMC(ingredients: IngredientCostData[]): number {
  * @returns Weighted average value
  */
 export function calculateWeightedAverage(attributes: AttributeData[]): number {
-  if (!attributes || attributes.length === 0) {
-    return 0;
-  }
+    if (!attributes || attributes.length === 0) {
+        return 0;
+    }
 
-  const totalWeightedValue = attributes.reduce((sum, attr) => {
-    return sum + (attr.value * attr.amount);
-  }, 0);
+    const totalWeightedValue = attributes.reduce((sum, attr) => {
+        return sum + (attr.value * attr.amount);
+    }, 0);
 
-  const totalAmount = attributes.reduce((sum, attr) => {
-    return sum + attr.amount;
-  }, 0);
+    const totalAmount = attributes.reduce((sum, attr) => {
+        return sum + attr.amount;
+    }, 0);
 
-  if (totalAmount === 0) {
-    return 0;
-  }
+    if (totalAmount === 0) {
+        return 0;
+    }
 
-  return Number((totalWeightedValue / totalAmount).toFixed(4));
+    return Number((totalWeightedValue / totalAmount).toFixed(4));
 }
 
 /**
@@ -72,7 +72,7 @@ export function calculateWeightedAverage(attributes: AttributeData[]): number {
  * @returns Contribution cost
  */
 export function calculateContributionCost(amount: number, costPerKg: number): number {
-  return Number(((amount * costPerKg) / 100).toFixed(4));
+    return Number(((amount * costPerKg) / 100).toFixed(4));
 }
 
 /**
@@ -84,82 +84,82 @@ export function calculateContributionCost(amount: number, costPerKg: number): nu
  * @returns Map of attribute names to weighted averages
  */
 export function calculateMultipleAttributeAverages(
-  ingredientAttributes: Record<string, Record<string, number>>,
-  amounts: Record<string, number>,
-  attributeNames: string[]
+    ingredientAttributes: Record<string, Record<string, number>>,
+    amounts: Record<string, number>,
+    attributeNames: string[]
 ): Record<string, number> {
-  const results: Record<string, number> = {};
+    const results: Record<string, number> = {};
 
-  attributeNames.forEach((attrName) => {
-    const attrData: AttributeData[] = [];
+    attributeNames.forEach((attrName) => {
+        const attrData: AttributeData[] = [];
 
-    Object.keys(ingredientAttributes).forEach((ingredientId) => {
-      const attributes = ingredientAttributes[ingredientId];
-      const amount = amounts[ingredientId];
+        Object.keys(ingredientAttributes).forEach((ingredientId) => {
+            const attributes = ingredientAttributes[ingredientId];
+            const amount = amounts[ingredientId];
 
-      if (attributes[attrName] !== undefined && amount !== undefined) {
-        attrData.push({
-          id: ingredientId,
-          name: attrName,
-          value: attributes[attrName],
-          amount: amount,
+            if (attributes[attrName] !== undefined && amount !== undefined) {
+                attrData.push({
+                    id: ingredientId,
+                    name: attrName,
+                    value: attributes[attrName],
+                    amount: amount,
+                });
+            }
         });
-      }
+
+        results[attrName] = calculateWeightedAverage(attrData);
     });
 
-    results[attrName] = calculateWeightedAverage(attrData);
-  });
-
-  return results;
+    return results;
 }
 
 /**
  * Validate ingredient data before calculations
  */
 export function validateIngredientData(ingredients: IngredientCostData[]): {
-  isValid: boolean;
-  errors: string[];
+    isValid: boolean;
+    errors: string[];
 } {
-  const errors: string[] = [];
+    const errors: string[] = [];
 
-  if (!ingredients || ingredients.length === 0) {
-    errors.push("No ingredients provided");
-    return { isValid: false, errors };
-  }
+    if (!ingredients || ingredients.length === 0) {
+        errors.push("No ingredients provided");
+        return { isValid: false, errors };
+    }
 
-  ingredients.forEach((ing, index) => {
-    if (ing.amount < 0) {
-      errors.push(`Ingredient ${ing.name} (index ${index}) has negative amount`);
-    }
-    if (ing.costPerKg < 0) {
-      errors.push(`Ingredient ${ing.name} (index ${index}) has negative cost`);
-    }
-    if (!ing.id) {
-      errors.push(`Ingredient at index ${index} is missing ID`);
-    }
-  });
+    ingredients.forEach((ing, index) => {
+        if (ing.amount < 0) {
+            errors.push(`Ingredient ${ing.name} (index ${index}) has negative amount`);
+        }
+        if (ing.costPerKg < 0) {
+            errors.push(`Ingredient ${ing.name} (index ${index}) has negative cost`);
+        }
+        if (!ing.id) {
+            errors.push(`Ingredient at index ${index} is missing ID`);
+        }
+    });
 
-  return {
-    isValid: errors.length === 0,
-    errors,
-  };
+    return {
+        isValid: errors.length === 0,
+        errors,
+    };
 }
 
 /**
  * Format currency value for display
  */
 export function formatCurrency(value: number, currency: string = "USD"): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 4,
-  }).format(value);
+    return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: currency,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 4,
+    }).format(value);
 }
 
 /**
  * Format percentage value for display
  */
 export function formatPercentage(value: number, decimals: number = 2): string {
-  return `${value.toFixed(decimals)}%`;
+    return `${value.toFixed(decimals)}%`;
 }

@@ -117,7 +117,9 @@ const AttributeSelector = ({
                   {attr.name}
                 </span>
                 {isHighlighted && (
-                  <i className={`ri-check-line text-base ${selectionStyles.selected.icon}`}></i>
+                  <i
+                    className={`ri-check-line text-base ${selectionStyles.selected.icon}`}
+                  ></i>
                 )}
               </div>
             </label>

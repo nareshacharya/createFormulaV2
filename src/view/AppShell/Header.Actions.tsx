@@ -29,7 +29,10 @@ const HeaderActions = () => {
       setAvailableFormulas(data.formulas);
     };
 
-    const handleUndoStateUpdate = (data: { canUndo: boolean; count: number }) => {
+    const handleUndoStateUpdate = (data: {
+      canUndo: boolean;
+      count: number;
+    }) => {
       setCanUndo(data.canUndo);
       setUndoCount(data.count);
     };
@@ -93,7 +96,9 @@ const HeaderActions = () => {
 
   const handleSendForCompounding = () => {
     if (!hasActiveFormula) {
-      toast.error("Please select an active formula before sending for compounding");
+      toast.error(
+        "Please select an active formula before sending for compounding"
+      );
       return;
     }
     eventBus.emit("send-for-compounding");
