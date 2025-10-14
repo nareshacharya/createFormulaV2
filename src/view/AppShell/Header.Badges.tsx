@@ -94,16 +94,22 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
   return (
     <div className="flex items-center gap-6">
       {/* Formula Metrics Container - Project Name, Formula Info, Status, Lines, and Costs */}
-      <div className="relative flex items-center gap-3 px-4 py-2 rounded-lg bg-purple-900/50" ref={dropdownRef}>
+      <div
+        className="relative flex items-center gap-3 px-4 py-1 rounded-lg bg-purple-900/50"
+        ref={dropdownRef}
+      >
         {/* Project Name with Dropdown */}
         <div className="relative">
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             className="flex items-center gap-2 hover:opacity-80 transition-opacity"
           >
-            <div className="flex flex-col gap-0.5">
-              <span className="text-xs text-white/50 font-medium">Project</span>
-              <span className="text-sm font-semibold text-white">
+            <i className="ri-folder-3-line text-purple-300 text-xl"></i>
+            <div className="flex flex-col gap-0.5 items-start">
+              <span className="text-xs text-white/50 font-medium text-left">
+                Project
+              </span>
+              <span className="text-sm font-semibold text-white text-left">
                 {currentFormula?.projectName || "Fragrance Lab Pro"}
               </span>
             </div>
@@ -146,75 +152,87 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
         </div>
 
         {/* Vertical Divider */}
-        <div className="w-px h-12 bg-purple-600/50"></div>
+        <div className="w-px h-10 bg-purple-600/50"></div>
 
         {/* Formula Name & ID */}
-        <div className="flex flex-col">
-          <span className="text-xs text-white/50 font-medium">Formula</span>
-          <span className="text-sm font-semibold text-white">
-            {currentFormula?.name || "-"}
-          </span>
-          <span className="text-xs text-white/40">
-            {currentFormula?.id || "-"}
-          </span>
-        </div>
-
-        {/* Vertical Divider */}
-        <div className="w-px h-12 bg-purple-600/50"></div>
-
-        {/* Status */}
-        <div className="flex flex-col items-center justify-center">
-          <span className="text-xs text-white/50 font-medium mb-1">Status</span>
-          <div
-            className={`px-2 py-0.5 rounded-full text-xs font-semibold ${getStatusVariant(
-              currentFormula?.status
-            )}`}
-          >
-            {currentFormula?.status?.toUpperCase() || "NEW"}
+        <div className="flex items-center gap-2">
+          <i className="ri-flask-line text-pink-300 text-xl"></i>
+          <div className="flex flex-col items-start">
+            <span className="text-xs text-white/50 font-medium text-left">
+              Formula
+            </span>
+            <span className="text-sm font-semibold text-white text-left">
+              {currentFormula?.name || "-"}
+            </span>
+            <span className="text-xs text-white/40 text-left">
+              {currentFormula?.id || "-"}
+            </span>
           </div>
         </div>
 
         {/* Vertical Divider */}
-        <div className="w-px h-12 bg-purple-600/50"></div>
+        <div className="w-px h-10 bg-purple-600/50"></div>
+
+        {/* Status */}
+        <div className="flex items-center gap-2">
+          <i className="ri-checkbox-circle-line text-orange-300 text-xl"></i>
+          <div className="flex flex-col items-start">
+            <span className="text-xs text-white/50 font-medium mb-1 text-left">
+              Status
+            </span>
+            <div
+              className={`px-2 py-0.5 rounded-full text-xs font-semibold ${getStatusVariant(
+                currentFormula?.status
+              )}`}
+            >
+              {currentFormula?.status?.toUpperCase() || "NEW"}
+            </div>
+          </div>
+        </div>
+
+        {/* Vertical Divider */}
+        <div className="w-px h-10 bg-purple-600/50"></div>
 
         {/* Lines Count */}
         <div className="flex items-center gap-2">
           <i className="ri-list-check-2 text-yellow-300 text-xl"></i>
-          <div className="flex flex-col">
-            <span className="text-xs text-white/50 font-medium">Lines</span>
-            <span className="text-base font-semibold text-white">
+          <div className="flex flex-col items-start">
+            <span className="text-xs text-white/50 font-medium text-left">
+              Lines
+            </span>
+            <span className="text-base font-semibold text-white text-left">
               {metrics.lineCount}
             </span>
           </div>
         </div>
 
         {/* Vertical Divider */}
-        <div className="w-px h-12 bg-purple-600/50"></div>
+        <div className="w-px h-10 bg-purple-600/50"></div>
 
         {/* Formula Cost */}
         <div className="flex items-center gap-2">
           <i className="ri-price-tag-3-line text-green-300 text-xl"></i>
-          <div className="flex flex-col">
-            <span className="text-xs text-white/50 font-medium">
+          <div className="flex flex-col items-start">
+            <span className="text-xs text-white/50 font-medium text-left">
               Formula Cost
             </span>
-            <span className="text-base font-semibold text-white">
+            <span className="text-base font-semibold text-white text-left">
               ${metrics.formulaCost.toFixed(2)}
             </span>
           </div>
         </div>
 
         {/* Vertical Divider */}
-        <div className="w-px h-12 bg-purple-600/50"></div>
+        <div className="w-px h-10 bg-purple-600/50"></div>
 
         {/* Target Cost (RMC) */}
         <div className="flex items-center gap-2">
           <i className="ri-money-dollar-circle-line text-blue-300 text-xl"></i>
-          <div className="flex flex-col">
-            <span className="text-xs text-white/50 font-medium">
+          <div className="flex flex-col items-start">
+            <span className="text-xs text-white/50 font-medium text-left">
               Target Cost
             </span>
-            <span className="text-base font-semibold text-white">
+            <span className="text-base font-semibold text-white text-left">
               ${metrics.targetCost.toFixed(2)}
             </span>
           </div>

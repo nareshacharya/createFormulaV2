@@ -1,9 +1,8 @@
 import type { Column } from "../components/DataGrid";
-import { calculateRMC, type IngredientCostData } from "./rmcCalculator";
 
 /**
  * Calculate totals for formula columns in the data grid
- * Handles running totals, RMC (raw material cost), and line count
+ * Handles running totals and cost sums
  */
 export const calculateTotals = (
     data: any[],
@@ -20,57 +19,46 @@ export const calculateTotals = (
             (col) => col.group === "Formulas" && col.type === "number"
         );
 
-    const updatedTotals = totalRows.map((totalRow) => {
-        const updatedRow = { ...totalRow };
+    // Only keep the "running" total row (remove RMC and Lines)
+    const updatedTotals = totalRows
+        .filter((totalRow) => totalRow.totalType === "running")
+        .map((totalRow) => {
+            const updatedRow = { ...totalRow };
 
-        formulaColumns.forEach((col) => {
-            const columnValues = ingredientRows
-                .filter((row) => !row.isFormula) // Only count individual ingredients, not formula groups
-                .map((row) => parseFloat(row[col.key]) || 0)
+            // Calculate sum for formula columns
+            formulaColumns.forEach((col) => {
+                const columnValues = ingredientRows
+                    .filter((row) => !row.isFormula) // Only count individual ingredients, not formula groups
+                    .map((row) => parseFloat(row[col.key]) || 0)
+                    .filter((val) => !isNaN(val));
+
+                updatedRow[col.key] = parseFloat(
+                    columnValues.reduce((sum, val) => sum + val, 0).toFixed(5)
+                );
+            });
+
+            // Calculate sum for costKg column
+            const costKgValues = ingredientRows
+                .filter((row) => !row.isFormula)
+                .map((row) => parseFloat(row.costKg) || 0)
                 .filter((val) => !isNaN(val));
 
-            switch (totalRow.totalType) {
-                case "running":
-                    updatedRow[col.key] = parseFloat(
-                        columnValues.reduce((sum, val) => sum + val, 0).toFixed(5)
-                    );
-                    break;
-                case "rmc": {
-                    // Calculate raw material cost using proper RMC calculator
-                    // Formula: RMC = ∑(Amount% × Cost/kg) / 100
-                    const ingredients: IngredientCostData[] = ingredientRows
-                        .filter((row) => !row.isFormula)
-                        .map((row) => ({
-                            id: row.id,
-                            name: row.description || row.name || '',
-                            amount: parseFloat(row[col.key]) || 0,
-                            costPerKg: parseFloat(row.costKg) || 0,
-                        }))
-                        .filter((ing) => ing.amount > 0); // Only include ingredients with amounts
+            updatedRow.costKg = parseFloat(
+                costKgValues.reduce((sum, val) => sum + val, 0).toFixed(2)
+            );
 
-                    const rmcValue = calculateRMC(ingredients);
-                    updatedRow[col.key] = parseFloat(rmcValue.toFixed(2));
-                    break;
-                }
-                case "lineCount": {
-                    // Count the number of lines (ingredients) that have a non-zero value in this column
-                    // Do not count un-exploded formulas (rows with isFormula=true and no children visible)
-                    const lineCount = ingredientRows.filter((row) => {
-                        // Skip formula group rows (un-exploded formulas)
-                        if (row.isFormula) return false;
-                        // Count only rows with non-zero values
-                        const value = parseFloat(row[col.key]) || 0;
-                        return value > 0;
-                    }).length;
+            // Calculate sum for contCost column
+            const contCostValues = ingredientRows
+                .filter((row) => !row.isFormula)
+                .map((row) => parseFloat(row.contCost) || 0)
+                .filter((val) => !isNaN(val));
 
-                    updatedRow[col.key] = lineCount;
-                    break;
-                }
-            }
+            updatedRow.contCost = parseFloat(
+                contCostValues.reduce((sum, val) => sum + val, 0).toFixed(2)
+            );
+
+            return updatedRow;
         });
-
-        return updatedRow;
-    });
 
     return [...ingredientRows, ...updatedTotals];
 };

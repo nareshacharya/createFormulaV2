@@ -8,6 +8,7 @@ import Modal from "../../components/Modal";
 import FormulaModal from "../../components/FormulaModal";
 import Button from "../../components/Button";
 import Badge from "../../components/Badge";
+import WorkspaceTabs from "../AppShell/WorkspaceTabs";
 import { PegaService } from "../../services/pega";
 import type {
   Formula,
@@ -226,35 +227,17 @@ const WorkArea = () => {
       };
 
       setTableData((prev) => {
-        // If this is the first ingredient, also add the total rows
+        // If this is the first ingredient, also add the total row
         if (prev.length === 0) {
-          const totalRows = [
-            {
-              id: "runningTotal",
-              description: "Total",
-              costKg: null,
-              contCost: null,
-              isTotal: true,
-              totalType: "running",
-            },
-            {
-              id: "rmc",
-              description: "RMC (Raw Material Cost)",
-              costKg: null,
-              contCost: null,
-              isTotal: true,
-              totalType: "rmc",
-            },
-            {
-              id: "lineCount",
-              description: "Lines in Formula",
-              costKg: null,
-              contCost: null,
-              isTotal: true,
-              totalType: "lineCount",
-            },
-          ];
-          return [newRow, ...totalRows];
+          const totalRow = {
+            id: "runningTotal",
+            description: "Total",
+            costKg: null,
+            contCost: null,
+            isTotal: true,
+            totalType: "running",
+          };
+          return [newRow, totalRow];
         }
 
         const totalIndex = prev.findIndex((row) => row.isTotal);
@@ -382,35 +365,17 @@ const WorkArea = () => {
       setTableData((prev) => {
         let newData = [...prev];
 
-        // If this is the first item, also add the total rows
+        // If this is the first item, also add the total row
         if (prev.length === 0) {
-          const totalRows = [
-            {
-              id: "runningTotal",
-              description: "Total",
-              costKg: null,
-              contCost: null,
-              isTotal: true,
-              totalType: "running",
-            },
-            {
-              id: "rmc",
-              description: "RMC (Raw Material Cost)",
-              costKg: null,
-              contCost: null,
-              isTotal: true,
-              totalType: "rmc",
-            },
-            {
-              id: "lineCount",
-              description: "Lines in Formula",
-              costKg: null,
-              contCost: null,
-              isTotal: true,
-              totalType: "lineCount",
-            },
-          ];
-          newData = [formulaGroupRow, ...formulaIngredientRows, ...totalRows];
+          const totalRow = {
+            id: "runningTotal",
+            description: "Total",
+            costKg: null,
+            contCost: null,
+            isTotal: true,
+            totalType: "running",
+          };
+          newData = [formulaGroupRow, ...formulaIngredientRows, totalRow];
         } else {
           const totalIndex = prev.findIndex((row) => row.isTotal);
           if (totalIndex !== -1) {
@@ -794,38 +759,18 @@ const WorkArea = () => {
             return rowData;
           });
 
-          // Create total rows
-          const totalRows = [
-            {
-              id: "runningTotal",
-              description: "Total",
-              costKg: null,
-              contCost: null,
-              isTotal: true,
-              totalType: "running",
-              [newColumnId]: null,
-            },
-            {
-              id: "rmc",
-              description: "RMC (Raw Material Cost)",
-              costKg: null,
-              contCost: null,
-              isTotal: true,
-              totalType: "rmc",
-              [newColumnId]: null,
-            },
-            {
-              id: "lineCount",
-              description: "Lines in Formula",
-              costKg: null,
-              contCost: null,
-              isTotal: true,
-              totalType: "lineCount",
-              [newColumnId]: null,
-            },
-          ];
+          // Create total row
+          const totalRow = {
+            id: "runningTotal",
+            description: "Total",
+            costKg: null,
+            contCost: null,
+            isTotal: true,
+            totalType: "running",
+            [newColumnId]: null,
+          };
 
-          const updatedData = [...ingredientRows, ...totalRows];
+          const updatedData = [...ingredientRows, totalRow];
           return calculateTotals(updatedData, [newColumn]);
         } else if (!hasExistingData && data.formula.ingredients) {
           // If we have other columns but no data yet, still add ingredients
@@ -1055,13 +1000,15 @@ const WorkArea = () => {
         return value > 0;
       }).length;
 
-      // Calculate target cost (RMC) for active formula
-      const rmcRow = tableData.find(
-        (row) => row.isTotal && row.totalType === "rmc"
+      // Calculate target cost (sum of all percentages in active formula)
+      const totalRow = tableData.find(
+        (row) => row.isTotal && row.totalType === "running"
       );
-      const targetCost = rmcRow ? parseFloat(rmcRow[editableFormula]) || 0 : 0;
+      const targetCost = totalRow
+        ? parseFloat(totalRow[editableFormula]) || 0
+        : 0;
 
-      // Calculate formula cost (sum of contribution costs) for active formula
+      // Calculate formula cost (RMC) for active formula: sum of (amount% × cost/kg) / 100
       const formulaCost = ingredientRows.reduce((sum, row) => {
         const amount = parseFloat(row[editableFormula]) || 0;
         const costPerKg = parseFloat(row.costKg) || 0;
@@ -1087,34 +1034,16 @@ const WorkArea = () => {
       isTotal: false,
     }));
 
-    const totalRows = [
-      {
-        id: "runningTotal",
-        description: "Total",
-        costKg: null,
-        contCost: null,
-        isTotal: true,
-        totalType: "running",
-      },
-      {
-        id: "rmc",
-        description: "RMC (Raw Material Cost)",
-        costKg: null,
-        contCost: null,
-        isTotal: true,
-        totalType: "rmc",
-      },
-      {
-        id: "lineCount",
-        description: "Lines in Formula",
-        costKg: null,
-        contCost: null,
-        isTotal: true,
-        totalType: "lineCount",
-      },
-    ];
+    const totalRow = {
+      id: "runningTotal",
+      description: "Total",
+      costKg: null,
+      contCost: null,
+      isTotal: true,
+      totalType: "running",
+    };
 
-    setTableData([...formulaIngredients, ...totalRows]);
+    setTableData([...formulaIngredients, totalRow]);
     setActiveFormula(formula);
     setShowFormulaSelector(false);
 
@@ -1295,13 +1224,13 @@ const WorkArea = () => {
           return value > 0;
         }).length;
 
-        // Calculate target cost (RMC) for active formula
-        const rmcRow = tableData.find(
-          (row) => row.isTotal && row.totalType === "rmc"
+        // Calculate target cost (sum of all percentages in active formula)
+        const totalRow = tableData.find(
+          (row) => row.isTotal && row.totalType === "running"
         );
-        const targetCost = rmcRow ? parseFloat(rmcRow[columnId]) || 0 : 0;
+        const targetCost = totalRow ? parseFloat(totalRow[columnId]) || 0 : 0;
 
-        // Calculate formula cost (sum of contribution costs) for active formula
+        // Calculate formula cost (RMC) for active formula: sum of (amount% × cost/kg) / 100
         const formulaCost = ingredientRows.reduce((sum, row) => {
           const amount = parseFloat(row[columnId]) || 0;
           const costPerKg = parseFloat(row.costKg) || 0;
@@ -1352,31 +1281,41 @@ const WorkArea = () => {
   };
 
   return (
-    <div className="h-full bg-white">
-      <DataGrid
-        columns={getDisplayColumns()}
-        data={getEmptyStateData(tableData, hasIngredients)}
-        onAddColumn={(columnType) => {
-          if (columnType === "formula") {
-            handleAddFormulaColumn();
-          } else if (columnType === "attribute") {
-            handleAddAttributeColumn();
-          }
-        }}
-        onRowDelete={handleRowDelete}
-        onCellEdit={handleCellEdit}
-        onDeleteColumn={handleDeleteColumn}
-        onSetActiveFormula={handleSetActiveFormula}
-        onCreateVersion={handleCreateVersion}
-        onNormalizeFormula={handleNormalizeFromMenu}
-        onSendForCompounding={handleSendForCompoundingFromMenu}
-        onExplodeFormula={handleExplodeFormula}
-        onToggleFormulaExpansion={handleToggleFormulaExpansion}
-        onColumnReorder={handleColumnReorder}
-        editableFormula={editableFormula}
-        className="h-full"
-        showEmptyState={!hasIngredients}
-      />
+    <div className="h-full bg-white flex flex-col">
+      {/* Workspace Tabs Header */}
+      <div className="flex items-center justify-between px-4 border-b border-gray-200 bg-white">
+        <div className="flex items-center gap-2 ml-2">
+          <WorkspaceTabs />
+        </div>
+      </div>
+
+      {/* Data Grid */}
+      <div className="flex-1 overflow-hidden">
+        <DataGrid
+          columns={getDisplayColumns()}
+          data={getEmptyStateData(tableData, hasIngredients)}
+          onAddColumn={(columnType) => {
+            if (columnType === "formula") {
+              handleAddFormulaColumn();
+            } else if (columnType === "attribute") {
+              handleAddAttributeColumn();
+            }
+          }}
+          onRowDelete={handleRowDelete}
+          onCellEdit={handleCellEdit}
+          onDeleteColumn={handleDeleteColumn}
+          onSetActiveFormula={handleSetActiveFormula}
+          onCreateVersion={handleCreateVersion}
+          onNormalizeFormula={handleNormalizeFromMenu}
+          onSendForCompounding={handleSendForCompoundingFromMenu}
+          onExplodeFormula={handleExplodeFormula}
+          onToggleFormulaExpansion={handleToggleFormulaExpansion}
+          onColumnReorder={handleColumnReorder}
+          editableFormula={editableFormula}
+          className="h-full"
+          showEmptyState={!hasIngredients}
+        />
+      </div>
 
       {/* Formula Modal */}
       <FormulaModal

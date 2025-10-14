@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { eventBus } from "../../utils/bus";
 import FormulaModal from "../../components/FormulaModal";
-import WorkspaceSelector from "../../components/WorkspaceSelector";
 import SaveWorkspaceModal from "../../components/SaveWorkspaceModal";
 import { useModal } from "../../App";
 import type { Formula } from "../../services/pega";
@@ -9,7 +8,6 @@ import toast from "react-hot-toast";
 import {
   saveWorkspace,
   canCreateWorkspace,
-  type Workspace,
   type WorkspaceState,
 } from "../../utils/workspaceManager";
 
@@ -164,24 +162,8 @@ const HeaderActions = () => {
     }
   };
 
-  const handleWorkspaceChange = (workspace: Workspace | null) => {
-    if (workspace) {
-      // Emit event to load workspace state
-      eventBus.emit("load-workspace-state", { state: workspace.state });
-    }
-  };
-
   return (
     <div className="flex items-center gap-3">
-      {/* Workspace Selector */}
-      <WorkspaceSelector
-        onWorkspaceChange={handleWorkspaceChange}
-        onSaveWorkspace={handleSaveWorkspace}
-      />
-
-      {/* Separator */}
-      <div className="w-px h-6 bg-purple-600"></div>
-
       {/* Formula Actions Group - Icon + Text Style */}
       <div className="flex items-center gap-2">
         <button

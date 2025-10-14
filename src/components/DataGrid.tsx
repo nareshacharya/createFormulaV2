@@ -607,9 +607,8 @@ const DataGrid = ({
           return <span className="text-sm text-gray-400">-</span>;
         }
         if (value !== null && value !== undefined) {
-          // Show 5 decimals for active formula (except RMC which is always 2), 2 decimals for others
-          const isRMCRow = row.totalType === "rmc";
-          const decimals = isActiveFormula && !isRMCRow ? 5 : 2;
+          // Show 5 decimals for active formula, 2 decimals for others
+          const decimals = isActiveFormula ? 5 : 2;
           const displayValue =
             typeof value === "number" ? value.toFixed(decimals) : value;
           return (
