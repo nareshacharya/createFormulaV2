@@ -15,7 +15,7 @@ export const buttonTokens = {
 };
 
 export const headerTokens = {
-  height: 'h-12',
+  height: 'h-16',
   padding: 'px-4',
   background: 'bg-white',
   border: ''

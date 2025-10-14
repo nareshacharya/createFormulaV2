@@ -71,7 +71,9 @@ export const WorkAreaModals = ({
             attributes={attributes}
             selectedIds={selectedAttributes.map((attr) => attr.id)}
             onSelectionChange={(ids) => {
-              const selected = attributes.filter((attr) => ids.includes(attr.id));
+              const selected = attributes.filter((attr) =>
+                ids.includes(attr.id)
+              );
               onAttributesSelected(selected);
             }}
             maxSelections={maxAttributeSelections}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { Formula } from "../../services/pega";
 import { eventBus } from "../../utils/bus";
 
@@ -10,6 +10,8 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
   const [currentFormula, setCurrentFormula] = useState<Formula | null>(
     activeFormula || null
   );
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleActiveFormulaChange = (data: { formula: Formula | null }) => {
@@ -26,6 +28,25 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
   useEffect(() => {
     setCurrentFormula(activeFormula || null);
   }, [activeFormula]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    if (isDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isDropdownOpen]);
 
   const getStatusVariant = (status?: string) => {
     switch (status) {
@@ -53,67 +74,70 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
     return date.toLocaleDateString();
   };
 
-  const badges = [
-    {
-      label: "Formula ID",
-      value: currentFormula?.id || "-",
-      variant: "default" as const,
-    },
-    {
-      label: "Project",
-      value: "Fragrance Lab Pro",
-      variant: "default" as const,
-    },
-    {
-      label: "Product",
-      value: currentFormula?.name || "-",
-      variant: "default" as const,
-    },
-    {
-      label: "Version",
-      value: currentFormula?.version || "-",
-      variant: "default" as const,
-    },
-    {
-      label: "Created By",
-      value: currentFormula?.createdBy || "-",
-      variant: "default" as const,
-    },
-    {
-      label: "Last Updated",
-      value: formatDate(currentFormula?.lastUpdated),
-      variant: "default" as const,
-    },
-    {
-      label: "Status",
-      value: currentFormula?.status?.toUpperCase() || "NEW",
-      variant: "status" as const,
-    },
-  ];
-
   return (
     <div className="flex items-center gap-6">
-      {badges.map((badge, index) => (
-        <div key={index} className="flex flex-col items-start gap-0.5 min-w-0">
-          <span className="text-white/50 text-[10px] font-medium uppercase tracking-wider">
-            {badge.label}
-          </span>
-          <div
-            className={`
-            whitespace-nowrap
-            ${
-              badge.variant === "status"
-                ? `px-2 py-0.5 rounded-full text-xs font-semibold ${getStatusVariant(
-                    currentFormula?.status
-                  )}`
-                : "text-sm font-medium text-white"
-            }
-          `}
-          >
-            {badge.value}
+      {/* Project Name with Dropdown */}
+      <div className="relative" ref={dropdownRef}>
+        <button
+          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+        >
+          <div className="flex flex-col gap-0.5">
+            <span className="text-xl font-semibold text-white">
+              {currentFormula?.projectName || "Fragrance Lab Pro"}
+            </span>
           </div>
+          <i
+            className={`ri-arrow-down-s-line text-white text-xl transition-transform ${
+              isDropdownOpen ? "rotate-180" : ""
+            }`}
+          ></i>
+        </button>
+
+        {/* Dropdown Menu */}
+        {isDropdownOpen && (
+          <div className="absolute top-full left-0 mt-2 bg-gray-800 rounded-lg shadow-xl border border-gray-700 py-2 min-w-[280px] z-50">
+            <div className="px-4 py-2 border-b border-gray-700">
+              <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">
+                Product
+              </div>
+              <div className="text-sm text-white font-medium">
+                {currentFormula?.name || "-"}
+              </div>
+            </div>
+            <div className="px-4 py-2 border-b border-gray-700">
+              <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">
+                Created By
+              </div>
+              <div className="text-sm text-white font-medium">
+                {currentFormula?.createdBy || "-"}
+              </div>
+            </div>
+            <div className="px-4 py-2">
+              <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">
+                Last Updated
+              </div>
+              <div className="text-sm text-white font-medium">
+                {formatDate(currentFormula?.lastUpdated)}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Formula ID and Status - Side by Side */}
+      <div className="flex items-center gap-3">
+        <span className="text-sm font-normal text-white/60">
+          {currentFormula?.id || "-"}
+        </span>
+        <div
+          className={`px-2 py-0.5 rounded-full text-xs font-semibold ${getStatusVariant(
+            currentFormula?.status
+          )}`}
+        >
+          {currentFormula?.status?.toUpperCase() || "NEW"}
         </div>
-      ))}
+      </div>
     </div>
   );
 };

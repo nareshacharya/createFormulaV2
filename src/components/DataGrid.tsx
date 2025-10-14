@@ -77,11 +77,15 @@ const DataGrid = ({
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Close menu when clicking outside
-  useClickOutside(menuRef, () => {
-    if (showColumnActions) {
-      setShowColumnActions(null);
-    }
-  }, showColumnActions !== null);
+  useClickOutside(
+    menuRef,
+    () => {
+      if (showColumnActions) {
+        setShowColumnActions(null);
+      }
+    },
+    showColumnActions !== null
+  );
 
   // Group columns by their group property
   const groupedColumns = columns.reduce((acc, column, index) => {
@@ -848,7 +852,7 @@ const DataGrid = ({
                               </button>
 
                               {showColumnActions === column.id && (
-                                <div 
+                                <div
                                   ref={menuRef}
                                   className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-20 min-w-[200px]"
                                 >

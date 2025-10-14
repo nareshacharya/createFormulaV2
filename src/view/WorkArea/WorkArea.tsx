@@ -90,19 +90,22 @@ const WorkArea = () => {
     });
 
   // Use extracted formula column handlers
-  const { handleCreateVersion, handleNormalizeFromMenu, handleSendForCompoundingFromMenu } =
-    useFormulaColumnHandlers({
-      columns,
-      tableData,
-      formulas,
-      availableFormulas,
-      editableFormula,
-      maxFormulaSelections,
-      setAvailableFormulas,
-      setColumns,
-      setTableData,
-      handleNormalize,
-    });
+  const {
+    handleCreateVersion,
+    handleNormalizeFromMenu,
+    handleSendForCompoundingFromMenu,
+  } = useFormulaColumnHandlers({
+    columns,
+    tableData,
+    formulas,
+    availableFormulas,
+    editableFormula,
+    maxFormulaSelections,
+    setAvailableFormulas,
+    setColumns,
+    setTableData,
+    handleNormalize,
+  });
 
   useEffect(() => {
     const loadData = async () => {

@@ -1,9 +1,17 @@
 import { useState, useEffect } from "react";
 import { eventBus } from "../../utils/bus";
 import FormulaModal from "../../components/FormulaModal";
+import WorkspaceSelector from "../../components/WorkspaceSelector";
+import SaveWorkspaceModal from "../../components/SaveWorkspaceModal";
 import { useModal } from "../../App";
 import type { Formula } from "../../services/pega";
 import toast from "react-hot-toast";
+import {
+  saveWorkspace,
+  canCreateWorkspace,
+  type Workspace,
+  type WorkspaceState,
+} from "../../utils/workspaceManager";
 
 const HeaderActions = () => {
   const { showModal, hideModal } = useModal();
@@ -111,80 +119,142 @@ const HeaderActions = () => {
     eventBus.emit("undo-action");
   };
 
+  const handleSaveWorkspace = () => {
+    if (!canCreateWorkspace()) {
+      toast.error(
+        "Maximum of 3 workspaces allowed. Please delete one to create new."
+      );
+      return;
+    }
+
+    showModal(
+      <SaveWorkspaceModal
+        isOpen={true}
+        onClose={hideModal}
+        onSave={handleSaveWorkspaceWithName}
+      />
+    );
+  };
+
+  const handleSaveWorkspaceWithName = (workspaceName: string) => {
+    try {
+      // Emit event to gather current state
+      eventBus.emit("request-workspace-state");
+
+      // In a real implementation, you would collect the state from WorkArea
+      // For now, we'll create a placeholder state
+      const state: WorkspaceState = {
+        formulas: [],
+        ingredients: [],
+        attributes: [],
+        selectedFormulas: selectedFormulaIds,
+        activeFormulaId: null,
+        expandedIngredients: [],
+        filters: {},
+        lastModified: new Date().toISOString(),
+      };
+
+      const workspace = saveWorkspace(workspaceName, state);
+      toast.success(`Workspace "${workspace.name}" saved successfully!`);
+      hideModal();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to save workspace"
+      );
+    }
+  };
+
+  const handleWorkspaceChange = (workspace: Workspace | null) => {
+    if (workspace) {
+      // Emit event to load workspace state
+      eventBus.emit("load-workspace-state", { state: workspace.state });
+    }
+  };
+
   return (
-    <div className="flex items-center gap-2">
-      {/* Formula Actions */}
+    <div className="flex items-center gap-3">
+      {/* Workspace Selector */}
+      <WorkspaceSelector
+        onWorkspaceChange={handleWorkspaceChange}
+        onSaveWorkspace={handleSaveWorkspace}
+      />
+
+      {/* Separator */}
+      <div className="w-px h-6 bg-purple-600"></div>
+
+      {/* Formula Actions Group - Rounded Icons */}
+      <div className="flex items-center gap-1.5">
+        <button
+          onClick={handleCreateFormula}
+          className="w-9 h-9 flex items-center justify-center rounded-full bg-purple-700 hover:bg-purple-600 transition-colors cursor-pointer shadow-sm"
+          title="New Formula"
+        >
+          <div className="relative">
+            <i className="ri-flask-line text-white text-base"></i>
+            <i className="ri-add-line text-white text-xs absolute -top-0.5 -right-0.5 bg-purple-700 rounded-full"></i>
+          </div>
+        </button>
+
+        <button
+          onClick={handleMergeDuplicates}
+          className="w-9 h-9 flex items-center justify-center rounded-full bg-purple-700 hover:bg-purple-600 transition-colors cursor-pointer shadow-sm"
+          title="Merge Duplicates"
+        >
+          <i className="ri-git-merge-line text-white text-base"></i>
+        </button>
+
+        <button
+          onClick={handleNormalize}
+          className="w-9 h-9 flex items-center justify-center rounded-full bg-purple-700 hover:bg-purple-600 transition-colors cursor-pointer shadow-sm"
+          title="Normalize Formula"
+        >
+          <i className="ri-scales-3-line text-white text-base"></i>
+        </button>
+
+        <button
+          onClick={handleSendForCompounding}
+          className={`w-9 h-9 flex items-center justify-center rounded-full transition-colors cursor-pointer shadow-sm ${
+            hasActiveFormula
+              ? "bg-purple-700 hover:bg-purple-600"
+              : "bg-purple-700/50 cursor-not-allowed"
+          }`}
+          title="Send Active Formula for Compounding"
+          disabled={!hasActiveFormula}
+        >
+          <i className="ri-send-plane-line text-white text-base"></i>
+        </button>
+      </div>
+
+      {/* Separator */}
+      <div className="w-px h-6 bg-purple-600 mx-1"></div>
+
+      {/* Save Workspace Button */}
       <button
-        onClick={handleCreateFormula}
-        className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-purple-700 transition-colors cursor-pointer"
-        title="New Formula"
+        onClick={handleSaveWorkspace}
+        className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap flex items-center gap-2 shadow-sm"
+        title="Save current workspace state"
       >
-        <div className="relative">
-          <i className="ri-flask-line text-white text-sm"></i>
-          <i className="ri-add-line text-white text-xs absolute -top-1 -right-1"></i>
-        </div>
-      </button>
-      <button
-        onClick={handleMergeDuplicates}
-        className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-purple-700 transition-colors cursor-pointer"
-        title="Merge Duplicates"
-      >
-        <i className="ri-git-merge-line text-white text-sm"></i>
+        <i className="ri-save-3-line text-base"></i>
+        Save
       </button>
 
-      {/* Normalize Action */}
-      <button
-        onClick={handleNormalize}
-        className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-purple-700 transition-colors cursor-pointer"
-        title="Normalize Formula"
-      >
-        <i className="ri-scales-line text-white text-lg"></i>
-      </button>
-
-      {/* Send for Compounding */}
-      <button
-        onClick={handleSendForCompounding}
-        className={`w-8 h-8 flex items-center justify-center rounded-md transition-colors cursor-pointer ${
-          hasActiveFormula
-            ? "hover:bg-purple-700"
-            : "opacity-50 cursor-not-allowed"
-        }`}
-        title="Send Active Formula for Compounding"
-        disabled={!hasActiveFormula}
-      >
-        <i className="ri-send-plane-line text-white text-sm"></i>
-      </button>
-
-      {/* Undo Action */}
+      {/* Undo Action - Rounded */}
       <button
         onClick={handleUndo}
-        className={`w-8 h-8 flex items-center justify-center rounded-md transition-colors relative ${
+        className={`w-9 h-9 flex items-center justify-center rounded-full transition-colors relative shadow-sm ${
           canUndo
-            ? "hover:bg-purple-700 cursor-pointer"
-            : "opacity-50 cursor-not-allowed"
+            ? "bg-purple-700 hover:bg-purple-600 cursor-pointer"
+            : "bg-purple-700/50 cursor-not-allowed"
         }`}
         title={canUndo ? `Undo (${undoCount} available)` : "No actions to undo"}
         disabled={!canUndo}
       >
-        <i className="ri-arrow-go-back-line text-white text-sm"></i>
+        <i className="ri-arrow-go-back-line text-white text-base"></i>
         {undoCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center font-semibold shadow-sm">
             {undoCount}
           </span>
         )}
-      </button>
-
-      {/* Primary Action */}
-      <button className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors whitespace-nowrap">
-        Run Compliance
-      </button>
-
-      {/* More Actions Menu - Always at the end */}
-      <button
-        className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-purple-700 transition-colors cursor-pointer"
-        title="More Actions"
-      >
-        <i className="ri-more-2-fill text-white text-lg"></i>
       </button>
     </div>
   );

@@ -30,6 +30,8 @@ export interface Formula {
   createdBy: string;
   lastUpdated: string;
   category: string;
+  projectName?: string;
+  projectId?: string;
   totalPercentage: number;
   costPerKg?: number;
   ingredients: FormulaIngredient[];
