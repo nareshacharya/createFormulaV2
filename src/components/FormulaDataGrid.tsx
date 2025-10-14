@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import type { Formula } from "../services/pega";
 import Badge from "./Badge";
 import Alert from "./Alert";
+import { getListItemClasses, selectionStyles } from "../config/theme";
 
 interface FormulaDataGridProps {
   formulas: Formula[];
@@ -302,19 +303,17 @@ const FormulaDataGrid = ({
                   selectedFormulas.length >= maxSelections &&
                   !isSelected);
 
+              // Use consistent theme-based classes
+              const rowClasses = getListItemClasses({
+                isSelected,
+                isHighlighted,
+                isDisabled: isDisabled && !isSelected && !isHighlighted,
+              });
+
               return (
                 <tr
                   key={formula.id}
-                  className={`
-                    hover:bg-gray-50 cursor-pointer
-                    ${isSelected ? "bg-blue-50 border-blue-200" : ""}
-                    ${isHighlighted ? "bg-yellow-50 border-yellow-200" : ""}
-                    ${
-                      isDisabled && !isSelected && !isHighlighted
-                        ? "opacity-50"
-                        : ""
-                    }
-                  `}
+                  className={`hover:bg-gray-50 cursor-pointer transition-colors ${rowClasses}`}
                   onClick={() => !isDisabled && handleRowClick(formula.id)}
                 >
                   <td className="px-3 py-2">
@@ -329,10 +328,10 @@ const FormulaDataGrid = ({
                   {displayColumns.map((col) => (
                     <td key={col} className="px-3 py-2 text-sm font-medium">
                       {col === "name" ? (
-                        <span className="font-medium flex items-center gap-1">
+                        <span className="font-medium flex items-center gap-1.5">
                           {renderCellValue(formula, col)}
                           {isHighlighted && (
-                            <i className="ri-check-line text-yellow-600 text-base"></i>
+                            <i className={`ri-check-line text-base ${selectionStyles.selected.icon}`}></i>
                           )}
                         </span>
                       ) : (

@@ -32,30 +32,101 @@ This document summarizes the bug fixes and improvements made to the Formula Mana
 - **Fix**: Removed from Create New form
 - **User Experience**: Simpler, focused form
 
+### 6. Number Input Spinner Removal ✅ (Current Session)
+- **Issue**: Up/down arrow spinners on number inputs were confusing
+- **Fix**: Global CSS + inline styles to hide spinners across all browsers
+- **User Experience**: Clean input fields without spinners
+
+### 7. Editable Field Styling ✅ (Current Session)
+- **Issue**: Editable fields looked like plain text
+- **Fix**: Added input-style appearance with borders and padding
+- **User Experience**: Users can immediately identify editable fields
+
+### 8. Negative Value Prevention ✅ (Current Session)
+- **Issue**: Users could enter negative values in quantity/percentage fields
+- **Fix**: 6 layers of validation (CSS, HTML, onChange, onInput, onKeyDown, validation)
+- **User Experience**: Impossible to enter invalid negative values
+
+### 9. Formula Highlighting in Add Formula Modal ✅ (Current Session)
+- **Issue**: Previously selected formulas weren't highlighted when modal reopened
+- **Fix**: Added selectedFormulaIds tracking, pass to FormulaDataGrid
+- **User Experience**: Blue highlight + checkmark for already-added formulas
+
+### 10. Attribute Synchronization ✅ (Current Session)
+- **Issue**: Library panel didn't update when attributes were added from modal
+- **Fix**: Event bus synchronization with 'attributes-updated' event
+- **User Experience**: Real-time updates between modal and library
+
+### 11. Centralized Theme Configuration ✅ (Current Session)
+- **Issue**: Inconsistent highlight colors (blue, yellow, green) across components
+- **Fix**: Created src/config/theme.ts with centralized selectionStyles
+- **User Experience**: Consistent blue highlighting everywhere
+- **Components Updated**: AttributeSelector (green→blue), FormulaDataGrid (yellow→blue)
+- **Documentation**: Created docs/THEME_CONFIGURATION.md
+
+### 12. Send for Compounding Feature ✅ (Current Session)
+- **Issue**: No way to submit active formula for compounding via Pega DX API
+- **Fix**: Implemented complete compounding service and UI integration
+- **User Experience**: Send plane icon in header to submit active formula
+- **Data Sent**: Formula, ingredients (CAS, amounts, costs, status), RMC, attributes, audit trail
+- **Documentation**: Created docs/COMPOUNDING_FEATURE.md
+
+### 13. RMC (Raw Material Cost) Calculator ✅ (Current Session)
+- **Issue**: No calculation for raw material costs or weighted attribute averages
+- **Fix**: Implemented RMC calculator with formula: RMC = ∑(Amount% × Cost/kg) / 100
+- **User Experience**: Automatic cost calculations for formulas
+- **Features**: RMC calculation, weighted averages (density, volatility, etc.), contribution costs
+- **File**: src/utils/rmcCalculator.ts
+
+### 14. State History Manager (Undo System) ✅ (Current Session)
+- **Issue**: No undo functionality or audit trail for tracking changes
+- **Fix**: Implemented state history manager with max 5 undo operations
+- **User Experience**: Undo button in header with count badge
+- **Features**: Deep state cloning, timestamps, audit trail, export/import for Pega API
+- **File**: src/utils/stateHistory.ts
+
+### 15. Event Bus Enhancements ✅ (Current Session)
+- **Issue**: Needed events for compounding, undo, and state synchronization
+- **Fix**: Added new events and centralized event listener hook
+- **New Events**: send-for-compounding, undo-action, undo-state-updated, active-formula-updated
+- **File**: src/view/WorkArea/hooks/useWorkAreaEvents.ts
+
 ## Work In Progress
 
-### 6. Active Formula Cell Editing ⏳
+### 16. Active Formula Cell Editing ⏳
 - **Goal**: Make cells editable by default with Tab navigation
 - **Status**: Planned, not yet implemented
 - **Estimated Time**: 2-3 hours
 
-### 7. File Size Reduction ⏳
-- **Goal**: Break down large files (WorkArea: 1371 lines, DataGrid: 916 lines)
-- **Status**: Planned, decomposition strategy documented
+### 13. File Size Reduction ⏳
+- **Goal**: Break down large files (WorkArea: 1433 lines, DataGrid: 966 lines)
+- **Status**: Planned, decomposition strategy documented in CHANGES.md
 - **Estimated Time**: 6-8 hours
 
 ## Files Modified
 
-### This Commit
-- `src/view/WorkArea/WorkArea.tsx` - Added validation checks
-- `src/view/Library/LibraryPanel.tsx` - Fixed scroll
-- `src/utils/formulaCalculations.ts` - Fixed Target Total persistence
-- `docs/CHANGES.md` - Comprehensive change log
-- `docs/SUMMARY.md` - This file
+### Current Session (Theme System & Input Validation & Compounding)
+- `src/config/theme.ts` - ✨ NEW: Centralized theme configuration (73 lines)
+- `src/components/AttributeSelector.tsx` - Theme integration (green→blue)
+- `src/components/FormulaDataGrid.tsx` - Theme integration (yellow→blue)
+- `src/components/DataGrid.tsx` - Input validation, spinner removal, editable styling
+- `src/view/WorkArea/WorkArea.tsx` - Formula highlighting, attribute sync
+- `src/view/WorkArea/hooks/useWorkAreaEvents.ts` - ✨ NEW: Event bus listener hook (65 lines)
+- `src/view/AppShell/Header.Actions.tsx` - ✨ UPDATED: Send for compounding, undo buttons
+- `src/services/compounding.ts` - ✨ NEW: Compounding service (240 lines)
+- `src/utils/rmcCalculator.ts` - ✨ NEW: RMC and weighted average calculator (175 lines)
+- `src/utils/stateHistory.ts` - ✨ NEW: State history manager for undo/audit (180 lines)
+- `src/index.css` - Global CSS for spinner removal
+- `docs/THEME_CONFIGURATION.md` - ✨ NEW: Theme system guide
+- `docs/COMPOUNDING_FEATURE.md` - ✨ NEW: Compounding feature documentation
+- `docs/CHANGES.md` - ✨ UPDATED: Comprehensive change log
+- `docs/SUMMARY.md` - ✨ UPDATED: This file
 
 ### Previous Commits
-- `src/components/FormulaModal.tsx` - Removed Project Name
-- `src/view/WorkArea/WorkArea.tsx` - Fixed formula highlighting
+- `src/view/WorkArea/WorkArea.tsx` - Validation checks, formula highlighting fix
+- `src/view/Library/LibraryPanel.tsx` - Scroll fix
+- `src/utils/formulaCalculations.ts` - Target Total persistence
+- `src/components/FormulaModal.tsx` - Project Name removal
 
 ## Testing Status
 
@@ -66,6 +137,13 @@ This document summarizes the bug fixes and improvements made to the Formula Mana
 - Target Total value editing and persistence
 - Formula highlighting logic
 - Toast notifications
+- Number input spinner removal (Chrome, Firefox, Safari)
+- Negative value prevention (6 layers)
+- Editable field styling
+- Formula modal highlighting with blue background + checkmark
+- Attribute dialog highlighting with blue background + checkmark
+- Attribute synchronization between modal and library
+- Theme consistency (all selection UIs use blue)
 
 ### Pending ⏳
 - Active formula cell editing

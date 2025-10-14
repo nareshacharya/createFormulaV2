@@ -3,12 +3,16 @@ import { eventBus } from "../../utils/bus";
 import FormulaModal from "../../components/FormulaModal";
 import { useModal } from "../../App";
 import type { Formula } from "../../services/pega";
+import toast from "react-hot-toast";
 
 const HeaderActions = () => {
   const { showModal, hideModal } = useModal();
   const [availableFormulas, setAvailableFormulas] = useState<Formula[]>([]);
   const [currentFormulaSelections, setCurrentFormulaSelections] = useState(0);
   const [selectedFormulaIds, setSelectedFormulaIds] = useState<string[]>([]);
+  const [canUndo, setCanUndo] = useState(false);
+  const [undoCount, setUndoCount] = useState(0);
+  const [hasActiveFormula, setHasActiveFormula] = useState(false);
 
   useEffect(() => {
     const handleFormulaSelectionsUpdate = (data: {
@@ -25,12 +29,25 @@ const HeaderActions = () => {
       setAvailableFormulas(data.formulas);
     };
 
+    const handleUndoStateUpdate = (data: { canUndo: boolean; count: number }) => {
+      setCanUndo(data.canUndo);
+      setUndoCount(data.count);
+    };
+
+    const handleActiveFormulaUpdate = (data: { hasActiveFormula: boolean }) => {
+      setHasActiveFormula(data.hasActiveFormula);
+    };
+
     eventBus.on("formula-selections-updated", handleFormulaSelectionsUpdate);
     eventBus.on("available-formulas-updated", handleAvailableFormulasUpdate);
+    eventBus.on("undo-state-updated", handleUndoStateUpdate);
+    eventBus.on("active-formula-updated", handleActiveFormulaUpdate);
 
     return () => {
       eventBus.off("formula-selections-updated", handleFormulaSelectionsUpdate);
       eventBus.off("available-formulas-updated", handleAvailableFormulasUpdate);
+      eventBus.off("undo-state-updated", handleUndoStateUpdate);
+      eventBus.off("active-formula-updated", handleActiveFormulaUpdate);
     };
   }, []);
 
@@ -74,6 +91,21 @@ const HeaderActions = () => {
     eventBus.emit("merge-duplicates");
   };
 
+  const handleSendForCompounding = () => {
+    if (!hasActiveFormula) {
+      toast.error("Please select an active formula before sending for compounding");
+      return;
+    }
+    eventBus.emit("send-for-compounding");
+  };
+
+  const handleUndo = () => {
+    if (!canUndo) {
+      return;
+    }
+    eventBus.emit("undo-action");
+  };
+
   return (
     <div className="flex items-center gap-2">
       {/* Formula Actions */}
@@ -102,6 +134,39 @@ const HeaderActions = () => {
         title="Normalize Formula"
       >
         <i className="ri-scales-line text-white text-lg"></i>
+      </button>
+
+      {/* Send for Compounding */}
+      <button
+        onClick={handleSendForCompounding}
+        className={`w-8 h-8 flex items-center justify-center rounded-md transition-colors cursor-pointer ${
+          hasActiveFormula
+            ? "hover:bg-purple-700"
+            : "opacity-50 cursor-not-allowed"
+        }`}
+        title="Send Active Formula for Compounding"
+        disabled={!hasActiveFormula}
+      >
+        <i className="ri-send-plane-line text-white text-sm"></i>
+      </button>
+
+      {/* Undo Action */}
+      <button
+        onClick={handleUndo}
+        className={`w-8 h-8 flex items-center justify-center rounded-md transition-colors relative ${
+          canUndo
+            ? "hover:bg-purple-700 cursor-pointer"
+            : "opacity-50 cursor-not-allowed"
+        }`}
+        title={canUndo ? `Undo (${undoCount} available)` : "No actions to undo"}
+        disabled={!canUndo}
+      >
+        <i className="ri-arrow-go-back-line text-white text-sm"></i>
+        {undoCount > 0 && (
+          <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+            {undoCount}
+          </span>
+        )}
       </button>
 
       {/* Primary Action */}

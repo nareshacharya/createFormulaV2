@@ -1,6 +1,7 @@
 import { useState } from "react";
 import SearchBar from "./SearchBar";
 import Alert from "./Alert";
+import { getListItemClasses, selectionStyles } from "../config/theme";
 import type { IngredientAttribute } from "../services/pega";
 
 interface AttributeSelectorProps {
@@ -93,21 +94,16 @@ const AttributeSelector = ({
             isHighlighted ||
             (!isSelected && selectedIds.length >= maxSelections);
 
+          const itemClasses = getListItemClasses({
+            isSelected,
+            isHighlighted,
+            isDisabled,
+          });
+
           return (
             <label
               key={attr.id}
-              className={`
-                flex items-start gap-2 p-3 rounded-md border transition-all cursor-pointer
-                ${
-                  isHighlighted
-                    ? "bg-green-50 border-green-300 shadow-sm"
-                    : isSelected
-                    ? "bg-blue-50 border-blue-300 shadow-sm"
-                    : isDisabled
-                    ? "bg-gray-50 border-gray-200 opacity-50 cursor-not-allowed"
-                    : "bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm"
-                }
-              `}
+              className={`flex items-start gap-2 p-3 rounded-md border transition-all cursor-pointer ${itemClasses}`}
             >
               <input
                 type="checkbox"
@@ -116,23 +112,12 @@ const AttributeSelector = ({
                 disabled={isDisabled}
                 className="mt-0.5 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 disabled:opacity-50 flex-shrink-0 cursor-pointer disabled:cursor-not-allowed"
               />
-              <div className="flex-1 min-w-0">
-                <span
-                  className={`text-sm leading-tight block ${
-                    isHighlighted
-                      ? "text-green-900 font-medium"
-                      : isSelected
-                      ? "text-blue-900 font-medium"
-                      : "text-gray-700"
-                  }`}
-                >
+              <div className="flex-1 min-w-0 flex items-center gap-1.5">
+                <span className={`text-sm leading-tight block flex-1`}>
                   {attr.name}
                 </span>
                 {isHighlighted && (
-                  <span className="text-xs text-green-600 flex items-center gap-1 mt-1">
-                    <i className="ri-check-line"></i>
-                    Already added
-                  </span>
+                  <i className={`ri-check-line text-base ${selectionStyles.selected.icon}`}></i>
                 )}
               </div>
             </label>
