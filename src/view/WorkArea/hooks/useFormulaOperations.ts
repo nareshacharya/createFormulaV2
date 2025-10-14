@@ -49,6 +49,8 @@ export const useFormulaOperations = ({
             const adjustmentFactor = targetTotal / runningTotal;
 
             const newData = prev.map((row) => {
+                // Only normalize exploded ingredients (not formula group rows)
+                // A row is normalizable if it's not a total row and not a formula group row
                 if (!row.isTotal && !row.isFormula) {
                     const currentValue = row[editableFormula] || 0;
                     const newValue = parseFloat(

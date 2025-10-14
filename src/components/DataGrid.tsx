@@ -28,6 +28,7 @@ interface DataGridProps {
   onCellEdit?: (rowId: string, columnId: string, value: any) => void;
   onDeleteColumn?: (columnId: string) => void;
   onSetActiveFormula?: (columnId: string) => void;
+  onCreateVersion?: (columnId: string) => void;
   onExplodeFormula?: (formulaId: string) => void;
   onToggleFormulaExpansion?: (formulaId: string) => void;
   onColumnReorder?: (fromIndex: number, toIndex: number) => void;
@@ -44,6 +45,7 @@ const DataGrid = ({
   onCellEdit,
   onDeleteColumn,
   onSetActiveFormula,
+  onCreateVersion,
   onExplodeFormula,
   onToggleFormulaExpansion,
   onColumnReorder,
@@ -750,24 +752,32 @@ const DataGrid = ({
                   >
                     {/* Column header content */}
                     {column.type === "add-column" ? (
-                      <div className="flex items-center justify-center">
+                      <div
+                        className="flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors py-2 rounded"
+                        onClick={() =>
+                          handleAddColumn(
+                            column.group === "Formulas"
+                              ? "formula"
+                              : "attribute"
+                          )
+                        }
+                      >
                         <div className="relative group">
-                          <button
-                            className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded cursor-pointer"
-                            onClick={() =>
-                              handleAddColumn(
-                                column.group === "Formulas"
-                                  ? "formula"
-                                  : "attribute"
-                              )
-                            }
-                          >
-                            <i className="ri-add-line text-sm"></i>
-                          </button>
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-6 h-6 flex items-center justify-center text-gray-400 group-hover:text-blue-600 transition-colors">
+                              <i className="ri-add-line text-sm"></i>
+                            </div>
+                            <span className="text-xs text-gray-500 group-hover:text-blue-600 transition-colors">
+                              {column.group === "Formulas"
+                                ? "Add Formula"
+                                : "Add Attribute"}
+                            </span>
+                          </div>
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                            Click to{" "}
                             {column.group === "Formulas"
-                              ? "Add Formula"
-                              : "Add Attribute"}
+                              ? "add a formula"
+                              : "add an attribute"}
                           </div>
                         </div>
                       </div>
@@ -825,7 +835,7 @@ const DataGrid = ({
                               </button>
 
                               {showColumnActions === column.id && (
-                                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-20 min-w-32">
+                                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-20 min-w-40">
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
@@ -840,13 +850,24 @@ const DataGrid = ({
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
+                                      onCreateVersion?.(column.id);
+                                      setShowColumnActions(null);
+                                    }}
+                                    className="w-full px-3 py-2 text-left text-sm text-green-600 hover:bg-green-50 flex items-center space-x-2"
+                                  >
+                                    <i className="ri-file-copy-line text-xs"></i>
+                                    <span>Create new version</span>
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
                                       onDeleteColumn?.(column.id);
                                       setShowColumnActions(null);
                                     }}
                                     className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
                                   >
-                                    <i className="ri-delete-bin-line text-xs"></i>
-                                    <span>Delete</span>
+                                    <i className="ri-close-circle-line text-xs"></i>
+                                    <span>Remove</span>
                                   </button>
                                 </div>
                               )}

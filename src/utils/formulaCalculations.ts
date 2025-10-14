@@ -54,7 +54,7 @@ export const calculateTotals = (
                             costPerKg: parseFloat(row.costKg) || 0,
                         }))
                         .filter((ing) => ing.amount > 0); // Only include ingredients with amounts
-                    
+
                     const rmcValue = calculateRMC(ingredients);
                     updatedRow[col.key] = parseFloat(rmcValue.toFixed(2));
                     break;
@@ -66,12 +66,12 @@ export const calculateTotals = (
                         (sum, val) => sum + val,
                         0
                     );
-                    
+
                     if (totalPercentage === 0) {
                         updatedRow[col.key] = 0;
                         break;
                     }
-                    
+
                     const weightedSum = ingredientRows
                         .filter((row) => !row.isFormula)
                         .reduce((sum, row) => {
@@ -79,7 +79,7 @@ export const calculateTotals = (
                             const cost = parseFloat(row.costKg) || 0;
                             return sum + (cost * percentage);
                         }, 0);
-                    
+
                     updatedRow[col.key] = parseFloat(
                         (weightedSum / totalPercentage).toFixed(2)
                     );

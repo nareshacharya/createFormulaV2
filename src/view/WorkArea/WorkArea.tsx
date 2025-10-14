@@ -1270,6 +1270,94 @@ const WorkArea = () => {
     }
   };
 
+  const handleCreateVersion = async (columnId: string) => {
+    const column = columns.find((col) => col.id === columnId);
+    if (!column || !column.formulaId) {
+      toast.error("No formula found for this column");
+      return;
+    }
+
+    const formula = formulas.find((f) => f.id === column.formulaId);
+    if (!formula) {
+      toast.error("Formula data not found");
+      return;
+    }
+
+    try {
+      toast.loading("Creating new version...", { id: "create-version" });
+
+      // TODO: Replace with actual Pega DX API call
+      // const response = await PegaService.createFormulaVersion(formula.id);
+
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      // Generate new version number
+      const versionMatch = formula.version.match(/v(\d+)/);
+      const currentVersion = versionMatch ? parseInt(versionMatch[1]) : 0;
+      const newVersion = `v${currentVersion + 1}`;
+
+      // Create new formula with updated version
+      const newFormula: Formula = {
+        ...formula,
+        id: `${formula.id}_${newVersion}`,
+        version: newVersion,
+        name: `${formula.name} (${newVersion})`,
+      };
+
+      // Add new formula to available formulas list
+      setAvailableFormulas((prev) => [...prev, newFormula]);
+
+      // Get all data from the current column
+      const columnData: Record<string, number> = {};
+      tableData.forEach((row) => {
+        if (!row.isTotal && row[columnId] !== undefined) {
+          columnData[row.id] = row[columnId];
+        }
+      });
+
+      // Create new column with the new formula version
+      const newColumnId = `formula_${Date.now()}`;
+      const newColumn: Column = {
+        id: newColumnId,
+        key: newColumnId,
+        title: newFormula.name,
+        type: "number",
+        editable: true,
+        sortable: true,
+        group: "Formulas",
+        formulaId: newFormula.id,
+      };
+
+      setColumns((prev) => {
+        const insertIndex = prev.findIndex((col) => col.id === "formulaAdd");
+        if (insertIndex === -1) {
+          return [...prev, newColumn];
+        }
+        return [
+          ...prev.slice(0, insertIndex),
+          newColumn,
+          ...prev.slice(insertIndex),
+        ];
+      });
+
+      // Copy data from original column to new column
+      setTableData((prev) =>
+        prev.map((row) => ({
+          ...row,
+          [newColumnId]: columnData[row.id] || (row.isTotal ? null : 0),
+        }))
+      );
+
+      toast.success(`Created new version: ${newVersion}`, {
+        id: "create-version",
+      });
+    } catch (error) {
+      console.error("Failed to create version:", error);
+      toast.error("Failed to create new version", { id: "create-version" });
+    }
+  };
+
   // Check if we should show the add column button for attributes
   const shouldShowAttributeAddButton = () => {
     const currentAttributeColumns = columns.filter(
@@ -1319,6 +1407,7 @@ const WorkArea = () => {
         onCellEdit={handleCellEdit}
         onDeleteColumn={handleDeleteColumn}
         onSetActiveFormula={handleSetActiveFormula}
+        onCreateVersion={handleCreateVersion}
         onExplodeFormula={handleExplodeFormula}
         onToggleFormulaExpansion={handleToggleFormulaExpansion}
         onColumnReorder={handleColumnReorder}
