@@ -95,7 +95,6 @@ export const useFormulaColumnHandlers = (config: FormulaHandlersConfig) => {
         // Generate completely new ID with v1
         newFormulaId = generateFormulaIdentifier({
           userInitials,
-          productName: formula.category || "Product",
           currentFormulas: availableFormulas,
           isReferenceFromOtherProject: true,
         });
@@ -109,7 +108,6 @@ export const useFormulaColumnHandlers = (config: FormulaHandlersConfig) => {
         newVersion = getNextVersion(formula.version);
         newFormulaId = generateFormulaIdentifier({
           userInitials,
-          productName: formula.category || "Product",
           currentFormulas: availableFormulas,
           isReferenceFromOtherProject: false,
           existingFormulaId: formula.id,
