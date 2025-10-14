@@ -182,38 +182,47 @@ const HeaderActions = () => {
       {/* Separator */}
       <div className="w-px h-6 bg-purple-600"></div>
 
-      {/* Formula Actions Group - Rounded Icons */}
-      <div className="flex items-center gap-1.5">
+      {/* Formula Actions Group - Icon + Text Style */}
+      <div className="flex items-center gap-2">
         <button
           onClick={handleCreateFormula}
-          className="w-9 h-9 flex items-center justify-center rounded-full bg-purple-700 hover:bg-purple-600 transition-colors cursor-pointer shadow-sm"
+          className="w-[68px] flex flex-col items-center justify-center py-1.5 rounded-lg bg-purple-700 hover:bg-purple-600 transition-colors cursor-pointer shadow-sm group"
           title="New Formula"
         >
-          <div className="relative">
-            <i className="ri-flask-line text-white text-base"></i>
+          <div className="relative mb-0.5">
+            <i className="ri-flask-line text-white text-lg"></i>
             <i className="ri-add-line text-white text-xs absolute -top-0.5 -right-0.5 bg-purple-700 rounded-full"></i>
           </div>
+          <span className="text-[10px] text-white/80 font-medium whitespace-nowrap">
+            Formula
+          </span>
         </button>
 
         <button
           onClick={handleMergeDuplicates}
-          className="w-9 h-9 flex items-center justify-center rounded-full bg-purple-700 hover:bg-purple-600 transition-colors cursor-pointer shadow-sm"
+          className="w-[68px] flex flex-col items-center justify-center py-1.5 rounded-lg bg-purple-700 hover:bg-purple-600 transition-colors cursor-pointer shadow-sm group"
           title="Merge Duplicates"
         >
-          <i className="ri-git-merge-line text-white text-base"></i>
+          <i className="ri-git-merge-line text-white text-lg mb-0.5"></i>
+          <span className="text-[10px] text-white/80 font-medium whitespace-nowrap">
+            Merge
+          </span>
         </button>
 
         <button
           onClick={handleNormalize}
-          className="w-9 h-9 flex items-center justify-center rounded-full bg-purple-700 hover:bg-purple-600 transition-colors cursor-pointer shadow-sm"
+          className="w-[68px] flex flex-col items-center justify-center py-1.5 rounded-lg bg-purple-700 hover:bg-purple-600 transition-colors cursor-pointer shadow-sm group"
           title="Normalize Formula"
         >
-          <i className="ri-scales-3-line text-white text-base"></i>
+          <i className="ri-scales-3-line text-white text-lg mb-0.5"></i>
+          <span className="text-[10px] text-white/80 font-medium whitespace-nowrap">
+            Normalize
+          </span>
         </button>
 
         <button
           onClick={handleSendForCompounding}
-          className={`w-9 h-9 flex items-center justify-center rounded-full transition-colors cursor-pointer shadow-sm ${
+          className={`w-[68px] flex flex-col items-center justify-center py-1.5 rounded-lg transition-colors cursor-pointer shadow-sm group ${
             hasActiveFormula
               ? "bg-purple-700 hover:bg-purple-600"
               : "bg-purple-700/50 cursor-not-allowed"
@@ -221,27 +230,30 @@ const HeaderActions = () => {
           title="Send Active Formula for Compounding"
           disabled={!hasActiveFormula}
         >
-          <i className="ri-send-plane-line text-white text-base"></i>
+          <i className="ri-send-plane-line text-white text-lg mb-0.5"></i>
+          <span className="text-[10px] text-white/80 font-medium whitespace-nowrap">
+            Send
+          </span>
         </button>
       </div>
 
       {/* Separator */}
-      <div className="w-px h-6 bg-purple-600 mx-1"></div>
+      <div className="w-px h-8 bg-purple-600 mx-1"></div>
 
       {/* Save Workspace Button */}
       <button
         onClick={handleSaveWorkspace}
-        className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap flex items-center gap-2 shadow-sm"
+        className="w-[68px] flex flex-col items-center justify-center py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap shadow-sm"
         title="Save current workspace state"
       >
-        <i className="ri-save-3-line text-base"></i>
-        Save
+        <i className="ri-save-3-line text-lg mb-0.5"></i>
+        <span className="text-[10px] font-medium">Save</span>
       </button>
 
-      {/* Undo Action - Rounded */}
+      {/* Undo Action */}
       <button
         onClick={handleUndo}
-        className={`w-9 h-9 flex items-center justify-center rounded-full transition-colors relative shadow-sm ${
+        className={`w-[68px] flex flex-col items-center justify-center py-1.5 rounded-lg transition-colors relative shadow-sm ${
           canUndo
             ? "bg-purple-700 hover:bg-purple-600 cursor-pointer"
             : "bg-purple-700/50 cursor-not-allowed"
@@ -249,9 +261,10 @@ const HeaderActions = () => {
         title={canUndo ? `Undo (${undoCount} available)` : "No actions to undo"}
         disabled={!canUndo}
       >
-        <i className="ri-arrow-go-back-line text-white text-base"></i>
+        <i className="ri-arrow-go-back-line text-white text-lg mb-0.5"></i>
+        <span className="text-[10px] text-white/80 font-medium">Undo</span>
         {undoCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center font-semibold shadow-sm">
+          <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-[9px] rounded-full w-4 h-4 flex items-center justify-center font-semibold shadow-sm">
             {undoCount}
           </span>
         )}

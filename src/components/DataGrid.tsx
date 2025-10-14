@@ -511,7 +511,7 @@ const DataGrid = ({
           <div className="flex items-center">
             <input
               type="number"
-              value={value || 0}
+              value={typeof value === "number" ? value.toFixed(5) : value || 0}
               readOnly
               className="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded text-gray-900 cursor-pointer focus:outline-none"
               min="0"
@@ -531,6 +531,11 @@ const DataGrid = ({
 
         if (displayValue === "-" || displayValue === ">>") {
           return <span className="text-sm text-gray-400">{displayValue}</span>;
+        }
+
+        // Show 2 decimals for readonly formula values
+        if (typeof value === "number") {
+          return <span className="text-sm">{value.toFixed(2)}</span>;
         }
       }
 
@@ -582,7 +587,7 @@ const DataGrid = ({
           }
           // Show as input field even when not editing (for Target Total in active formula)
           const displayValue =
-            typeof value === "number" ? value.toFixed(2) : value;
+            typeof value === "number" ? value.toFixed(5) : value;
           return (
             <input
               type="number"
@@ -602,8 +607,11 @@ const DataGrid = ({
           return <span className="text-sm text-gray-400">-</span>;
         }
         if (value !== null && value !== undefined) {
+          // Show 5 decimals for active formula (except RMC which is always 2), 2 decimals for others
+          const isRMCRow = row.totalType === "rmc";
+          const decimals = isActiveFormula && !isRMCRow ? 5 : 2;
           const displayValue =
-            typeof value === "number" ? value.toFixed(2) : value;
+            typeof value === "number" ? value.toFixed(decimals) : value;
           return (
             <span
               className={`text-sm ${
@@ -633,8 +641,10 @@ const DataGrid = ({
         );
       }
 
-      // Regular number formatting with 2 decimal places
-      const displayValue = typeof value === "number" ? value.toFixed(2) : value;
+      // Regular number formatting - 5 decimals for active formula, 2 decimals for others
+      const decimals = isFormulaColumn && isActiveFormula ? 5 : 2;
+      const displayValue =
+        typeof value === "number" ? value.toFixed(decimals) : value;
       return (
         <span
           className={`text-sm ${isTotal ? "font-semibold text-gray-900" : ""}`}

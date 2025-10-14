@@ -6,10 +6,21 @@ interface HeaderBadgesProps {
   activeFormula?: Formula | null;
 }
 
+interface FormulaMetrics {
+  lineCount: number;
+  targetCost: number;
+  formulaCost: number;
+}
+
 const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
   const [currentFormula, setCurrentFormula] = useState<Formula | null>(
     activeFormula || null
   );
+  const [metrics, setMetrics] = useState<FormulaMetrics>({
+    lineCount: 0,
+    targetCost: 0,
+    formulaCost: 0,
+  });
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -18,10 +29,16 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
       setCurrentFormula(data.formula);
     };
 
+    const handleMetricsUpdate = (data: FormulaMetrics) => {
+      setMetrics(data);
+    };
+
     eventBus.on("active-formula-changed", handleActiveFormulaChange);
+    eventBus.on("active-formula-metrics-updated", handleMetricsUpdate);
 
     return () => {
       eventBus.off("active-formula-changed", handleActiveFormulaChange);
+      eventBus.off("active-formula-metrics-updated", handleMetricsUpdate);
     };
   }, []);
 
@@ -136,6 +153,55 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
           )}`}
         >
           {currentFormula?.status?.toUpperCase() || "NEW"}
+        </div>
+      </div>
+
+      {/* Separator */}
+      <div className="w-px h-8 bg-purple-600"></div>
+
+      {/* Formula Metrics Container - Lines, Formula Cost, and Target Cost */}
+      <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-purple-900/50">
+        {/* Lines Count */}
+        <div className="flex items-center gap-2">
+          <i className="ri-list-check-2 text-yellow-300 text-xl"></i>
+          <div className="flex flex-col">
+            <span className="text-xs text-white/50 font-medium">Lines</span>
+            <span className="text-base font-semibold text-white">
+              {metrics.lineCount}
+            </span>
+          </div>
+        </div>
+
+        {/* Vertical Divider */}
+        <div className="w-px h-10 bg-purple-600/50"></div>
+
+        {/* Formula Cost */}
+        <div className="flex items-center gap-2">
+          <i className="ri-price-tag-3-line text-green-300 text-xl"></i>
+          <div className="flex flex-col">
+            <span className="text-xs text-white/50 font-medium">
+              Formula Cost
+            </span>
+            <span className="text-base font-semibold text-white">
+              ${metrics.formulaCost.toFixed(2)}
+            </span>
+          </div>
+        </div>
+
+        {/* Vertical Divider */}
+        <div className="w-px h-10 bg-purple-600/50"></div>
+
+        {/* Target Cost (RMC) */}
+        <div className="flex items-center gap-2">
+          <i className="ri-money-dollar-circle-line text-blue-300 text-xl"></i>
+          <div className="flex flex-col">
+            <span className="text-xs text-white/50 font-medium">
+              Target Cost
+            </span>
+            <span className="text-base font-semibold text-white">
+              ${metrics.targetCost.toFixed(2)}
+            </span>
+          </div>
         </div>
       </div>
     </div>

@@ -3,7 +3,7 @@ import { calculateRMC, type IngredientCostData } from "./rmcCalculator";
 
 /**
  * Calculate totals for formula columns in the data grid
- * Handles running totals, target totals, RMC (raw material cost), and weighted averages
+ * Handles running totals, RMC (raw material cost), and line count
  */
 export const calculateTotals = (
     data: any[],
@@ -32,15 +32,8 @@ export const calculateTotals = (
             switch (totalRow.totalType) {
                 case "running":
                     updatedRow[col.key] = parseFloat(
-                        columnValues.reduce((sum, val) => sum + val, 0).toFixed(2)
+                        columnValues.reduce((sum, val) => sum + val, 0).toFixed(5)
                     );
-                    break;
-                case "target":
-                    // Preserve existing target value if it exists, otherwise default to 100.0
-                    if (updatedRow[col.key] === null || updatedRow[col.key] === undefined) {
-                        updatedRow[col.key] = 100.0;
-                    }
-                    // If target was already set, keep the existing value
                     break;
                 case "rmc": {
                     // Calculate raw material cost using proper RMC calculator
@@ -59,30 +52,18 @@ export const calculateTotals = (
                     updatedRow[col.key] = parseFloat(rmcValue.toFixed(2));
                     break;
                 }
-                case "weighted": {
-                    // Calculate weighted average for cost per kg
-                    // Formula: Weighted Avg = ∑(Cost × Amount%) / ∑(Amount%)
-                    const totalPercentage = columnValues.reduce(
-                        (sum, val) => sum + val,
-                        0
-                    );
+                case "lineCount": {
+                    // Count the number of lines (ingredients) that have a non-zero value in this column
+                    // Do not count un-exploded formulas (rows with isFormula=true and no children visible)
+                    const lineCount = ingredientRows.filter((row) => {
+                        // Skip formula group rows (un-exploded formulas)
+                        if (row.isFormula) return false;
+                        // Count only rows with non-zero values
+                        const value = parseFloat(row[col.key]) || 0;
+                        return value > 0;
+                    }).length;
 
-                    if (totalPercentage === 0) {
-                        updatedRow[col.key] = 0;
-                        break;
-                    }
-
-                    const weightedSum = ingredientRows
-                        .filter((row) => !row.isFormula)
-                        .reduce((sum, row) => {
-                            const percentage = parseFloat(row[col.key]) || 0;
-                            const cost = parseFloat(row.costKg) || 0;
-                            return sum + (cost * percentage);
-                        }, 0);
-
-                    updatedRow[col.key] = parseFloat(
-                        (weightedSum / totalPercentage).toFixed(2)
-                    );
+                    updatedRow[col.key] = lineCount;
                     break;
                 }
             }

@@ -231,19 +231,11 @@ const WorkArea = () => {
           const totalRows = [
             {
               id: "runningTotal",
-              description: "Running Total",
+              description: "Total",
               costKg: null,
               contCost: null,
               isTotal: true,
               totalType: "running",
-            },
-            {
-              id: "targetTotal",
-              description: "Target Total",
-              costKg: null,
-              contCost: null,
-              isTotal: true,
-              totalType: "target",
             },
             {
               id: "rmc",
@@ -254,12 +246,12 @@ const WorkArea = () => {
               totalType: "rmc",
             },
             {
-              id: "weightedAvg",
-              description: "Weighted Average",
+              id: "lineCount",
+              description: "Lines in Formula",
               costKg: null,
               contCost: null,
               isTotal: true,
-              totalType: "weighted",
+              totalType: "lineCount",
             },
           ];
           return [newRow, ...totalRows];
@@ -395,19 +387,11 @@ const WorkArea = () => {
           const totalRows = [
             {
               id: "runningTotal",
-              description: "Running Total",
+              description: "Total",
               costKg: null,
               contCost: null,
               isTotal: true,
               totalType: "running",
-            },
-            {
-              id: "targetTotal",
-              description: "Target Total",
-              costKg: null,
-              contCost: null,
-              isTotal: true,
-              totalType: "target",
             },
             {
               id: "rmc",
@@ -418,12 +402,12 @@ const WorkArea = () => {
               totalType: "rmc",
             },
             {
-              id: "weightedAvg",
-              description: "Weighted Average",
+              id: "lineCount",
+              description: "Lines in Formula",
               costKg: null,
               contCost: null,
               isTotal: true,
-              totalType: "weighted",
+              totalType: "lineCount",
             },
           ];
           newData = [formulaGroupRow, ...formulaIngredientRows, ...totalRows];
@@ -814,20 +798,11 @@ const WorkArea = () => {
           const totalRows = [
             {
               id: "runningTotal",
-              description: "Running Total",
+              description: "Total",
               costKg: null,
               contCost: null,
               isTotal: true,
               totalType: "running",
-              [newColumnId]: null,
-            },
-            {
-              id: "targetTotal",
-              description: "Target Total",
-              costKg: null,
-              contCost: null,
-              isTotal: true,
-              totalType: "target",
               [newColumnId]: null,
             },
             {
@@ -840,12 +815,12 @@ const WorkArea = () => {
               [newColumnId]: null,
             },
             {
-              id: "weightedAvg",
-              description: "Weighted Average",
+              id: "lineCount",
+              description: "Lines in Formula",
               costKg: null,
               contCost: null,
               isTotal: true,
-              totalType: "weighted",
+              totalType: "lineCount",
               [newColumnId]: null,
             },
           ];
@@ -1069,6 +1044,39 @@ const WorkArea = () => {
     setActiveFormula,
   ]);
 
+  // Monitor active formula metrics and emit updates to header
+  useEffect(() => {
+    if (editableFormula && tableData.length > 0) {
+      const ingredientRows = tableData.filter(
+        (row) => !row.isTotal && !row.isFormula
+      );
+      const lineCount = ingredientRows.filter((row) => {
+        const value = parseFloat(row[editableFormula]) || 0;
+        return value > 0;
+      }).length;
+
+      // Calculate target cost (RMC) for active formula
+      const rmcRow = tableData.find(
+        (row) => row.isTotal && row.totalType === "rmc"
+      );
+      const targetCost = rmcRow ? parseFloat(rmcRow[editableFormula]) || 0 : 0;
+
+      // Calculate formula cost (sum of contribution costs) for active formula
+      const formulaCost = ingredientRows.reduce((sum, row) => {
+        const amount = parseFloat(row[editableFormula]) || 0;
+        const costPerKg = parseFloat(row.costKg) || 0;
+        // Calculate contribution cost: (amount% × cost/kg) / 100
+        return sum + (amount * costPerKg) / 100;
+      }, 0);
+
+      eventBus.emit("active-formula-metrics-updated", {
+        lineCount,
+        targetCost,
+        formulaCost,
+      });
+    }
+  }, [tableData, editableFormula]);
+
   const handleLoadFormulaFromModal = (formula: Formula) => {
     // Load formula ingredients into the work area
     const formulaIngredients = formula.ingredients.map((ing, index) => ({
@@ -1082,19 +1090,11 @@ const WorkArea = () => {
     const totalRows = [
       {
         id: "runningTotal",
-        description: "Running Total",
+        description: "Total",
         costKg: null,
         contCost: null,
         isTotal: true,
         totalType: "running",
-      },
-      {
-        id: "targetTotal",
-        description: "Target Total",
-        costKg: null,
-        contCost: null,
-        isTotal: true,
-        totalType: "target",
       },
       {
         id: "rmc",
@@ -1105,12 +1105,12 @@ const WorkArea = () => {
         totalType: "rmc",
       },
       {
-        id: "weightedAvg",
-        description: "Weighted Average",
+        id: "lineCount",
+        description: "Lines in Formula",
         costKg: null,
         contCost: null,
         isTotal: true,
-        totalType: "weighted",
+        totalType: "lineCount",
       },
     ];
 
@@ -1285,6 +1285,35 @@ const WorkArea = () => {
       const formula = formulas.find((f) => f.id === column.formulaId);
       if (formula) {
         eventBus.emit("active-formula-changed", { formula });
+
+        // Calculate and emit line count and target cost for active formula
+        const ingredientRows = tableData.filter(
+          (row) => !row.isTotal && !row.isFormula
+        );
+        const lineCount = ingredientRows.filter((row) => {
+          const value = parseFloat(row[columnId]) || 0;
+          return value > 0;
+        }).length;
+
+        // Calculate target cost (RMC) for active formula
+        const rmcRow = tableData.find(
+          (row) => row.isTotal && row.totalType === "rmc"
+        );
+        const targetCost = rmcRow ? parseFloat(rmcRow[columnId]) || 0 : 0;
+
+        // Calculate formula cost (sum of contribution costs) for active formula
+        const formulaCost = ingredientRows.reduce((sum, row) => {
+          const amount = parseFloat(row[columnId]) || 0;
+          const costPerKg = parseFloat(row.costKg) || 0;
+          // Calculate contribution cost: (amount% × cost/kg) / 100
+          return sum + (amount * costPerKg) / 100;
+        }, 0);
+
+        eventBus.emit("active-formula-metrics-updated", {
+          lineCount,
+          targetCost,
+          formulaCost,
+        });
       }
     }
   };
