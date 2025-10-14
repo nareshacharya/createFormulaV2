@@ -169,15 +169,18 @@ const WorkArea = () => {
 
   useEffect(() => {
     const handleIngredientClick = (data: { ingredient: Ingredient }) => {
-      // VALIDATION: Check if we have at least one formula column before adding ingredients
+      // VALIDATION: Check if we have at least one formula (column or group row) before adding ingredients
       const hasFormulaColumns = columns.some(
         (col) => col.group === "Formulas" && col.formulaId
       );
-      if (!hasFormulaColumns) {
-        toast.error(
-          "Please add a formula first before adding ingredients",
-          { duration: 3000 }
-        );
+      const hasFormulaGroupRows = tableData.some(
+        (row) => row.isFormula && row.formulaId
+      );
+      
+      if (!hasFormulaColumns && !hasFormulaGroupRows) {
+        toast.error("Please add a formula first before adding ingredients", {
+          duration: 3000,
+        });
         return;
       }
 
@@ -441,15 +444,18 @@ const WorkArea = () => {
     const handleAttributeSelected = (data: {
       attribute: IngredientAttribute;
     }) => {
-      // VALIDATION: Check if we have at least one formula column before adding attributes
+      // VALIDATION: Check if we have at least one formula (column or group row) before adding attributes
       const hasFormulaColumns = columns.some(
         (col) => col.group === "Formulas" && col.formulaId
       );
-      if (!hasFormulaColumns) {
-        toast.error(
-          "Please add a formula first before adding attributes",
-          { duration: 3000 }
-        );
+      const hasFormulaGroupRows = tableData.some(
+        (row) => row.isFormula && row.formulaId
+      );
+      
+      if (!hasFormulaColumns && !hasFormulaGroupRows) {
+        toast.error("Please add a formula first before adding attributes", {
+          duration: 3000,
+        });
         return;
       }
 
@@ -1025,7 +1031,24 @@ const WorkArea = () => {
         handleFormulaSelectedForColumn
       );
     };
-  }, []); // Empty dependency array to prevent re-registration
+  }, [
+    columns,
+    tableData,
+    selectedFormulaIds,
+    editableFormula,
+    ingredients,
+    formulas,
+    maxFormulaSelections,
+    pendingFormulaIds,
+    setTableData,
+    setColumns,
+    setSelectedFormulaIds,
+    setFormulas,
+    setAvailableFormulas,
+    setEditableFormula,
+    setShowFormulaSelector,
+    setActiveFormula,
+  ]);
 
   const handleLoadFormulaFromModal = (formula: Formula) => {
     // Load formula ingredients into the work area
