@@ -8,6 +8,7 @@ interface AttributeSelectorProps {
   selectedIds: string[];
   onSelectionChange: (ids: string[]) => void;
   maxSelections?: number;
+  highlightedIds?: string[]; // Already added attributes to highlight
 }
 
 /**
@@ -19,6 +20,7 @@ const AttributeSelector = ({
   selectedIds = [],
   onSelectionChange,
   maxSelections = 5,
+  highlightedIds = [],
 }: AttributeSelectorProps) => {
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -28,6 +30,11 @@ const AttributeSelector = ({
   );
 
   const handleToggle = (id: string) => {
+    // Don't allow toggling of already highlighted (added) attributes
+    if (highlightedIds.includes(id)) {
+      return;
+    }
+
     const isSelected = selectedIds.includes(id);
 
     if (isSelected) {
@@ -81,7 +88,10 @@ const AttributeSelector = ({
       <div className="grid grid-cols-3 gap-2 max-h-[400px] overflow-y-auto pr-1">
         {filteredAttributes.map((attr) => {
           const isSelected = selectedIds.includes(attr.id);
-          const isDisabled = !isSelected && selectedIds.length >= maxSelections;
+          const isHighlighted = highlightedIds.includes(attr.id);
+          const isDisabled =
+            isHighlighted ||
+            (!isSelected && selectedIds.length >= maxSelections);
 
           return (
             <label
@@ -89,7 +99,9 @@ const AttributeSelector = ({
               className={`
                 flex items-start gap-2 p-3 rounded-md border transition-all cursor-pointer
                 ${
-                  isSelected
+                  isHighlighted
+                    ? "bg-green-50 border-green-300 shadow-sm"
+                    : isSelected
                     ? "bg-blue-50 border-blue-300 shadow-sm"
                     : isDisabled
                     ? "bg-gray-50 border-gray-200 opacity-50 cursor-not-allowed"
@@ -99,18 +111,30 @@ const AttributeSelector = ({
             >
               <input
                 type="checkbox"
-                checked={isSelected}
+                checked={isSelected || isHighlighted}
                 onChange={() => !isDisabled && handleToggle(attr.id)}
                 disabled={isDisabled}
                 className="mt-0.5 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 disabled:opacity-50 flex-shrink-0 cursor-pointer disabled:cursor-not-allowed"
               />
-              <span
-                className={`text-sm leading-tight ${
-                  isSelected ? "text-blue-900 font-medium" : "text-gray-700"
-                }`}
-              >
-                {attr.name}
-              </span>
+              <div className="flex-1 min-w-0">
+                <span
+                  className={`text-sm leading-tight block ${
+                    isHighlighted
+                      ? "text-green-900 font-medium"
+                      : isSelected
+                      ? "text-blue-900 font-medium"
+                      : "text-gray-700"
+                  }`}
+                >
+                  {attr.name}
+                </span>
+                {isHighlighted && (
+                  <span className="text-xs text-green-600 flex items-center gap-1 mt-1">
+                    <i className="ri-check-line"></i>
+                    Already added
+                  </span>
+                )}
+              </div>
             </label>
           );
         })}

@@ -176,7 +176,7 @@ const WorkArea = () => {
       const hasFormulaGroupRows = tableData.some(
         (row) => row.isFormula && row.formulaId
       );
-      
+
       if (!hasFormulaColumns && !hasFormulaGroupRows) {
         toast.error("Please add a formula first before adding ingredients", {
           duration: 3000,
@@ -451,7 +451,7 @@ const WorkArea = () => {
       const hasFormulaGroupRows = tableData.some(
         (row) => row.isFormula && row.formulaId
       );
-      
+
       if (!hasFormulaColumns && !hasFormulaGroupRows) {
         toast.error("Please add a formula first before adding attributes", {
           duration: 3000,
@@ -1124,11 +1124,17 @@ const WorkArea = () => {
 
     // Emit event to add this formula as a new column in the work area
     eventBus.emit("new-formula-created", { formula: newFormula });
+
+    // Update selectedFormulaIds to show it as selected in the modal
+    setSelectedFormulaIds((prev) => [...prev, newFormula.id]);
   };
 
   const handleFormulaModalSelectFormula = (formula: Formula) => {
     // Emit event to add this formula as a new column in the work area
     eventBus.emit("formula-selected-for-column", { formula });
+
+    // Update selectedFormulaIds to show it as selected in the modal
+    setSelectedFormulaIds((prev) => [...prev, formula.id]);
   };
 
   // Modified handleAddAttributeColumn with max selection logic
@@ -1189,13 +1195,15 @@ const WorkArea = () => {
           // Generate sample data based on attribute type
           let sampleValue;
           switch (attribute.type) {
-            case "number":
+            case "number": {
               sampleValue = Math.floor(Math.random() * 10) + 1;
               break;
-            case "boolean":
+            }
+            case "boolean": {
               sampleValue = Math.random() > 0.5 ? "Yes" : "No";
               break;
-            case "select":
+            }
+            case "select": {
               const options = attribute.values || [
                 "Option A",
                 "Option B",
@@ -1203,14 +1211,33 @@ const WorkArea = () => {
               ];
               sampleValue = options[Math.floor(Math.random() * options.length)];
               break;
-            default:
+            }
+            default: {
               sampleValue = `Sample ${attribute.name}`;
+            }
           }
 
           return { ...row, [newColumnId]: sampleValue };
         })
       );
     });
+
+    // Update selected attributes list and emit to library to sync
+    // Get all attribute column IDs including the newly added ones
+    setTimeout(() => {
+      setColumns((currentColumns) => {
+        const allAttributeColumns = currentColumns.filter(
+          (col) => col.group === "Attributes" && col.attributeId
+        );
+        const allSelectedAttributeIds = allAttributeColumns.map(
+          (col) => col.attributeId!
+        );
+        eventBus.emit("work-area-attributes-updated", {
+          selectedAttributes: allSelectedAttributeIds,
+        });
+        return currentColumns;
+      });
+    }, 100);
 
     setSelectedAttributes([]);
     setShowAttributeDialog(false);
@@ -1396,6 +1423,9 @@ const WorkArea = () => {
               (col) => col.group === "Attributes" && col.attributeId
             ).length
           }
+          highlightedIds={columns
+            .filter((col) => col.group === "Attributes" && col.attributeId)
+            .map((col) => col.attributeId!)}
         />
       </Dialog>
     </div>

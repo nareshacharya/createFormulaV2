@@ -447,28 +447,60 @@ const DataGrid = ({
               <input
                 type="number"
                 value={editValue}
-                onChange={(e) => setEditValue(parseFloat(e.target.value) || 0)}
+                onChange={(e) => {
+                  const val = parseFloat(e.target.value);
+                  // Prevent negative values
+                  if (val < 0 || isNaN(val)) {
+                    setEditValue(0);
+                  } else {
+                    setEditValue(val);
+                  }
+                }}
+                onInput={(e) => {
+                  // Additional safeguard - prevent negative input
+                  const input = e.target as HTMLInputElement;
+                  if (parseFloat(input.value) < 0) {
+                    input.value = "0";
+                    setEditValue(0);
+                  }
+                }}
                 onBlur={handleCellSave}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     handleCellSave();
                   } else if (e.key === "Escape") {
                     handleCellCancel();
+                  } else if (e.key === "-" || e.key === "Minus") {
+                    e.preventDefault(); // Block minus key
                   }
                 }}
-                className="w-full px-2 py-1 text-sm border border-blue-500 rounded focus:outline-none"
+                className="w-full px-3 py-2 text-sm border border-blue-500 rounded focus:outline-none"
                 autoFocus
                 min="0"
                 max="100"
+                step="0.01"
+                style={{
+                  MozAppearance: "textfield",
+                  appearance: "textfield",
+                }}
               />
-              <span className="ml-1 text-sm text-gray-500">%</span>
             </div>
           );
         }
+        // Show as editable-looking input field by default
         return (
           <div className="flex items-center">
-            <span className="text-sm">{value || 0}</span>
-            <span className="ml-1 text-sm text-gray-500">%</span>
+            <input
+              type="number"
+              value={value || 0}
+              readOnly
+              className="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded text-gray-900 cursor-pointer focus:outline-none"
+              min="0"
+              style={{
+                MozAppearance: "textfield",
+                appearance: "textfield",
+              }}
+            />
           </div>
         );
       }
@@ -485,22 +517,64 @@ const DataGrid = ({
 
       // Total rows for formula columns - make Target Total editable for active formula
       if (isTotal && isFormulaColumn) {
-        if (row.totalType === "target" && isActiveFormula && isEditing) {
+        if (row.totalType === "target" && isActiveFormula) {
+          if (isEditing) {
+            return (
+              <input
+                type="number"
+                value={editValue}
+                onChange={(e) => {
+                  const val = parseFloat(e.target.value);
+                  // Prevent negative values
+                  if (val < 0 || isNaN(val)) {
+                    setEditValue(0);
+                  } else {
+                    setEditValue(val);
+                  }
+                }}
+                onInput={(e) => {
+                  // Additional safeguard - prevent negative input
+                  const input = e.target as HTMLInputElement;
+                  if (parseFloat(input.value) < 0) {
+                    input.value = "0";
+                    setEditValue(0);
+                  }
+                }}
+                onBlur={handleCellSave}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleCellSave();
+                  } else if (e.key === "Escape") {
+                    handleCellCancel();
+                  } else if (e.key === "-" || e.key === "Minus") {
+                    e.preventDefault(); // Block minus key
+                  }
+                }}
+                className="w-full px-3 py-2 text-sm border border-blue-500 rounded focus:outline-none font-semibold"
+                autoFocus
+                min="0"
+                step="0.01"
+                style={{
+                  MozAppearance: "textfield",
+                  appearance: "textfield",
+                }}
+              />
+            );
+          }
+          // Show as input field even when not editing (for Target Total in active formula)
+          const displayValue =
+            typeof value === "number" ? value.toFixed(2) : value;
           return (
             <input
               type="number"
-              value={editValue}
-              onChange={(e) => setEditValue(parseFloat(e.target.value) || 0)}
-              onBlur={handleCellSave}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleCellSave();
-                } else if (e.key === "Escape") {
-                  handleCellCancel();
-                }
+              value={displayValue}
+              readOnly
+              className="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded font-semibold text-gray-900 cursor-pointer focus:outline-none"
+              min="0"
+              style={{
+                MozAppearance: "textfield",
+                appearance: "textfield",
               }}
-              className="w-full px-2 py-1 text-sm border border-blue-500 rounded focus:outline-none font-semibold"
-              autoFocus
             />
           );
         }

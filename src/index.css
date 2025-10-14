@@ -1,7 +1,20 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Remove spinner arrows from number inputs - with !important to ensure it works */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  margin: 0 !important;
+  display: none !important;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield !important;
+  appearance: textfield !important;
+}
 
 /* Custom styles for react-query-builder */
 .query-builder-custom {
