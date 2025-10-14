@@ -245,35 +245,33 @@ const LibraryPanel = () => {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-hidden">
-        <div className="flex-1 overflow-auto px-0 pb-4">
-          {activeTab === "ingredients" && (
-            <IngredientList
-              ingredients={filteredIngredients}
-              searchQuery={searchQuery}
-              onIngredientSelect={handleIngredientSelect}
-              selectedIngredients={selectedIngredients}
-            />
-          )}
+      <div className="flex-1 overflow-auto">
+        {activeTab === "ingredients" && (
+          <IngredientList
+            ingredients={filteredIngredients}
+            searchQuery={searchQuery}
+            onIngredientSelect={handleIngredientSelect}
+            selectedIngredients={selectedIngredients}
+          />
+        )}
 
-          {activeTab === "formulas" && (
-            <FormulaList
-              formulas={filteredFormulas}
-              searchQuery={searchQuery}
-              onFormulaSelect={handleFormulaSelect}
-              selectedFormulas={selectedFormulaIds}
-            />
-          )}
+        {activeTab === "formulas" && (
+          <FormulaList
+            formulas={filteredFormulas}
+            searchQuery={searchQuery}
+            onFormulaSelect={handleFormulaSelect}
+            selectedFormulas={selectedFormulaIds}
+          />
+        )}
 
-          {activeTab === "attributes" && (
-            <IngredientAttributeList
-              attributes={filteredAttributes}
-              searchQuery={searchQuery}
-              onAttributeSelect={handleAttributeSelect}
-              selectedAttributes={selectedAttributes}
-            />
-          )}
-        </div>
+        {activeTab === "attributes" && (
+          <IngredientAttributeList
+            attributes={filteredAttributes}
+            searchQuery={searchQuery}
+            onAttributeSelect={handleAttributeSelect}
+            selectedAttributes={selectedAttributes}
+          />
+        )}
       </div>
 
       {/* Results Summary */}

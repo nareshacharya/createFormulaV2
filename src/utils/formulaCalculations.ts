@@ -35,7 +35,11 @@ export const calculateTotals = (
                     );
                     break;
                 case "target":
-                    updatedRow[col.key] = 100.0; // Target is typically 100%
+                    // Preserve existing target value if it exists, otherwise default to 100.0
+                    if (updatedRow[col.key] === null || updatedRow[col.key] === undefined) {
+                        updatedRow[col.key] = 100.0;
+                    }
+                    // If target was already set, keep the existing value
                     break;
                 case "rmc": {
                     // Calculate raw material cost based on percentages and costs

@@ -169,6 +169,18 @@ const WorkArea = () => {
 
   useEffect(() => {
     const handleIngredientClick = (data: { ingredient: Ingredient }) => {
+      // VALIDATION: Check if we have at least one formula column before adding ingredients
+      const hasFormulaColumns = columns.some(
+        (col) => col.group === "Formulas" && col.formulaId
+      );
+      if (!hasFormulaColumns) {
+        toast.error(
+          "Please add a formula first before adding ingredients",
+          { duration: 3000 }
+        );
+        return;
+      }
+
       // Check if ingredient already exists in the work area
       const existingIngredient = tableData.find(
         (row) =>
@@ -178,8 +190,7 @@ const WorkArea = () => {
       );
 
       if (existingIngredient) {
-        // If ingredient already exists, don't add duplicate
-        console.log(`${data.ingredient.name} is already in the work area`);
+        toast.error(`${data.ingredient.name} is already in the work area`);
         return;
       }
 
@@ -430,6 +441,18 @@ const WorkArea = () => {
     const handleAttributeSelected = (data: {
       attribute: IngredientAttribute;
     }) => {
+      // VALIDATION: Check if we have at least one formula column before adding attributes
+      const hasFormulaColumns = columns.some(
+        (col) => col.group === "Formulas" && col.formulaId
+      );
+      if (!hasFormulaColumns) {
+        toast.error(
+          "Please add a formula first before adding attributes",
+          { duration: 3000 }
+        );
+        return;
+      }
+
       const newColumnId = `attr_${Date.now()}_${Math.random()
         .toString(36)
         .substr(2, 9)}`;
