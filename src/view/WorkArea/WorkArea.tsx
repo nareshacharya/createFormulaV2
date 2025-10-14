@@ -681,18 +681,8 @@ const WorkArea = () => {
         return updated;
       });
 
-      // Update selected formula IDs
-      const newSelectedIds = [...selectedFormulaIds, data.formula.id];
-      setSelectedFormulaIds(newSelectedIds);
-
-      // Update formula selections count with selected IDs
-      const newCount =
-        columns.filter((col) => col.group === "Formulas" && col.formulaId)
-          .length + 1;
-      eventBus.emit("formula-selections-updated", {
-        count: newCount,
-        selectedIds: newSelectedIds,
-      });
+      // Note: Do NOT update selectedFormulaIds here - formulas added via popup
+      // should not be highlighted in the library panel
     };
 
     const handleFormulaSelectedForColumn = (data: { formula: Formula }) => {
@@ -953,9 +943,8 @@ const WorkArea = () => {
         }
       });
 
-      // Update selected formula IDs
-      const newSelectedIds = [...selectedFormulaIds, data.formula.id];
-      setSelectedFormulaIds(newSelectedIds);
+      // Note: Do NOT update selectedFormulaIds here - formulas added via popup
+      // should not be highlighted in the library panel
 
       // If this is the first formula column, automatically activate it
       if (currentFormulaColumns.length === 0) {
@@ -967,15 +956,6 @@ const WorkArea = () => {
           setTableData((prev) => calculateTotals(prev, columns, [newColumnId]));
         }, 0);
       }
-
-      // Update formula selections count with selected IDs
-      const newCount =
-        columns.filter((col) => col.group === "Formulas" && col.formulaId)
-          .length + 1;
-      eventBus.emit("formula-selections-updated", {
-        count: newCount,
-        selectedIds: newSelectedIds,
-      });
 
       // Show success toast
       toast.success(
