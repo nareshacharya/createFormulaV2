@@ -1,0 +1,97 @@
+/**
+ * Modal Components for WorkArea
+ * Extracted to keep WorkArea.tsx under 1000 lines
+ */
+
+import FormulaModal from "../../../components/FormulaModal";
+import Dialog from "../../../components/Dialog";
+import AttributeSelector from "../../../components/AttributeSelector";
+import Button from "../../../components/Button";
+import type { Formula, IngredientAttribute } from "../../../services/pega";
+
+interface ModalsProps {
+  // Formula Modal
+  showFormulaModal: boolean;
+  setShowFormulaModal: (show: boolean) => void;
+  onFormulaModalCreateFormula: (formula: Omit<Formula, "id">) => void;
+  onFormulaModalSelectFormula: (formula: Formula) => void;
+  availableFormulas: Formula[];
+  maxFormulaSelections: number;
+  currentFormulaSelections: number;
+  selectedFormulaIds: string[];
+
+  // Attribute Dialog
+  showAttributeDialog: boolean;
+  setShowAttributeDialog: (show: boolean) => void;
+  attributes: IngredientAttribute[];
+  selectedAttributes: IngredientAttribute[];
+  maxAttributeSelections: number;
+  onAttributesSelected: (attributes: IngredientAttribute[]) => void;
+}
+
+export const WorkAreaModals = ({
+  showFormulaModal,
+  setShowFormulaModal,
+  onFormulaModalCreateFormula,
+  onFormulaModalSelectFormula,
+  availableFormulas,
+  maxFormulaSelections,
+  currentFormulaSelections,
+  selectedFormulaIds,
+  showAttributeDialog,
+  setShowAttributeDialog,
+  attributes,
+  selectedAttributes,
+  maxAttributeSelections,
+  onAttributesSelected,
+}: ModalsProps) => {
+  return (
+    <>
+      {/* Formula Modal */}
+      <FormulaModal
+        isOpen={showFormulaModal}
+        onClose={() => setShowFormulaModal(false)}
+        onCreateFormula={onFormulaModalCreateFormula}
+        onSelectFormula={onFormulaModalSelectFormula}
+        availableFormulas={availableFormulas}
+        maxSelections={maxFormulaSelections}
+        currentSelections={currentFormulaSelections}
+        selectedFormulaIds={selectedFormulaIds}
+      />
+
+      {/* Attribute Selector Dialog */}
+      <Dialog
+        isOpen={showAttributeDialog}
+        onClose={() => setShowAttributeDialog(false)}
+        title="Select Attributes"
+        size="lg"
+      >
+        <div className="space-y-4">
+          <AttributeSelector
+            attributes={attributes}
+            selectedIds={selectedAttributes.map((attr) => attr.id)}
+            onSelectionChange={(ids) => {
+              const selected = attributes.filter((attr) => ids.includes(attr.id));
+              onAttributesSelected(selected);
+            }}
+            maxSelections={maxAttributeSelections}
+          />
+          <div className="flex justify-end space-x-2 pt-4 border-t">
+            <Button
+              variant="secondary"
+              onClick={() => setShowAttributeDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => setShowAttributeDialog(false)}
+            >
+              Apply
+            </Button>
+          </div>
+        </div>
+      </Dialog>
+    </>
+  );
+};

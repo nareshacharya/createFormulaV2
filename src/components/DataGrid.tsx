@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import Badge from "./Badge";
+import { useClickOutside } from "../hooks/useClickOutside";
 
 export interface Column {
   id: string;
@@ -29,6 +30,8 @@ interface DataGridProps {
   onDeleteColumn?: (columnId: string) => void;
   onSetActiveFormula?: (columnId: string) => void;
   onCreateVersion?: (columnId: string) => void;
+  onNormalizeFormula?: (columnId: string) => void;
+  onSendForCompounding?: (columnId: string) => void;
   onExplodeFormula?: (formulaId: string) => void;
   onToggleFormulaExpansion?: (formulaId: string) => void;
   onColumnReorder?: (fromIndex: number, toIndex: number) => void;
@@ -46,6 +49,8 @@ const DataGrid = ({
   onDeleteColumn,
   onSetActiveFormula,
   onCreateVersion,
+  onNormalizeFormula,
+  onSendForCompounding,
   onExplodeFormula,
   onToggleFormulaExpansion,
   onColumnReorder,
@@ -69,6 +74,14 @@ const DataGrid = ({
   );
 
   const tableRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close menu when clicking outside
+  useClickOutside(menuRef, () => {
+    if (showColumnActions) {
+      setShowColumnActions(null);
+    }
+  }, showColumnActions !== null);
 
   // Group columns by their group property
   const groupedColumns = columns.reduce((acc, column, index) => {
@@ -835,14 +848,17 @@ const DataGrid = ({
                               </button>
 
                               {showColumnActions === column.id && (
-                                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-20 min-w-40">
+                                <div 
+                                  ref={menuRef}
+                                  className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-20 min-w-[200px]"
+                                >
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       onSetActiveFormula?.(column.id);
                                       setShowColumnActions(null);
                                     }}
-                                    className="w-full px-3 py-2 text-left text-sm text-blue-600 hover:bg-blue-50 flex items-center space-x-2"
+                                    className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
                                   >
                                     <i className="ri-edit-line text-xs"></i>
                                     <span>Set Active</span>
@@ -853,18 +869,42 @@ const DataGrid = ({
                                       onCreateVersion?.(column.id);
                                       setShowColumnActions(null);
                                     }}
-                                    className="w-full px-3 py-2 text-left text-sm text-green-600 hover:bg-green-50 flex items-center space-x-2"
+                                    className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2 whitespace-nowrap"
                                   >
                                     <i className="ri-file-copy-line text-xs"></i>
                                     <span>Create new version</span>
                                   </button>
+                                  <div className="border-t border-gray-200 my-1"></div>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onNormalizeFormula?.(column.id);
+                                      setShowColumnActions(null);
+                                    }}
+                                    className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                                  >
+                                    <i className="ri-scales-line text-xs"></i>
+                                    <span>Normalize</span>
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onSendForCompounding?.(column.id);
+                                      setShowColumnActions(null);
+                                    }}
+                                    className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2 whitespace-nowrap"
+                                  >
+                                    <i className="ri-send-plane-line text-xs"></i>
+                                    <span>Send for Compounding</span>
+                                  </button>
+                                  <div className="border-t border-gray-200 my-1"></div>
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       onDeleteColumn?.(column.id);
                                       setShowColumnActions(null);
                                     }}
-                                    className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
+                                    className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
                                   >
                                     <i className="ri-close-circle-line text-xs"></i>
                                     <span>Remove</span>

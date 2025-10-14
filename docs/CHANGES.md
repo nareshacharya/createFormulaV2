@@ -1,7 +1,221 @@
 # Change Log - October 14, 2024
 
 ## Summary
-Comprehensive bug fixes and UX improvements for the Formula Management Application.
+Comprehensive bug fixes, UX improvements, and new features for the Formula Management Application including formula versioning with advanced naming conventions, menu enhancements, and code refactoring.
+
+---
+
+## 🆕 Latest Updates - October 14, 2024 (Current Session)
+
+### ✅ Formula Naming Convention System
+**Feature**: Implemented standardized formula ID generation with user tracking and project awareness.
+
+**Naming Pattern**: `[USER_INITIALS]F-[PRODUCT_INITIALS][SEQUENTIAL_NUMBER]v[VERSION]`
+
+**Example**: `JDF-PFRA-00001v1` (John Doe's Formula for Perfume Fragrance #1, version 1)
+
+**Implementation**:
+- Created `src/utils/formulaNaming.ts` with comprehensive naming utilities
+- Automatic detection of formulas from other projects
+- Generates new ID with v1 when adapting reference formulas
+- Increments version for formulas from same project
+- Sequential number tracking with 5-digit padding (00001-99999)
+
+**Files Created**:
+- `src/utils/formulaNaming.ts` (136 lines)
+
+**Features**:
+- `getCurrentUserInitials()` - Gets current user initials (TODO: integrate with Pega user service)
+- `getProductInitials()` - Extracts up to 4 letters from product name
+- `getNextSequentialNumber()` - Finds highest number and increments
+- `generateFormulaId()` - Creates complete formula ID
+- `isFormulaFromOtherProject()` - Compares user initials in ID
+- `isValidFormulaId()` - Validates ID format
+
+---
+
+### ✅ Enhanced Formula Column Menu
+**Feature**: Redesigned three-dot menu with consistent styling and additional actions.
+
+**Changes**:
+1. **Consistent Text Colors**: All menu items now use `text-gray-700` instead of mixed colors (red, green, blue)
+2. **Single-Line Text**: Added `whitespace-nowrap` to prevent text wrapping
+3. **Menu Width**: Increased from 40 to 200px (`min-w-[200px]`)
+4. **Click Outside**: Implemented `useClickOutside` hook to close menu when clicking away
+5. **Added Separators**: Visual dividers between action groups
+
+**Menu Actions**:
+- **Set Active** - Makes formula editable
+- **Create new version** - Creates versioned copy with new ID
+- **Normalize** (new) - Synced with header action
+- **Send for Compounding** (new) - Synced with header action  
+- **Remove** - Removes column from work area
+
+**Files Created**:
+- `src/hooks/useClickOutside.ts` (40 lines)
+
+**Files Modified**:
+- `src/components/DataGrid.tsx` - Menu UI and props
+- `src/view/WorkArea/WorkArea.tsx` - Handler integration
+
+---
+
+### ✅ Formula Version Creation with Limits
+**Feature**: Create new versions of formulas with maximum column limit enforcement.
+
+**Functionality**:
+- Checks if maximum formula columns (4) already exist
+- Shows toast error when limit reached
+- Copies all data from original column to new version
+- Generates proper ID based on naming convention
+- Handles reference formulas from other projects differently
+- Toast notifications for all actions
+
+**Formula Limit Check**:
+```typescript
+if (currentFormulaColumns.length >= maxFormulaSelections) {
+  toast.error(
+    `Maximum of ${maxFormulaSelections} formula columns allowed...`
+  );
+  return;
+}
+```
+
+**Version Logic**:
+- **Same Project**: Increments version (v1 → v2 → v3)
+- **Other Project**: Generates new ID with v1
+
+**Files Modified**:
+- `src/view/WorkArea/components/FormulaColumnHandlers.tsx` (new, 288 lines)
+- `src/view/WorkArea/WorkArea.tsx` - Uses extracted handlers
+
+**Toasts**:
+- Loading: "Creating new version..."
+- Success: "Created v2: JDF-PFRA-00001v2"
+- Error: "Failed to create new version"
+- Reference: "Formula adapted from reference. New formula ID generated."
+
+---
+
+### ✅ Menu Actions Synced with Header
+**Feature**: Normalize and Send for Compounding now available in formula column menu.
+
+**Implementation**:
+- `onNormalizeFormula` prop added to DataGrid
+- `onSendForCompounding` prop added to DataGrid
+- Both actions emit events to keep header in sync
+- State history tracking for undo functionality
+- Toast notifications for all actions
+
+**Normalize Action**:
+- Calls existing `handleNormalize()` function
+- Shows toast: "Normalized formula: [Formula Name]"
+- Saves state for undo
+- Updates undo count in header
+
+**Send for Compounding Action**:
+- Validates formula is active before sending
+- Shows error if not active formula
+- Simulates API call with loading state
+- Success toast with formula name
+- Emits event for header synchronization
+
+**Files Modified**:
+- `src/components/DataGrid.tsx` - Added handler props
+- `src/view/WorkArea/components/FormulaColumnHandlers.tsx` - Handler implementation
+
+---
+
+### ✅ Code Refactoring for File Size Management
+**Goal**: Keep all files under 1000 lines for maintainability.
+
+**Progress**:
+- ✅ **WorkArea.tsx**: Reduced from 1683 to 1454 lines (target: <1000)
+- ⚠️ **DataGrid.tsx**: Currently 1050 lines (target: <1000)
+- ✅ **Extracted Components**: 288 lines + 92 lines
+
+**Extracted Files**:
+1. `src/view/WorkArea/components/FormulaColumnHandlers.tsx` (288 lines)
+   - `handleCreateVersion`
+   - `handleNormalizeFromMenu`
+   - `handleSendForCompoundingFromMenu`
+
+2. `src/view/WorkArea/components/WorkAreaModals.tsx` (92 lines)
+   - Formula Modal component
+   - Attribute Selector Dialog component
+
+3. `src/hooks/useClickOutside.ts` (40 lines)
+   - Reusable click-outside detection hook
+
+**Architecture Benefits**:
+- Smaller, more focused files
+- Better separation of concerns
+- Easier testing and maintenance
+- Reusable hooks and components
+
+---
+
+### ✅ State History Integration
+**Feature**: All formula actions now tracked in state history for undo functionality.
+
+**Actions Tracked**:
+- Create version
+- Normalize formula
+- Send for compounding
+
+**Implementation**:
+```typescript
+appStateHistory.push(
+  { columns, tableData, formulas },
+  "action_type",
+  "Human-readable description"
+);
+
+eventBus.emit("undo-state-updated", {
+  canUndo: appStateHistory.canUndo(),
+  count: appStateHistory.getUndoCount(),
+});
+```
+
+**Files Modified**:
+- `src/view/WorkArea/components/FormulaColumnHandlers.tsx` - State tracking
+
+---
+
+### 🔄 Pending Items
+
+#### File Size Reduction
+- [ ] DataGrid.tsx still at 1050 lines (needs 50+ line reduction)
+- [ ] WorkArea.tsx still at 1454 lines (needs 454+ line reduction)
+
+**Recommended Extractions**:
+1. **DataGrid Cell Rendering** (~200 lines)
+   - Extract `renderCell` function
+   - Create `DataGridCell` component
+
+2. **DataGrid Header Rendering** (~150 lines)
+   - Extract header row logic
+   - Create `DataGridHeader` component
+
+3. **WorkArea Event Handlers** (~200 lines)
+   - Extract modal handlers
+   - Extract formula selection handlers
+   - Create `useWorkAreaHandlers` hook
+
+#### Pega API Integration
+- [ ] Replace simulated API calls in `handleCreateVersion`
+- [ ] Implement `PegaService.createFormulaVersion()`
+- [ ] Implement `PegaService.sendForCompounding()`
+- [ ] Integrate with actual user service for initials
+
+#### User Service Integration
+- [ ] Replace `getCurrentUserInitials()` mock
+- [ ] Fetch real user data from Pega
+- [ ] Store user preferences
+
+---
+
+## Previous Changes
 
 ## Issues Addressed
 
