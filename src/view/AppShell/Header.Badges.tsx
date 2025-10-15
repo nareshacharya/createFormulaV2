@@ -99,17 +99,15 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
         ref={dropdownRef}
       >
         {/* Project Name with Dropdown */}
-        <div className="relative">
+        <div className="relative group">
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             className="flex items-center gap-2 hover:opacity-80 transition-opacity"
           >
             <i className="ri-folder-3-line text-purple-300 text-xl"></i>
-            <div className="flex flex-col gap-0.5 items-start">
-              <span className="text-xs text-white/50 font-medium text-left">
-                Project
-              </span>
-              <span className="text-sm font-semibold text-white text-left">
+            <div className="flex flex-col items-start gap-0.5">
+              <span className="text-xs text-white/50 font-medium">Project</span>
+              <span className="text-sm font-semibold text-white">
                 {currentFormula?.projectName || "Fragrance Lab Pro"}
               </span>
             </div>
@@ -122,29 +120,100 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
 
           {/* Dropdown Menu */}
           {isDropdownOpen && (
-            <div className="absolute top-full left-0 mt-2 bg-gray-800 rounded-lg shadow-xl border border-gray-700 py-2 min-w-[280px] z-50">
-              <div className="px-4 py-2 border-b border-gray-700">
-                <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">
-                  Product
+            <div className="absolute top-full left-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 min-w-[320px] z-50">
+              {/* Formula Info - Only visible on small screens */}
+              <div className="lg:hidden">
+                <div className="px-3 py-2 mb-2">
+                  <div className="grid grid-cols-3 gap-2">
+                    {/* Formula Name Tile */}
+                    <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-lg p-3 border border-pink-200">
+                      <div className="flex items-center gap-1 mb-1">
+                        <i className="ri-flask-line text-pink-600 text-sm"></i>
+                        <span className="text-[10px] text-pink-700 font-semibold uppercase tracking-wide">
+                          Formula
+                        </span>
+                      </div>
+                      <div className="text-xs text-pink-900 font-semibold truncate">
+                        {currentFormula?.name || "-"}
+                      </div>
+                    </div>
+
+                    {/* Formula ID Tile */}
+                    <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-lg p-3 border border-cyan-200">
+                      <div className="flex items-center gap-1 mb-1">
+                        <i className="ri-hashtag text-cyan-600 text-sm"></i>
+                        <span className="text-[10px] text-cyan-700 font-semibold uppercase tracking-wide">
+                          ID
+                        </span>
+                      </div>
+                      <div className="text-xs text-cyan-900 font-semibold truncate">
+                        {currentFormula?.id || "-"}
+                      </div>
+                    </div>
+
+                    {/* Status Tile */}
+                    <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-3 border border-orange-200">
+                      <div className="flex items-center gap-1 mb-1">
+                        <i className="ri-checkbox-circle-line text-orange-600 text-sm"></i>
+                        <span className="text-[10px] text-orange-700 font-semibold uppercase tracking-wide">
+                          Status
+                        </span>
+                      </div>
+                      <div
+                        className={`px-2 py-0.5 rounded-full text-[9px] font-bold inline-block ${getStatusVariant(
+                          currentFormula?.status
+                        )}`}
+                      >
+                        {currentFormula?.status?.toUpperCase() || "NEW"}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="text-sm text-white font-medium">
-                  {currentFormula?.name || "-"}
+                <div className="border-t border-gray-200 my-2"></div>
+              </div>
+
+              {/* Product Info Tile */}
+              <div className="px-3 py-2">
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-3 border border-purple-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <i className="ri-product-hunt-line text-purple-600 text-base"></i>
+                    <span className="text-[10px] text-purple-700 font-bold uppercase tracking-wider">
+                      Product
+                    </span>
+                  </div>
+                  <div className="text-sm text-purple-900 font-semibold">
+                    {currentFormula?.name || "-"}
+                  </div>
                 </div>
               </div>
-              <div className="px-4 py-2 border-b border-gray-700">
-                <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">
-                  Created By
-                </div>
-                <div className="text-sm text-white font-medium">
-                  {currentFormula?.createdBy || "-"}
+
+              {/* Created By Tile */}
+              <div className="px-3 py-2">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-3 border border-blue-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <i className="ri-user-line text-blue-600 text-base"></i>
+                    <span className="text-[10px] text-blue-700 font-bold uppercase tracking-wider">
+                      Created By
+                    </span>
+                  </div>
+                  <div className="text-sm text-blue-900 font-semibold">
+                    {currentFormula?.createdBy || "-"}
+                  </div>
                 </div>
               </div>
-              <div className="px-4 py-2">
-                <div className="text-xs text-gray-400 uppercase tracking-wider mb-1">
-                  Last Updated
-                </div>
-                <div className="text-sm text-white font-medium">
-                  {formatDate(currentFormula?.lastUpdated)}
+
+              {/* Last Updated Tile */}
+              <div className="px-3 py-2">
+                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-3 border border-green-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <i className="ri-calendar-line text-green-600 text-base"></i>
+                    <span className="text-[10px] text-green-700 font-bold uppercase tracking-wider">
+                      Last Updated
+                    </span>
+                  </div>
+                  <div className="text-sm text-green-900 font-semibold">
+                    {formatDate(currentFormula?.lastUpdated)}
+                  </div>
                 </div>
               </div>
             </div>
@@ -154,34 +223,43 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
         {/* Vertical Divider */}
         <div className="w-px h-10 bg-purple-600/50"></div>
 
-        {/* Formula Name & ID */}
-        <div className="flex items-center gap-2">
+        {/* Formula Name - Hidden on small screens */}
+        <div className="hidden lg:flex items-center gap-2 group">
           <i className="ri-flask-line text-pink-300 text-xl"></i>
           <div className="flex flex-col items-start">
-            <span className="text-xs text-white/50 font-medium text-left">
-              Formula
-            </span>
-            <span className="text-sm font-semibold text-white text-left">
+            <span className="text-xs text-white/50 font-medium">Formula</span>
+            <span className="text-sm font-semibold text-white">
               {currentFormula?.name || "-"}
             </span>
-            <span className="text-xs text-white/40 text-left">
+          </div>
+        </div>
+
+        {/* Vertical Divider - Hidden on small screens */}
+        <div className="hidden lg:block w-px h-10 bg-purple-600/50"></div>
+
+        {/* Formula ID - Hidden on small screens */}
+        <div className="hidden lg:flex items-center gap-2 group">
+          <i className="ri-hashtag text-cyan-300 text-xl"></i>
+          <div className="flex flex-col items-start">
+            <span className="text-xs text-white/50 font-medium">ID</span>
+            <span className="text-sm font-semibold text-white">
               {currentFormula?.id || "-"}
             </span>
           </div>
         </div>
 
-        {/* Vertical Divider */}
-        <div className="w-px h-10 bg-purple-600/50"></div>
+        {/* Vertical Divider - Hidden on small screens */}
+        <div className="hidden lg:block w-px h-10 bg-purple-600/50"></div>
 
-        {/* Status */}
-        <div className="flex items-center gap-2">
+        {/* Status - Hidden on small screens */}
+        <div className="hidden lg:flex items-center gap-2 group">
           <i className="ri-checkbox-circle-line text-orange-300 text-xl"></i>
           <div className="flex flex-col items-start">
-            <span className="text-xs text-white/50 font-medium mb-1 text-left">
+            <span className="text-xs text-white/50 font-medium mb-1">
               Status
             </span>
             <div
-              className={`px-2 py-0.5 rounded-full text-xs font-semibold ${getStatusVariant(
+              className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${getStatusVariant(
                 currentFormula?.status
               )}`}
             >
@@ -194,13 +272,11 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
         <div className="w-px h-10 bg-purple-600/50"></div>
 
         {/* Lines Count */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 group">
           <i className="ri-list-check-2 text-yellow-300 text-xl"></i>
           <div className="flex flex-col items-start">
-            <span className="text-xs text-white/50 font-medium text-left">
-              Lines
-            </span>
-            <span className="text-base font-semibold text-white text-left">
+            <span className="text-xs text-white/50 font-medium">Lines</span>
+            <span className="text-sm font-semibold text-white">
               {metrics.lineCount}
             </span>
           </div>
@@ -210,13 +286,13 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
         <div className="w-px h-10 bg-purple-600/50"></div>
 
         {/* Formula Cost */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 group">
           <i className="ri-price-tag-3-line text-green-300 text-xl"></i>
           <div className="flex flex-col items-start">
-            <span className="text-xs text-white/50 font-medium text-left">
+            <span className="text-xs text-white/50 font-medium">
               Formula Cost
             </span>
-            <span className="text-base font-semibold text-white text-left">
+            <span className="text-sm font-semibold text-white">
               ${metrics.formulaCost.toFixed(2)}
             </span>
           </div>
@@ -226,13 +302,13 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
         <div className="w-px h-10 bg-purple-600/50"></div>
 
         {/* Target Cost (RMC) */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 group">
           <i className="ri-money-dollar-circle-line text-blue-300 text-xl"></i>
           <div className="flex flex-col items-start">
-            <span className="text-xs text-white/50 font-medium text-left">
+            <span className="text-xs text-white/50 font-medium">
               Target Cost
             </span>
-            <span className="text-base font-semibold text-white text-left">
+            <span className="text-sm font-semibold text-white">
               ${metrics.targetCost.toFixed(2)}
             </span>
           </div>
