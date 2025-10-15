@@ -1,6 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import Badge from "./Badge";
 import { useClickOutside } from "../hooks/useClickOutside";
+import { useRowReordering } from "./DataGrid/hooks/useRowReordering";
+import { useSavedViews } from "./DataGrid/hooks/useSavedViews";
+import { ViewManager } from "./DataGrid/components/ViewManager";
+import { isRowDraggable } from "./DataGrid/utils/rowOrdering";
 
 export interface Column {
   id: string;
@@ -35,9 +39,14 @@ interface DataGridProps {
   onExplodeFormula?: (formulaId: string) => void;
   onToggleFormulaExpansion?: (formulaId: string) => void;
   onColumnReorder?: (fromIndex: number, toIndex: number) => void;
+  onRowReorder?: (rowOrder: string[]) => void;
+  onSaveView?: (viewName: string) => void;
+  onLoadView?: (viewId: string) => void;
   editableFormula?: string;
   className?: string;
   showEmptyState?: boolean;
+  enableRowReordering?: boolean;
+  enableSavedViews?: boolean;
 }
 
 const DataGrid = ({
@@ -54,9 +63,14 @@ const DataGrid = ({
   onExplodeFormula,
   onToggleFormulaExpansion,
   onColumnReorder,
+  onRowReorder,
+  onSaveView,
+  onLoadView,
   editableFormula,
   className = "",
   showEmptyState = false,
+  enableRowReordering = true,
+  enableSavedViews = false,
 }: DataGridProps) => {
   const [sortConfig, setSortConfig] = useState<{
     key: string;
@@ -73,8 +87,34 @@ const DataGrid = ({
     null
   );
 
+  // Row reordering hooks
+  const {
+    dragState: rowDragState,
+    handleDragStart: handleRowDragStart,
+    handleDragOver: handleRowDragOver,
+    handleDragEnd: handleRowDragEnd,
+    handleDragLeave: handleRowDragLeave,
+  } = useRowReordering(data, onRowReorder);
+
+  // Saved views hooks
+  const {
+    savedViews,
+    currentViewId,
+    saveView,
+    loadView,
+    deleteView,
+    loadSavedViews,
+  } = useSavedViews();
+
   const tableRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Load saved views on mount
+  useEffect(() => {
+    if (enableSavedViews) {
+      loadSavedViews();
+    }
+  }, [enableSavedViews, loadSavedViews]);
 
   // Close menu when clicking outside
   useClickOutside(
@@ -682,6 +722,13 @@ const DataGrid = ({
 
     return (
       <tr>
+        {/* Drag handle column (if enabled) */}
+        {enableRowReordering && (
+          <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200 bg-gray-50">
+            {/* Empty for drag handle */}
+          </th>
+        )}
+
         {/* Row actions column */}
         <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200 bg-gray-50">
           {/* Empty for row actions */}
@@ -729,6 +776,25 @@ const DataGrid = ({
 
   return (
     <div className={`flex flex-col h-full ${className}`} ref={tableRef}>
+      {/* View Manager toolbar */}
+      {enableSavedViews && (
+        <div className="mb-2">
+          <ViewManager
+            savedViews={savedViews}
+            currentViewId={currentViewId}
+            onSaveView={(viewName) => {
+              saveView(viewName, data.map((row) => row.id));
+              onSaveView?.(viewName);
+            }}
+            onLoadView={(viewId) => {
+              loadView(viewId);
+              onLoadView?.(viewId);
+            }}
+            onDeleteView={deleteView}
+          />
+        </div>
+      )}
+
       <div className="flex-1 overflow-auto border border-gray-200 rounded-lg">
         <table className="w-full">
           <thead className="bg-white sticky top-0 z-10">
@@ -737,6 +803,13 @@ const DataGrid = ({
 
             {/* Column headers */}
             <tr className="border-b border-gray-200">
+              {/* Drag handle column (if enabled) */}
+              {enableRowReordering && (
+                <th className="w-8 px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
+                  <i className="ri-draggable text-gray-400"></i>
+                </th>
+              )}
+
               {/* Row actions column */}
               <th className="w-12 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
                 <i className="ri-settings-3-line text-gray-400"></i>
@@ -945,9 +1018,18 @@ const DataGrid = ({
 
               if (shouldHide) return null;
 
+              const isDraggable = enableRowReordering && isRowDraggable(row);
+              const isBeingDragged = rowDragState.draggedRowId === row.id;
+              const isDraggedOver = rowDragState.dragOverRowId === row.id;
+
               return (
                 <tr
                   key={row.id}
+                  draggable={isDraggable}
+                  onDragStart={() => handleRowDragStart(row.id)}
+                  onDragOver={(e) => handleRowDragOver(e, row.id)}
+                  onDragEnd={handleRowDragEnd}
+                  onDragLeave={handleRowDragLeave}
                   className={`
                     ${
                       row.isTotal
@@ -956,8 +1038,22 @@ const DataGrid = ({
                     }
                     ${row.isEmpty ? "bg-gray-50" : ""}
                     ${row.parentFormulaId ? "bg-blue-25" : ""}
+                    ${isBeingDragged ? "opacity-50" : ""}
+                    ${isDraggedOver ? "border-t-2 border-blue-500" : ""}
                   `}
                 >
+                  {/* Drag handle cell (if enabled) */}
+                  {enableRowReordering && (
+                    <td
+                      className="w-8 px-2 py-2 text-center"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {isDraggable && (
+                        <i className="ri-draggable text-gray-400 cursor-move"></i>
+                      )}
+                    </td>
+                  )}
+
                   {/* Row actions */}
                   <td
                     className="w-12 px-3 py-2 text-center"

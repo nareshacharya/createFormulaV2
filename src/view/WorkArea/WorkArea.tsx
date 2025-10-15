@@ -1202,6 +1202,36 @@ const WorkArea = () => {
     );
   };
 
+  // Row reordering handler
+  const handleRowReorder = (rowOrder: string[]) => {
+    setTableData((prev) => {
+      // Separate total rows from regular rows
+      const totalRows = prev.filter((row) => row.isTotal);
+      const regularRows = prev.filter((row) => !row.isTotal);
+
+      // Create a map for quick lookup
+      const rowMap = new Map(regularRows.map((row) => [row.id, row]));
+
+      // Reorder according to the new order
+      const reorderedRows = rowOrder
+        .map((id) => rowMap.get(id))
+        .filter((row): row is NonNullable<typeof row> => row !== undefined);
+
+      // Return reordered rows followed by total rows
+      return [...reorderedRows, ...totalRows];
+    });
+  };
+
+  // Save view handler
+  const handleSaveView = (viewName: string) => {
+    toast.success(`View "${viewName}" saved successfully`);
+  };
+
+  // Load view handler
+  const handleLoadView = (viewId: string) => {
+    toast.success(`View loaded successfully`);
+  };
+
   // Check if we have any ingredient data to show
   const hasIngredients = tableData.some((row) => !row.isTotal);
 
@@ -1311,9 +1341,14 @@ const WorkArea = () => {
           onExplodeFormula={handleExplodeFormula}
           onToggleFormulaExpansion={handleToggleFormulaExpansion}
           onColumnReorder={handleColumnReorder}
+          onRowReorder={handleRowReorder}
+          onSaveView={handleSaveView}
+          onLoadView={handleLoadView}
           editableFormula={editableFormula}
           className="h-full"
           showEmptyState={!hasIngredients}
+          enableRowReordering={true}
+          enableSavedViews={true}
         />
       </div>
 
