@@ -800,7 +800,7 @@ const DataGrid = ({
                                 onToggleGrouping={onToggleGrouping}
                               />
                             )}
-                          
+
                           {/* Remove icon for all formula and attribute columns */}
                           {((column.id.startsWith("formula") &&
                             !column.fixed) ||

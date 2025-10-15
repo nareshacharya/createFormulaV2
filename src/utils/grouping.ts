@@ -4,8 +4,8 @@
  */
 
 export interface GroupedData {
-  groupValue: string;
-  rows: any[];
+    groupValue: string;
+    rows: any[];
 }
 
 /**
@@ -15,33 +15,33 @@ export interface GroupedData {
  * @returns Array of grouped data
  */
 export const groupDataByColumn = (
-  data: any[],
-  columnKey: string
+    data: any[],
+    columnKey: string
 ): GroupedData[] => {
-  const groups = new Map<string, any[]>();
+    const groups = new Map<string, any[]>();
 
-  data.forEach((row) => {
-    // Skip total rows
-    if (row.isTotal) {
-      return;
-    }
+    data.forEach((row) => {
+        // Skip total rows
+        if (row.isTotal) {
+            return;
+        }
 
-    const value = row[columnKey];
-    const groupKey = value !== undefined && value !== null ? String(value) : "";
+        const value = row[columnKey];
+        const groupKey = value !== undefined && value !== null ? String(value) : "";
 
-    if (!groups.has(groupKey)) {
-      groups.set(groupKey, []);
-    }
-    groups.get(groupKey)!.push(row);
-  });
+        if (!groups.has(groupKey)) {
+            groups.set(groupKey, []);
+        }
+        groups.get(groupKey)!.push(row);
+    });
 
-  // Convert map to array and sort by group value
-  return Array.from(groups.entries())
-    .map(([groupValue, rows]) => ({
-      groupValue,
-      rows,
-    }))
-    .sort((a, b) => a.groupValue.localeCompare(b.groupValue));
+    // Convert map to array and sort by group value
+    return Array.from(groups.entries())
+        .map(([groupValue, rows]) => ({
+            groupValue,
+            rows,
+        }))
+        .sort((a, b) => a.groupValue.localeCompare(b.groupValue));
 };
 
 /**
@@ -51,23 +51,23 @@ export const groupDataByColumn = (
  * @returns Array of unique values
  */
 export const getUniqueColumnValues = (
-  data: any[],
-  columnKey: string
+    data: any[],
+    columnKey: string
 ): string[] => {
-  const values = new Set<string>();
+    const values = new Set<string>();
 
-  data.forEach((row) => {
-    if (row.isTotal) {
-      return;
-    }
+    data.forEach((row) => {
+        if (row.isTotal) {
+            return;
+        }
 
-    const value = row[columnKey];
-    if (value !== undefined && value !== null) {
-      values.add(String(value));
-    }
-  });
+        const value = row[columnKey];
+        if (value !== undefined && value !== null) {
+            values.add(String(value));
+        }
+    });
 
-  return Array.from(values).sort();
+    return Array.from(values).sort();
 };
 
 /**
@@ -76,10 +76,10 @@ export const getUniqueColumnValues = (
  * @returns True if the column is groupable
  */
 export const isColumnGroupable = (column: any): boolean => {
-  return (
-    column.type !== "number" &&
-    column.type === "select" &&
-    column.values &&
-    column.values.length > 0
-  );
+    return (
+        column.type !== "number" &&
+        column.type === "select" &&
+        column.values &&
+        column.values.length > 0
+    );
 };

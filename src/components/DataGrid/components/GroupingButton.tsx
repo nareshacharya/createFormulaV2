@@ -25,7 +25,10 @@ export const GroupingButton = ({
   // Handle click outside to close preview
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (previewRef.current && !previewRef.current.contains(event.target as Node)) {
+      if (
+        previewRef.current &&
+        !previewRef.current.contains(event.target as Node)
+      ) {
         setShowPreview(false);
       }
     };
@@ -54,7 +57,9 @@ export const GroupingButton = ({
         `}
         title={isGrouped ? "Remove grouping" : "Group by this attribute"}
       >
-        <i className={`ri-${isGrouped ? "subtract" : "add"}-box-line text-sm`}></i>
+        <i
+          className={`ri-${isGrouped ? "subtract" : "add"}-box-line text-sm`}
+        ></i>
       </button>
 
       {/* Preview Tooltip */}

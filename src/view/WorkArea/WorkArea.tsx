@@ -1113,7 +1113,12 @@ const WorkArea = () => {
         key: newColumnId,
         title: attribute.name,
         attributeId: attribute.id,
-        type: attribute.type === "number" ? "number" : attribute.type === "select" ? "select" : "text",
+        type:
+          attribute.type === "number"
+            ? "number"
+            : attribute.type === "select"
+            ? "select"
+            : "text",
         sortable: true,
         editable: false,
         group: "Attributes",
