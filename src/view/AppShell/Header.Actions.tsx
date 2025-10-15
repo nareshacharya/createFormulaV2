@@ -168,55 +168,55 @@ const HeaderActions = () => {
       <div className="flex items-center gap-2">
         <button
           onClick={handleCreateFormula}
-          className="group relative w-[68px] flex flex-col items-center justify-center py-1.5 rounded-lg bg-purple-700 hover:bg-purple-600 transition-colors cursor-pointer shadow-sm"
+          className="group relative w-[42px] xl:w-[68px] flex flex-col items-center justify-center py-1.5 rounded-lg bg-purple-700 hover:bg-purple-600 transition-colors cursor-pointer shadow-sm"
           title="New Formula"
         >
           <div className="relative mb-0.5">
             <i className="ri-flask-line text-white text-xl leading-6"></i>
             <i className="ri-add-line text-white text-xs absolute -top-0.5 -right-0.5 bg-purple-700 rounded-full"></i>
           </div>
-          <span className="text-[10px] text-white/80 font-medium whitespace-nowrap hidden lg:inline">
+          <span className="text-[10px] text-white/80 font-medium whitespace-nowrap hidden xl:inline">
             Formula
           </span>
           {/* Tooltip for small screens */}
-          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none lg:hidden">
+          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none xl:hidden">
             Formula
           </div>
         </button>
 
         <button
           onClick={handleMergeDuplicates}
-          className="group relative w-[68px] flex flex-col items-center justify-center py-1.5 rounded-lg bg-purple-700 hover:bg-purple-600 transition-colors cursor-pointer shadow-sm"
+          className="group relative w-[42px] xl:w-[68px] flex flex-col items-center justify-center py-1.5 rounded-lg bg-purple-700 hover:bg-purple-600 transition-colors cursor-pointer shadow-sm"
           title="Merge Duplicates"
         >
           <i className="ri-git-merge-line text-white text-xl leading-6 mb-0.5"></i>
-          <span className="text-[10px] text-white/80 font-medium whitespace-nowrap hidden lg:inline">
+          <span className="text-[10px] text-white/80 font-medium whitespace-nowrap hidden xl:inline">
             Merge
           </span>
           {/* Tooltip for small screens */}
-          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none lg:hidden">
+          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none xl:hidden">
             Merge
           </div>
         </button>
 
         <button
           onClick={handleNormalize}
-          className="group relative w-[68px] flex flex-col items-center justify-center py-1.5 rounded-lg bg-purple-700 hover:bg-purple-600 transition-colors cursor-pointer shadow-sm"
+          className="group relative w-[42px] xl:w-[68px] flex flex-col items-center justify-center py-1.5 rounded-lg bg-purple-700 hover:bg-purple-600 transition-colors cursor-pointer shadow-sm"
           title="Normalize Formula"
         >
           <i className="ri-scales-3-line text-white text-xl leading-6 mb-0.5"></i>
-          <span className="text-[10px] text-white/80 font-medium whitespace-nowrap hidden lg:inline">
+          <span className="text-[10px] text-white/80 font-medium whitespace-nowrap hidden xl:inline">
             Normalize
           </span>
           {/* Tooltip for small screens */}
-          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none lg:hidden">
+          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none xl:hidden">
             Normalize
           </div>
         </button>
 
         <button
           onClick={handleSendForCompounding}
-          className={`group relative w-[68px] flex flex-col items-center justify-center py-1.5 rounded-lg transition-colors cursor-pointer shadow-sm ${
+          className={`group relative w-[42px] xl:w-[68px] flex flex-col items-center justify-center py-1.5 rounded-lg transition-colors cursor-pointer shadow-sm ${
             hasActiveFormula
               ? "bg-purple-700 hover:bg-purple-600"
               : "bg-purple-700/50 cursor-not-allowed"
@@ -225,11 +225,11 @@ const HeaderActions = () => {
           disabled={!hasActiveFormula}
         >
           <i className="ri-send-plane-line text-white text-xl leading-6 mb-0.5"></i>
-          <span className="text-[10px] text-white/80 font-medium whitespace-nowrap hidden lg:inline">
+          <span className="text-[10px] text-white/80 font-medium whitespace-nowrap hidden xl:inline">
             Send
           </span>
           {/* Tooltip for small screens */}
-          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none lg:hidden">
+          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none xl:hidden">
             Send
           </div>
         </button>
@@ -241,13 +241,13 @@ const HeaderActions = () => {
       {/* Save Workspace Button */}
       <button
         onClick={handleSaveWorkspace}
-        className="group relative w-[68px] flex flex-col items-center justify-center py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap shadow-sm"
+        className="group relative w-[42px] xl:w-[68px] flex flex-col items-center justify-center py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap shadow-sm"
         title="Save current workspace state"
       >
         <i className="ri-save-3-line text-xl leading-6 mb-0.5"></i>
-        <span className="text-[10px] font-medium hidden lg:inline">Save</span>
+        <span className="text-[10px] font-medium hidden xl:inline">Save</span>
         {/* Tooltip for small screens */}
-        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none lg:hidden">
+        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none xl:hidden">
           Save
         </div>
       </button>
@@ -255,7 +255,7 @@ const HeaderActions = () => {
       {/* Undo Action */}
       <button
         onClick={handleUndo}
-        className={`group relative w-[68px] flex flex-col items-center justify-center py-1.5 rounded-lg transition-colors shadow-sm ${
+        className={`group relative w-[42px] xl:w-[68px] flex flex-col items-center justify-center py-1.5 rounded-lg transition-colors shadow-sm ${
           canUndo
             ? "bg-purple-700 hover:bg-purple-600 cursor-pointer"
             : "bg-purple-700/50 cursor-not-allowed"
@@ -264,7 +264,7 @@ const HeaderActions = () => {
         disabled={!canUndo}
       >
         <i className="ri-arrow-go-back-line text-white text-xl leading-6 mb-0.5"></i>
-        <span className="text-[10px] text-white/80 font-medium hidden lg:inline">
+        <span className="text-[10px] text-white/80 font-medium hidden xl:inline">
           Undo
         </span>
         {undoCount > 0 && (
@@ -273,7 +273,7 @@ const HeaderActions = () => {
           </span>
         )}
         {/* Tooltip for small screens */}
-        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none lg:hidden">
+        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none xl:hidden">
           Undo {undoCount > 0 ? `(${undoCount})` : ""}
         </div>
       </button>

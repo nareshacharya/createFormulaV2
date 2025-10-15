@@ -224,7 +224,7 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
         <div className="w-px h-10 bg-purple-600/50"></div>
 
         {/* Formula Name - Hidden on small screens */}
-        <div className="hidden lg:flex items-center gap-2 group">
+        <div className="hidden xl:flex items-center gap-2 group">
           <i className="ri-flask-line text-pink-300 text-xl"></i>
           <div className="flex flex-col items-start">
             <span className="text-xs text-white/50 font-medium">Formula</span>
@@ -235,10 +235,10 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
         </div>
 
         {/* Vertical Divider - Hidden on small screens */}
-        <div className="hidden lg:block w-px h-10 bg-purple-600/50"></div>
+        <div className="hidden xl:block w-px h-10 bg-purple-600/50"></div>
 
         {/* Formula ID - Hidden on small screens */}
-        <div className="hidden lg:flex items-center gap-2 group">
+        <div className="hidden xl:flex items-center gap-2 group">
           <i className="ri-hashtag text-cyan-300 text-xl"></i>
           <div className="flex flex-col items-start">
             <span className="text-xs text-white/50 font-medium">ID</span>
@@ -249,10 +249,10 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
         </div>
 
         {/* Vertical Divider - Hidden on small screens */}
-        <div className="hidden lg:block w-px h-10 bg-purple-600/50"></div>
+        <div className="hidden xl:block w-px h-10 bg-purple-600/50"></div>
 
         {/* Status - Hidden on small screens */}
-        <div className="hidden lg:flex items-center gap-2 group">
+        <div className="hidden xl:flex items-center gap-2 group">
           <i className="ri-checkbox-circle-line text-orange-300 text-xl"></i>
           <div className="flex flex-col items-start">
             <span className="text-xs text-white/50 font-medium mb-1">
@@ -275,7 +275,9 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
         <div className="flex items-center gap-2 group">
           <i className="ri-list-check-2 text-yellow-300 text-xl"></i>
           <div className="flex flex-col items-start">
-            <span className="text-xs text-white/50 font-medium">Lines</span>
+            <span className="text-xs text-white/50 font-medium hidden xl:inline">
+              Lines
+            </span>
             <span className="text-sm font-semibold text-white">
               {metrics.lineCount}
             </span>
@@ -289,7 +291,7 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
         <div className="flex items-center gap-2 group">
           <i className="ri-price-tag-3-line text-green-300 text-xl"></i>
           <div className="flex flex-col items-start">
-            <span className="text-xs text-white/50 font-medium">
+            <span className="text-xs text-white/50 font-medium hidden xl:inline">
               Formula Cost
             </span>
             <span className="text-sm font-semibold text-white">
@@ -305,7 +307,7 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
         <div className="flex items-center gap-2 group">
           <i className="ri-money-dollar-circle-line text-blue-300 text-xl"></i>
           <div className="flex flex-col items-start">
-            <span className="text-xs text-white/50 font-medium">
+            <span className="text-xs text-white/50 font-medium hidden xl:inline">
               Target Cost
             </span>
             <span className="text-sm font-semibold text-white">
