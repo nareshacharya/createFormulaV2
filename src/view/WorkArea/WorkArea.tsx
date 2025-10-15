@@ -59,8 +59,9 @@ const WorkArea = () => {
     setSelectedFormulas,
   } = state;
 
-  // Local state for attribute dialog
+  // Local state for attribute dialog and grouping
   const [showAttributeDialog, setShowAttributeDialog] = useState(false);
+  const [groupedByColumn, setGroupedByColumn] = useState<string | null>(null);
 
   // Use custom hooks for handlers
   const {
@@ -1112,11 +1113,12 @@ const WorkArea = () => {
         key: newColumnId,
         title: attribute.name,
         attributeId: attribute.id,
-        type: attribute.type === "number" ? "number" : "text",
+        type: attribute.type === "number" ? "number" : attribute.type === "select" ? "select" : "text",
         sortable: true,
         editable: false,
         group: "Attributes",
         width: 120,
+        values: attribute.values, // Include values for select-type attributes
       };
 
       setColumns((prev) => {
@@ -1224,6 +1226,11 @@ const WorkArea = () => {
   // Save view handler
   const handleSaveView = (viewName: string) => {
     toast.success(`View "${viewName}" saved successfully`);
+  };
+
+  // Toggle grouping handler
+  const handleToggleGrouping = (columnId: string) => {
+    setGroupedByColumn((prev) => (prev === columnId ? null : columnId));
   };
 
   // Load view handler
@@ -1345,6 +1352,8 @@ const WorkArea = () => {
           onRowReorder={handleRowReorder}
           onSaveView={handleSaveView}
           onLoadView={handleLoadView}
+          onToggleGrouping={handleToggleGrouping}
+          groupedByColumn={groupedByColumn}
           editableFormula={editableFormula}
           className="h-full"
           showEmptyState={!hasIngredients}

@@ -1,10 +1,10 @@
-import React, {
-  createContext,
-  useState,
-  useCallback,
-} from "react";
+import React, { createContext, useState, useCallback } from "react";
 import toast from "react-hot-toast";
-import type { Formula, Ingredient, IngredientAttribute } from "../services/pega";
+import type {
+  Formula,
+  Ingredient,
+  IngredientAttribute,
+} from "../services/pega";
 import type { Column } from "../components/DataGrid";
 
 interface WorkspaceData {
@@ -35,17 +35,17 @@ interface WorkspaceContextType {
   closeTab: (tabId: string) => void;
   switchTab: (tabId: string) => void;
   renameTab: (tabId: string, newName: string) => void;
-  
+
   // Session Management
   resetWorkspace: (tabId: string) => void;
   updateWorkspaceData: (data: Partial<WorkspaceData>) => void;
-  
+
   // Formula Locking
   isFormulaLocked: (formulaId: string) => boolean;
   getFormulaLockedInWorkspace: (formulaId: string) => string | null;
   lockFormula: (formulaId: string) => void;
   unlockFormula: (formulaId: string) => void;
-  
+
   // Global Data
   availableFormulas: Formula[];
   ingredients: Ingredient[];
@@ -136,15 +136,17 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
       data: createEmptyWorkspaceData(),
     },
   ]);
-  
+
   const [activeTabId, setActiveTabId] = useState("default");
-  
+
   // Global data shared across all workspaces
   const [availableFormulas, setAvailableFormulas] = useState<Formula[]>([]);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [attributes, setAttributes] = useState<IngredientAttribute[]>([]);
 
-  const activeWorkspace = tabs.find((tab) => tab.id === activeTabId)?.data || createEmptyWorkspaceData();
+  const activeWorkspace =
+    tabs.find((tab) => tab.id === activeTabId)?.data ||
+    createEmptyWorkspaceData();
 
   const addTab = useCallback(() => {
     if (tabs.length >= MAX_TABS) {
@@ -162,32 +164,37 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
 
     setTabs((prev) => [...prev, newTab]);
     setActiveTabId(newTab.id);
-    toast.success(`New workspace "${newTab.name}" created - Fresh session started`);
+    toast.success(
+      `New workspace "${newTab.name}" created - Fresh session started`
+    );
   }, [tabs.length]);
 
-  const closeTab = useCallback((tabId: string) => {
-    const tab = tabs.find((t) => t.id === tabId);
-    if (tab?.isDefault) {
-      toast.error("Cannot close the default workspace");
-      return;
-    }
+  const closeTab = useCallback(
+    (tabId: string) => {
+      const tab = tabs.find((t) => t.id === tabId);
+      if (tab?.isDefault) {
+        toast.error("Cannot close the default workspace");
+        return;
+      }
 
-    // Unlock all formulas from this workspace
-    const tabData = tabs.find((t) => t.id === tabId)?.data;
-    if (tabData) {
-      tabData.lockedFormulas.clear();
-    }
+      // Unlock all formulas from this workspace
+      const tabData = tabs.find((t) => t.id === tabId)?.data;
+      if (tabData) {
+        tabData.lockedFormulas.clear();
+      }
 
-    const updatedTabs = tabs.filter((t) => t.id !== tabId);
-    setTabs(updatedTabs);
+      const updatedTabs = tabs.filter((t) => t.id !== tabId);
+      setTabs(updatedTabs);
 
-    // If closing active tab, switch to first tab
-    if (activeTabId === tabId) {
-      setActiveTabId(updatedTabs[0].id);
-    }
+      // If closing active tab, switch to first tab
+      if (activeTabId === tabId) {
+        setActiveTabId(updatedTabs[0].id);
+      }
 
-    toast.success(`Workspace "${tab?.name}" closed`);
-  }, [tabs, activeTabId]);
+      toast.success(`Workspace "${tab?.name}" closed`);
+    },
+    [tabs, activeTabId]
+  );
 
   const switchTab = useCallback((tabId: string) => {
     setActiveTabId(tabId);
@@ -213,7 +220,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
         if (tab.id === tabId) {
           // Unlock all formulas from this workspace before resetting
           tab.data.lockedFormulas.clear();
-          
+
           return {
             ...tab,
             data: createEmptyWorkspaceData(),
@@ -226,67 +233,84 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
     toast.success("Workspace reset to fresh state");
   }, []);
 
-  const updateWorkspaceData = useCallback((data: Partial<WorkspaceData>) => {
-    setTabs((prev) =>
-      prev.map((tab) => {
-        if (tab.id === activeTabId) {
-          return {
-            ...tab,
-            data: { ...tab.data, ...data },
-            lastModified: new Date(),
-          };
-        }
-        return tab;
-      })
-    );
-  }, [activeTabId]);
+  const updateWorkspaceData = useCallback(
+    (data: Partial<WorkspaceData>) => {
+      setTabs((prev) =>
+        prev.map((tab) => {
+          if (tab.id === activeTabId) {
+            return {
+              ...tab,
+              data: { ...tab.data, ...data },
+              lastModified: new Date(),
+            };
+          }
+          return tab;
+        })
+      );
+    },
+    [activeTabId]
+  );
 
   // Check if formula is locked in ANY workspace
-  const isFormulaLocked = useCallback((formulaId: string): boolean => {
-    return tabs.some((tab) => 
-      tab.id !== activeTabId && tab.data.lockedFormulas.has(formulaId)
-    );
-  }, [tabs, activeTabId]);
+  const isFormulaLocked = useCallback(
+    (formulaId: string): boolean => {
+      return tabs.some(
+        (tab) =>
+          tab.id !== activeTabId && tab.data.lockedFormulas.has(formulaId)
+      );
+    },
+    [tabs, activeTabId]
+  );
 
   // Get the workspace name where formula is locked
-  const getFormulaLockedInWorkspace = useCallback((formulaId: string): string | null => {
-    const lockedTab = tabs.find((tab) => 
-      tab.id !== activeTabId && tab.data.lockedFormulas.has(formulaId)
-    );
-    return lockedTab ? lockedTab.name : null;
-  }, [tabs, activeTabId]);
+  const getFormulaLockedInWorkspace = useCallback(
+    (formulaId: string): string | null => {
+      const lockedTab = tabs.find(
+        (tab) =>
+          tab.id !== activeTabId && tab.data.lockedFormulas.has(formulaId)
+      );
+      return lockedTab ? lockedTab.name : null;
+    },
+    [tabs, activeTabId]
+  );
 
-  const lockFormula = useCallback((formulaId: string) => {
-    setTabs((prev) =>
-      prev.map((tab) => {
-        if (tab.id === activeTabId) {
-          const newLockedFormulas = new Set(tab.data.lockedFormulas);
-          newLockedFormulas.add(formulaId);
-          return {
-            ...tab,
-            data: { ...tab.data, lockedFormulas: newLockedFormulas },
-          };
-        }
-        return tab;
-      })
-    );
-  }, [activeTabId]);
+  const lockFormula = useCallback(
+    (formulaId: string) => {
+      setTabs((prev) =>
+        prev.map((tab) => {
+          if (tab.id === activeTabId) {
+            const newLockedFormulas = new Set(tab.data.lockedFormulas);
+            newLockedFormulas.add(formulaId);
+            return {
+              ...tab,
+              data: { ...tab.data, lockedFormulas: newLockedFormulas },
+            };
+          }
+          return tab;
+        })
+      );
+    },
+    [activeTabId]
+  );
 
-  const unlockFormula = useCallback((formulaId: string) => {
-    setTabs((prev) =>
-      prev.map((tab) => {
-        if (tab.id === activeTabId) {
-          const newLockedFormulas = new Set(tab.data.lockedFormulas);
-          newLockedFormulas.delete(formulaId);
-          return {
-            ...tab,
-            data: { ...tab.data, lockedFormulas: newLockedFormulas },
-          };
-        }
-        return tab;
-      })
-    );
-  }, [activeTabId]);
+  const unlockFormula = useCallback(
+    (formulaId: string) => {
+      setTabs((prev) =>
+        prev.map((tab) => {
+          if (tab.id === activeTabId) {
+            const newLockedFormulas = new Set(tab.data.lockedFormulas);
+            newLockedFormulas.delete(formulaId);
+            return {
+              ...tab,
+              data: { ...tab.data, lockedFormulas: newLockedFormulas },
+            };
+          }
+          return tab;
+        })
+      );
+    },
+    [activeTabId]
+  );
 
   const value: WorkspaceContextType = {
     tabs,

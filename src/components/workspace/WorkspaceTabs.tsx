@@ -9,14 +9,8 @@ const MAX_TABS = 3;
  * Each tab maintains its own isolated session state
  */
 const WorkspaceTabs = () => {
-  const {
-    tabs,
-    activeTabId,
-    addTab,
-    closeTab,
-    switchTab,
-    renameTab,
-  } = useWorkspace();
+  const { tabs, activeTabId, addTab, closeTab, switchTab, renameTab } =
+    useWorkspace();
 
   const [editingTabId, setEditingTabId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");

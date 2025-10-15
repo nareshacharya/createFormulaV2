@@ -80,7 +80,7 @@ export const BulkActionsToolbar = ({
   }, [showViewsList]);
 
   return (
-    <div className="flex items-center justify-between mb-3 px-1 py-2 bg-white border-b border-gray-200">
+    <div className="flex items-center justify-between mb-3 px-6 py-2.5 bg-gray-50/50">
       {/* Left side - Bulk actions */}
       <div className="flex items-center space-x-3 text-xs">
         <span className="text-gray-600 font-medium">

@@ -7,7 +7,7 @@ export interface Column {
     id: string;
     label: string;
     key: string;
-    type?: "text" | "number" | "boolean" | "add-column";
+    type?: "text" | "number" | "boolean" | "add-column" | "select";
     width?: string;
     minWidth?: string;
     maxWidth?: string;
@@ -16,6 +16,9 @@ export interface Column {
     group?: string;
     formulaId?: string;
     sortable?: boolean;
+    groupable?: boolean;
+    attributeId?: string;
+    attributeValues?: string[];
     render?: (value: any, row: any) => React.ReactNode;
 }
 
@@ -64,4 +67,6 @@ export interface DataGridProps {
     onSaveView?: (viewName: string) => void;
     onLoadView?: (viewId: string) => void;
     showEmptyState?: boolean;
+    groupedByColumn?: string | null;
+    onToggleGrouping?: (columnId: string) => void;
 }

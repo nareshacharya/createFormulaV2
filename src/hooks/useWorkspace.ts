@@ -6,9 +6,9 @@ import { WorkspaceContext } from "../context/WorkspaceContext";
  * Must be used within a WorkspaceProvider
  */
 export const useWorkspace = () => {
-  const context = useContext(WorkspaceContext);
-  if (context === undefined) {
-    throw new Error("useWorkspace must be used within a WorkspaceProvider");
-  }
-  return context;
+    const context = useContext(WorkspaceContext);
+    if (context === undefined) {
+        throw new Error("useWorkspace must be used within a WorkspaceProvider");
+    }
+    return context;
 };

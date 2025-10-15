@@ -1,6 +1,15 @@
 
-// Mock ingredient attributes data - only numeric attributes suitable for comparison
+// Mock ingredient attributes data - numeric and categorical attributes
 export const mockIngredientAttributes = [
+  {
+    id: 'ATTR001',
+    name: 'Olfactive Family',
+    type: 'select' as const,
+    description: 'Primary olfactive family classification',
+    category: 'Sensory',
+    isRequired: false,
+    values: ['Floral', 'Citrus', 'Woody', 'Amber', 'Fresh', 'Fruity', 'Green', 'Oriental', 'Chypre', 'Fougere', 'Gourmand', 'Aquatic']
+  },
   {
     id: 'ATTR006',
     name: 'MAC (Maximum Allowable Concentration)',

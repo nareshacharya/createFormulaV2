@@ -7,6 +7,7 @@ import { useBulkSelection } from "./DataGrid/hooks/useBulkSelection";
 import { useKeyboardNavigation } from "./DataGrid/hooks/useKeyboardNavigation";
 import { BulkActionsToolbar } from "./DataGrid/components/BulkActionsToolbar";
 import { EditableCell } from "./DataGrid/components/EditableCell";
+import { GroupingButton } from "./DataGrid/components/GroupingButton";
 import { isRowDraggable } from "./DataGrid/utils/rowOrdering";
 
 export interface Column {
@@ -46,6 +47,8 @@ interface DataGridProps {
   onRowReorder?: (rowOrder: string[]) => void;
   onSaveView?: (viewName: string) => void;
   onLoadView?: (viewId: string) => void;
+  onToggleGrouping?: (columnId: string) => void;
+  groupedByColumn?: string | null;
   editableFormula?: string;
   className?: string;
   showEmptyState?: boolean;
@@ -72,6 +75,8 @@ const DataGrid = ({
   onRowReorder,
   onSaveView,
   onLoadView,
+  onToggleGrouping,
+  groupedByColumn,
   editableFormula,
   className = "",
   showEmptyState = false,
@@ -780,6 +785,22 @@ const DataGrid = ({
                         </div>
 
                         <div className="flex items-center space-x-1">
+                          {/* Grouping button for non-numeric attribute columns */}
+                          {column.group === "Attributes" &&
+                            column.type !== "number" &&
+                            column.type === "select" &&
+                            column.values &&
+                            column.values.length > 0 &&
+                            onToggleGrouping && (
+                              <GroupingButton
+                                columnId={column.id}
+                                columnLabel={column.title}
+                                isGrouped={groupedByColumn === column.id}
+                                availableValues={column.values}
+                                onToggleGrouping={onToggleGrouping}
+                              />
+                            )}
+                          
                           {/* Remove icon for all formula and attribute columns */}
                           {((column.id.startsWith("formula") &&
                             !column.fixed) ||
