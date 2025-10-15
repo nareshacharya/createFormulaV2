@@ -8,7 +8,6 @@ import Modal from "../../components/Modal";
 import FormulaModal from "../../components/FormulaModal";
 import Button from "../../components/Button";
 import Badge from "../../components/Badge";
-import WorkspaceTabs from "../AppShell/WorkspaceTabs";
 import { PegaService } from "../../services/pega";
 import type {
   Formula,
@@ -1320,13 +1319,6 @@ const WorkArea = () => {
 
   return (
     <div className="h-full bg-white flex flex-col">
-      {/* Workspace Tabs Header */}
-      <div className="flex items-center justify-between px-4 border-b border-gray-200 bg-white">
-        <div className="flex items-center gap-2 ml-2">
-          <WorkspaceTabs />
-        </div>
-      </div>
-
       {/* Data Grid */}
       <div className="flex-1 overflow-hidden">
         <DataGrid
