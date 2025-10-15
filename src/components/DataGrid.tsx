@@ -3,7 +3,8 @@ import Badge from "./Badge";
 import { useClickOutside } from "../hooks/useClickOutside";
 import { useRowReordering } from "./DataGrid/hooks/useRowReordering";
 import { useSavedViews } from "./DataGrid/hooks/useSavedViews";
-import { ViewManager } from "./DataGrid/components/ViewManager";
+import { useBulkSelection } from "./DataGrid/hooks/useBulkSelection";
+import { BulkActionsToolbar } from "./DataGrid/components/BulkActionsToolbar";
 import { isRowDraggable } from "./DataGrid/utils/rowOrdering";
 
 export interface Column {
@@ -30,6 +31,7 @@ interface DataGridProps {
   data: any[];
   onAddColumn?: (columnType: "formula" | "attribute") => void;
   onRowDelete?: (rowId: string) => void;
+  onBulkDelete?: (rowIds: string[]) => void;
   onCellEdit?: (rowId: string, columnId: string, value: any) => void;
   onDeleteColumn?: (columnId: string) => void;
   onSetActiveFormula?: (columnId: string) => void;
@@ -47,6 +49,7 @@ interface DataGridProps {
   showEmptyState?: boolean;
   enableRowReordering?: boolean;
   enableSavedViews?: boolean;
+  enableBulkSelection?: boolean;
 }
 
 const DataGrid = ({
@@ -54,6 +57,7 @@ const DataGrid = ({
   data,
   onAddColumn,
   onRowDelete,
+  onBulkDelete,
   onCellEdit,
   onDeleteColumn,
   onSetActiveFormula,
@@ -71,6 +75,7 @@ const DataGrid = ({
   showEmptyState = false,
   enableRowReordering = true,
   enableSavedViews = false,
+  enableBulkSelection = true,
 }: DataGridProps) => {
   const [sortConfig, setSortConfig] = useState<{
     key: string;
@@ -105,6 +110,17 @@ const DataGrid = ({
     deleteView,
     loadSavedViews,
   } = useSavedViews();
+
+  // Bulk selection hooks
+  const {
+    selectedRows,
+    toggleRowSelection,
+    toggleSelectAll,
+    clearSelection,
+    isRowSelected,
+    isAllSelected,
+    isSomeSelected,
+  } = useBulkSelection(data);
 
   const tableRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -729,10 +745,12 @@ const DataGrid = ({
           </th>
         )}
 
-        {/* Row actions column */}
-        <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200 bg-gray-50">
-          {/* Empty for row actions */}
-        </th>
+        {/* Checkbox column (if enabled) */}
+        {enableBulkSelection && (
+          <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200 bg-gray-50">
+            {/* Empty for checkbox */}
+          </th>
+        )}
 
         {/* Description column (no group) */}
         {columns.find((col) => col.key === "description") && (
@@ -776,24 +794,29 @@ const DataGrid = ({
 
   return (
     <div className={`flex flex-col h-full ${className}`} ref={tableRef}>
-      {/* View Manager toolbar */}
-      {enableSavedViews && (
-        <div className="mb-2">
-          <ViewManager
-            savedViews={savedViews}
-            currentViewId={currentViewId}
-            onSaveView={(viewName) => {
-              saveView(viewName, data.map((row) => row.id));
-              onSaveView?.(viewName);
-            }}
-            onLoadView={(viewId) => {
-              loadView(viewId);
-              onLoadView?.(viewId);
-            }}
-            onDeleteView={deleteView}
-          />
-        </div>
-      )}
+      {/* Bulk Actions Toolbar */}
+      <BulkActionsToolbar
+        selectedCount={selectedRows.size}
+        onBulkDelete={() => {
+          if (selectedRows.size > 0) {
+            onBulkDelete?.(Array.from(selectedRows));
+            clearSelection();
+          }
+        }}
+        onClearSelection={clearSelection}
+        enableSavedViews={enableSavedViews}
+        savedViews={savedViews}
+        currentViewId={currentViewId}
+        onSaveView={(viewName) => {
+          saveView(viewName, data.map((row) => row.id));
+          onSaveView?.(viewName);
+        }}
+        onLoadView={(viewId) => {
+          loadView(viewId);
+          onLoadView?.(viewId);
+        }}
+        onDeleteView={deleteView}
+      />
 
       <div className="flex-1 overflow-auto border border-gray-200 rounded-lg">
         <table className="w-full">
@@ -810,10 +833,22 @@ const DataGrid = ({
                 </th>
               )}
 
-              {/* Row actions column */}
-              <th className="w-12 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
-                <i className="ri-settings-3-line text-gray-400"></i>
-              </th>
+              {/* Checkbox column (if enabled) */}
+              {enableBulkSelection && (
+                <th className="w-10 px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
+                  <input
+                    type="checkbox"
+                    checked={isAllSelected()}
+                    ref={(el) => {
+                      if (el) {
+                        el.indeterminate = isSomeSelected();
+                      }
+                    }}
+                    onChange={toggleSelectAll}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                  />
+                </th>
+              )}
 
               {columns.map((column, index) => {
                 const isDraggable =
@@ -1054,25 +1089,22 @@ const DataGrid = ({
                     </td>
                   )}
 
-                  {/* Row actions */}
-                  <td
-                    className="w-12 px-3 py-2 text-center"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="flex items-center justify-center space-x-1">
+                  {/* Checkbox cell (if enabled) */}
+                  {enableBulkSelection && (
+                    <td
+                      className="w-10 px-3 py-2 text-center"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       {!row.isTotal && !row.isEmpty && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onRowDelete?.(row.id);
-                          }}
-                          className="w-5 h-5 flex items-center justify-center text-gray-400 hover:text-red-600 rounded"
-                        >
-                          <i className="ri-delete-bin-line text-xs"></i>
-                        </button>
+                        <input
+                          type="checkbox"
+                          checked={isRowSelected(row.id)}
+                          onChange={() => toggleRowSelection(row.id)}
+                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                        />
                       )}
-                    </div>
-                  </td>
+                    </td>
+                  )}
 
                   {columns.map((column, colIndex) => {
                     // For empty state, only render the first column (description) with full colspan

@@ -1232,6 +1232,12 @@ const WorkArea = () => {
     toast.success(`View loaded successfully`);
   };
 
+  // Bulk delete handler
+  const handleBulkDelete = (rowIds: string[]) => {
+    setTableData((prev) => prev.filter((row) => !rowIds.includes(row.id)));
+    toast.success(`${rowIds.length} row${rowIds.length > 1 ? "s" : ""} deleted`);
+  };
+
   // Check if we have any ingredient data to show
   const hasIngredients = tableData.some((row) => !row.isTotal);
 
@@ -1332,6 +1338,7 @@ const WorkArea = () => {
             }
           }}
           onRowDelete={handleRowDelete}
+          onBulkDelete={handleBulkDelete}
           onCellEdit={handleCellEdit}
           onDeleteColumn={handleDeleteColumn}
           onSetActiveFormula={handleSetActiveFormula}
@@ -1349,6 +1356,7 @@ const WorkArea = () => {
           showEmptyState={!hasIngredients}
           enableRowReordering={true}
           enableSavedViews={true}
+          enableBulkSelection={true}
         />
       </div>
 
