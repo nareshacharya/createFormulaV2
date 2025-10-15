@@ -4,7 +4,9 @@ import { useClickOutside } from "../hooks/useClickOutside";
 import { useRowReordering } from "./DataGrid/hooks/useRowReordering";
 import { useSavedViews } from "./DataGrid/hooks/useSavedViews";
 import { useBulkSelection } from "./DataGrid/hooks/useBulkSelection";
+import { useKeyboardNavigation } from "./DataGrid/hooks/useKeyboardNavigation";
 import { BulkActionsToolbar } from "./DataGrid/components/BulkActionsToolbar";
+import { EditableCell } from "./DataGrid/components/EditableCell";
 import { isRowDraggable } from "./DataGrid/utils/rowOrdering";
 
 export interface Column {
@@ -81,11 +83,6 @@ const DataGrid = ({
     key: string;
     direction: "asc" | "desc";
   } | null>(null);
-  const [editingCell, setEditingCell] = useState<{
-    rowId: string;
-    columnId: string;
-  } | null>(null);
-  const [editValue, setEditValue] = useState<any>("");
   const [draggedColumn, setDraggedColumn] = useState<number | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<number | null>(null);
   const [showColumnActions, setShowColumnActions] = useState<string | null>(
@@ -121,6 +118,27 @@ const DataGrid = ({
     isAllSelected,
     isSomeSelected,
   } = useBulkSelection(data);
+
+  // Keyboard navigation hook
+  const navigation = useKeyboardNavigation({
+    data: data as any[], // Type assertion for compatibility
+    columns,
+    editableFormula,
+    onCellEdit,
+    onNavigate: (cell) => {
+      // Scroll to cell if needed
+      const cellElement = document.getElementById(
+        `cell-${cell.rowId}-${cell.columnId}`
+      );
+      if (cellElement) {
+        cellElement.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "nearest",
+        });
+      }
+    },
+  });
 
   const tableRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -243,50 +261,6 @@ const DataGrid = ({
     return [...sortedRegularRows, ...totalRows];
   };
 
-  const handleCellClick = (
-    rowId: string,
-    columnId: string,
-    currentValue: any
-  ) => {
-    const row = data.find((r) => r.id === rowId);
-    const column = columns.find((col) => col.id === columnId);
-
-    // Allow editing target total in active formula, but prevent editing other total rows
-    const isTargetTotalInActiveFormula =
-      row?.isTotal &&
-      row?.totalType === "target" &&
-      column.id === editableFormula;
-
-    // Prevent editing of total rows (except target total in active formula), non-editable columns, or fixed columns
-    if (
-      (row?.isTotal && !isTargetTotalInActiveFormula) ||
-      !column?.editable ||
-      column?.fixed ||
-      row?.isEmpty
-    )
-      return;
-
-    // Only allow editing of active formula column
-    if (column.id.startsWith("formula") && column.id !== editableFormula)
-      return;
-
-    setEditingCell({ rowId, columnId });
-    setEditValue(currentValue);
-  };
-
-  const handleCellSave = () => {
-    if (!editingCell) return;
-
-    onCellEdit?.(editingCell.rowId, editingCell.columnId, editValue);
-    setEditingCell(null);
-    setEditValue("");
-  };
-
-  const handleCellCancel = () => {
-    setEditingCell(null);
-    setEditValue("");
-  };
-
   const handleColumnHeaderClick = (e: React.MouseEvent, columnId: string) => {
     e.stopPropagation();
 
@@ -364,16 +338,10 @@ const DataGrid = ({
     };
   }, []);
 
-  const renderCell = (row: any, column: Column) => {
+  const renderCell = (row: Record<string, any>, column: Column) => {
     const value = row[column.key];
-    const isEditing =
-      editingCell?.rowId === row.id && editingCell?.columnId === column.id;
     const isTotal = row.isTotal;
     const isEmpty = row.isEmpty;
-    const isActiveFormula = column.id === editableFormula;
-    const isFormulaColumn = column.id.startsWith("formula");
-    const isEditable =
-      column.editable && !row.isTotal && editableFormula === column.id;
 
     // New add-column rendering - only show plus icon in header, not in rows
     if (column.type === "add-column") {
@@ -459,44 +427,7 @@ const DataGrid = ({
       );
     }
 
-    // Editing mode
-    if (isEditing && !isTotal && !column.fixed && isActiveFormula) {
-      if (column.type === "select" && column.options) {
-        return (
-          <select
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            onBlur={handleCellSave}
-            className="w-full px-2 py-1 text-sm border border-blue-500 rounded focus:outline-none"
-            autoFocus
-          >
-            {column.options.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        );
-      }
-
-      return (
-        <input
-          type={column.type === "number" ? "number" : "text"}
-          value={editValue}
-          onChange={(e) => setEditValue(e.target.value)}
-          onBlur={handleCellSave}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleCellSave();
-            } else if (e.key === "Escape") {
-              handleCellCancel();
-            }
-          }}
-          className="w-full px-2 py-1 text-sm border border-blue-500 rounded focus:outline-none"
-          autoFocus
-        />
-      );
-    }
+    // Note: Editing is now handled by EditableCell component, not here
 
     // Custom render function
     if (column.render) {
@@ -514,55 +445,11 @@ const DataGrid = ({
 
     // Number type handling
     if (column.type === "number") {
-      // Formula rows in formula columns - show editable percentage
-      if (row.isFormula && isFormulaColumn && isActiveFormula) {
-        if (isEditing) {
-          return (
-            <div className="flex items-center">
-              <input
-                type="number"
-                value={editValue}
-                onChange={(e) => {
-                  const val = parseFloat(e.target.value);
-                  // Prevent negative values
-                  if (val < 0 || isNaN(val)) {
-                    setEditValue(0);
-                  } else {
-                    setEditValue(val);
-                  }
-                }}
-                onInput={(e) => {
-                  // Additional safeguard - prevent negative input
-                  const input = e.target as HTMLInputElement;
-                  if (parseFloat(input.value) < 0) {
-                    input.value = "0";
-                    setEditValue(0);
-                  }
-                }}
-                onBlur={handleCellSave}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleCellSave();
-                  } else if (e.key === "Escape") {
-                    handleCellCancel();
-                  } else if (e.key === "-" || e.key === "Minus") {
-                    e.preventDefault(); // Block minus key
-                  }
-                }}
-                className="w-full px-3 py-2 text-sm border border-blue-500 rounded focus:outline-none"
-                autoFocus
-                min="0"
-                max="100"
-                step="0.01"
-                style={{
-                  MozAppearance: "textfield",
-                  appearance: "textfield",
-                }}
-              />
-            </div>
-          );
-        }
-        // Show as editable-looking input field by default
+      const isActiveFormula = column.id === editableFormula;
+      const isFormulaColumn = column.id.startsWith("formula");
+
+      // Formula rows in formula columns - show non-editable display
+      if (row.isFormula && isFormulaColumn) {
         return (
           <div className="flex items-center">
             <input
@@ -595,70 +482,9 @@ const DataGrid = ({
         }
       }
 
-      // Total rows for formula columns - make Target Total editable for active formula
+      // Total rows for formula columns
       if (isTotal && isFormulaColumn) {
-        if (row.totalType === "target" && isActiveFormula) {
-          if (isEditing) {
-            return (
-              <input
-                type="number"
-                value={editValue}
-                onChange={(e) => {
-                  const val = parseFloat(e.target.value);
-                  // Prevent negative values
-                  if (val < 0 || isNaN(val)) {
-                    setEditValue(0);
-                  } else {
-                    setEditValue(val);
-                  }
-                }}
-                onInput={(e) => {
-                  // Additional safeguard - prevent negative input
-                  const input = e.target as HTMLInputElement;
-                  if (parseFloat(input.value) < 0) {
-                    input.value = "0";
-                    setEditValue(0);
-                  }
-                }}
-                onBlur={handleCellSave}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleCellSave();
-                  } else if (e.key === "Escape") {
-                    handleCellCancel();
-                  } else if (e.key === "-" || e.key === "Minus") {
-                    e.preventDefault(); // Block minus key
-                  }
-                }}
-                className="w-full px-3 py-2 text-sm border border-blue-500 rounded focus:outline-none font-semibold"
-                autoFocus
-                min="0"
-                step="0.01"
-                style={{
-                  MozAppearance: "textfield",
-                  appearance: "textfield",
-                }}
-              />
-            );
-          }
-          // Show as input field even when not editing (for Target Total in active formula)
-          const displayValue =
-            typeof value === "number" ? value.toFixed(5) : value;
-          return (
-            <input
-              type="number"
-              value={displayValue}
-              readOnly
-              className="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded font-semibold text-gray-900 cursor-pointer focus:outline-none"
-              min="0"
-              style={{
-                MozAppearance: "textfield",
-                appearance: "textfield",
-              }}
-            />
-          );
-        }
-
+        // Target total is now handled by EditableCell, so just display normally
         if (value === "-") {
           return <span className="text-sm text-gray-400">-</span>;
         }
@@ -954,7 +780,24 @@ const DataGrid = ({
                         </div>
 
                         <div className="flex items-center space-x-1">
-                          {/* Actions menu for formula columns */}
+                          {/* Remove icon for all formula and attribute columns */}
+                          {((column.id.startsWith("formula") &&
+                            !column.fixed) ||
+                            (column.group === "Attributes" &&
+                              column.id !== "description")) && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onDeleteColumn?.(column.id);
+                              }}
+                              className="text-gray-400 hover:text-red-600 p-1 transition-colors"
+                              title="Remove column"
+                            >
+                              <i className="ri-close-line text-sm"></i>
+                            </button>
+                          )}
+
+                          {/* Actions menu only for formula columns */}
                           {column.id.startsWith("formula") && !column.fixed && (
                             <div className="relative">
                               <button
@@ -1115,62 +958,85 @@ const DataGrid = ({
                       return null;
                     }
 
+                    const isEditing =
+                      navigation.editingCell?.rowId === row.id &&
+                      navigation.editingCell?.columnId === column.id;
+                    const isFocused =
+                      navigation.focusedCell?.rowId === row.id &&
+                      navigation.focusedCell?.columnId === column.id;
+
+                    // Check if it's target total in active formula
+                    const isTargetTotalInActiveFormula =
+                      row.isTotal &&
+                      row.totalType === "target" &&
+                      column.id === editableFormula;
+
+                    const isEditable =
+                      column.editable &&
+                      (!row.isTotal || isTargetTotalInActiveFormula) &&
+                      !column.fixed &&
+                      column.id === editableFormula &&
+                      column.type !== "add-column" &&
+                      !row.isEmpty;
+
+                    // Use EditableCell for editable formula columns (including target total)
+                    if (
+                      isEditable ||
+                      (isFocused && column.id === editableFormula)
+                    ) {
+                      return (
+                        <EditableCell
+                          key={`${row.id}-${column.id}`}
+                          value={row[column.key]}
+                          isEditing={isEditing}
+                          isFocused={isFocused}
+                          editValue={navigation.editValue}
+                          onChange={navigation.handleInputChange}
+                          onKeyDown={navigation.handleKeyDown}
+                          onClick={() =>
+                            navigation.handleCellFocus(row.id, column.id)
+                          }
+                          align={column.type === "number" ? "right" : "left"}
+                          className={`
+                            border-r border-gray-100 last:border-r-0 font-sans
+                            ${row.isTotal ? "font-medium bg-gray-100" : ""}
+                            ${column.fixed ? "bg-gray-25" : ""}
+                            ${
+                              column.id === editableFormula && !column.fixed
+                                ? "bg-green-50"
+                                : ""
+                            }
+                          `}
+                        />
+                      );
+                    }
+
+                    // Regular cells (description, fixed columns, etc.)
                     return (
                       <td
                         key={`${row.id}-${column.id}`}
                         className={`
-                        px-3 py-2 border-r border-gray-100 last:border-r-0 font-sans
-                        ${
-                          column.editable &&
-                          !row.isTotal &&
-                          !column.fixed &&
-                          column.id === editableFormula &&
-                          column.type !== "add-column" &&
-                          !row.isEmpty
-                            ? "cursor-pointer hover:bg-blue-50"
-                            : ""
-                        }
-                        ${
-                          row.isTotal &&
-                          row.totalType === "target" &&
-                          column.id === editableFormula
-                            ? "cursor-pointer hover:bg-blue-50"
-                            : ""
-                        }
-                        ${row.isTotal ? "font-medium bg-gray-100" : ""}
-                        ${column.fixed ? "bg-gray-25" : ""}
-                        ${
-                          column.id === editableFormula && !column.fixed
-                            ? "bg-green-50"
-                            : ""
-                        }
-                        ${
-                          row.isEmpty && column.key === "description"
-                            ? "text-center"
-                            : ""
-                        }
-                      `}
-                        onClick={() => {
-                          if (column.type !== "add-column") {
-                            if (
-                              row.isTotal &&
-                              row.totalType === "target" &&
-                              column.id === editableFormula
-                            ) {
-                              handleCellClick(
-                                row.id,
-                                column.id,
-                                row[column.key]
-                              );
-                            } else {
-                              handleCellClick(
-                                row.id,
-                                column.id,
-                                row[column.key]
-                              );
-                            }
+                          px-3 py-2 border-r border-gray-100 last:border-r-0 font-sans
+                          ${
+                            row.isTotal &&
+                            row.totalType === "target" &&
+                            column.id === editableFormula
+                              ? "cursor-pointer hover:bg-blue-50"
+                              : ""
                           }
-                        }}
+                          ${row.isTotal ? "font-medium bg-gray-100" : ""}
+                          ${column.fixed ? "bg-gray-25" : ""}
+                          ${
+                            column.id === editableFormula && !column.fixed
+                              ? "bg-green-50"
+                              : ""
+                          }
+                          ${
+                            row.isEmpty && column.key === "description"
+                              ? "text-center"
+                              : ""
+                          }
+                        `}
                         colSpan={
                           row.isEmpty && column.key === "description"
                             ? columns.length
