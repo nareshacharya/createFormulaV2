@@ -793,7 +793,7 @@ const DataGrid = ({
   };
 
   return (
-    <div className={`flex flex-col h-full ${className}`} ref={tableRef}>
+    <div className={`flex flex-col h-full p-2 ${className}`} ref={tableRef}>
       {/* Bulk Actions Toolbar */}
       <BulkActionsToolbar
         selectedCount={selectedRows.size}
@@ -808,7 +808,10 @@ const DataGrid = ({
         savedViews={savedViews}
         currentViewId={currentViewId}
         onSaveView={(viewName) => {
-          saveView(viewName, data.map((row) => row.id));
+          saveView(
+            viewName,
+            data.map((row) => row.id)
+          );
           onSaveView?.(viewName);
         }}
         onLoadView={(viewId) => {
@@ -818,7 +821,7 @@ const DataGrid = ({
         onDeleteView={deleteView}
       />
 
-      <div className="flex-1 overflow-auto border border-gray-200 rounded-lg">
+      <div className="flex-1 overflow-auto border border-gray-200 rounded-lg shadow-sm">
         <table className="w-full">
           <thead className="bg-white sticky top-0 z-10">
             {/* Group headers */}

@@ -354,13 +354,10 @@ export const CellRenderer = ({
     // Currency formatting for cost columns
     if (column.id === "costKg" || column.id === "contCost") {
       if (value === null || value === undefined) return "-";
-      const displayValue =
-        typeof value === "number" ? value.toFixed(2) : value;
+      const displayValue = typeof value === "number" ? value.toFixed(2) : value;
       return (
         <span
-          className={`text-sm ${
-            isTotal ? "font-semibold text-gray-900" : ""
-          }`}
+          className={`text-sm ${isTotal ? "font-semibold text-gray-900" : ""}`}
         >
           ${displayValue}
         </span>
@@ -393,9 +390,7 @@ export const CellRenderer = ({
 
   // Default text rendering
   return (
-    <span
-      className={`text-sm ${isTotal ? "font-semibold text-gray-900" : ""}`}
-    >
+    <span className={`text-sm ${isTotal ? "font-semibold text-gray-900" : ""}`}>
       {value}
     </span>
   );

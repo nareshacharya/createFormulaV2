@@ -1,5 +1,4 @@
-import { useState } from "react";
-import Button from "../../Button";
+import { useState, useEffect, useRef } from "react";
 import type { SavedView } from "../types";
 
 interface BulkActionsToolbarProps {
@@ -30,6 +29,9 @@ export const BulkActionsToolbar = ({
   const [viewName, setViewName] = useState("");
   const [showViewsList, setShowViewsList] = useState(false);
 
+  const saveDialogRef = useRef<HTMLDivElement>(null);
+  const viewsListRef = useRef<HTMLDivElement>(null);
+
   const handleSaveView = () => {
     if (viewName.trim() && onSaveView) {
       onSaveView(viewName.trim());
@@ -38,59 +40,93 @@ export const BulkActionsToolbar = ({
     }
   };
 
+  // Handle click outside for save dialog
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        saveDialogRef.current &&
+        !saveDialogRef.current.contains(event.target as Node)
+      ) {
+        setShowSaveDialog(false);
+        setViewName("");
+      }
+    };
+
+    if (showSaveDialog) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }
+  }, [showSaveDialog]);
+
+  // Handle click outside for views list
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        viewsListRef.current &&
+        !viewsListRef.current.contains(event.target as Node)
+      ) {
+        setShowViewsList(false);
+      }
+    };
+
+    if (showViewsList) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }
+  }, [showViewsList]);
+
   return (
-    <div className="flex items-center justify-between mb-2 p-2 bg-gray-50 border border-gray-200 rounded-lg">
+    <div className="flex items-center justify-between mb-3 px-1 py-2 bg-white border-b border-gray-200">
       {/* Left side - Bulk actions */}
-      <div className="flex items-center space-x-2">
-        {selectedCount > 0 ? (
+      <div className="flex items-center space-x-3 text-xs">
+        <span className="text-gray-600 font-medium">
+          {selectedCount} selected
+        </span>
+
+        {selectedCount > 0 && (
           <>
-            <span className="text-sm text-gray-700 font-medium">
-              {selectedCount} row{selectedCount > 1 ? "s" : ""} selected
-            </span>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={onBulkDelete}
-              className="flex items-center space-x-1 bg-red-50 hover:bg-red-100 text-red-700 border-red-200"
-            >
-              <i className="ri-delete-bin-line text-sm"></i>
-              <span>Delete</span>
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
+            <button
               onClick={onClearSelection}
-              className="flex items-center space-x-1"
+              className="text-gray-600 hover:text-gray-900 transition-colors"
             >
-              <i className="ri-close-line text-sm"></i>
-              <span>Clear</span>
-            </Button>
+              Clear
+            </button>
+
+            {onBulkDelete && (
+              <button
+                onClick={onBulkDelete}
+                className="text-red-600 hover:text-red-700 transition-colors flex items-center space-x-1"
+              >
+                <i className="ri-delete-bin-line"></i>
+                <span>Delete</span>
+              </button>
+            )}
           </>
-        ) : (
-          <span className="text-sm text-gray-500">No rows selected</span>
         )}
       </div>
 
       {/* Right side - Saved views */}
       {enableSavedViews && (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 text-xs">
           {/* Save View Button */}
-          <div className="relative">
-            <Button
-              variant="secondary"
-              size="sm"
+          <div className="relative" ref={saveDialogRef}>
+            <button
               onClick={() => setShowSaveDialog(!showSaveDialog)}
-              className="flex items-center space-x-1"
+              className="flex items-center space-x-1 text-gray-600 hover:text-gray-900 transition-colors"
             >
-              <i className="ri-save-line text-sm"></i>
+              <i className="ri-save-line"></i>
               <span>Save View</span>
-            </Button>
+            </button>
 
             {/* Save Dialog */}
             {showSaveDialog && (
               <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-3 z-30 min-w-[250px]">
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-xs font-medium text-gray-700">
                     View Name
                   </label>
                   <input
@@ -98,7 +134,7 @@ export const BulkActionsToolbar = ({
                     value={viewName}
                     onChange={(e) => setViewName(e.target.value)}
                     placeholder="Enter view name..."
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         handleSaveView();
@@ -110,24 +146,22 @@ export const BulkActionsToolbar = ({
                     autoFocus
                   />
                   <div className="flex space-x-2">
-                    <Button
-                      variant="primary"
-                      size="sm"
+                    <button
                       onClick={handleSaveView}
                       disabled={!viewName.trim()}
+                      className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                     >
                       Save
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      size="sm"
+                    </button>
+                    <button
                       onClick={() => {
                         setShowSaveDialog(false);
                         setViewName("");
                       }}
+                      className="px-2 py-1 text-xs border border-gray-300 rounded hover:bg-gray-50 transition-colors"
                     >
                       Cancel
-                    </Button>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -135,30 +169,28 @@ export const BulkActionsToolbar = ({
           </div>
 
           {/* Views List Button */}
-          <div className="relative">
-            <Button
-              variant="secondary"
-              size="sm"
+          <div className="relative" ref={viewsListRef}>
+            <button
               onClick={() => setShowViewsList(!showViewsList)}
-              className="flex items-center space-x-1"
+              className="flex items-center space-x-1 text-gray-600 hover:text-gray-900 transition-colors"
             >
-              <i className="ri-folder-line text-sm"></i>
+              <i className="ri-folder-line"></i>
               <span>Views ({savedViews.length})</span>
-            </Button>
+            </button>
 
             {/* Views List */}
             {showViewsList && (
-              <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-30 min-w-[300px] max-h-[400px] overflow-y-auto">
+              <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded shadow-lg py-1 z-30 min-w-[300px] max-h-[400px] overflow-y-auto">
                 {savedViews.length === 0 ? (
-                  <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                  <div className="px-3 py-2 text-xs text-gray-500 text-center">
                     No saved views yet
                   </div>
                 ) : (
-                  <div className="space-y-1">
+                  <div>
                     {savedViews.map((view) => (
                       <div
                         key={view.id}
-                        className={`px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center justify-between ${
+                        className={`px-3 py-1.5 hover:bg-gray-50 cursor-pointer flex items-center justify-between ${
                           currentViewId === view.id ? "bg-blue-50" : ""
                         }`}
                       >
@@ -169,7 +201,7 @@ export const BulkActionsToolbar = ({
                             setShowViewsList(false);
                           }}
                         >
-                          <div className="text-sm font-medium text-gray-900">
+                          <div className="text-xs font-medium text-gray-900">
                             {view.name}
                           </div>
                           <div className="text-xs text-gray-500">
@@ -179,11 +211,7 @@ export const BulkActionsToolbar = ({
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (
-                              window.confirm(
-                                `Delete view "${view.name}"?`
-                              )
-                            ) {
+                            if (window.confirm(`Delete view "${view.name}"?`)) {
                               onDeleteView?.(view.id);
                             }
                           }}

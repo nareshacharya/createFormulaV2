@@ -1235,7 +1235,9 @@ const WorkArea = () => {
   // Bulk delete handler
   const handleBulkDelete = (rowIds: string[]) => {
     setTableData((prev) => prev.filter((row) => !rowIds.includes(row.id)));
-    toast.success(`${rowIds.length} row${rowIds.length > 1 ? "s" : ""} deleted`);
+    toast.success(
+      `${rowIds.length} row${rowIds.length > 1 ? "s" : ""} deleted`
+    );
   };
 
   // Check if we have any ingredient data to show

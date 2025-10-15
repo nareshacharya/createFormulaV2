@@ -100,7 +100,11 @@ export const ViewManager = ({
             >
               Cancel
             </Button>
-            <Button variant="primary" onClick={handleSave} disabled={!viewName.trim()}>
+            <Button
+              variant="primary"
+              onClick={handleSave}
+              disabled={!viewName.trim()}
+            >
               Save
             </Button>
           </div>
