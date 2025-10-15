@@ -2,7 +2,7 @@ import type { Column } from "../components/DataGrid";
 
 /**
  * Calculate totals for formula columns in the data grid
- * Handles running totals and cost sums
+ * Handles running totals, target totals, and cost sums
  */
 export const calculateTotals = (
     data: any[],
@@ -19,48 +19,68 @@ export const calculateTotals = (
             (col) => col.group === "Formulas" && col.type === "number"
         );
 
-    // Only keep the "running" total row (remove RMC and Lines)
-    const updatedTotals = totalRows
-        .filter((totalRow) => totalRow.totalType === "running")
-        .map((totalRow) => {
-            const updatedRow = { ...totalRow };
+    // Process the running total row
+    const runningTotalRow = totalRows.find((row) => row.totalType === "running");
+    const updatedRunningTotal = runningTotalRow ? { ...runningTotalRow } : {
+        id: "runningTotal",
+        description: "Total",
+        costKg: null,
+        contCost: null,
+        isTotal: true,
+        totalType: "running",
+    };
 
-            // Calculate sum for formula columns
-            formulaColumns.forEach((col) => {
-                const columnValues = ingredientRows
-                    .filter((row) => !row.isFormula) // Only count individual ingredients, not formula groups
-                    .map((row) => parseFloat(row[col.key]) || 0)
-                    .filter((val) => !isNaN(val));
+    // Calculate sum for formula columns
+    formulaColumns.forEach((col) => {
+        const columnValues = ingredientRows
+            .filter((row) => !row.isFormula) // Only count individual ingredients, not formula groups
+            .map((row) => parseFloat(row[col.key]) || 0)
+            .filter((val) => !isNaN(val));
 
-                updatedRow[col.key] = parseFloat(
-                    columnValues.reduce((sum, val) => sum + val, 0).toFixed(5)
-                );
-            });
+        updatedRunningTotal[col.key] = parseFloat(
+            columnValues.reduce((sum, val) => sum + val, 0).toFixed(5)
+        );
+    });
 
-            // Calculate sum for costKg column
-            const costKgValues = ingredientRows
-                .filter((row) => !row.isFormula)
-                .map((row) => parseFloat(row.costKg) || 0)
-                .filter((val) => !isNaN(val));
+    // Calculate sum for costKg column
+    const costKgValues = ingredientRows
+        .filter((row) => !row.isFormula)
+        .map((row) => parseFloat(row.costKg) || 0)
+        .filter((val) => !isNaN(val));
 
-            updatedRow.costKg = parseFloat(
-                costKgValues.reduce((sum, val) => sum + val, 0).toFixed(2)
-            );
+    updatedRunningTotal.costKg = parseFloat(
+        costKgValues.reduce((sum, val) => sum + val, 0).toFixed(2)
+    );
 
-            // Calculate sum for contCost column
-            const contCostValues = ingredientRows
-                .filter((row) => !row.isFormula)
-                .map((row) => parseFloat(row.contCost) || 0)
-                .filter((val) => !isNaN(val));
+    // Calculate sum for contCost column
+    const contCostValues = ingredientRows
+        .filter((row) => !row.isFormula)
+        .map((row) => parseFloat(row.contCost) || 0)
+        .filter((val) => !isNaN(val));
 
-            updatedRow.contCost = parseFloat(
-                contCostValues.reduce((sum, val) => sum + val, 0).toFixed(2)
-            );
+    updatedRunningTotal.contCost = parseFloat(
+        contCostValues.reduce((sum, val) => sum + val, 0).toFixed(2)
+    );
 
-            return updatedRow;
-        });
+    // Process or create the target total row
+    const targetTotalRow = totalRows.find((row) => row.totalType === "target");
+    const updatedTargetTotal = targetTotalRow ? { ...targetTotalRow } : {
+        id: "targetTotal",
+        description: "Target Total",
+        costKg: null,
+        contCost: null,
+        isTotal: true,
+        totalType: "target",
+    };
 
-    return [...ingredientRows, ...updatedTotals];
+    // Initialize target total to 100.00000 for formula columns if not already set
+    formulaColumns.forEach((col) => {
+        if (updatedTargetTotal[col.key] === undefined || updatedTargetTotal[col.key] === null) {
+            updatedTargetTotal[col.key] = 100.00000;
+        }
+    });
+
+    return [...ingredientRows, updatedRunningTotal, updatedTargetTotal];
 };
 
 /**
