@@ -2,6 +2,7 @@ import { useState } from "react";
 import AppHeader from "./AppHeader";
 import LibraryPanel from "../Library/LibraryPanel";
 import WorkArea from "../WorkArea/WorkArea";
+import WorkspaceTabs from "../../components/workspace/WorkspaceTabs";
 
 const AppShell = () => {
   const [isLibraryCollapsed, setIsLibraryCollapsed] = useState(false);
@@ -10,6 +11,13 @@ const AppShell = () => {
     <div className="h-screen flex flex-col bg-gray-100">
       {/* Header */}
       <AppHeader />
+
+      {/* Workspace Tabs - Below Header */}
+      <div className="flex items-center justify-between px-4 border-b border-gray-200 bg-white">
+        <div className="flex items-center gap-2 ml-2">
+          <WorkspaceTabs />
+        </div>
+      </div>
 
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
