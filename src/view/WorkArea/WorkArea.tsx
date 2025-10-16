@@ -23,10 +23,14 @@ import { useWorkAreaState } from "./hooks/useWorkAreaState";
 import { useDataGridHandlers } from "./hooks/useDataGridHandlers";
 import { useFormulaOperations } from "./hooks/useFormulaOperations";
 import { useFormulaColumnHandlers } from "./components/FormulaColumnHandlers";
+import { useDilution } from "../../components/dilution";
 
 const WorkArea = () => {
   // Use custom hooks for state management
   const state = useWorkAreaState();
+
+  // Dilution state management
+  const dilutionState = useDilution();
   const {
     columns,
     tableData,
@@ -1365,6 +1369,7 @@ const WorkArea = () => {
           enableRowReordering={true}
           enableSavedViews={true}
           enableBulkSelection={true}
+          dilutionState={dilutionState}
         />
       </div>
 

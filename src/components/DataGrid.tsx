@@ -9,6 +9,10 @@ import { BulkActionsToolbar } from "./DataGrid/components/BulkActionsToolbar";
 import { EditableCell } from "./DataGrid/components/EditableCell";
 import { GroupingButton } from "./DataGrid/components/GroupingButton";
 import { isRowDraggable } from "./DataGrid/utils/rowOrdering";
+import { DilutionIcon, DilutionBadge, DilutionModal } from "./dilution";
+import { mockSolvents } from "../mocks/solvents";
+import type { Dilution } from "../types/dilution";
+import type { UseDilutionReturn } from "./dilution";
 
 export interface Column {
   id: string;
@@ -55,6 +59,7 @@ interface DataGridProps {
   enableRowReordering?: boolean;
   enableSavedViews?: boolean;
   enableBulkSelection?: boolean;
+  dilutionState?: UseDilutionReturn;
 }
 
 const DataGrid = ({
@@ -83,6 +88,7 @@ const DataGrid = ({
   enableRowReordering = true,
   enableSavedViews = false,
   enableBulkSelection = true,
+  dilutionState,
 }: DataGridProps) => {
   const [sortConfig, setSortConfig] = useState<{
     key: string;
@@ -93,6 +99,13 @@ const DataGrid = ({
   const [showColumnActions, setShowColumnActions] = useState<string | null>(
     null
   );
+
+  // Dilution modal state
+  const [dilutionModal, setDilutionModal] = useState<{
+    isOpen: boolean;
+    ingredientId: string;
+    ingredientName: string;
+  } | null>(null);
 
   // Row reordering hooks
   const {
@@ -381,40 +394,50 @@ const DataGrid = ({
       }
 
       const indent = (row.level || 0) * 20;
+      const isIngredient = !row.isFormula && !row.isTotal && row.id;
+      const dilution =
+        dilutionState && isIngredient
+          ? dilutionState.getDilution(row.id)
+          : undefined;
+      const hasDilution =
+        dilutionState && isIngredient
+          ? dilutionState.hasDilution(row.id)
+          : false;
+
       return (
         <div
-          className="flex items-center h-full"
+          className="flex items-center justify-between h-full group"
           style={{ paddingLeft: `${indent}px` }}
         >
-          {row.isFormula && (
-            <div className="flex items-center space-x-1 mr-2">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleFormulaExpansion?.(row.formulaId);
-                }}
-                className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-blue-600 cursor-pointer"
-                title={row.isExpanded ? "Collapse Formula" : "Expand Formula"}
-              >
-                <i
-                  className={`ri-arrow-${
-                    row.isExpanded ? "down" : "right"
-                  }-s-line text-sm`}
-                ></i>
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onExplodeFormula?.(row.formulaId);
-                }}
-                className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-orange-600 cursor-pointer"
-                title="Explode Formula"
-              >
-                <i className="ri-bubble-chart-line text-sm"></i>
-              </button>
-            </div>
-          )}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 flex-1 min-w-0">
+            {row.isFormula && (
+              <div className="flex items-center space-x-1 mr-2">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleFormulaExpansion?.(row.formulaId);
+                  }}
+                  className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-blue-600 cursor-pointer"
+                  title={row.isExpanded ? "Collapse Formula" : "Expand Formula"}
+                >
+                  <i
+                    className={`ri-arrow-${
+                      row.isExpanded ? "down" : "right"
+                    }-s-line text-sm`}
+                  ></i>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onExplodeFormula?.(row.formulaId);
+                  }}
+                  className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-orange-600 cursor-pointer"
+                  title="Explode Formula"
+                >
+                  <i className="ri-bubble-chart-line text-sm"></i>
+                </button>
+              </div>
+            )}
             {row.isFormula && (
               <i className="ri-folder-line text-blue-600 text-sm"></i>
             )}
@@ -427,7 +450,44 @@ const DataGrid = ({
             >
               {value || ""}
             </span>
+
+            {/* Dilution Badge - show text if ingredient has dilution */}
+            {dilution && dilution.solventIds.length > 0 && (
+              <DilutionBadge
+                dilution={dilution}
+                solvents={mockSolvents}
+                onClick={() => {
+                  setDilutionModal({
+                    isOpen: true,
+                    ingredientId: row.id,
+                    ingredientName: value || "",
+                  });
+                }}
+              />
+            )}
           </div>
+
+          {/* Dilution Icon - floating to the right, centered vertically */}
+          {isIngredient && dilutionState && (
+            <div
+              className={`flex items-center justify-center ml-2 ${
+                hasDilution
+                  ? ""
+                  : "opacity-0 group-hover:opacity-100 transition-opacity"
+              }`}
+            >
+              <DilutionIcon
+                onClick={() => {
+                  setDilutionModal({
+                    isOpen: true,
+                    ingredientId: row.id,
+                    ingredientName: value || "",
+                  });
+                }}
+                hasDilution={hasDilution}
+              />
+            </div>
+          )}
         </div>
       );
     }
@@ -1074,6 +1134,23 @@ const DataGrid = ({
           </tbody>
         </table>
       </div>
+
+      {/* Dilution Modal */}
+      {dilutionModal && dilutionState && (
+        <DilutionModal
+          isOpen={dilutionModal.isOpen}
+          onClose={() => setDilutionModal(null)}
+          onApply={(dilution: Dilution) => {
+            dilutionState.setDilution(dilutionModal.ingredientId, dilution);
+            setDilutionModal(null);
+          }}
+          ingredientName={dilutionModal.ingredientName}
+          currentDilution={dilutionState.getDilution(
+            dilutionModal.ingredientId
+          )}
+          solvents={mockSolvents}
+        />
+      )}
     </div>
   );
 };
