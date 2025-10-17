@@ -38,9 +38,9 @@ const LibraryPanel = () => {
   const [loading, setLoading] = useState(true);
 
   const tabs = [
-    { id: "ingredients", label: "Ingredients", icon: "ri-flask-line" },
-    { id: "formulas", label: "Formulas", icon: "ri-test-tube-line" },
-    { id: "attributes", label: "Attributes", icon: "ri-list-check" },
+    { id: "ingredients", label: "Ingredients", icon: "labs" },
+    { id: "formulas", label: "Formulas", icon: "experiment" },
+    { id: "attributes", label: "Attributes", icon: "checklist" },
   ];
 
   // Load data on mount
@@ -236,7 +236,7 @@ const LibraryPanel = () => {
             ))}
             {hasActiveFilters && (
               <div className="flex items-center space-x-1 text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded ml-2">
-                <i className="ri-filter-3-line"></i>
+                <span className="material-symbols-rounded text-sm">tune</span>
                 <span>Advanced</span>
               </div>
             )}

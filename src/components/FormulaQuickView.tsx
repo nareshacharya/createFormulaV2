@@ -18,9 +18,9 @@ const FormulaQuickView = ({
   const [activeSection, setActiveSection] = useState("overview");
 
   const sections = [
-    { id: "overview", label: "Overview", icon: "ri-information-line" },
-    { id: "ingredients", label: "Ingredients", icon: "ri-flask-line" },
-    { id: "notes", label: "Fragrance Notes", icon: "ri-music-2-line" },
+    { id: "overview", label: "Overview", icon: "info" },
+    { id: "ingredients", label: "Ingredients", icon: "beaker" },
+    { id: "notes", label: "Fragrance Notes", icon: "air_freshener" },
   ];
 
   const handleAddToWorkArea = () => {
@@ -141,7 +141,7 @@ const FormulaQuickView = ({
     if (!formula || !formula.ingredients || formula.ingredients.length === 0) {
       return (
         <div className="text-center py-8 text-gray-500">
-          <i className="ri-flask-line text-2xl mb-2"></i>
+          <span className="material-symbols-rounded text-2xl mb-2">beaker</span>
           <p>No ingredients in this formula</p>
         </div>
       );
@@ -224,7 +224,9 @@ const FormulaQuickView = ({
     if (!formula || !formula.notes) {
       return (
         <div className="text-center py-8 text-gray-500">
-          <i className="ri-music-2-line text-2xl mb-2"></i>
+          <span className="material-symbols-rounded text-2xl mb-2">
+            air_freshener
+          </span>
           <p>No fragrance notes available</p>
         </div>
       );
@@ -332,7 +334,7 @@ const FormulaQuickView = ({
       size="3xl"
       headerActions={
         <Button onClick={handleAddToWorkArea} size="sm">
-          <i className="ri-add-line mr-2"></i>
+          <span className="material-symbols-rounded mr-2">add</span>
           Add to Work Area
         </Button>
       }
@@ -354,9 +356,11 @@ const FormulaQuickView = ({
                   }
                 `}
               >
-                <i
-                  className={`${section.icon} mr-3 text-base flex-shrink-0`}
-                ></i>
+                <span
+                  className={`material-symbols-rounded mr-3 text-base flex-shrink-0`}
+                >
+                  {section.icon}
+                </span>
                 <span className="truncate">{section.label}</span>
               </button>
             ))}

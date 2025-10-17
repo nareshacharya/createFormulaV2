@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 interface Tab {
   id: string;
   label: string;
+  icon?: string;
 }
 
 interface PillTabsProps {
@@ -49,7 +50,11 @@ const PillTabs = ({
   }, [tabs, activeTab, onTabChange]);
 
   return (
-    <div ref={tabsRef} className={`flex space-x-2 ${className}`} role="tablist">
+    <div
+      ref={tabsRef}
+      className={`flex gap-1 w-full ${className}`}
+      role="tablist"
+    >
       {tabs.map((tab) => (
         <button
           key={tab.id}
@@ -57,7 +62,7 @@ const PillTabs = ({
           aria-selected={activeTab === tab.id}
           onClick={() => onTabChange(tab.id)}
           className={`
-            px-4 py-2 text-sm font-medium rounded-lg transition-all whitespace-nowrap cursor-pointer
+            flex-1 px-2 py-1.5 text-sm font-medium rounded-lg transition-all whitespace-nowrap cursor-pointer flex items-center justify-center gap-1
             focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500
             ${
               activeTab === tab.id
@@ -66,7 +71,10 @@ const PillTabs = ({
             }
           `}
         >
-          {tab.label}
+          {tab.icon && (
+            <span className="material-symbols-rounded text-sm">{tab.icon}</span>
+          )}
+          <span className="truncate">{tab.label}</span>
         </button>
       ))}
     </div>

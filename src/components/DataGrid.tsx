@@ -374,19 +374,19 @@ const DataGrid = ({
     if (column.key === "description") {
       if (isEmpty) {
         return (
-          <div className="text-center py-8">
-            <div className="w-12 h-12 mx-auto mb-3 bg-gray-200 rounded-full flex items-center justify-center">
-              <i className="ri-flask-line text-xl text-gray-400"></i>
+          <div className="text-center py-32">
+            <div className="w-24 h-24 mx-auto mb-3 bg-gray-200 rounded-full flex items-center justify-center">
+              <span className="material-symbols-rounded text-5xl text-gray-400">
+                science
+              </span>
             </div>
-            <h3 className="text-base font-medium text-gray-900 mb-2">
+            <h3 className="text-lg font-medium text-gray-700 mb-2">
               No ingredients added
             </h3>
-            <p className="text-sm text-gray-500 mb-4">
-              Start building your formula by adding ingredients from the library
-              panel.
-            </p>
             <div className="flex items-center justify-center text-sm text-gray-600">
-              <i className="ri-arrow-left-line mr-2 text-blue-500"></i>
+              <span className="material-symbols-rounded mr-2 text-blue-500">
+                arrow_back
+              </span>
               Select ingredients from the library panel
             </div>
           </div>
@@ -420,11 +420,15 @@ const DataGrid = ({
                   className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-blue-600 cursor-pointer"
                   title={row.isExpanded ? "Collapse Formula" : "Expand Formula"}
                 >
-                  <i
-                    className={`ri-arrow-${
-                      row.isExpanded ? "down" : "right"
-                    }-s-line text-sm`}
-                  ></i>
+                  <span
+                    className={`material-symbols-rounded text-sm ${
+                      row.isExpanded
+                        ? "content: 'expand_less'"
+                        : "content: 'expand_more'"
+                    }`}
+                  >
+                    {row.isExpanded ? "expand_less" : "expand_more"}
+                  </span>
                 </button>
                 <button
                   onClick={(e) => {
@@ -434,12 +438,14 @@ const DataGrid = ({
                   className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-orange-600 cursor-pointer"
                   title="Explode Formula"
                 >
-                  <i className="ri-bubble-chart-line text-sm"></i>
+                  <span className="material-symbols-rounded text-sm">bomb</span>
                 </button>
               </div>
             )}
             {row.isFormula && (
-              <i className="ri-folder-line text-blue-600 text-sm"></i>
+              <span className="material-symbols-rounded text-blue-600 text-sm">
+                folder
+              </span>
             )}
             <span
               className={`text-sm ${
@@ -722,14 +728,19 @@ const DataGrid = ({
             <tr className="border-b border-gray-200">
               {/* Drag handle column (if enabled) */}
               {enableRowReordering && (
-                <th className="w-8 px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
-                  <i className="ri-draggable text-gray-400"></i>
+                <th className="w-8 px-2 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider bg-gray-50">
+                  <span
+                    className="material-symbols-rounded text-gray-400"
+                    style={{ fontSize: "16px" }}
+                  >
+                    drag_handle
+                  </span>
                 </th>
               )}
 
               {/* Checkbox column (if enabled) */}
               {enableBulkSelection && (
-                <th className="w-10 px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
+                <th className="w-10 px-3 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider bg-gray-50">
                   <input
                     type="checkbox"
                     checked={isAllSelected()}
@@ -751,11 +762,38 @@ const DataGrid = ({
                   (column.group === "Formulas" ||
                     column.group === "Attributes");
 
+                const getColumnWidth = () => {
+                  // Add column button - minimal width
+                  if (column.type === "add-column") return "50px";
+
+                  // Fixed columns - hug content
+                  if (column.fixed) return "auto";
+
+                  // Description column - fixed width
+                  if (column.key === "description") return "300px";
+
+                  // Formulas group - fixed equal width with max-width for ellipsis
+                  if (column.group === "Formulas") {
+                    return "180px";
+                  }
+
+                  // Cost group columns - hug content
+                  if (column.group === "Cost") return "124px";
+                  if (column.key === "cost") return "124px";
+
+                  // Attributes group - fixed equal width with max-width for ellipsis
+                  if (column.group === "Attributes") {
+                    return "140px";
+                  }
+
+                  return "auto";
+                };
+
                 return (
                   <th
                     key={column.id}
                     className={`
-                    relative px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider
+                    relative px-3 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider
                     cursor-pointer select-none border-r border-gray-200 last:border-r-0
                     ${
                       column.id === editableFormula
@@ -768,6 +806,11 @@ const DataGrid = ({
                     ${column.fixed ? "bg-gray-100" : ""}
                     ${isDraggable ? "cursor-move" : ""}
                   `}
+                    style={{
+                      width: getColumnWidth(),
+                      minWidth: getColumnWidth(),
+                      maxWidth: getColumnWidth(),
+                    }}
                     draggable={isDraggable}
                     onDragStart={(e) => handleDragStart(e, index)}
                     onDragOver={(e) => handleDragOver(e, index)}
@@ -789,39 +832,43 @@ const DataGrid = ({
                               : "attribute"
                           )
                         }
+                        title={`Click to ${
+                          column.group === "Formulas"
+                            ? "add a formula"
+                            : "add an attribute"
+                        }`}
                       >
                         <div className="relative group">
-                          <div className="flex items-center space-x-2">
-                            <div className="w-6 h-6 flex items-center justify-center text-gray-400 group-hover:text-blue-600 transition-colors">
-                              <i className="ri-add-line text-sm"></i>
-                            </div>
-                            <span className="text-xs text-gray-500 group-hover:text-blue-600 transition-colors">
-                              {column.group === "Formulas"
-                                ? "Add Formula"
-                                : "Add Attribute"}
+                          <div className="flex items-center justify-center">
+                            <span className="material-symbols-rounded text-base text-gray-400 group-hover:text-blue-600 transition-colors">
+                              add
                             </span>
-                          </div>
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                            Click to{" "}
-                            {column.group === "Formulas"
-                              ? "add a formula"
-                              : "add an attribute"}
                           </div>
                         </div>
                       </div>
                     ) : (
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <div className="flex flex-col">
-                            <span className="truncate">{column.title}</span>
+                      <div className="flex items-center justify-between gap-1">
+                        <div className="flex items-center space-x-1 min-w-0">
+                          <div className="flex flex-col min-w-0">
+                            <span
+                              className="truncate text-xs"
+                              title={column.title}
+                            >
+                              {column.title}
+                            </span>
                             {column.formulaId && (
-                              <span className="text-xs text-gray-400 font-normal">
+                              <span
+                                className="text-xs text-gray-400 font-normal truncate"
+                                title={column.formulaId}
+                              >
                                 {column.formulaId}
                               </span>
                             )}
                           </div>
                           {column.fixed && (
-                            <i className="ri-lock-line text-xs text-gray-400"></i>
+                            <span className="material-symbols-rounded text-xs text-gray-400 flex-shrink-0">
+                              lock
+                            </span>
                           )}
                           {column.sortable && (
                             <button
@@ -833,18 +880,24 @@ const DataGrid = ({
                             >
                               {sortConfig?.key === column.id ? (
                                 sortConfig.direction === "asc" ? (
-                                  <i className="ri-arrow-up-line text-xs"></i>
+                                  <span className="material-symbols-rounded text-xs">
+                                    arrow_upward
+                                  </span>
                                 ) : (
-                                  <i className="ri-arrow-down-line text-xs"></i>
+                                  <span className="material-symbols-rounded text-xs">
+                                    arrow_downward
+                                  </span>
                                 )
                               ) : (
-                                <i className="ri-expand-up-down-line text-xs"></i>
+                                <span className="material-symbols-rounded text-xs">
+                                  unfold_more
+                                </span>
                               )}
                             </button>
                           )}
                         </div>
 
-                        <div className="flex items-center space-x-1">
+                        <div className="flex items-center space-x-0.5 flex-shrink-0">
                           {/* Grouping button for non-numeric attribute columns */}
                           {column.group === "Attributes" &&
                             column.type !== "number" &&
@@ -871,10 +924,12 @@ const DataGrid = ({
                                 e.stopPropagation();
                                 onDeleteColumn?.(column.id);
                               }}
-                              className="text-gray-400 hover:text-red-600 p-1 transition-colors"
+                              className="text-gray-400 hover:text-red-600 transition-colors"
                               title="Remove column"
                             >
-                              <i className="ri-close-line text-sm"></i>
+                              <span className="material-symbols-rounded text-sm">
+                                close
+                              </span>
                             </button>
                           )}
 
@@ -890,9 +945,11 @@ const DataGrid = ({
                                       : column.id
                                   );
                                 }}
-                                className="text-gray-400 hover:text-gray-600 p-1"
+                                className="text-gray-400 hover:text-gray-600"
                               >
-                                <i className="ri-more-2-line text-xs"></i>
+                                <span className="material-symbols-rounded text-xs">
+                                  more_vert
+                                </span>
                               </button>
 
                               {showColumnActions === column.id && (
@@ -908,7 +965,9 @@ const DataGrid = ({
                                     }}
                                     className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
                                   >
-                                    <i className="ri-edit-line text-xs"></i>
+                                    <span className="material-symbols-rounded text-xs">
+                                      edit
+                                    </span>
                                     <span>Set Active</span>
                                   </button>
                                   <button
@@ -919,7 +978,9 @@ const DataGrid = ({
                                     }}
                                     className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2 whitespace-nowrap"
                                   >
-                                    <i className="ri-file-copy-line text-xs"></i>
+                                    <span className="material-symbols-rounded text-xs">
+                                      content_copy
+                                    </span>
                                     <span>Create new version</span>
                                   </button>
                                   <div className="border-t border-gray-200 my-1"></div>
@@ -931,7 +992,9 @@ const DataGrid = ({
                                     }}
                                     className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
                                   >
-                                    <i className="ri-scales-line text-xs"></i>
+                                    <span className="material-symbols-rounded text-xs">
+                                      balance
+                                    </span>
                                     <span>Normalize</span>
                                   </button>
                                   <button
@@ -942,7 +1005,9 @@ const DataGrid = ({
                                     }}
                                     className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2 whitespace-nowrap"
                                   >
-                                    <i className="ri-send-plane-line text-xs"></i>
+                                    <span className="material-symbols-rounded text-xs">
+                                      send
+                                    </span>
                                     <span>Send for Compounding</span>
                                   </button>
                                   <div className="border-t border-gray-200 my-1"></div>
@@ -954,7 +1019,9 @@ const DataGrid = ({
                                     }}
                                     className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
                                   >
-                                    <i className="ri-close-circle-line text-xs"></i>
+                                    <span className="material-symbols-rounded text-xs">
+                                      delete
+                                    </span>
                                     <span>Remove</span>
                                   </button>
                                 </div>
@@ -1011,7 +1078,12 @@ const DataGrid = ({
                       onClick={(e) => e.stopPropagation()}
                     >
                       {isDraggable && (
-                        <i className="ri-draggable text-gray-400 cursor-move"></i>
+                        <span
+                          className="material-symbols-rounded text-gray-400 cursor-move"
+                          style={{ fontSize: "16px" }}
+                        >
+                          drag_handle
+                        </span>
                       )}
                     </td>
                   )}
@@ -1038,6 +1110,34 @@ const DataGrid = ({
                     if (row.isEmpty && colIndex > 0) {
                       return null;
                     }
+
+                    // Column width calculation function (same as header)
+                    const getColumnWidth = () => {
+                      // Add column button - minimal width
+                      if (column.type === "add-column") return "50px";
+
+                      // Description column - fixed width (check before fixed columns)
+                      if (column.key === "description") return "280px";
+
+                      // Fixed columns - hug content
+                      if (column.fixed) return "auto";
+
+                      // Formulas group - fixed equal width
+                      if (column.group === "Formulas") {
+                        return "180px";
+                      }
+
+                      // Cost group columns - hug content
+                      if (column.group === "Cost") return "124px";
+                      if (column.key === "cost") return "124px";
+
+                      // Attributes group - fixed equal width
+                      if (column.group === "Attributes") {
+                        return "140px";
+                      }
+
+                      return "auto";
+                    };
 
                     const isEditing =
                       navigation.editingCell?.rowId === row.id &&
@@ -1118,6 +1218,11 @@ const DataGrid = ({
                               : ""
                           }
                         `}
+                        style={{
+                          width: getColumnWidth(),
+                          minWidth: getColumnWidth(),
+                          maxWidth: getColumnWidth(),
+                        }}
                         colSpan={
                           row.isEmpty && column.key === "description"
                             ? columns.length

@@ -151,7 +151,9 @@ const IngredientList = ({
                     >
                       {ingredient.name}
                       {isSelected && (
-                        <i className="ri-check-line text-blue-600 ml-1 text-xs"></i>
+                        <span className="material-symbols-rounded text-blue-600 ml-1 text-xs">
+                          check
+                        </span>
                       )}
                     </h4>
                     <p
@@ -182,7 +184,9 @@ const IngredientList = ({
                     onClick={(e) => handleInfoClick(e, ingredient)}
                     aria-label={`View details for ${ingredient.name}`}
                   >
-                    <i className="ri-information-line text-gray-400 text-lg"></i>
+                    <span className="material-symbols-rounded text-gray-400 text-lg">
+                      info
+                    </span>
                   </button>
                 )}
               </div>
@@ -192,7 +196,9 @@ const IngredientList = ({
 
         {filteredIngredients.length === 0 && (
           <div className="text-center py-6 text-gray-500">
-            <i className="ri-search-line text-xl mb-2"></i>
+            <span className="material-symbols-rounded text-xl mb-2">
+              search
+            </span>
             <p className="text-sm">No ingredients found</p>
             {(searchQuery ||
               activeFilter ||

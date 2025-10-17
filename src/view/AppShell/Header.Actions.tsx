@@ -172,8 +172,12 @@ const HeaderActions = () => {
           title="New Formula"
         >
           <div className="relative mb-0.5">
-            <i className="ri-flask-line text-white text-xl leading-6"></i>
-            <i className="ri-add-line text-white text-xs absolute -top-0.5 -right-0.5 bg-purple-700 rounded-full"></i>
+            <span className="material-symbols-rounded text-white text-xl leading-6">
+              experiment
+            </span>
+            <span className="material-symbols-rounded text-white text-xs absolute -top-0.5 -right-[0.325rem]">
+              add
+            </span>
           </div>
           <span className="text-[10px] text-white/80 font-medium whitespace-nowrap hidden xl:inline">
             Formula
@@ -189,7 +193,9 @@ const HeaderActions = () => {
           className="group relative w-[42px] xl:w-[68px] flex flex-col items-center justify-center py-1.5 rounded-lg bg-purple-700 hover:bg-purple-600 transition-colors cursor-pointer shadow-sm"
           title="Merge Duplicates"
         >
-          <i className="ri-git-merge-line text-white text-xl leading-6 mb-0.5"></i>
+          <span className="material-symbols-rounded text-white text-xl leading-6 mb-0.5">
+            call_merge
+          </span>
           <span className="text-[10px] text-white/80 font-medium whitespace-nowrap hidden xl:inline">
             Merge
           </span>
@@ -204,7 +210,9 @@ const HeaderActions = () => {
           className="group relative w-[42px] xl:w-[68px] flex flex-col items-center justify-center py-1.5 rounded-lg bg-purple-700 hover:bg-purple-600 transition-colors cursor-pointer shadow-sm"
           title="Normalize Formula"
         >
-          <i className="ri-scales-3-line text-white text-xl leading-6 mb-0.5"></i>
+          <span className="material-symbols-rounded text-white text-xl leading-6 mb-0.5">
+            balance
+          </span>
           <span className="text-[10px] text-white/80 font-medium whitespace-nowrap hidden xl:inline">
             Normalize
           </span>
@@ -224,7 +232,9 @@ const HeaderActions = () => {
           title="Send Active Formula for Compounding"
           disabled={!hasActiveFormula}
         >
-          <i className="ri-send-plane-line text-white text-xl leading-6 mb-0.5"></i>
+          <span className="material-symbols-rounded text-white text-xl leading-6 mb-0.5">
+            send
+          </span>
           <span className="text-[10px] text-white/80 font-medium whitespace-nowrap hidden xl:inline">
             Send
           </span>
@@ -244,7 +254,9 @@ const HeaderActions = () => {
         className="group relative w-[42px] xl:w-[68px] flex flex-col items-center justify-center py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap shadow-sm"
         title="Save current workspace state"
       >
-        <i className="ri-save-3-line text-xl leading-6 mb-0.5"></i>
+        <span className="material-symbols-rounded text-xl leading-6 mb-0.5">
+          save
+        </span>
         <span className="text-[10px] font-medium hidden xl:inline">Save</span>
         {/* Tooltip for small screens */}
         <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none xl:hidden">
@@ -263,7 +275,9 @@ const HeaderActions = () => {
         title={canUndo ? `Undo (${undoCount} available)` : "No actions to undo"}
         disabled={!canUndo}
       >
-        <i className="ri-arrow-go-back-line text-white text-xl leading-6 mb-0.5"></i>
+        <span className="material-symbols-rounded text-white text-xl leading-6 mb-0.5">
+          undo
+        </span>
         <span className="text-[10px] text-white/80 font-medium hidden xl:inline">
           Undo
         </span>

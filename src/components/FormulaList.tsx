@@ -69,7 +69,7 @@ const FormulaList = ({
   if (filteredFormulas.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
-        <i className="ri-flask-line text-2xl mb-2"></i>
+        <span className="material-symbols-rounded text-2xl mb-2">beaker</span>
         <p>No formulas found</p>
         {searchTerm && (
           <p className="text-sm mt-1">Try adjusting your search term</p>
@@ -116,7 +116,9 @@ const FormulaList = ({
                   >
                     {formula.name}
                     {isSelected && (
-                      <i className="ri-check-line text-blue-600 ml-1 text-xs"></i>
+                      <span className="material-symbols-rounded text-blue-600 ml-1 text-xs">
+                        check
+                      </span>
                     )}
                   </h4>
                   <p
@@ -147,7 +149,9 @@ const FormulaList = ({
                   onClick={(e) => handleViewClick(e, formula)}
                   aria-label={`View details for ${formula.name}`}
                 >
-                  <i className="ri-eye-line text-gray-400 text-lg"></i>
+                  <span className="material-symbols-rounded text-gray-400 text-lg">
+                    visibility
+                  </span>
                 </button>
               )}
             </div>

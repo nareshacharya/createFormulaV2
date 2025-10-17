@@ -174,13 +174,15 @@ const WorkspaceTabs = () => {
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
-                  <i
-                    className={`ri-folder-3-line ${
+                  <span
+                    className={`material-symbols-rounded ${
                       activeTabId === tab.id
                         ? "text-purple-600"
                         : "text-gray-400"
                     }`}
-                  ></i>
+                  >
+                    folder
+                  </span>
                   <span>{tab.name}</span>
                 </div>
                 {!tab.isDefault && (
@@ -189,7 +191,7 @@ const WorkspaceTabs = () => {
                     className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-red-500"
                     title="Close workspace"
                   >
-                    <i className="ri-close-line"></i>
+                    <span className="material-symbols-rounded">close</span>
                   </button>
                 )}
               </div>
@@ -205,7 +207,9 @@ const WorkspaceTabs = () => {
           className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 transition-colors"
           title="Workspace options"
         >
-          <i className="ri-more-fill text-gray-500"></i>
+          <span className="material-symbols-rounded text-gray-500">
+            more_vert
+          </span>
         </button>
 
         {/* Dropdown Menu */}
@@ -219,7 +223,7 @@ const WorkspaceTabs = () => {
               disabled={tabs.length >= MAX_TABS}
               className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              <i className="ri-add-line"></i>
+              <span className="material-symbols-rounded">add</span>
               Add Workspace ({tabs.length}/{MAX_TABS})
             </button>
             <button
@@ -232,7 +236,7 @@ const WorkspaceTabs = () => {
               }}
               className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
             >
-              <i className="ri-edit-line"></i>
+              <span className="material-symbols-rounded">edit</span>
               Rename Active
             </button>
           </div>

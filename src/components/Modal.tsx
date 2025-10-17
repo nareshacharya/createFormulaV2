@@ -71,7 +71,7 @@ const Modal = ({
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
             >
-              <i className="ri-close-line text-xl"></i>
+              <span className="material-symbols-rounded text-xl">close</span>
             </button>
           </div>
 

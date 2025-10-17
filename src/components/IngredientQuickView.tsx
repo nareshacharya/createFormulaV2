@@ -41,29 +41,29 @@ const IngredientQuickView = ({
   const [activeSection, setActiveSection] = useState("overview");
 
   const sections = [
-    { id: "overview", label: "Overview", icon: "ri-information-line" },
+    { id: "overview", label: "Overview", icon: "info" },
     {
       id: "chemical-structure",
       label: "Chemical Structure",
-      icon: "ri-flask-line",
+      icon: "beaker",
     },
     {
       id: "physical-properties",
       label: "Physical Properties",
-      icon: "ri-temp-hot-line",
+      icon: "thermostat",
     },
     {
       id: "chemical-properties",
       label: "Chemical Properties",
-      icon: "ri-test-tube-line",
+      icon: "science",
     },
     {
       id: "compliance",
       label: "Compliance & Regulations",
-      icon: "ri-shield-check-line",
+      icon: "verified_user",
     },
-    { id: "suppliers", label: "Suppliers", icon: "ri-truck-line" },
-    { id: "documents", label: "Documents", icon: "ri-file-text-line" },
+    { id: "suppliers", label: "Suppliers", icon: "local_shipping" },
+    { id: "documents", label: "Documents", icon: "description" },
   ];
 
   const handleAddToFormula = () => {
@@ -113,7 +113,7 @@ const IngredientQuickView = ({
       size="3xl"
       headerActions={
         <Button onClick={handleAddToFormula} size="sm">
-          <i className="ri-add-line mr-2"></i>
+          <span className="material-symbols-rounded mr-2">add</span>
           Add to Active Formula
         </Button>
       }
@@ -135,9 +135,11 @@ const IngredientQuickView = ({
                   }
                 `}
               >
-                <i
-                  className={`${section.icon} mr-3 text-base flex-shrink-0`}
-                ></i>
+                <span
+                  className={`material-symbols-rounded mr-3 text-base flex-shrink-0`}
+                >
+                  {section.icon}
+                </span>
                 <span className="truncate">{section.label}</span>
               </button>
             ))}
