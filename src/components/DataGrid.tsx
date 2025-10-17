@@ -9,7 +9,7 @@ import { BulkActionsToolbar } from "./DataGrid/components/BulkActionsToolbar";
 import { EditableCell } from "./DataGrid/components/EditableCell";
 import { GroupingButton } from "./DataGrid/components/GroupingButton";
 import { isRowDraggable } from "./DataGrid/utils/rowOrdering";
-import { DilutionIcon, DilutionBadge, DilutionModal } from "./dilution";
+import { DilutionIcon, DilutionModal } from "./dilution";
 import { mockSolvents } from "../mocks/solvents";
 import type { Dilution } from "../types/dilution";
 import type { UseDilutionReturn } from "./dilution";
@@ -399,10 +399,6 @@ const DataGrid = ({
         dilutionState && isIngredient
           ? dilutionState.getDilution(row.id)
           : undefined;
-      const hasDilution =
-        dilutionState && isIngredient
-          ? dilutionState.hasDilution(row.id)
-          : false;
 
       return (
         <div
@@ -430,16 +426,6 @@ const DataGrid = ({
                     {row.isExpanded ? "expand_less" : "expand_more"}
                   </span>
                 </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onExplodeFormula?.(row.formulaId);
-                  }}
-                  className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-orange-600 cursor-pointer"
-                  title="Explode Formula"
-                >
-                  <span className="material-symbols-rounded text-sm">bomb</span>
-                </button>
               </div>
             )}
             {row.isFormula && (
@@ -456,33 +442,33 @@ const DataGrid = ({
             >
               {value || ""}
             </span>
-
-            {/* Dilution Badge - show text if ingredient has dilution */}
-            {dilution && dilution.solventIds.length > 0 && (
-              <DilutionBadge
-                dilution={dilution}
-                solvents={mockSolvents}
-                onClick={() => {
-                  setDilutionModal({
-                    isOpen: true,
-                    ingredientId: row.id,
-                    ingredientName: value || "",
-                  });
-                }}
-              />
-            )}
           </div>
 
-          {/* Dilution Icon - floating to the right, centered vertically */}
-          {isIngredient && dilutionState && (
-            <div
-              className={`flex items-center justify-center ml-2 ${
-                hasDilution
-                  ? ""
-                  : "opacity-0 group-hover:opacity-100 transition-opacity"
-              }`}
+          {/* Explode button for formulas - positioned on right like dilution icon */}
+          {row.isFormula && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onExplodeFormula?.(row.formulaId);
+              }}
+              className="flex-shrink-0 ml-2 text-orange-600 hover:text-orange-700 transition-colors"
+              title="Explode Formula"
             >
-              <DilutionIcon
+              <span
+                className="material-symbols-rounded text-lg"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                bomb
+              </span>
+            </button>
+          )}
+
+          {/* Dilution Display - show "X% Solvent 💧" on the right in blue */}
+          {isIngredient &&
+            dilutionState &&
+            dilution &&
+            dilution.solventIds.length > 0 && (
+              <button
                 onClick={() => {
                   setDilutionModal({
                     isOpen: true,
@@ -490,10 +476,50 @@ const DataGrid = ({
                     ingredientName: value || "",
                   });
                 }}
-                hasDilution={hasDilution}
-              />
-            </div>
-          )}
+                className="flex items-center gap-1 ml-2 text-blue-600 hover:text-blue-700 transition-colors cursor-pointer"
+                title="Edit Dilution"
+              >
+                <span className="text-xs font-medium whitespace-nowrap">
+                  {(() => {
+                    const solventCodes = dilution.solventIds
+                      .map(
+                        (id) =>
+                          mockSolvents.find((s) => s.id === id)?.code || ""
+                      )
+                      .filter(Boolean)
+                      .join(", ");
+                    const percentageDisplay = (
+                      dilution.concentration * 100
+                    ).toFixed(dilution.concentration < 0.01 ? 4 : 2);
+                    return `${percentageDisplay}% ${solventCodes}`;
+                  })()}
+                </span>
+                <span
+                  className="material-symbols-rounded text-sm flex-shrink-0"
+                  style={{ fontVariationSettings: "'FILL' 1" }}
+                >
+                  water_drop
+                </span>
+              </button>
+            )}
+
+          {/* Dilution Icon - show only when no dilution (on hover) */}
+          {isIngredient &&
+            dilutionState &&
+            (!dilution || dilution.solventIds.length === 0) && (
+              <div className="flex items-center justify-center ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <DilutionIcon
+                  onClick={() => {
+                    setDilutionModal({
+                      isOpen: true,
+                      ingredientId: row.id,
+                      ingredientName: value || "",
+                    });
+                  }}
+                  hasDilution={false}
+                />
+              </div>
+            )}
         </div>
       );
     }
@@ -519,21 +545,85 @@ const DataGrid = ({
       const isActiveFormula = column.id === editableFormula;
       const isFormulaColumn = column.id.startsWith("formula");
 
-      // Formula rows in formula columns - show non-editable display
+      // Formula rows in formula columns
       if (row.isFormula && isFormulaColumn) {
+        // Non-active formula columns: show plain number without input styling
+        if (!isActiveFormula) {
+          return (
+            <span className="text-sm text-gray-700">
+              {typeof value === "number" ? value.toFixed(2) : "0"}
+            </span>
+          );
+        }
+
+        // Active formula column: show input with explode icon on right (like dilution)
         return (
-          <div className="flex items-center">
+          <div className="flex items-center gap-2 w-full group">
             <input
               type="number"
-              value={typeof value === "number" ? value.toFixed(5) : value || 0}
-              readOnly
-              className="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded text-gray-900 cursor-pointer focus:outline-none"
+              value={
+                typeof value === "number" ? value.toFixed(5) : value || 100
+              }
+              onChange={(e) => {
+                const newPercentage = parseFloat(e.target.value) || 0;
+                const basePercentage = 100; // Always use 100 as base
+                const scaleFactor = newPercentage / basePercentage;
+
+                // Update the formula cell
+                onCellEdit?.(row.id, column.id, newPercentage);
+
+                // Update all child ingredient values proportionally
+                // The base values are what the ingredients would be at 100%
+                data.forEach((dataRow) => {
+                  if (
+                    dataRow.parentFormulaId === row.formulaId &&
+                    !dataRow.isFormula
+                  ) {
+                    // To calculate from base 100%, we need to reverse the current scaling
+                    // then apply the new scaling
+                    const currentFormulaPercentage =
+                      typeof value === "number" ? value : 100;
+                    const currentIngredientValue = dataRow[column.id];
+
+                    if (
+                      typeof currentIngredientValue === "number" &&
+                      currentFormulaPercentage !== 0
+                    ) {
+                      // Calculate base value (what it would be at 100%)
+                      const baseValue =
+                        currentIngredientValue /
+                        (currentFormulaPercentage / 100);
+                      // Apply new percentage
+                      const newIngredientValue = baseValue * scaleFactor;
+                      onCellEdit?.(dataRow.id, column.id, newIngredientValue);
+                    }
+                  }
+                });
+              }}
+              className="flex-1 min-w-0 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               min="0"
+              step="0.1"
               style={{
                 MozAppearance: "textfield",
                 appearance: "textfield",
               }}
             />
+            {/* Explode button - positioned on far right like dilution icon */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onExplodeFormula?.(row.formulaId);
+              }}
+              className="flex-shrink-0 text-orange-600 hover:text-orange-700 transition-colors"
+              title="Explode Formula"
+            >
+              <span
+                className="material-symbols-rounded text-lg"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                bomb
+              </span>
+            </button>
           </div>
         );
       }

@@ -171,7 +171,7 @@ const HeaderActions = () => {
           className="group relative w-[42px] xl:w-[68px] flex flex-col items-center justify-center py-1.5 rounded-lg bg-purple-700 hover:bg-purple-600 transition-colors cursor-pointer shadow-sm"
           title="New Formula"
         >
-          <div className="relative mb-0.5">
+          <div className="relative">
             <span className="material-symbols-rounded text-white text-xl leading-6">
               experiment
             </span>

@@ -29,22 +29,56 @@ export const useDataGridHandlers = ({
     setEditableFormula,
 }: UseDataGridHandlersProps) => {
     const handleRowDelete = (rowId: string) => {
+        console.log("🔥 handleRowDelete ENTRY - rowId:", rowId);
         setTableData((prev) => {
             const rowToDelete = prev.find((row) => row.id === rowId);
+            console.log("🗑️ handleRowDelete called:", {
+                rowId,
+                rowToDelete,
+                isFormula: rowToDelete?.isFormula,
+                formulaId: rowToDelete?.formulaId,
+                parentFormulaId: rowToDelete?.parentFormulaId
+            });
             let newData = prev.filter((row) => row.id !== rowId);
 
-            // If deleting a formula group, also delete its ingredients and update tracking
-            if (rowToDelete?.isFormula) {
+            // If deleting a formula group row, also delete its ingredients and update tracking
+            if (rowToDelete?.isFormula && rowToDelete?.formulaId) {
+                console.log("📋 Deleting formula GROUP row:", rowToDelete.formulaId);
                 newData = newData.filter(
                     (row) => row.parentFormulaId !== rowToDelete.formulaId
                 );
 
                 // Remove from tracking sets and update state
                 pendingFormulaIds.current?.delete(rowToDelete.formulaId);
-                const updatedSelectedIds = selectedFormulaIds.filter(
-                    (id) => id !== rowToDelete.formulaId
+                setSelectedFormulaIds((prev) =>
+                    prev.filter((id) => id !== rowToDelete.formulaId)
                 );
-                setSelectedFormulaIds(updatedSelectedIds);
+
+                // The useEffect in WorkArea will emit the formula-selections-updated event
+                console.log("✅ Formula group row deleted, selectedFormulaIds will be updated");
+            }
+            // If deleting an ingredient that belongs to a formula, check if all formula ingredients are gone
+            else if (rowToDelete?.parentFormulaId) {
+                console.log("📋 Deleting ingredient from formula:", rowToDelete.parentFormulaId);
+
+                // Check if this is the last ingredient for this formula
+                const remainingIngredientsForFormula = newData.filter(
+                    (row) => row.parentFormulaId === rowToDelete.parentFormulaId
+                );
+
+                // Also check if the formula group row still exists
+                const formulaGroupRow = newData.find(
+                    (row) => row.isFormula && row.formulaId === rowToDelete.parentFormulaId
+                );
+
+                // If no ingredients left and no group row, remove formula from tracking
+                if (remainingIngredientsForFormula.length === 0 && !formulaGroupRow) {
+                    console.log("✅ Last ingredient deleted, removing formula from tracking:", rowToDelete.parentFormulaId);
+                    pendingFormulaIds.current?.delete(rowToDelete.parentFormulaId);
+                    setSelectedFormulaIds((prev) =>
+                        prev.filter((id) => id !== rowToDelete.parentFormulaId)
+                    );
+                }
             }
 
             return newData;
@@ -102,19 +136,11 @@ export const useDataGridHandlers = ({
 
         // If it's a formula column, update selected formula IDs
         if (columnToDelete.formulaId) {
-            const newSelectedIds = selectedFormulaIds.filter(
-                (id) => id !== columnToDelete.formulaId
+            setSelectedFormulaIds((prev) =>
+                prev.filter((id) => id !== columnToDelete.formulaId)
             );
-            setSelectedFormulaIds(newSelectedIds);
 
-            const newCount = columns.filter(
-                (col) =>
-                    col.group === "Formulas" && col.formulaId && col.id !== columnId
-            ).length;
-            eventBus.emit("formula-selections-updated", {
-                count: newCount,
-                selectedIds: newSelectedIds,
-            });
+            // The useEffect in WorkArea will emit the formula-selections-updated event
 
             // If this was the active formula, set another formula as active
             if (editableFormula === columnId) {

@@ -10,6 +10,8 @@ interface UseFormulaOperationsProps {
     formulas: Formula[];
     ingredients: Ingredient[];
     setTableData: Dispatch<SetStateAction<any[]>>;
+    selectedFormulaIds: string[];
+    setSelectedFormulaIds: Dispatch<SetStateAction<string[]>>;
 }
 
 export const useFormulaOperations = ({
@@ -18,6 +20,8 @@ export const useFormulaOperations = ({
     formulas,
     ingredients,
     setTableData,
+    selectedFormulaIds,
+    setSelectedFormulaIds,
 }: UseFormulaOperationsProps) => {
     const handleNormalize = () => {
         if (!editableFormula) {
@@ -224,6 +228,10 @@ export const useFormulaOperations = ({
 
             return calculateTotals(newData, columns);
         });
+
+        // REQUIREMENT 4: Remove the exploded formula from selectedFormulaIds
+        // The useEffect in WorkArea will emit the formula-selections-updated event
+        setSelectedFormulaIds((prev) => prev.filter((id) => id !== formulaId));
     };
 
     return {

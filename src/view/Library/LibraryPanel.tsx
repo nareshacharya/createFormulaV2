@@ -89,6 +89,7 @@ const LibraryPanel = () => {
       count: number;
       selectedIds: string[];
     }) => {
+      console.log("📥 LibraryPanel received formula-selections-updated:", data);
       setSelectedFormulaIds(data.selectedIds || []);
     };
 

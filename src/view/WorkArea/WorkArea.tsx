@@ -92,6 +92,8 @@ const WorkArea = () => {
       formulas,
       ingredients,
       setTableData,
+      selectedFormulaIds,
+      setSelectedFormulaIds,
     });
 
   // Use extracted formula column handlers
@@ -140,6 +142,7 @@ const WorkArea = () => {
 
   // Sync selected formula IDs with LibraryPanel whenever they change
   useEffect(() => {
+    console.log("🔄 selectedFormulaIds changed:", selectedFormulaIds);
     eventBus.emit("formula-selections-updated", {
       count: selectedFormulaIds.length,
       selectedIds: selectedFormulaIds,
@@ -268,6 +271,20 @@ const WorkArea = () => {
     };
 
     const handleFormulaSelected = (data: { formula: Formula }) => {
+      // REQUIREMENT 1: Check if there are any formula columns
+      // Formulas can only be added if at least one formula column exists
+      const hasFormulaColumns = columns.some(
+        (col) => col.group === "Formulas" && col.formulaId
+      );
+
+      if (!hasFormulaColumns) {
+        toast.error(
+          "Please add a formula column first before selecting formulas from the library",
+          { duration: 4000 }
+        );
+        return;
+      }
+
       // Check if formula is already selected or being added (prevents race condition)
       if (
         selectedFormulaIds.includes(data.formula.id) ||
@@ -676,14 +693,17 @@ const WorkArea = () => {
 
       // Add the formula to the available formulas list
       setFormulas((prev) => [...prev, data.formula]);
-      setAvailableFormulas((prev) => {
-        const updated = [...prev, data.formula];
-        eventBus.emit("available-formulas-updated", { formulas: updated });
-        return updated;
+      const updatedFormulas = [...availableFormulas, data.formula];
+      setAvailableFormulas(updatedFormulas);
+
+      // Emit event outside of setState to avoid React warning
+      eventBus.emit("available-formulas-updated", {
+        formulas: updatedFormulas,
       });
 
-      // Note: Do NOT update selectedFormulaIds here - formulas added via popup
-      // should not be highlighted in the library panel
+      // REQUIREMENT 2: Track formula added as column - add to selectedFormulaIds
+      // The useEffect at line 144 will emit the event automatically
+      setSelectedFormulaIds((prev) => [...prev, data.formula.id]);
     };
 
     const handleFormulaSelectedForColumn = (data: { formula: Formula }) => {
@@ -915,8 +935,9 @@ const WorkArea = () => {
         }
       });
 
-      // Note: Do NOT update selectedFormulaIds here - formulas added via popup
-      // should not be highlighted in the library panel
+      // REQUIREMENT 2: Track formula added as column from library - add to selectedFormulaIds
+      // The useEffect at line 144 will emit the event automatically
+      setSelectedFormulaIds((prev) => [...prev, data.formula.id]);
 
       // If this is the first formula column, automatically activate it
       if (currentFormulaColumns.length === 0) {
@@ -937,19 +958,8 @@ const WorkArea = () => {
       );
 
       // Emit event to update selected ingredients in library after state update
-      setTimeout(() => {
-        setTableData((current) => {
-          const allIngredients = current
-            .filter((row) => !row.isTotal && !row.isFormula)
-            .map((row) => row.description);
-
-          if (allIngredients.length > 0) {
-            eventBus.emit("work-area-updated", { ingredients: allIngredients });
-          }
-
-          return current;
-        });
-      }, 0);
+      // Note: The useEffect at line 151 already handles this automatically when tableData changes
+      // No need for manual emission here
     };
 
     eventBus.on("ingredient-selected", handleIngredientClick);
@@ -981,6 +991,7 @@ const WorkArea = () => {
     editableFormula,
     ingredients,
     formulas,
+    availableFormulas,
     maxFormulaSelections,
     pendingFormulaIds,
     setTableData,
@@ -1249,7 +1260,89 @@ const WorkArea = () => {
 
   // Bulk delete handler
   const handleBulkDelete = (rowIds: string[]) => {
-    setTableData((prev) => prev.filter((row) => !rowIds.includes(row.id)));
+    console.log("🗑️ handleBulkDelete called with rowIds:", rowIds);
+
+    setTableData((prev) => {
+      const rowsToDelete = prev.filter((row) => rowIds.includes(row.id));
+      console.log("📋 Rows being deleted:", rowsToDelete);
+
+      // Check if any formula group rows are being deleted
+      const deletedFormulaIds = rowsToDelete
+        .filter((row) => row.isFormula && row.formulaId)
+        .map((row) => row.formulaId);
+
+      console.log("🔍 Deleted formula IDs:", deletedFormulaIds);
+
+      // Remove deleted formulas from tracking
+      if (deletedFormulaIds.length > 0) {
+        deletedFormulaIds.forEach((id) => {
+          pendingFormulaIds.current?.delete(id);
+        });
+        setSelectedFormulaIds((prev) =>
+          prev.filter((id) => !deletedFormulaIds.includes(id))
+        );
+        console.log("✅ Removed formulas from tracking:", deletedFormulaIds);
+      }
+
+      // Also check if deleting ingredients that belong to formulas
+      const deletedIngredients = rowsToDelete.filter(
+        (row) => row.parentFormulaId
+      );
+      if (deletedIngredients.length > 0) {
+        console.log(
+          "📋 Deleted ingredients with parentFormulaId:",
+          deletedIngredients
+        );
+
+        // For each formula, check if all its ingredients and group row are being deleted
+        const affectedFormulaIds = new Set(
+          deletedIngredients.map((row) => row.parentFormulaId)
+        );
+        const formulasToRemove: string[] = [];
+
+        affectedFormulaIds.forEach((formulaId) => {
+          const remainingRows = prev.filter(
+            (row) =>
+              !rowIds.includes(row.id) &&
+              (row.formulaId === formulaId || row.parentFormulaId === formulaId)
+          );
+
+          // If no rows remain for this formula, remove it from tracking
+          if (remainingRows.length === 0) {
+            formulasToRemove.push(formulaId);
+          }
+        });
+
+        if (formulasToRemove.length > 0) {
+          console.log("✅ Formulas with all rows deleted:", formulasToRemove);
+          formulasToRemove.forEach((id) => {
+            pendingFormulaIds.current?.delete(id);
+          });
+          setSelectedFormulaIds((prev) =>
+            prev.filter((id) => !formulasToRemove.includes(id))
+          );
+        }
+      }
+
+      // Also remove child ingredients of deleted formula groups
+      const newData = prev.filter((row) => {
+        // Keep rows that are not in the delete list
+        if (!rowIds.includes(row.id)) {
+          // But also remove child ingredients if their parent formula is being deleted
+          if (
+            row.parentFormulaId &&
+            deletedFormulaIds.includes(row.parentFormulaId)
+          ) {
+            return false;
+          }
+          return true;
+        }
+        return false;
+      });
+
+      return newData;
+    });
+
     toast.success(
       `${rowIds.length} row${rowIds.length > 1 ? "s" : ""} deleted`
     );
