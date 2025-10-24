@@ -12,6 +12,7 @@ interface UseFormulaOperationsProps {
     setTableData: Dispatch<SetStateAction<any[]>>;
     selectedFormulaIds: string[];
     setSelectedFormulaIds: Dispatch<SetStateAction<string[]>>;
+    pendingFormulaIds: React.RefObject<Set<string>>;
 }
 
 export const useFormulaOperations = ({
@@ -22,6 +23,7 @@ export const useFormulaOperations = ({
     setTableData,
     selectedFormulaIds,
     setSelectedFormulaIds,
+    pendingFormulaIds,
 }: UseFormulaOperationsProps) => {
     const handleNormalize = () => {
         if (!editableFormula) {
@@ -171,15 +173,25 @@ export const useFormulaOperations = ({
     };
 
     const handleExplodeFormula = (formulaId: string) => {
+        console.log("💣 handleExplodeFormula called for formulaId:", formulaId);
+        
         setTableData((prev) => {
             const formula = formulas.find((f) => f.id === formulaId);
-            if (!formula) return prev;
+            if (!formula) {
+                console.log("❌ Formula not found:", formulaId);
+                return prev;
+            }
 
             const formulaGroupRow = prev.find(
                 (row) => row.isFormula && row.formulaId === formulaId
             );
 
-            if (!formulaGroupRow) return prev;
+            if (!formulaGroupRow) {
+                console.log("❌ Formula group row not found for:", formulaId);
+                return prev;
+            }
+            
+            console.log("✅ Exploding formula:", formula.name, "with", formula.ingredients.length, "ingredients");
 
             const percentage = formulaGroupRow[editableFormula] || 100;
             const multiplier = percentage / 100;
@@ -231,7 +243,16 @@ export const useFormulaOperations = ({
 
         // REQUIREMENT 4: Remove the exploded formula from selectedFormulaIds
         // The useEffect in WorkArea will emit the formula-selections-updated event
-        setSelectedFormulaIds((prev) => prev.filter((id) => id !== formulaId));
+        console.log("💣 Removing exploded formula from tracking:", formulaId);
+        
+        // Clean up pending formulas ref
+        pendingFormulaIds.current?.delete(formulaId);
+        
+        setSelectedFormulaIds((prev) => {
+            const newIds = prev.filter((id) => id !== formulaId);
+            console.log("✅ selectedFormulaIds after explosion:", newIds);
+            return newIds;
+        });
     };
 
     return {

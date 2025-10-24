@@ -94,6 +94,7 @@ const WorkArea = () => {
       setTableData,
       selectedFormulaIds,
       setSelectedFormulaIds,
+      pendingFormulaIds,
     });
 
   // Use extracted formula column handlers
