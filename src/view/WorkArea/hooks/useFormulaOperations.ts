@@ -174,7 +174,7 @@ export const useFormulaOperations = ({
 
     const handleExplodeFormula = (formulaId: string) => {
         console.log("💣 handleExplodeFormula called for formulaId:", formulaId);
-        
+
         setTableData((prev) => {
             const formula = formulas.find((f) => f.id === formulaId);
             if (!formula) {
@@ -190,7 +190,7 @@ export const useFormulaOperations = ({
                 console.log("❌ Formula group row not found for:", formulaId);
                 return prev;
             }
-            
+
             console.log("✅ Exploding formula:", formula.name, "with", formula.ingredients.length, "ingredients");
 
             const percentage = formulaGroupRow[editableFormula] || 100;
@@ -244,10 +244,10 @@ export const useFormulaOperations = ({
         // REQUIREMENT 4: Remove the exploded formula from selectedFormulaIds
         // The useEffect in WorkArea will emit the formula-selections-updated event
         console.log("💣 Removing exploded formula from tracking:", formulaId);
-        
+
         // Clean up pending formulas ref
         pendingFormulaIds.current?.delete(formulaId);
-        
+
         setSelectedFormulaIds((prev) => {
             const newIds = prev.filter((id) => id !== formulaId);
             console.log("✅ selectedFormulaIds after explosion:", newIds);
