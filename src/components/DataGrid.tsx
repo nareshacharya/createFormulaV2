@@ -400,6 +400,27 @@ const DataGrid = ({
           ? dilutionState.getDilution(row.id)
           : undefined;
 
+      // Get status color for ingredient/formula rows
+      const getStatusColor = () => {
+        if (row.isTotal) return ""; // No status for total rows
+        const { status, mac } = row;
+
+        // Handle formula-specific statuses
+        if (status === "archived") return "bg-gray-500";
+        if (status === "draft") return "bg-yellow-500";
+
+        // Handle ingredient-specific statuses
+        if (mac !== undefined && mac < 0) return "bg-red-500";
+        if (status === "inactive") return "bg-gray-400";
+        if (status === "active" || status === "palette") return "bg-green-500";
+        if (status === "analytical") return "bg-purple-500";
+        if (status === "sers_review") return "bg-blue-500";
+
+        return "bg-green-500"; // Default to green
+      };
+
+      const statusColor = getStatusColor();
+
       return (
         <div
           className="flex items-center justify-between h-full group"
@@ -432,6 +453,15 @@ const DataGrid = ({
               <span className="material-symbols-rounded text-blue-600 text-sm">
                 folder
               </span>
+            )}
+            {/* Status indicator dot */}
+            {statusColor && (
+              <div
+                className={`w-1.5 h-1.5 rounded-full ${statusColor} flex-shrink-0`}
+                title={`Status: ${row.status || "active"}${
+                  row.mac !== undefined && row.mac < 0 ? " (non-compliant)" : ""
+                }`}
+              />
             )}
             <span
               className={`text-sm ${

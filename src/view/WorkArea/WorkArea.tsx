@@ -226,12 +226,15 @@ const WorkArea = () => {
       }
 
       const newRow = {
-        id: `ing_${Date.now()}`,
+        id: `ingredient_${Date.now()}`,
         description: data.ingredient.name,
         costKg: data.ingredient.price || 0,
         contCost: 0.0,
         isTotal: false,
         isFormula: false,
+        status: data.ingredient.status,
+        mac: data.ingredient.mac,
+        ingredientId: data.ingredient.id,
       };
 
       setTableData((prev) => {
@@ -328,6 +331,7 @@ const WorkArea = () => {
         isExpanded: true, // Start expanded by default
         level: 0,
         percentage: 100, // Default to 100% of the formula
+        status: data.formula.status,
       };
 
       // Add formula percentage to active formula column (100% default)
@@ -362,6 +366,9 @@ const WorkArea = () => {
             parentFormulaId: data.formula.id,
             level: 1,
             percentage: ing.percentage,
+            status: ingredient?.status,
+            mac: ingredient?.mac,
+            ingredientId: ingredient?.id,
           };
 
           // Set ingredient values in formula columns
