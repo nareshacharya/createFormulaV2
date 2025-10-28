@@ -80,7 +80,56 @@ export const calculateTotals = (
         }
     });
 
-    return [...ingredientRows, updatedRunningTotal, updatedTargetTotal];
+    // Process or create the RMC (Raw Material Cost) row
+    const rmcRow = totalRows.find((row) => row.totalType === "rmc");
+    const updatedRMCRow = rmcRow ? { ...rmcRow } : {
+        id: "rmcTotal",
+        description: "RMC",
+        costKg: null,
+        contCost: null,
+        isTotal: true,
+        totalType: "rmc",
+    };
+
+    // RMC in Contribution Cost column is the sum of all contribution costs
+    updatedRMCRow.contCost = updatedRunningTotal.contCost || 0;
+
+    // For each formula column, calculate RMC using contribution cost formula: (percentage * costKg / 1000)
+    formulaColumns.forEach((col) => {
+        const rmc = ingredientRows
+            .filter((row) => !row.isFormula)
+            .reduce((sum, row) => {
+                const percentage = parseFloat(row[col.key]) || 0;
+                const costPerKg = parseFloat(row.costKg) || 0;
+                // Use the same formula as contribution cost: (percentage * costKg) / 1000
+                return sum + (percentage * costPerKg) / 1000;
+            }, 0);
+        updatedRMCRow[col.key] = parseFloat(rmc.toFixed(2));
+    });
+
+    // Process or create the Number of Lines row
+    const linesRow = totalRows.find((row) => row.totalType === "lines");
+    const updatedLinesRow = linesRow ? { ...linesRow } : {
+        id: "linesTotal",
+        description: "Number of Lines",
+        costKg: null,
+        contCost: null,
+        isTotal: true,
+        totalType: "lines",
+    };
+
+    // Calculate number of lines for each formula column (count of non-zero ingredients)
+    formulaColumns.forEach((col) => {
+        const lineCount = ingredientRows
+            .filter((row) => !row.isFormula)
+            .filter((row) => {
+                const value = parseFloat(row[col.key]) || 0;
+                return value > 0;
+            }).length;
+        updatedLinesRow[col.key] = lineCount;
+    });
+
+    return [...ingredientRows, updatedRunningTotal, updatedTargetTotal, updatedRMCRow, updatedLinesRow];
 };
 
 /**

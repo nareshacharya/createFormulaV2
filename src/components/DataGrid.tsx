@@ -160,6 +160,42 @@ const DataGrid = ({
 
   const tableRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Scroll state for conditional shadows
+  const [scrollState, setScrollState] = useState({
+    canScrollUp: false,
+    canScrollDown: false,
+  });
+
+  // Detect scroll position for shadow effects
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      setScrollState({
+        canScrollUp: scrollTop > 0,
+        canScrollDown: scrollTop + clientHeight < scrollHeight - 1,
+      });
+    };
+
+    // Initial check
+    handleScroll();
+
+    // Add scroll listener
+    container.addEventListener("scroll", handleScroll);
+
+    // Recheck on window resize
+    const handleResize = () => handleScroll();
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      container.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [data]); // Recheck when data changes (might affect scrollability)
 
   // Load saved views on mount
   useEffect(() => {
@@ -680,10 +716,33 @@ const DataGrid = ({
           return <span className="text-sm text-gray-400">-</span>;
         }
         if (value !== null && value !== undefined) {
-          // Show 5 decimals for active formula, 2 decimals for others
-          const decimals = isActiveFormula ? 5 : 2;
-          const displayValue =
-            typeof value === "number" ? value.toFixed(decimals) : value;
+          // Special handling for different total types
+          let decimals = 2;
+          let displayValue: string | number = value;
+
+          if (row.totalType === "lines") {
+            // Number of Lines: no decimals, just integer
+            displayValue =
+              typeof value === "number" ? Math.round(value) : value;
+          } else if (row.totalType === "rmc") {
+            // RMC: always 2 decimals
+            decimals = 2;
+            displayValue = typeof value === "number" ? value.toFixed(2) : value;
+          } else if (
+            row.totalType === "running" ||
+            row.totalType === "target"
+          ) {
+            // Running Total and Target Total: 5 decimals for active formula, 2 for others
+            decimals = isActiveFormula ? 5 : 2;
+            displayValue =
+              typeof value === "number" ? value.toFixed(decimals) : value;
+          } else {
+            // Default: 5 decimals for active formula, 2 decimals for others
+            decimals = isActiveFormula ? 5 : 2;
+            displayValue =
+              typeof value === "number" ? value.toFixed(decimals) : value;
+          }
+
           return (
             <span
               className={`text-sm ${
@@ -757,21 +816,21 @@ const DataGrid = ({
       <tr>
         {/* Drag handle column (if enabled) */}
         {enableRowReordering && (
-          <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200 bg-gray-50">
+          <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-r border-gray-200 bg-gray-50">
             {/* Empty for drag handle */}
           </th>
         )}
 
         {/* Checkbox column (if enabled) */}
         {enableBulkSelection && (
-          <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200 bg-gray-50">
+          <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-r border-gray-200 bg-gray-50">
             {/* Empty for checkbox */}
           </th>
         )}
 
         {/* Description column (no group) */}
         {columns.find((col) => col.key === "description") && (
-          <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200 bg-gray-50">
+          <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-r border-gray-200 bg-gray-50">
             {/* Empty for description */}
           </th>
         )}
@@ -787,7 +846,7 @@ const DataGrid = ({
           .map((col) => (
             <th
               key={col.id}
-              className="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200 bg-gray-50"
+              className="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-r border-gray-200 bg-gray-50"
             >
               {col.title}
             </th>
@@ -797,7 +856,7 @@ const DataGrid = ({
         {groups.map((groupName) => (
           <th
             key={groupName}
-            className={`px-3 py-2 text-center text-xs font-medium uppercase tracking-wider border-b border-gray-200 ${getGroupColor(
+            className={`px-3 py-2 text-center text-xs font-medium uppercase tracking-wider border-b border-r last:border-r-0 border-gray-200 ${getGroupColor(
               groupName
             )}`}
             colSpan={getGroupSpan(groupName)}
@@ -838,17 +897,26 @@ const DataGrid = ({
         onDeleteView={deleteView}
       />
 
-      <div className="flex-1 overflow-auto border border-gray-200 rounded-lg shadow-sm">
+      <div
+        ref={scrollContainerRef}
+        className="flex-1 overflow-auto border border-gray-200 rounded-lg shadow-sm"
+      >
         <table className="w-full">
-          <thead className="bg-white sticky top-0 z-10">
+          <thead
+            className={`bg-gray-300 sticky top-0 z-10 border-gray-100 ${
+              scrollState.canScrollUp
+                ? "shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)]"
+                : ""
+            }`}
+          >
             {/* Group headers */}
             {renderGroupHeaders()}
 
             {/* Column headers */}
-            <tr className="border-b border-gray-200">
+            <tr>
               {/* Drag handle column (if enabled) */}
               {enableRowReordering && (
-                <th className="w-8 px-2 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider bg-gray-50">
+                <th className="w-8 px-2 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider bg-gray-50 border-r border-b border-gray-200">
                   <span
                     className="material-symbols-rounded text-gray-400"
                     style={{ fontSize: "16px" }}
@@ -860,7 +928,7 @@ const DataGrid = ({
 
               {/* Checkbox column (if enabled) */}
               {enableBulkSelection && (
-                <th className="w-10 px-3 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider bg-gray-50">
+                <th className="w-10 px-3 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider bg-gray-50 border-r border-b border-gray-200">
                   <input
                     type="checkbox"
                     checked={isAllSelected()}
@@ -914,7 +982,7 @@ const DataGrid = ({
                     key={column.id}
                     className={`
                     relative px-3 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider
-                    cursor-pointer select-none border-r border-gray-200 last:border-r-0
+                    cursor-pointer select-none border-r border-b border-gray-200 last:border-r-0
                     ${
                       column.id === editableFormula
                         ? "bg-green-100 text-green-800"
@@ -1158,28 +1226,30 @@ const DataGrid = ({
           </thead>
 
           <tbody className="bg-white divide-y divide-gray-200">
-            {getSortedData().map((row, _rowIndex) => {
-              // Hide child ingredients if parent formula is collapsed
-              const shouldHide =
-                row.parentFormulaId &&
-                !data.find((r) => r.formulaId === row.parentFormulaId)
-                  ?.isExpanded;
+            {getSortedData()
+              .filter((row) => !row.isTotal)
+              .map((row, _rowIndex) => {
+                // Hide child ingredients if parent formula is collapsed
+                const shouldHide =
+                  row.parentFormulaId &&
+                  !data.find((r) => r.formulaId === row.parentFormulaId)
+                    ?.isExpanded;
 
-              if (shouldHide) return null;
+                if (shouldHide) return null;
 
-              const isDraggable = enableRowReordering && isRowDraggable(row);
-              const isBeingDragged = rowDragState.draggedRowId === row.id;
-              const isDraggedOver = rowDragState.dragOverRowId === row.id;
+                const isDraggable = enableRowReordering && isRowDraggable(row);
+                const isBeingDragged = rowDragState.draggedRowId === row.id;
+                const isDraggedOver = rowDragState.dragOverRowId === row.id;
 
-              return (
-                <tr
-                  key={row.id}
-                  draggable={isDraggable}
-                  onDragStart={() => handleRowDragStart(row.id)}
-                  onDragOver={(e) => handleRowDragOver(e, row.id)}
-                  onDragEnd={handleRowDragEnd}
-                  onDragLeave={handleRowDragLeave}
-                  className={`
+                return (
+                  <tr
+                    key={row.id}
+                    draggable={isDraggable}
+                    onDragStart={() => handleRowDragStart(row.id)}
+                    onDragOver={(e) => handleRowDragOver(e, row.id)}
+                    onDragEnd={handleRowDragEnd}
+                    onDragLeave={handleRowDragLeave}
+                    className={`
                     ${
                       row.isTotal
                         ? "bg-gray-100 border-t-2 border-gray-300"
@@ -1190,115 +1260,115 @@ const DataGrid = ({
                     ${isBeingDragged ? "opacity-50" : ""}
                     ${isDraggedOver ? "border-t-2 border-blue-500" : ""}
                   `}
-                >
-                  {/* Drag handle cell (if enabled) */}
-                  {enableRowReordering && (
-                    <td
-                      className="w-8 px-2 py-2 text-center"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {isDraggable && (
-                        <span
-                          className="material-symbols-rounded text-gray-400 cursor-move"
-                          style={{ fontSize: "16px" }}
-                        >
-                          drag_handle
-                        </span>
-                      )}
-                    </td>
-                  )}
+                  >
+                    {/* Drag handle cell (if enabled) */}
+                    {enableRowReordering && (
+                      <td
+                        className="w-8 px-2 py-2 text-center"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {isDraggable && (
+                          <span
+                            className="material-symbols-rounded text-gray-400 cursor-move"
+                            style={{ fontSize: "16px" }}
+                          >
+                            drag_handle
+                          </span>
+                        )}
+                      </td>
+                    )}
 
-                  {/* Checkbox cell (if enabled) */}
-                  {enableBulkSelection && (
-                    <td
-                      className="w-10 px-3 py-2 text-center"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {!row.isTotal && !row.isEmpty && (
-                        <input
-                          type="checkbox"
-                          checked={isRowSelected(row.id)}
-                          onChange={() => toggleRowSelection(row.id)}
-                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
-                        />
-                      )}
-                    </td>
-                  )}
+                    {/* Checkbox cell (if enabled) */}
+                    {enableBulkSelection && (
+                      <td
+                        className="w-10 px-3 py-2 text-center"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {!row.isTotal && !row.isEmpty && (
+                          <input
+                            type="checkbox"
+                            checked={isRowSelected(row.id)}
+                            onChange={() => toggleRowSelection(row.id)}
+                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                          />
+                        )}
+                      </td>
+                    )}
 
-                  {columns.map((column, colIndex) => {
-                    // For empty state, only render the first column (description) with full colspan
-                    if (row.isEmpty && colIndex > 0) {
-                      return null;
-                    }
-
-                    // Column width calculation function (same as header)
-                    const getColumnWidth = () => {
-                      // Add column button - minimal width
-                      if (column.type === "add-column") return "50px";
-
-                      // Description column - fixed width (check before fixed columns)
-                      if (column.key === "description") return "280px";
-
-                      // Fixed columns - hug content
-                      if (column.fixed) return "auto";
-
-                      // Formulas group - fixed equal width
-                      if (column.group === "Formulas") {
-                        return "180px";
+                    {columns.map((column, colIndex) => {
+                      // For empty state, only render the first column (description) with full colspan
+                      if (row.isEmpty && colIndex > 0) {
+                        return null;
                       }
 
-                      // Cost group columns - hug content
-                      if (column.group === "Cost") return "124px";
-                      if (column.key === "cost") return "124px";
+                      // Column width calculation function (same as header)
+                      const getColumnWidth = () => {
+                        // Add column button - minimal width
+                        if (column.type === "add-column") return "50px";
 
-                      // Attributes group - fixed equal width
-                      if (column.group === "Attributes") {
-                        return "140px";
-                      }
+                        // Description column - fixed width (check before fixed columns)
+                        if (column.key === "description") return "280px";
 
-                      return "auto";
-                    };
+                        // Fixed columns - hug content
+                        if (column.fixed) return "auto";
 
-                    const isEditing =
-                      navigation.editingCell?.rowId === row.id &&
-                      navigation.editingCell?.columnId === column.id;
-                    const isFocused =
-                      navigation.focusedCell?.rowId === row.id &&
-                      navigation.focusedCell?.columnId === column.id;
+                        // Formulas group - fixed equal width
+                        if (column.group === "Formulas") {
+                          return "180px";
+                        }
 
-                    // Check if it's target total in active formula
-                    const isTargetTotalInActiveFormula =
-                      row.isTotal &&
-                      row.totalType === "target" &&
-                      column.id === editableFormula;
+                        // Cost group columns - hug content
+                        if (column.group === "Cost") return "124px";
+                        if (column.key === "cost") return "124px";
 
-                    const isEditable =
-                      column.editable &&
-                      (!row.isTotal || isTargetTotalInActiveFormula) &&
-                      !column.fixed &&
-                      column.id === editableFormula &&
-                      column.type !== "add-column" &&
-                      !row.isEmpty;
+                        // Attributes group - fixed equal width
+                        if (column.group === "Attributes") {
+                          return "140px";
+                        }
 
-                    // Use EditableCell for editable formula columns (including target total)
-                    if (
-                      isEditable ||
-                      (isFocused && column.id === editableFormula)
-                    ) {
-                      return (
-                        <EditableCell
-                          key={`${row.id}-${column.id}`}
-                          value={row[column.key]}
-                          isEditing={isEditing}
-                          isFocused={isFocused}
-                          editValue={navigation.editValue}
-                          onChange={navigation.handleInputChange}
-                          onKeyDown={navigation.handleKeyDown}
-                          onClick={() =>
-                            navigation.handleCellFocus(row.id, column.id)
-                          }
-                          align={column.type === "number" ? "right" : "left"}
-                          className={`
+                        return "auto";
+                      };
+
+                      const isEditing =
+                        navigation.editingCell?.rowId === row.id &&
+                        navigation.editingCell?.columnId === column.id;
+                      const isFocused =
+                        navigation.focusedCell?.rowId === row.id &&
+                        navigation.focusedCell?.columnId === column.id;
+
+                      // Check if it's target total in active formula
+                      const isTargetTotalInActiveFormula =
+                        row.isTotal &&
+                        row.totalType === "target" &&
+                        column.id === editableFormula;
+
+                      const isEditable =
+                        column.editable &&
+                        (!row.isTotal || isTargetTotalInActiveFormula) &&
+                        !column.fixed &&
+                        column.id === editableFormula &&
+                        column.type !== "add-column" &&
+                        !row.isEmpty;
+
+                      // Use EditableCell for editable formula columns (including target total)
+                      if (
+                        isEditable ||
+                        (isFocused && column.id === editableFormula)
+                      ) {
+                        return (
+                          <EditableCell
+                            key={`${row.id}-${column.id}`}
+                            value={row[column.key]}
+                            isEditing={isEditing}
+                            isFocused={isFocused}
+                            editValue={navigation.editValue}
+                            onChange={navigation.handleInputChange}
+                            onKeyDown={navigation.handleKeyDown}
+                            onClick={() =>
+                              navigation.handleCellFocus(row.id, column.id)
+                            }
+                            align={column.type === "number" ? "right" : "left"}
+                            className={`
                             border-r border-gray-100 last:border-r-0 font-sans
                             ${row.isTotal ? "font-medium bg-gray-100" : ""}
                             ${column.fixed ? "bg-gray-25" : ""}
@@ -1308,15 +1378,15 @@ const DataGrid = ({
                                 : ""
                             }
                           `}
-                        />
-                      );
-                    }
+                          />
+                        );
+                      }
 
-                    // Regular cells (description, fixed columns, etc.)
-                    return (
-                      <td
-                        key={`${row.id}-${column.id}`}
-                        className={`
+                      // Regular cells (description, fixed columns, etc.)
+                      return (
+                        <td
+                          key={`${row.id}-${column.id}`}
+                          className={`
                           px-3 py-2 border-r border-gray-100 last:border-r-0 font-sans
                           ${
                             row.isTotal &&
@@ -1338,25 +1408,89 @@ const DataGrid = ({
                               : ""
                           }
                         `}
-                        style={{
-                          width: getColumnWidth(),
-                          minWidth: getColumnWidth(),
-                          maxWidth: getColumnWidth(),
-                        }}
-                        colSpan={
-                          row.isEmpty && column.key === "description"
-                            ? columns.length
-                            : 1
-                        }
-                      >
-                        {renderCell(row, column)}
-                      </td>
-                    );
-                  })}
-                </tr>
-              );
-            })}
+                          style={{
+                            width: getColumnWidth(),
+                            minWidth: getColumnWidth(),
+                            maxWidth: getColumnWidth(),
+                          }}
+                          colSpan={
+                            row.isEmpty && column.key === "description"
+                              ? columns.length
+                              : 1
+                          }
+                        >
+                          {renderCell(row, column)}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
           </tbody>
+
+          {/* Sticky footer for total rows */}
+          <tfoot
+            className={`bg-white sticky bottom-0 z-10 border-t-1 border-gray-100 ${
+              scrollState.canScrollDown
+                ? "shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]"
+                : ""
+            }`}
+          >
+            {getSortedData()
+              .filter((row) => row.isTotal)
+              .map((row) => {
+                return (
+                  <tr key={row.id} className="bg-gray-100">
+                    {/* Drag handle cell (if enabled) */}
+                    {enableRowReordering && (
+                      <td className="w-8 px-2 py-2 text-center" />
+                    )}
+
+                    {/* Checkbox cell (if enabled) */}
+                    {enableBulkSelection && (
+                      <td className="w-10 px-3 py-2 text-center" />
+                    )}
+
+                    {columns.map((column) => {
+                      // Column width calculation function (same as tbody)
+                      const getColumnWidth = () => {
+                        if (column.type === "add-column") return "50px";
+                        if (column.key === "description") return "280px";
+                        if (column.fixed) return "auto";
+                        if (column.group === "Formulas") return "180px";
+                        if (column.group === "Cost") return "124px";
+                        if (column.key === "cost") return "124px";
+                        if (column.group === "Attributes") return "140px";
+                        return "auto";
+                      };
+
+                      return (
+                        <td
+                          key={`${row.id}-${column.id}`}
+                          className={`
+                            px-3 py-2 border-r border-gray-100 last:border-r-0 font-sans
+                            font-medium bg-gray-100
+                            ${column.fixed ? "bg-gray-25" : ""}
+                            ${
+                              column.id === editableFormula && !column.fixed
+                                ? "bg-green-50"
+                                : ""
+                            }
+                          `}
+                          style={{
+                            width: getColumnWidth(),
+                            minWidth: getColumnWidth(),
+                            maxWidth: getColumnWidth(),
+                          }}
+                        >
+                          {renderCell(row, column)}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+          </tfoot>
         </table>
       </div>
 

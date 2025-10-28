@@ -165,8 +165,8 @@ const WorkArea = () => {
     if (!editableFormula) return;
 
     setTableData((prev) => {
-      return prev.map((row) => {
-        // Skip total rows
+      const updatedData = prev.map((row) => {
+        // Skip total rows - they'll be recalculated
         if (row.isTotal) {
           return row;
         }
@@ -181,8 +181,11 @@ const WorkArea = () => {
           contCost: parseFloat(contCost.toFixed(4)),
         };
       });
+
+      // Recalculate totals after updating contribution costs
+      return calculateTotals(updatedData, columns);
     });
-  }, [editableFormula, setTableData]);
+  }, [editableFormula, setTableData, columns]);
 
   // Register event handlers for normalize and merge duplicates
   useEffect(() => {
