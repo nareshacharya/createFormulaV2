@@ -144,6 +144,7 @@ const LibraryPanel = () => {
     (formula) =>
       !searchQuery ||
       formula.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      formula.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       formula.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 

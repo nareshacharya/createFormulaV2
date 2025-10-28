@@ -6,7 +6,6 @@ import { eventBus } from "../utils/bus";
 
 interface FormulaListProps {
   formulas: Formula[];
-  searchTerm?: string;
   searchQuery?: string;
   selectedFormulas: string[];
   onSelectionChange?: (selectedIds: string[]) => void;
@@ -15,7 +14,7 @@ interface FormulaListProps {
 
 const FormulaList = ({
   formulas,
-  searchTerm = "",
+  searchQuery = "",
   selectedFormulas,
 }: FormulaListProps) => {
   const [hoveredFormula, setHoveredFormula] = useState<string | null>(null);
@@ -38,10 +37,10 @@ const FormulaList = ({
   const filteredFormulas = formulas.filter((formula) => {
     if (!formula) return false;
 
-    // Ensure searchTerm is defined and is a string
-    if (!searchTerm || typeof searchTerm !== "string") return true;
+    // Ensure searchQuery is defined and is a string
+    if (!searchQuery || typeof searchQuery !== "string") return true;
 
-    const searchLower = searchTerm.toLowerCase();
+    const searchLower = searchQuery.toLowerCase();
     const name = formula.name || "";
     const category = formula.category || "";
     const id = formula.id || "";
@@ -69,9 +68,9 @@ const FormulaList = ({
   if (filteredFormulas.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
-        <span className="material-symbols-rounded text-2xl mb-2">beaker</span>
+        <span className="material-symbols-rounded text-2xl mb-2">science</span>
         <p>No formulas found</p>
-        {searchTerm && (
+        {searchQuery && (
           <p className="text-sm mt-1">Try adjusting your search term</p>
         )}
       </div>

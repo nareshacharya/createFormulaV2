@@ -54,9 +54,12 @@ const IngredientList = ({
   };
 
   const filteredIngredients = ingredients.filter((ingredient) => {
+    const searchLower = searchQuery?.toLowerCase() || "";
     const matchesSearch =
       !searchQuery ||
-      ingredient.name.toLowerCase().includes(searchQuery.toLowerCase());
+      ingredient.name.toLowerCase().includes(searchLower) ||
+      ingredient.id.toLowerCase().includes(searchLower) ||
+      (ingredient.code && ingredient.code.toLowerCase().includes(searchLower));
     const matchesFilter = !activeFilter || ingredient.type === activeFilter;
 
     // Apply additional filters from modal
