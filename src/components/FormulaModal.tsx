@@ -64,7 +64,7 @@ const FormulaModal = ({
 
     const newFormula: Omit<Formula, "id"> = {
       name: newFormulaData.name,
-      version: "1.0",
+      version: "v1", // Updated to match naming convention
       status: "draft",
       createdBy: newFormulaData.createdBy,
       lastUpdated: new Date().toISOString().split("T")[0],

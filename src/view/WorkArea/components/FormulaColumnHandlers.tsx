@@ -10,11 +10,10 @@ import { eventBus } from "../../../utils/bus";
 import { appStateHistory } from "../../../utils/stateHistory";
 import {
   getCurrentUserInitials,
-  generateFormulaIdentifier,
-  getNextVersion,
   isFormulaFromOtherProject,
   isValidFormulaId,
 } from "../../../utils/formulaNaming";
+import { generateNewFormulaId } from "../../../utils/formulaIdGenerator";
 
 export interface FormulaHandlersConfig {
   columns: Column[];
@@ -93,9 +92,8 @@ export const useFormulaColumnHandlers = (config: FormulaHandlersConfig) => {
       if (isFromOtherProject || !isValidFormulaId(formula.id)) {
         // Formula is from another project or doesn't follow naming convention
         // Generate completely new ID with v1
-        newFormulaId = generateFormulaIdentifier({
-          userInitials,
-          currentFormulas: availableFormulas,
+        newFormulaId = generateNewFormulaId({
+          existingFormulas: availableFormulas,
           isReferenceFromOtherProject: true,
         });
         newVersion = "v1";
@@ -105,14 +103,15 @@ export const useFormulaColumnHandlers = (config: FormulaHandlersConfig) => {
         );
       } else {
         // Formula is from same project - just increment version
-        newVersion = getNextVersion(formula.version);
-        newFormulaId = generateFormulaIdentifier({
-          userInitials,
-          currentFormulas: availableFormulas,
+        // Use baseFormula to ensure proper version increment (e.g., NP-F-00003v1 -> NP-F-00003v2)
+        newFormulaId = generateNewFormulaId({
+          existingFormulas: availableFormulas,
+          baseFormula: formula,
           isReferenceFromOtherProject: false,
-          existingFormulaId: formula.id,
         });
-        newFormulaId = `${newFormulaId}${newVersion}`;
+        // Extract version from generated ID
+        const versionMatch = newFormulaId.match(/(v\d+)$/);
+        newVersion = versionMatch ? versionMatch[1] : "v2";
       }
 
       // Create new formula with updated ID and version

@@ -127,6 +127,30 @@ export const NumberCell = ({
 
   // Total rows for formula columns
   if (isTotal && isFormulaColumn) {
+    // Target total row for active formula should be editable
+    if (row.totalType === "target" && isActiveFormula) {
+      return (
+        <input
+          type="number"
+          value={typeof value === "number" ? value.toFixed(5) : value || 100}
+          onChange={(e) => {
+            const newValue = parseFloat(e.target.value);
+            if (!isNaN(newValue)) {
+              onCellEdit?.(row.id, column.id, newValue);
+            }
+          }}
+          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold text-right"
+          min="0"
+          step="0.1"
+          style={{
+            MozAppearance: "textfield",
+            appearance: "textfield",
+          }}
+        />
+      );
+    }
+    
+    // All other total rows (lines, rmc, running) remain read-only displays
     if (value === "-") {
       return (
         <span className="text-sm text-gray-400 font-semibold text-right block">

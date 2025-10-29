@@ -24,6 +24,7 @@ import { useDataGridHandlers } from "./hooks/useDataGridHandlers";
 import { useFormulaOperations } from "./hooks/useFormulaOperations";
 import { useFormulaColumnHandlers } from "./components/FormulaColumnHandlers";
 import { useDilution } from "../../components/dilution";
+import { generateNewFormulaId } from "../../utils/formulaIdGenerator";
 
 const WorkArea = () => {
   // Use custom hooks for state management
@@ -616,10 +617,15 @@ const WorkArea = () => {
     };
 
     const handleCreateFormula = () => {
+      // Generate proper formula ID using centralized utility
+      const newFormulaId = generateNewFormulaId({
+        existingFormulas: availableFormulas,
+      });
+      
       const newFormula: Formula = {
-        id: `FORM${Date.now()}`,
+        id: newFormulaId,
         name: `New Formula ${Date.now()}`,
-        version: "1.0",
+        version: "v1",
         status: "draft",
         createdBy: "Current User",
         lastUpdated: new Date().toISOString().split("T")[0],
@@ -1091,9 +1097,15 @@ const WorkArea = () => {
   };
 
   const handleFormulaModalCreateFormula = (formula: Omit<Formula, "id">) => {
+    // Generate proper formula ID using centralized utility
+    const newFormulaId = generateNewFormulaId({
+      existingFormulas: availableFormulas,
+    });
+    
     const newFormula: Formula = {
       ...formula,
-      id: `FORM${Date.now()}`,
+      id: newFormulaId,
+      version: "v1", // Ensure version is in correct format
     };
 
     // Emit event to add this formula as a new column in the work area

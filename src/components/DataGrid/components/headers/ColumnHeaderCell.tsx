@@ -1,4 +1,5 @@
 import { GroupingButton } from "../GroupingButton";
+import { isOwnFormula } from "../../../../utils/formulaIdGenerator";
 
 // Use Column type from DataGrid.tsx to match parent component
 interface Column {
@@ -174,10 +175,24 @@ export const ColumnHeaderCell = ({
               )}
             </div>
             {column.fixed && (
-              <span className="material-symbols-rounded text-xs text-gray-400 flex-shrink-0">
+              <span
+                className="material-symbols-rounded text-xs text-gray-400 flex-shrink-0"
+                title="Fixed column"
+              >
                 lock
               </span>
             )}
+            {/* Show lock icon for reference formulas not owned by current user */}
+            {!column.fixed &&
+              column.formulaId &&
+              !isOwnFormula(column.formulaId) && (
+                <span
+                  className="material-symbols-rounded text-xs text-amber-600 flex-shrink-0"
+                  title="Reference formula (read-only)"
+                >
+                  lock
+                </span>
+              )}
             {column.sortable && (
               <button
                 onClick={(e) => {
@@ -260,73 +275,107 @@ export const ColumnHeaderCell = ({
                     ref={menuRef}
                     className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-20 min-w-[200px]"
                   >
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onSetActiveFormula?.(column.id);
-                        setShowColumnActions(null);
-                      }}
-                      className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
-                    >
-                      <span className="material-symbols-rounded text-xs">
-                        edit
-                      </span>
-                      <span>Set Active</span>
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onCreateVersion?.(column.id);
-                        setShowColumnActions(null);
-                      }}
-                      className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2 whitespace-nowrap"
-                    >
-                      <span className="material-symbols-rounded text-xs">
-                        content_copy
-                      </span>
-                      <span>Create new version</span>
-                    </button>
-                    <div className="border-t border-gray-200 my-1"></div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onNormalizeFormula?.(column.id);
-                        setShowColumnActions(null);
-                      }}
-                      className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
-                    >
-                      <span className="material-symbols-rounded text-xs">
-                        balance
-                      </span>
-                      <span>Normalize</span>
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onSendForCompounding?.(column.id);
-                        setShowColumnActions(null);
-                      }}
-                      className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2 whitespace-nowrap"
-                    >
-                      <span className="material-symbols-rounded text-xs">
-                        send
-                      </span>
-                      <span>Send for Compounding</span>
-                    </button>
-                    <div className="border-t border-gray-200 my-1"></div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDeleteColumn?.(column.id);
-                        setShowColumnActions(null);
-                      }}
-                      className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
-                    >
-                      <span className="material-symbols-rounded text-xs">
-                        delete
-                      </span>
-                      <span>Remove</span>
-                    </button>
+                    {/* Check if formula is owned by current user */}
+                    {(() => {
+                      const isOwned = column.formulaId
+                        ? isOwnFormula(column.formulaId)
+                        : true;
+                      const isReadonly = !isOwned;
+
+                      return (
+                        <>
+                          {/* Set Active - only show for owned formulas */}
+                          {isOwned && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onSetActiveFormula?.(column.id);
+                                setShowColumnActions(null);
+                              }}
+                              className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                            >
+                              <span className="material-symbols-rounded text-xs">
+                                edit
+                              </span>
+                              <span>Set Active</span>
+                            </button>
+                          )}
+                          
+                          {/* Create Version - always available */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onCreateVersion?.(column.id);
+                              setShowColumnActions(null);
+                            }}
+                            className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2 whitespace-nowrap"
+                          >
+                            <span className="material-symbols-rounded text-xs">
+                              content_copy
+                            </span>
+                            <span>Create new version</span>
+                          </button>
+
+                          {/* Readonly indicator for non-owned formulas */}
+                          {isReadonly && (
+                            <div className="px-3 py-2 text-xs text-gray-500 italic flex items-center space-x-2 bg-gray-50">
+                              <span className="material-symbols-rounded text-xs">
+                                lock
+                              </span>
+                              <span>Reference formula (read-only)</span>
+                            </div>
+                          )}
+
+                          {/* Divider and additional actions - only for owned formulas */}
+                          {isOwned && (
+                            <>
+                              <div className="border-t border-gray-200 my-1"></div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onNormalizeFormula?.(column.id);
+                                  setShowColumnActions(null);
+                                }}
+                                className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                              >
+                                <span className="material-symbols-rounded text-xs">
+                                  balance
+                                </span>
+                                <span>Normalize</span>
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onSendForCompounding?.(column.id);
+                                  setShowColumnActions(null);
+                                }}
+                                className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2 whitespace-nowrap"
+                              >
+                                <span className="material-symbols-rounded text-xs">
+                                  send
+                                </span>
+                                <span>Send for Compounding</span>
+                              </button>
+                            </>
+                          )}
+
+                          <div className="border-t border-gray-200 my-1"></div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDeleteColumn?.(column.id);
+                              setShowColumnActions(null);
+                            }}
+                            className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                          >
+                            <span className="material-symbols-rounded text-xs">
+                              delete
+                            </span>
+                            <span>Remove</span>
+                          </button>
+                        </>
+                      );
+                    })()}
                   </div>
                 )}
               </div>
