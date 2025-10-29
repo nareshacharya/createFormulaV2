@@ -3,23 +3,46 @@
  * 
  * Manages multiple workspaces for the application, allowing users to save
  * and switch between different work states. Each workspace contains:
+ * - Complete DataGrid state (columns, data, formulas)
  * - Selected formulas and their state
  * - Ingredient selections
  * - Attribute filters
  * - Active formula
- * - UI state (expanded rows, etc.)
+ * - UI state (expanded rows, grouping, etc.)
  * 
  * Uses localStorage for persistence with a maximum of 3 workspaces.
  */
 
 export interface WorkspaceState {
-    formulas: unknown[];
-    ingredients: unknown[];
-    attributes: unknown[];
-    selectedFormulas: string[];
-    activeFormulaId: string | null;
-    expandedIngredients: string[];
-    filters: Record<string, unknown>;
+    // DataGrid Core State
+    columns: unknown[];           // Column definitions with all metadata
+    tableData: unknown[];         // All row data including ingredients and totals
+    
+    // Formula State
+    formulas: unknown[];          // Currently loaded formulas in workspace
+    availableFormulas: unknown[]; // All formulas available in library
+    selectedFormulas: unknown[];  // Formula objects for selected formulas
+    selectedFormulaIds: string[]; // IDs of formulas added to grid
+    editableFormula: string | null; // Active formula column ID
+    activeFormulaId: string | null; // Active formula ID (for compatibility)
+    
+    // Ingredient State
+    ingredients: unknown[];       // All ingredients in workspace
+    expandedIngredients: string[]; // IDs of expanded formula rows
+    
+    // Attribute State
+    attributes: unknown[];        // All attributes in workspace
+    selectedAttributes: string[]; // IDs of attributes added to grid
+    
+    // UI State
+    groupedByColumn: string | null; // Column ID for grouping
+    filters: Record<string, unknown>; // Active filters
+    sortConfig: {
+        key: string;
+        direction: 'asc' | 'desc';
+    } | null;
+    
+    // Metadata
     lastModified: string;
 }
 
@@ -36,6 +59,39 @@ const MAX_WORKSPACES = 3;
 const ACTIVE_WORKSPACE_KEY = 'pega_active_workspace_id';
 
 /**
+ * Create an empty workspace state with all required fields
+ */
+const createEmptyWorkspaceState = (): WorkspaceState => ({
+    // DataGrid Core State
+    columns: [],
+    tableData: [],
+    
+    // Formula State
+    formulas: [],
+    availableFormulas: [],
+    selectedFormulas: [],
+    selectedFormulaIds: [],
+    editableFormula: null,
+    activeFormulaId: null,
+    
+    // Ingredient State
+    ingredients: [],
+    expandedIngredients: [],
+    
+    // Attribute State
+    attributes: [],
+    selectedAttributes: [],
+    
+    // UI State
+    groupedByColumn: null,
+    filters: {},
+    sortConfig: null,
+    
+    // Metadata
+    lastModified: new Date().toISOString(),
+});
+
+/**
  * Initialize default workspaces (Alpha, Beta, Gamma) if none exist
  */
 export const initializeDefaultWorkspaces = (): void => {
@@ -47,48 +103,21 @@ export const initializeDefaultWorkspaces = (): void => {
             {
                 id: "workspace_alpha",
                 name: "Alpha",
-                state: {
-                    formulas: [],
-                    ingredients: [],
-                    attributes: [],
-                    selectedFormulas: [],
-                    activeFormulaId: null,
-                    expandedIngredients: [],
-                    filters: {},
-                    lastModified: new Date().toISOString(),
-                },
+                state: createEmptyWorkspaceState(),
                 createdAt: new Date().toISOString(),
                 lastModified: new Date().toISOString(),
             },
             {
                 id: "workspace_beta",
                 name: "Beta",
-                state: {
-                    formulas: [],
-                    ingredients: [],
-                    attributes: [],
-                    selectedFormulas: [],
-                    activeFormulaId: null,
-                    expandedIngredients: [],
-                    filters: {},
-                    lastModified: new Date().toISOString(),
-                },
+                state: createEmptyWorkspaceState(),
                 createdAt: new Date().toISOString(),
                 lastModified: new Date().toISOString(),
             },
             {
                 id: "workspace_gamma",
                 name: "Gamma",
-                state: {
-                    formulas: [],
-                    ingredients: [],
-                    attributes: [],
-                    selectedFormulas: [],
-                    activeFormulaId: null,
-                    expandedIngredients: [],
-                    filters: {},
-                    lastModified: new Date().toISOString(),
-                },
+                state: createEmptyWorkspaceState(),
                 createdAt: new Date().toISOString(),
                 lastModified: new Date().toISOString(),
             },
@@ -259,4 +288,26 @@ export const getWorkspaceCount = (): number => {
 export const clearAllWorkspaces = (): void => {
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(ACTIVE_WORKSPACE_KEY);
+};
+
+/**
+ * Load a workspace by ID and emit event to restore its state
+ * This is a convenience function that combines getting the workspace
+ * and triggering the load event
+ */
+export const loadWorkspaceById = (workspaceId: string): boolean => {
+    const workspace = getWorkspace(workspaceId);
+    
+    if (!workspace) {
+        console.error(`Workspace ${workspaceId} not found`);
+        return false;
+    }
+    
+    // Import eventBus dynamically to avoid circular dependencies
+    import('../utils/bus').then(({ eventBus }) => {
+        eventBus.emit("load-workspace-state", { state: workspace.state });
+    });
+    
+    setActiveWorkspaceId(workspaceId);
+    return true;
 };

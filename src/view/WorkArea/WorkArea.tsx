@@ -25,6 +25,7 @@ import { useFormulaOperations } from "./hooks/useFormulaOperations";
 import { useFormulaColumnHandlers } from "./components/FormulaColumnHandlers";
 import { useDilution } from "../../components/dilution";
 import { generateNewFormulaId } from "../../utils/formulaIdGenerator";
+import type { WorkspaceState } from "../../utils/workspaceManager";
 
 const WorkArea = () => {
   // Use custom hooks for state management
@@ -1055,6 +1056,129 @@ const WorkArea = () => {
       });
     }
   }, [tableData, editableFormula]);
+
+  // Workspace State Management - Save and Load
+  useEffect(() => {
+    // Handler to capture current workspace state
+    const handleWorkspaceStateRequest = () => {
+      const state = {
+        // DataGrid Core State
+        columns,
+        tableData,
+        
+        // Formula State
+        formulas,
+        availableFormulas,
+        selectedFormulas,
+        selectedFormulaIds,
+        editableFormula,
+        activeFormulaId: editableFormula, // Map column ID to formula ID
+        
+        // Ingredient State
+        ingredients,
+        expandedIngredients: [], // TODO: Track expanded formula rows if needed
+        
+        // Attribute State
+        attributes,
+        selectedAttributes,
+        
+        // UI State
+        groupedByColumn,
+        filters: {}, // TODO: Add filter state if needed
+        sortConfig: null, // TODO: Add sort state if needed
+        
+        // Metadata
+        lastModified: new Date().toISOString(),
+      };
+
+      // Emit the captured state
+      eventBus.emit("workspace-state-ready", { state });
+      console.log("📦 Workspace state captured:", state);
+    };
+
+    // Handler to restore workspace state
+    const handleWorkspaceStateLoad = ({ state }: { state: WorkspaceState }) => {
+      console.log("📥 Loading workspace state:", state);
+
+      try {
+        // Restore DataGrid Core State
+        if (state.columns) setColumns(state.columns as Column[]);
+        if (state.tableData) setTableData(state.tableData as Record<string, unknown>[]);
+        
+        // Restore Formula State
+        if (state.formulas) setFormulas(state.formulas as Formula[]);
+        if (state.availableFormulas) setAvailableFormulas(state.availableFormulas as Formula[]);
+        if (state.selectedFormulaIds) setSelectedFormulaIds(state.selectedFormulaIds);
+        if (state.editableFormula !== undefined) setEditableFormula(state.editableFormula);
+        
+        // Restore Ingredient State
+        if (state.ingredients) setIngredients(state.ingredients as Ingredient[]);
+        
+        // Restore Attribute State
+        if (state.attributes) setAttributes(state.attributes as IngredientAttribute[]);
+        if (state.selectedAttributes) setSelectedAttributes(state.selectedAttributes);
+        
+        // Restore UI State
+        if (state.groupedByColumn !== undefined) setGroupedByColumn(state.groupedByColumn);
+
+        // Emit events to sync with other components
+        const ingredientsList = state.ingredients as Ingredient[];
+        eventBus.emit("work-area-updated", {
+          ingredients: ingredientsList?.map((ing) => ing.name) || [],
+        });
+
+        if (state.selectedAttributes) {
+          eventBus.emit("work-area-attributes-updated", {
+            selectedAttributes: state.selectedAttributes,
+          });
+        }
+
+        if (state.selectedFormulaIds) {
+          eventBus.emit("formula-selections-updated", {
+            selectedFormulas: state.selectedFormulaIds,
+          });
+        }
+
+        toast.success("Workspace loaded successfully!");
+        console.log("✅ Workspace state restored");
+      } catch (error) {
+        console.error("❌ Error loading workspace state:", error);
+        toast.error("Failed to load workspace state");
+      }
+    };
+
+    // Register event listeners
+    eventBus.on("request-workspace-state", handleWorkspaceStateRequest);
+    eventBus.on("load-workspace-state", handleWorkspaceStateLoad);
+
+    return () => {
+      eventBus.off("request-workspace-state", handleWorkspaceStateRequest);
+      eventBus.off("load-workspace-state", handleWorkspaceStateLoad);
+    };
+  }, [
+    columns,
+    tableData,
+    formulas,
+    availableFormulas,
+    selectedFormulas,
+    selectedFormulaIds,
+    editableFormula,
+    ingredients,
+    attributes,
+    selectedAttributes,
+    groupedByColumn,
+    setColumns,
+    setTableData,
+    setFormulas,
+    setAvailableFormulas,
+    setSelectedFormulas,
+    setSelectedFormulaIds,
+    setEditableFormula,
+    setIngredients,
+    setAttributes,
+    setSelectedAttributes,
+    setGroupedByColumn,
+  ]);
 
   const handleLoadFormulaFromModal = (formula: Formula) => {
     // Load formula ingredients into the work area

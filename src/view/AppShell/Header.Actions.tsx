@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { eventBus } from "../../utils/bus";
 import FormulaModal from "../../components/FormulaModal";
 import SaveWorkspaceModal from "../../components/SaveWorkspaceModal";
@@ -8,7 +8,11 @@ import toast from "react-hot-toast";
 import {
   saveWorkspace,
   canCreateWorkspace,
+  getWorkspaces,
+  loadWorkspaceById,
+  deleteWorkspace,
   type WorkspaceState,
+  type Workspace,
 } from "../../utils/workspaceManager";
 
 const HeaderActions = () => {
@@ -19,6 +23,9 @@ const HeaderActions = () => {
   const [canUndo, setCanUndo] = useState(false);
   const [undoCount, setUndoCount] = useState(0);
   const [hasActiveFormula, setHasActiveFormula] = useState(false);
+  const [showWorkspacesDropdown, setShowWorkspacesDropdown] = useState(false);
+  const [savedWorkspaces, setSavedWorkspaces] = useState<Workspace[]>([]);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleFormulaSelectionsUpdate = (data: {
@@ -59,6 +66,29 @@ const HeaderActions = () => {
       eventBus.off("active-formula-updated", handleActiveFormulaUpdate);
     };
   }, []);
+
+  // Load saved workspaces when dropdown is opened
+  useEffect(() => {
+    if (showWorkspacesDropdown) {
+      setSavedWorkspaces(getWorkspaces());
+    }
+  }, [showWorkspacesDropdown]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowWorkspacesDropdown(false);
+      }
+    };
+
+    if (showWorkspacesDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }
+  }, [showWorkspacesDropdown]);
 
   const handleNormalize = () => {
     eventBus.emit("normalize-formula");
@@ -136,30 +166,79 @@ const HeaderActions = () => {
 
   const handleSaveWorkspaceWithName = (workspaceName: string) => {
     try {
-      // Emit event to gather current state
-      eventBus.emit("request-workspace-state");
-
-      // In a real implementation, you would collect the state from WorkArea
-      // For now, we'll create a placeholder state
-      const state: WorkspaceState = {
-        formulas: [],
-        ingredients: [],
-        attributes: [],
-        selectedFormulas: selectedFormulaIds,
-        activeFormulaId: null,
-        expandedIngredients: [],
-        filters: {},
-        lastModified: new Date().toISOString(),
+      // Set up one-time listener for workspace state
+      const handleWorkspaceStateReady = ({ state }: { state: WorkspaceState }) => {
+        try {
+          const workspace = saveWorkspace(workspaceName, state);
+          toast.success(`Workspace "${workspace.name}" saved successfully!`);
+          hideModal();
+          
+          // Clean up listener
+          eventBus.off("workspace-state-ready", handleWorkspaceStateReady);
+        } catch (error) {
+          toast.error(
+            error instanceof Error ? error.message : "Failed to save workspace"
+          );
+          eventBus.off("workspace-state-ready", handleWorkspaceStateReady);
+        }
       };
 
-      const workspace = saveWorkspace(workspaceName, state);
-      toast.success(`Workspace "${workspace.name}" saved successfully!`);
-      hideModal();
+      // Register listener
+      eventBus.on("workspace-state-ready", handleWorkspaceStateReady);
+      
+      // Request current state from WorkArea
+      eventBus.emit("request-workspace-state");
+      
+      // Set a timeout in case WorkArea doesn't respond
+      setTimeout(() => {
+        eventBus.off("workspace-state-ready", handleWorkspaceStateReady);
+      }, 5000);
+      
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to save workspace"
       );
     }
+  };
+
+  const handleLoadWorkspace = (workspaceId: string) => {
+    try {
+      const success = loadWorkspaceById(workspaceId);
+      if (success) {
+        const workspace = savedWorkspaces.find(w => w.id === workspaceId);
+        toast.success(`Workspace "${workspace?.name}" loaded successfully!`);
+        setShowWorkspacesDropdown(false);
+      } else {
+        toast.error("Failed to load workspace");
+      }
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to load workspace"
+      );
+    }
+  };
+
+  const handleDeleteWorkspace = (workspaceId: string, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent triggering load
+    
+    const workspace = savedWorkspaces.find(w => w.id === workspaceId);
+    if (!workspace) return;
+    
+    if (confirm(`Are you sure you want to delete workspace "${workspace.name}"?`)) {
+      try {
+        deleteWorkspace(workspaceId);
+        toast.success(`Workspace "${workspace.name}" deleted`);
+        setSavedWorkspaces(getWorkspaces()); // Refresh list
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : "Failed to delete workspace"
+        );
+      }
+    }
+  };
+
+  const handleToggleWorkspacesDropdown = () => {
+    setShowWorkspacesDropdown(!showWorkspacesDropdown);
   };
 
   return (
@@ -248,21 +327,89 @@ const HeaderActions = () => {
       {/* Separator */}
       <div className="w-px h-8 bg-purple-600 mx-1"></div>
 
-      {/* Save Workspace Button */}
-      <button
-        onClick={handleSaveWorkspace}
-        className="group relative w-[42px] xl:w-[68px] flex flex-col items-center justify-center py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap shadow-sm"
-        title="Save current workspace state"
-      >
-        <span className="material-symbols-rounded text-xl leading-6 mb-0.5">
-          save
-        </span>
-        <span className="text-[10px] font-medium hidden xl:inline">Save</span>
-        {/* Tooltip for small screens */}
-        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none xl:hidden">
-          Save
+      {/* Workspace Management - Save & Load */}
+      <div className="flex items-center gap-2">
+        {/* Save Workspace Button */}
+        <button
+          onClick={handleSaveWorkspace}
+          className="group relative w-[42px] xl:w-[68px] flex flex-col items-center justify-center py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap shadow-sm"
+          title="Save current workspace state"
+        >
+          <span className="material-symbols-rounded text-xl leading-6 mb-0.5">
+            save
+          </span>
+          <span className="text-[10px] font-medium hidden xl:inline">Save</span>
+          {/* Tooltip for small screens */}
+          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none xl:hidden">
+            Save
+          </div>
+        </button>
+
+        {/* Load Workspace Button with Dropdown */}
+        <div className="relative" ref={dropdownRef}>
+          <button
+            onClick={handleToggleWorkspacesDropdown}
+            className="group relative w-[42px] xl:w-[68px] flex flex-col items-center justify-center py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap shadow-sm"
+            title="Load saved workspace"
+          >
+            <span className="material-symbols-rounded text-xl leading-6 mb-0.5">
+              folder_open
+            </span>
+            <span className="text-[10px] font-medium hidden xl:inline">Load</span>
+            {/* Tooltip for small screens */}
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none xl:hidden">
+              Load
+            </div>
+          </button>
+
+          {/* Workspaces Dropdown */}
+          {showWorkspacesDropdown && (
+            <div className="absolute top-full right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50">
+              <div className="p-2">
+                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 px-2 py-1 mb-1">
+                  Saved Workspaces ({savedWorkspaces.length}/3)
+                </div>
+                {savedWorkspaces.length === 0 ? (
+                  <div className="px-2 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
+                    No saved workspaces
+                  </div>
+                ) : (
+                  <div className="max-h-64 overflow-y-auto">
+                    {savedWorkspaces.map((workspace) => (
+                      <div
+                        key={workspace.id}
+                        className="group flex items-center justify-between px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer"
+                        onClick={() => handleLoadWorkspace(workspace.id)}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                            {workspace.name}
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                            {new Date(workspace.createdAt).toLocaleDateString()} {new Date(workspace.createdAt).toLocaleTimeString()}
+                          </div>
+                        </div>
+                        <button
+                          onClick={(e) => handleDeleteWorkspace(workspace.id, e)}
+                          className="ml-2 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                          title="Delete workspace"
+                        >
+                          <span className="material-symbols-rounded text-base">
+                            delete
+                          </span>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
-      </button>
+      </div>
+
+      {/* Separator */}
+      <div className="w-px h-8 bg-purple-600 mx-1"></div>
 
       {/* Undo Action */}
       <button
