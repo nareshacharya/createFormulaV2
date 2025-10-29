@@ -42,11 +42,11 @@ export const useSavedViews = () => {
     }, [savedViews]);
 
     const deleteView = useCallback((viewId: string) => {
+        // Update state
         setSavedViews((prev) => prev.filter((v) => v.id !== viewId));
-
-        if (currentViewId === viewId) {
-            setCurrentViewId(null);
-        }
+        
+        // Clear current view if it's the one being deleted
+        setCurrentViewId((prevId) => (prevId === viewId ? null : prevId));
 
         // Remove from localStorage
         try {
@@ -55,11 +55,12 @@ export const useSavedViews = () => {
                 const views = JSON.parse(storedViews);
                 const updatedViews = views.filter((v: SavedView) => v.id !== viewId);
                 localStorage.setItem("dataGridViews", JSON.stringify(updatedViews));
+                console.log("View deleted from localStorage:", viewId);
             }
         } catch (error) {
             console.error("Failed to delete view from localStorage:", error);
         }
-    }, [currentViewId]);
+    }, []); // No dependencies needed since we're using functional updates
 
     const loadSavedViews = useCallback(() => {
         try {
