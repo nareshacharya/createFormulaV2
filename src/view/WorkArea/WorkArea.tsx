@@ -26,6 +26,7 @@ import { useFormulaColumnHandlers } from "./components/FormulaColumnHandlers";
 import { useDilution } from "../../components/dilution";
 import { generateNewFormulaId } from "../../utils/formulaIdGenerator";
 import type { WorkspaceState } from "../../utils/workspaceManager";
+import { appStateHistory } from "../../utils/stateHistory";
 
 const WorkArea = () => {
   // Use custom hooks for state management
@@ -658,6 +659,13 @@ const WorkArea = () => {
         return;
       }
 
+      // Save current state for undo BEFORE making changes
+      appStateHistory.push(
+        { columns, tableData, formulas, availableFormulas },
+        "add_formula",
+        `Added new formula: ${data.formula.name}`
+      );
+
       const newColumnId = `formula_${Date.now()}_${Math.random()
         .toString(36)
         .substr(2, 9)}`;
@@ -722,6 +730,12 @@ const WorkArea = () => {
       // REQUIREMENT 2: Track formula added as column - add to selectedFormulaIds
       // The useEffect at line 144 will emit the event automatically
       setSelectedFormulaIds((prev) => [...prev, data.formula.id]);
+
+      // Emit undo state update
+      eventBus.emit("undo-state-updated", {
+        canUndo: appStateHistory.canUndo(),
+        count: appStateHistory.getUndoCount(),
+      });
     };
 
     const handleFormulaSelectedForColumn = (data: { formula: Formula }) => {
@@ -733,6 +747,13 @@ const WorkArea = () => {
         console.log("Maximum number of formula columns reached");
         return;
       }
+
+      // Save current state for undo BEFORE making changes
+      appStateHistory.push(
+        { columns, tableData, formulas, availableFormulas },
+        "add_formula",
+        `Added formula: ${data.formula.name}`
+      );
 
       const newColumnId = `formula_${Date.now()}_${Math.random()
         .toString(36)
@@ -975,9 +996,43 @@ const WorkArea = () => {
         } ingredients`
       );
 
+      // Emit undo state update
+      eventBus.emit("undo-state-updated", {
+        canUndo: appStateHistory.canUndo(),
+        count: appStateHistory.getUndoCount(),
+      });
+
       // Emit event to update selected ingredients in library after state update
       // Note: The useEffect at line 151 already handles this automatically when tableData changes
       // No need for manual emission here
+    };
+
+    const handleUndoAction = () => {
+      const previousState = appStateHistory.undo();
+      if (previousState) {
+        // Restore the previous state
+        setColumns(previousState.columns);
+        setTableData(previousState.tableData);
+        setFormulas(previousState.formulas);
+        setAvailableFormulas(previousState.availableFormulas);
+
+        // Emit undo state update
+        eventBus.emit("undo-state-updated", {
+          canUndo: appStateHistory.canUndo(),
+          count: appStateHistory.getUndoCount(),
+        });
+
+        // Update formula selections count
+        const formulaColumns = previousState.columns.filter(
+          (col: Column) => col.group === "Formulas" && col.formulaId
+        );
+        const formulaIds = formulaColumns.map((col: Column) => col.formulaId!);
+        setSelectedFormulaIds(formulaIds);
+
+        toast.success("Action undone successfully");
+      } else {
+        toast.error("Nothing to undo");
+      }
     };
 
     eventBus.on("ingredient-selected", handleIngredientClick);
@@ -988,6 +1043,7 @@ const WorkArea = () => {
     eventBus.on("load-formula", handleLoadFormula);
     eventBus.on("new-formula-created", handleNewFormulaCreated);
     eventBus.on("formula-selected-for-column", handleFormulaSelectedForColumn);
+    eventBus.on("undo-action", handleUndoAction);
 
     return () => {
       eventBus.off("ingredient-selected", handleIngredientClick);
@@ -1001,6 +1057,7 @@ const WorkArea = () => {
         "formula-selected-for-column",
         handleFormulaSelectedForColumn
       );
+      eventBus.off("undo-action", handleUndoAction);
     };
   }, [
     columns,
