@@ -17,7 +17,7 @@ export interface WorkspaceState {
     // DataGrid Core State
     columns: unknown[];           // Column definitions with all metadata
     tableData: unknown[];         // All row data including ingredients and totals
-    
+
     // Formula State
     formulas: unknown[];          // Currently loaded formulas in workspace
     availableFormulas: unknown[]; // All formulas available in library
@@ -25,15 +25,15 @@ export interface WorkspaceState {
     selectedFormulaIds: string[]; // IDs of formulas added to grid
     editableFormula: string | null; // Active formula column ID
     activeFormulaId: string | null; // Active formula ID (for compatibility)
-    
+
     // Ingredient State
     ingredients: unknown[];       // All ingredients in workspace
     expandedIngredients: string[]; // IDs of expanded formula rows
-    
+
     // Attribute State
     attributes: unknown[];        // All attributes in workspace
     selectedAttributes: string[]; // IDs of attributes added to grid
-    
+
     // UI State
     groupedByColumn: string | null; // Column ID for grouping
     filters: Record<string, unknown>; // Active filters
@@ -41,7 +41,7 @@ export interface WorkspaceState {
         key: string;
         direction: 'asc' | 'desc';
     } | null;
-    
+
     // Metadata
     lastModified: string;
 }
@@ -65,7 +65,7 @@ const createEmptyWorkspaceState = (): WorkspaceState => ({
     // DataGrid Core State
     columns: [],
     tableData: [],
-    
+
     // Formula State
     formulas: [],
     availableFormulas: [],
@@ -73,20 +73,20 @@ const createEmptyWorkspaceState = (): WorkspaceState => ({
     selectedFormulaIds: [],
     editableFormula: null,
     activeFormulaId: null,
-    
+
     // Ingredient State
     ingredients: [],
     expandedIngredients: [],
-    
+
     // Attribute State
     attributes: [],
     selectedAttributes: [],
-    
+
     // UI State
     groupedByColumn: null,
     filters: {},
     sortConfig: null,
-    
+
     // Metadata
     lastModified: new Date().toISOString(),
 });
@@ -297,17 +297,17 @@ export const clearAllWorkspaces = (): void => {
  */
 export const loadWorkspaceById = (workspaceId: string): boolean => {
     const workspace = getWorkspace(workspaceId);
-    
+
     if (!workspace) {
         console.error(`Workspace ${workspaceId} not found`);
         return false;
     }
-    
+
     // Import eventBus dynamically to avoid circular dependencies
     import('../utils/bus').then(({ eventBus }) => {
         eventBus.emit("load-workspace-state", { state: workspace.state });
     });
-    
+
     setActiveWorkspaceId(workspaceId);
     return true;
 };

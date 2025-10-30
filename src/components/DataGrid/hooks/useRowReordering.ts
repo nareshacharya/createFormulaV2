@@ -6,7 +6,8 @@ import type { DragState, DataGridRow } from "../types";
  */
 export const useRowReordering = (
     data: DataGridRow[],
-    onRowReorder?: (rowOrder: string[]) => void
+    onRowReorder?: (rowOrder: string[]) => void,
+    onSortReset?: () => void
 ) => {
     const [dragState, setDragState] = useState<DragState>({
         draggedRowId: null,
@@ -14,8 +15,12 @@ export const useRowReordering = (
     });
 
     const handleDragStart = useCallback((rowId: string) => {
+        // Reset any active sorting when user starts dragging
+        if (onSortReset) {
+            onSortReset();
+        }
         setDragState((prev) => ({ ...prev, draggedRowId: rowId }));
-    }, []);
+    }, [onSortReset]);
 
     const handleDragOver = useCallback(
         (e: React.DragEvent, rowId: string) => {
@@ -31,33 +36,37 @@ export const useRowReordering = (
     );
 
     const handleDragEnd = useCallback(() => {
-        const { draggedRowId, dragOverRowId } = dragState;
+        setDragState((currentDragState) => {
+            const { draggedRowId, dragOverRowId } = currentDragState;
 
-        if (draggedRowId && dragOverRowId && draggedRowId !== dragOverRowId) {
-            // Find non-total rows only
-            const reorderableRows = data.filter((row) => !row.isTotal);
-            const draggedIndex = reorderableRows.findIndex(
-                (row) => row.id === draggedRowId
-            );
-            const targetIndex = reorderableRows.findIndex(
-                (row) => row.id === dragOverRowId
-            );
+            if (draggedRowId && dragOverRowId && draggedRowId !== dragOverRowId) {
+                // Find non-total rows only
+                const reorderableRows = data.filter((row) => !row.isTotal);
+                const draggedIndex = reorderableRows.findIndex(
+                    (row) => row.id === draggedRowId
+                );
+                const targetIndex = reorderableRows.findIndex(
+                    (row) => row.id === dragOverRowId
+                );
 
-            if (draggedIndex !== -1 && targetIndex !== -1) {
-                // Create new order
-                const newOrder = [...reorderableRows];
-                const [removed] = newOrder.splice(draggedIndex, 1);
-                newOrder.splice(targetIndex, 0, removed);
+                if (draggedIndex !== -1 && targetIndex !== -1) {
+                    // Create new order
+                    const newOrder = [...reorderableRows];
+                    const [removed] = newOrder.splice(draggedIndex, 1);
+                    newOrder.splice(targetIndex, 0, removed);
 
-                // Notify parent of new order
-                if (onRowReorder) {
-                    onRowReorder(newOrder.map((row) => row.id));
+                    // Notify parent of new order
+                    if (onRowReorder) {
+                        console.log("Row reordering:", { draggedRowId, dragOverRowId, newOrder: newOrder.map(r => r.id) });
+                        onRowReorder(newOrder.map((row) => row.id));
+                    }
                 }
             }
-        }
 
-        setDragState({ draggedRowId: null, dragOverRowId: null });
-    }, [dragState, data, onRowReorder]);
+            // Reset drag state
+            return { draggedRowId: null, dragOverRowId: null };
+        });
+    }, [data, onRowReorder]);
 
     const handleDragLeave = useCallback(() => {
         setDragState((prev) => ({ ...prev, dragOverRowId: null }));

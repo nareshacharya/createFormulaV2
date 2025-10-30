@@ -149,7 +149,7 @@ export const NumberCell = ({
         />
       );
     }
-    
+
     // All other total rows (lines, rmc, running) remain read-only displays
     if (value === "-") {
       return (

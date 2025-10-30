@@ -9,6 +9,7 @@ interface DescriptionCellProps {
   onToggleFormulaExpansion?: (formulaId: string) => void;
   onExplodeFormula?: (formulaId: string) => void;
   onDilutionClick?: (ingredientId: string, ingredientName: string) => void;
+  onAddFormula?: () => void;
 }
 
 export const DescriptionCell = ({
@@ -18,6 +19,7 @@ export const DescriptionCell = ({
   onToggleFormulaExpansion,
   onExplodeFormula,
   onDilutionClick,
+  onAddFormula,
 }: DescriptionCellProps) => {
   // Empty state handling
   if (row.isEmpty) {
@@ -28,15 +30,17 @@ export const DescriptionCell = ({
             science
           </span>
         </div>
-        <h3 className="text-lg font-medium text-gray-700 mb-2">
-          No ingredients added
+        <h3 className="text-lg font-medium text-gray-400 mb-2">
+          Start building by adding a formula to begin <br />
+          <br />
         </h3>
-        <div className="flex items-center justify-center text-sm text-gray-600">
-          <span className="material-symbols-rounded mr-2 text-blue-500">
-            arrow_back
-          </span>
-          Select ingredients from the library panel
-        </div>
+        <button
+          onClick={onAddFormula}
+          className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 font-medium mx-auto shadow-sm"
+        >
+          <span className="material-symbols-rounded text-xl">add</span>
+          Create/Add Formula
+        </button>
       </div>
     );
   }

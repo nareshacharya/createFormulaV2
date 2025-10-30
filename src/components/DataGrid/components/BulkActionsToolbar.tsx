@@ -211,12 +211,10 @@ export const BulkActionsToolbar = ({
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (window.confirm(`Delete view "${view.name}"?`)) {
-                              console.log("Deleting view:", view.id);
-                              onDeleteView?.(view.id);
-                            }
+                            console.log("Deleting view:", view.id, view.name);
+                            onDeleteView?.(view.id);
                           }}
-                          className="ml-2 p-1 text-gray-400 hover:text-red-600 rounded"
+                          className="ml-2 p-1 text-gray-400 hover:text-red-600 rounded transition-colors"
                           title="Delete view"
                         >
                           <i className="ri-delete-bin-line text-sm"></i>

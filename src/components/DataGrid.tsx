@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import toast from "react-hot-toast";
 import { useClickOutside } from "../hooks/useClickOutside";
 import { useRowReordering } from "./DataGrid/hooks/useRowReordering";
 import { useSavedViews } from "./DataGrid/hooks/useSavedViews";
@@ -37,6 +38,7 @@ interface DataGridProps {
   columns: Column[];
   data: any[];
   onAddColumn?: (columnType: "formula" | "attribute") => void;
+  onAddFormula?: () => void;
   onRowDelete?: (rowId: string) => void;
   onBulkDelete?: (rowIds: string[]) => void;
   onCellEdit?: (rowId: string, columnId: string, value: any) => void;
@@ -66,6 +68,7 @@ const DataGrid = ({
   columns,
   data,
   onAddColumn,
+  onAddFormula,
   onRowDelete,
   onBulkDelete,
   onCellEdit,
@@ -114,7 +117,16 @@ const DataGrid = ({
     handleDragOver: handleRowDragOver,
     handleDragEnd: handleRowDragEnd,
     handleDragLeave: handleRowDragLeave,
-  } = useRowReordering(data, onRowReorder);
+  } = useRowReordering(data, onRowReorder, () => {
+    // Reset sorting when user starts dragging rows
+    if (sortConfig) {
+      setSortConfig(null);
+      toast("Sorting cleared to enable manual reordering", {
+        icon: "↕️",
+        duration: 2000,
+      });
+    }
+  });
 
   // Saved views hooks
   const {
@@ -394,6 +406,7 @@ const DataGrid = ({
           });
         }}
         onCellEdit={onCellEdit}
+        onAddFormula={onAddFormula}
       />
     );
   };
@@ -421,7 +434,11 @@ const DataGrid = ({
           onSaveView?.(viewName);
         }}
         onLoadView={(viewId) => {
-          loadView(viewId);
+          const rowOrder = loadView(viewId);
+          if (rowOrder && onRowReorder) {
+            console.log("Loading view with row order:", rowOrder);
+            onRowReorder(rowOrder);
+          }
           onLoadView?.(viewId);
         }}
         onDeleteView={deleteView}
@@ -610,7 +627,11 @@ const DataGrid = ({
                             align={column.type === "number" ? "right" : "left"}
                             className={`
                             border-r border-gray-100 last:border-r-0 font-sans
-                            ${row.isTotal ? "font-medium bg-gray-100" : ""}
+                            ${
+                              row.isTotal && !isTargetTotalInActiveFormula
+                                ? "font-medium bg-gray-100"
+                                : ""
+                            }
                             ${column.fixed ? "bg-gray-25" : ""}
                             ${
                               column.id === editableFormula && !column.fixed

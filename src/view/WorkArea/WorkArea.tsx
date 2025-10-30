@@ -622,7 +622,7 @@ const WorkArea = () => {
       const newFormulaId = generateNewFormulaId({
         existingFormulas: availableFormulas,
       });
-      
+
       const newFormula: Formula = {
         id: newFormulaId,
         name: `New Formula ${Date.now()}`,
@@ -1065,7 +1065,7 @@ const WorkArea = () => {
         // DataGrid Core State
         columns,
         tableData,
-        
+
         // Formula State
         formulas,
         availableFormulas,
@@ -1073,20 +1073,20 @@ const WorkArea = () => {
         selectedFormulaIds,
         editableFormula,
         activeFormulaId: editableFormula, // Map column ID to formula ID
-        
+
         // Ingredient State
         ingredients,
         expandedIngredients: [], // TODO: Track expanded formula rows if needed
-        
+
         // Attribute State
         attributes,
         selectedAttributes,
-        
+
         // UI State
         groupedByColumn,
         filters: {}, // TODO: Add filter state if needed
         sortConfig: null, // TODO: Add sort state if needed
-        
+
         // Metadata
         lastModified: new Date().toISOString(),
       };
@@ -1103,23 +1103,31 @@ const WorkArea = () => {
       try {
         // Restore DataGrid Core State
         if (state.columns) setColumns(state.columns as Column[]);
-        if (state.tableData) setTableData(state.tableData as Record<string, unknown>[]);
-        
+        if (state.tableData)
+          setTableData(state.tableData as Record<string, unknown>[]);
+
         // Restore Formula State
         if (state.formulas) setFormulas(state.formulas as Formula[]);
-        if (state.availableFormulas) setAvailableFormulas(state.availableFormulas as Formula[]);
-        if (state.selectedFormulaIds) setSelectedFormulaIds(state.selectedFormulaIds);
-        if (state.editableFormula !== undefined) setEditableFormula(state.editableFormula);
-        
+        if (state.availableFormulas)
+          setAvailableFormulas(state.availableFormulas as Formula[]);
+        if (state.selectedFormulaIds)
+          setSelectedFormulaIds(state.selectedFormulaIds);
+        if (state.editableFormula !== undefined)
+          setEditableFormula(state.editableFormula);
+
         // Restore Ingredient State
-        if (state.ingredients) setIngredients(state.ingredients as Ingredient[]);
-        
+        if (state.ingredients)
+          setIngredients(state.ingredients as Ingredient[]);
+
         // Restore Attribute State
-        if (state.attributes) setAttributes(state.attributes as IngredientAttribute[]);
-        if (state.selectedAttributes) setSelectedAttributes(state.selectedAttributes);
-        
+        if (state.attributes)
+          setAttributes(state.attributes as IngredientAttribute[]);
+        if (state.selectedAttributes)
+          setSelectedAttributes(state.selectedAttributes);
+
         // Restore UI State
-        if (state.groupedByColumn !== undefined) setGroupedByColumn(state.groupedByColumn);
+        if (state.groupedByColumn !== undefined)
+          setGroupedByColumn(state.groupedByColumn);
 
         // Emit events to sync with other components
         const ingredientsList = state.ingredients as Ingredient[];
@@ -1225,7 +1233,7 @@ const WorkArea = () => {
     const newFormulaId = generateNewFormulaId({
       existingFormulas: availableFormulas,
     });
-    
+
     const newFormula: Formula = {
       ...formula,
       id: newFormulaId,
@@ -1233,18 +1241,20 @@ const WorkArea = () => {
     };
 
     // Emit event to add this formula as a new column in the work area
+    // The event handler (handleNewFormulaCreated) will automatically add it to selectedFormulaIds
     eventBus.emit("new-formula-created", { formula: newFormula });
 
-    // Update selectedFormulaIds to show it as selected in the modal
-    setSelectedFormulaIds((prev) => [...prev, newFormula.id]);
+    // Close the modal
+    setShowFormulaModal(false);
   };
 
   const handleFormulaModalSelectFormula = (formula: Formula) => {
     // Emit event to add this formula as a new column in the work area
+    // The event handler (handleFormulaSelectedForColumn) will automatically add it to selectedFormulaIds
     eventBus.emit("formula-selected-for-column", { formula });
 
-    // Update selectedFormulaIds to show it as selected in the modal
-    setSelectedFormulaIds((prev) => [...prev, formula.id]);
+    // Close the modal
+    setShowFormulaModal(false);
   };
 
   // Modified handleAddAttributeColumn with max selection logic
@@ -1587,6 +1597,7 @@ const WorkArea = () => {
               handleAddAttributeColumn();
             }
           }}
+          onAddFormula={handleAddFormulaColumn}
           onRowDelete={handleRowDelete}
           onBulkDelete={handleBulkDelete}
           onCellEdit={handleCellEdit}

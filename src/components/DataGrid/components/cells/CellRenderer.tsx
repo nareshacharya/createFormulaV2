@@ -32,6 +32,7 @@ interface CellRendererProps {
   onExplodeFormula?: (formulaId: string) => void;
   onDilutionClick?: (ingredientId: string, ingredientName: string) => void;
   onCellEdit?: (rowId: string, columnId: string, value: any) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
+  onAddFormula?: () => void;
 }
 
 export const CellRenderer = ({
@@ -43,6 +44,7 @@ export const CellRenderer = ({
   onExplodeFormula,
   onDilutionClick,
   onCellEdit,
+  onAddFormula,
 }: CellRendererProps) => {
   const value = row[column.key];
 
@@ -56,6 +58,7 @@ export const CellRenderer = ({
         onToggleFormulaExpansion={onToggleFormulaExpansion}
         onExplodeFormula={onExplodeFormula}
         onDilutionClick={onDilutionClick}
+        onAddFormula={onAddFormula}
       />
     );
   }

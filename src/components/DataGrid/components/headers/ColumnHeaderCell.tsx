@@ -300,7 +300,7 @@ export const ColumnHeaderCell = ({
                               <span>Set Active</span>
                             </button>
                           )}
-                          
+
                           {/* Create Version - always available */}
                           <button
                             onClick={(e) => {

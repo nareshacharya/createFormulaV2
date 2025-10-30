@@ -77,7 +77,10 @@ const HeaderActions = () => {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setShowWorkspacesDropdown(false);
       }
     };
@@ -167,12 +170,16 @@ const HeaderActions = () => {
   const handleSaveWorkspaceWithName = (workspaceName: string) => {
     try {
       // Set up one-time listener for workspace state
-      const handleWorkspaceStateReady = ({ state }: { state: WorkspaceState }) => {
+      const handleWorkspaceStateReady = ({
+        state,
+      }: {
+        state: WorkspaceState;
+      }) => {
         try {
           const workspace = saveWorkspace(workspaceName, state);
           toast.success(`Workspace "${workspace.name}" saved successfully!`);
           hideModal();
-          
+
           // Clean up listener
           eventBus.off("workspace-state-ready", handleWorkspaceStateReady);
         } catch (error) {
@@ -185,15 +192,14 @@ const HeaderActions = () => {
 
       // Register listener
       eventBus.on("workspace-state-ready", handleWorkspaceStateReady);
-      
+
       // Request current state from WorkArea
       eventBus.emit("request-workspace-state");
-      
+
       // Set a timeout in case WorkArea doesn't respond
       setTimeout(() => {
         eventBus.off("workspace-state-ready", handleWorkspaceStateReady);
       }, 5000);
-      
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to save workspace"
@@ -205,7 +211,7 @@ const HeaderActions = () => {
     try {
       const success = loadWorkspaceById(workspaceId);
       if (success) {
-        const workspace = savedWorkspaces.find(w => w.id === workspaceId);
+        const workspace = savedWorkspaces.find((w) => w.id === workspaceId);
         toast.success(`Workspace "${workspace?.name}" loaded successfully!`);
         setShowWorkspacesDropdown(false);
       } else {
@@ -218,13 +224,18 @@ const HeaderActions = () => {
     }
   };
 
-  const handleDeleteWorkspace = (workspaceId: string, event: React.MouseEvent) => {
+  const handleDeleteWorkspace = (
+    workspaceId: string,
+    event: React.MouseEvent
+  ) => {
     event.stopPropagation(); // Prevent triggering load
-    
-    const workspace = savedWorkspaces.find(w => w.id === workspaceId);
+
+    const workspace = savedWorkspaces.find((w) => w.id === workspaceId);
     if (!workspace) return;
-    
-    if (confirm(`Are you sure you want to delete workspace "${workspace.name}"?`)) {
+
+    if (
+      confirm(`Are you sure you want to delete workspace "${workspace.name}"?`)
+    ) {
       try {
         deleteWorkspace(workspaceId);
         toast.success(`Workspace "${workspace.name}" deleted`);
@@ -355,7 +366,9 @@ const HeaderActions = () => {
             <span className="material-symbols-rounded text-xl leading-6 mb-0.5">
               folder_open
             </span>
-            <span className="text-[10px] font-medium hidden xl:inline">Load</span>
+            <span className="text-[10px] font-medium hidden xl:inline">
+              Load
+            </span>
             {/* Tooltip for small screens */}
             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none xl:hidden">
               Load
@@ -386,11 +399,14 @@ const HeaderActions = () => {
                             {workspace.name}
                           </div>
                           <div className="text-xs text-gray-500 dark:text-gray-400">
-                            {new Date(workspace.createdAt).toLocaleDateString()} {new Date(workspace.createdAt).toLocaleTimeString()}
+                            {new Date(workspace.createdAt).toLocaleDateString()}{" "}
+                            {new Date(workspace.createdAt).toLocaleTimeString()}
                           </div>
                         </div>
                         <button
-                          onClick={(e) => handleDeleteWorkspace(workspace.id, e)}
+                          onClick={(e) =>
+                            handleDeleteWorkspace(workspace.id, e)
+                          }
                           className="ml-2 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
                           title="Delete workspace"
                         >
