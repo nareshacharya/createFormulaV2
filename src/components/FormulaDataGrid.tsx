@@ -27,8 +27,8 @@ const FormulaDataGrid = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [displayColumns] = useState<string[]>([
     "name",
+    "id",
     "version",
-    "formulaId",
     "status",
     "category",
     "costPerKg",
@@ -170,8 +170,8 @@ const FormulaDataGrid = ({
   const getColumnLabel = (col: string) => {
     const map: Record<string, string> = {
       name: "Name",
+      id: "Formula ID",
       version: "Version",
-      formulaId: "Formula ID",
       status: "Status",
       category: "Category",
       costPerKg: "Cost per kg",
@@ -230,7 +230,7 @@ const FormulaDataGrid = ({
             </div>
             <input
               type="text"
-              placeholder="Search formulas..."
+              placeholder="Search by name or formula ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="

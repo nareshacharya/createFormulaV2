@@ -24,7 +24,7 @@ export const DescriptionCell = ({
   // Empty state handling
   if (row.isEmpty) {
     return (
-      <div className="text-center py-32">
+      <div className="text-center pt-16 pb-[30vh]">
         <div className="w-24 h-24 mx-auto mb-3 bg-gray-200 rounded-full flex items-center justify-center">
           <span className="material-symbols-rounded text-5xl text-gray-400">
             science
