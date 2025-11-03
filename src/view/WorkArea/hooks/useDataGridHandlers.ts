@@ -4,12 +4,15 @@ import type { Column } from "../../../components/DataGrid";
 import type { Formula } from "../../../services/pega";
 import { calculateTotals } from "../../../utils/formulaCalculations";
 import { eventBus } from "../../../utils/bus";
+import { appStateHistory } from "../../../utils/stateHistory";
 
 interface UseDataGridHandlersProps {
     columns: Column[];
     selectedFormulaIds: string[];
     editableFormula: string;
     formulas: Formula[];
+    availableFormulas: Formula[];
+    tableData: any[];
     pendingFormulaIds: React.RefObject<Set<string>>;
     setTableData: Dispatch<SetStateAction<any[]>>;
     setColumns: Dispatch<SetStateAction<Column[]>>;
@@ -22,6 +25,8 @@ export const useDataGridHandlers = ({
     selectedFormulaIds,
     editableFormula,
     formulas,
+    availableFormulas,
+    tableData,
     pendingFormulaIds,
     setTableData,
     setColumns,
@@ -30,6 +35,14 @@ export const useDataGridHandlers = ({
 }: UseDataGridHandlersProps) => {
     const handleRowDelete = (rowId: string) => {
         console.log("🔥 handleRowDelete ENTRY - rowId:", rowId);
+
+        // Save state before deletion
+        appStateHistory.push(
+            { columns, tableData, formulas, availableFormulas },
+            "delete_row",
+            `Deleted row: ${rowId}`
+        );
+
         setTableData((prev) => {
             const rowToDelete = prev.find((row) => row.id === rowId);
             console.log("🗑️ handleRowDelete called:", {
@@ -83,9 +96,22 @@ export const useDataGridHandlers = ({
 
             return newData;
         });
+
+        // Emit undo state update
+        eventBus.emit("undo-state-updated", {
+            canUndo: appStateHistory.canUndo(),
+            count: appStateHistory.getUndoCount(),
+        });
     };
 
     const handleCellEdit = (rowId: string, columnId: string, value: any) => {
+        // Save state before editing
+        appStateHistory.push(
+            { columns, tableData, formulas, availableFormulas },
+            "edit_cell",
+            `Edited cell: row ${rowId}, column ${columnId}`
+        );
+
         setTableData((prev) => {
             const updatedRow = prev.find((row) => row.id === rowId);
             const newData = prev.map((row) => {
@@ -119,11 +145,24 @@ export const useDataGridHandlers = ({
 
             return calculateTotals(newData, columns);
         });
+
+        // Emit undo state update
+        eventBus.emit("undo-state-updated", {
+            canUndo: appStateHistory.canUndo(),
+            count: appStateHistory.getUndoCount(),
+        });
     };
 
     const handleDeleteColumn = (columnId: string) => {
         const columnToDelete = columns.find((col) => col.id === columnId);
         if (!columnToDelete) return;
+
+        // Save state before deletion
+        appStateHistory.push(
+            { columns, tableData, formulas, availableFormulas },
+            "delete_column",
+            `Deleted column: ${columnToDelete.title}`
+        );
 
         setColumns((prev) => prev.filter((col) => col.id !== columnId));
 
@@ -176,14 +215,33 @@ export const useDataGridHandlers = ({
                 selectedAttributes: newSelectedAttributes,
             });
         }
+
+        // Emit undo state update
+        eventBus.emit("undo-state-updated", {
+            canUndo: appStateHistory.canUndo(),
+            count: appStateHistory.getUndoCount(),
+        });
     };
 
     const handleColumnReorder = (fromIndex: number, toIndex: number) => {
+        // Save state before reordering
+        appStateHistory.push(
+            { columns, tableData, formulas, availableFormulas },
+            "reorder_columns",
+            `Reordered columns: ${fromIndex} to ${toIndex}`
+        );
+
         setColumns((prev) => {
             const newColumns = [...prev];
             const [movedColumn] = newColumns.splice(fromIndex, 1);
             newColumns.splice(toIndex, 0, movedColumn);
             return newColumns;
+        });
+
+        // Emit undo state update
+        eventBus.emit("undo-state-updated", {
+            canUndo: appStateHistory.canUndo(),
+            count: appStateHistory.getUndoCount(),
         });
     };
 

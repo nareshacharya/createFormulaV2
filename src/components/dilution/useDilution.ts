@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { eventBus } from '../../utils/bus';
 import type { Dilution } from '../../types/dilution';
 
 export interface DilutionState {
@@ -12,6 +13,7 @@ export interface UseDilutionReturn {
     removeDilution: (ingredientId: string) => void;
     hasDilution: (ingredientId: string) => boolean;
     clearAllDilutions: () => void;
+    restoreDilutions: (savedDilutions: DilutionState) => void;
 }
 
 /**
@@ -48,6 +50,11 @@ export const useDilution = (): UseDilutionReturn => {
                 [ingredientId]: dilution,
             };
         });
+
+        // Emit event to notify WorkArea to save state for undo
+        setTimeout(() => {
+            eventBus.emit("dilution-changed", { ingredientId, dilution });
+        }, 0);
     }, []);
 
     /**
@@ -78,6 +85,13 @@ export const useDilution = (): UseDilutionReturn => {
         setDilutions({});
     }, []);
 
+    /**
+     * Restore dilutions from a saved state (for undo/redo)
+     */
+    const restoreDilutions = useCallback((savedDilutions: DilutionState) => {
+        setDilutions(savedDilutions || {});
+    }, []);
+
     return {
         dilutions,
         getDilution,
@@ -85,5 +99,6 @@ export const useDilution = (): UseDilutionReturn => {
         removeDilution,
         hasDilution,
         clearAllDilutions,
+        restoreDilutions,
     };
 };

@@ -3,11 +3,15 @@ import toast from "react-hot-toast";
 import type { Column } from "../../../components/DataGrid";
 import type { Formula, Ingredient } from "../../../services/pega";
 import { calculateTotals } from "../../../utils/formulaCalculations";
+import { appStateHistory } from "../../../utils/stateHistory";
+import { eventBus } from "../../../utils/bus";
 
 interface UseFormulaOperationsProps {
     columns: Column[];
     editableFormula: string;
     formulas: Formula[];
+    availableFormulas: Formula[];
+    tableData: any[];
     ingredients: Ingredient[];
     setTableData: Dispatch<SetStateAction<any[]>>;
     selectedFormulaIds: string[];
@@ -19,6 +23,8 @@ export const useFormulaOperations = ({
     columns,
     editableFormula,
     formulas,
+    availableFormulas,
+    tableData,
     ingredients,
     setTableData,
     selectedFormulaIds,
@@ -30,6 +36,13 @@ export const useFormulaOperations = ({
             toast.error("No active formula to normalize");
             return;
         }
+
+        // Save state before normalizing
+        appStateHistory.push(
+            { columns, tableData, formulas, availableFormulas },
+            "normalize_formula",
+            `Normalized active formula`
+        );
 
         setTableData((prev) => {
             const targetTotalRow = prev.find(
@@ -72,9 +85,22 @@ export const useFormulaOperations = ({
             toast.success(`Formula normalized to ${targetTotal.toFixed(2)}%`);
             return finalData;
         });
+
+        // Emit undo state update
+        eventBus.emit("undo-state-updated", {
+            canUndo: appStateHistory.canUndo(),
+            count: appStateHistory.getUndoCount(),
+        });
     };
 
     const handleMergeDuplicates = () => {
+        // Save state before merging
+        appStateHistory.push(
+            { columns, tableData, formulas, availableFormulas },
+            "merge_duplicates",
+            `Merged duplicate ingredients`
+        );
+
         setTableData((prev) => {
             // Separate ingredient rows and total rows
             const ingredientRows = prev.filter((row) => !row.isTotal);
@@ -170,10 +196,23 @@ export const useFormulaOperations = ({
             );
             return dataWithRecalculatedTotals;
         });
+
+        // Emit undo state update
+        eventBus.emit("undo-state-updated", {
+            canUndo: appStateHistory.canUndo(),
+            count: appStateHistory.getUndoCount(),
+        });
     };
 
     const handleExplodeFormula = (formulaId: string) => {
         console.log("💣 handleExplodeFormula called for formulaId:", formulaId);
+
+        // Save state before exploding
+        appStateHistory.push(
+            { columns, tableData, formulas, availableFormulas },
+            "explode_formula",
+            `Exploded formula: ${formulaId}`
+        );
 
         setTableData((prev) => {
             const formula = formulas.find((f) => f.id === formulaId);
@@ -252,6 +291,12 @@ export const useFormulaOperations = ({
             const newIds = prev.filter((id) => id !== formulaId);
             console.log("✅ selectedFormulaIds after explosion:", newIds);
             return newIds;
+        });
+
+        // Emit undo state update
+        eventBus.emit("undo-state-updated", {
+            canUndo: appStateHistory.canUndo(),
+            count: appStateHistory.getUndoCount(),
         });
     };
 

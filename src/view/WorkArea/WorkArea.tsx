@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import toast from "react-hot-toast";
 import DataGrid from "../../components/DataGrid";
 import type { Column } from "../../components/DataGrid";
@@ -70,6 +70,58 @@ const WorkArea = () => {
   const [showAttributeDialog, setShowAttributeDialog] = useState(false);
   const [groupedByColumn, setGroupedByColumn] = useState<string | null>(null);
 
+  // Track if initial state has been saved for undo
+  const initialStateSaved = useRef(false);
+
+  // Helper function to save initial state before first user action
+  const ensureInitialStateSaved = useCallback(() => {
+    if (!initialStateSaved.current && columns.length > 0) {
+      appStateHistory.push(
+        {
+          columns,
+          tableData,
+          formulas,
+          availableFormulas,
+          dilutions: dilutionState.dilutions, // Access current dilution state
+        },
+        "initial_state",
+        "Initial application state"
+      );
+      initialStateSaved.current = true;
+      eventBus.emit("undo-state-updated", {
+        canUndo: appStateHistory.canUndo(),
+        count: appStateHistory.getUndoCount(),
+      });
+    }
+  }, [columns, tableData, formulas, availableFormulas, dilutionState]);
+
+  // Helper function to save state after an action completes
+  const saveStateAfterAction = useCallback(
+    (action: string, description: string) => {
+      // Use setTimeout to ensure state updates have completed
+      setTimeout(() => {
+        // Access dilutionState directly to get current value
+        const currentDilutions = dilutionState.dilutions;
+        appStateHistory.push(
+          {
+            columns,
+            tableData,
+            formulas,
+            availableFormulas,
+            dilutions: currentDilutions,
+          },
+          action,
+          description
+        );
+        eventBus.emit("undo-state-updated", {
+          canUndo: appStateHistory.canUndo(),
+          count: appStateHistory.getUndoCount(),
+        });
+      }, 0);
+    },
+    [columns, tableData, formulas, availableFormulas, dilutionState]
+  );
+
   // Use custom hooks for handlers
   const {
     handleRowDelete,
@@ -81,6 +133,8 @@ const WorkArea = () => {
     selectedFormulaIds,
     editableFormula,
     formulas,
+    availableFormulas,
+    tableData,
     pendingFormulaIds,
     setTableData,
     setColumns,
@@ -93,6 +147,8 @@ const WorkArea = () => {
       columns,
       editableFormula,
       formulas,
+      availableFormulas,
+      tableData,
       ingredients,
       setTableData,
       selectedFormulaIds,
@@ -195,11 +251,48 @@ const WorkArea = () => {
     eventBus.on("normalize-formula", handleNormalize);
     eventBus.on("merge-duplicates", handleMergeDuplicates);
 
+    // Listen for dilution changes to save state for undo
+    const handleDilutionChanged = () => {
+      ensureInitialStateSaved();
+      // Use a longer delay to ensure dilution state has updated
+      setTimeout(() => {
+        // Access dilutionState directly here to get the current value, not from closure
+        const currentDilutions = dilutionState.dilutions;
+        appStateHistory.push(
+          {
+            columns,
+            tableData,
+            formulas,
+            availableFormulas,
+            dilutions: currentDilutions,
+          },
+          "apply_dilution",
+          "Applied dilution to ingredient"
+        );
+        eventBus.emit("undo-state-updated", {
+          canUndo: appStateHistory.canUndo(),
+          count: appStateHistory.getUndoCount(),
+        });
+      }, 100); // Longer delay to ensure React has updated dilution state
+    };
+
+    eventBus.on("dilution-changed", handleDilutionChanged);
+
     return () => {
       eventBus.off("normalize-formula", handleNormalize);
       eventBus.off("merge-duplicates", handleMergeDuplicates);
+      eventBus.off("dilution-changed", handleDilutionChanged);
     };
-  }, [handleNormalize, handleMergeDuplicates]);
+  }, [
+    handleNormalize,
+    handleMergeDuplicates,
+    ensureInitialStateSaved,
+    columns,
+    tableData,
+    formulas,
+    availableFormulas,
+    dilutionState,
+  ]);
 
   useEffect(() => {
     const handleIngredientClick = (data: { ingredient: Ingredient }) => {
@@ -243,6 +336,9 @@ const WorkArea = () => {
         ingredientId: data.ingredient.id,
       };
 
+      // Ensure initial state is saved before first action
+      ensureInitialStateSaved();
+
       setTableData((prev) => {
         // If this is the first ingredient, also add the total row
         if (prev.length === 0) {
@@ -278,6 +374,12 @@ const WorkArea = () => {
 
       // Show success toast
       toast.success(`Ingredient "${data.ingredient.name}" added to work area`);
+
+      // Save state after action completes
+      saveStateAfterAction(
+        "add_ingredient",
+        `Added ingredient: ${data.ingredient.name}`
+      );
     };
 
     const handleFormulaSelected = (data: { formula: Formula }) => {
@@ -339,6 +441,9 @@ const WorkArea = () => {
         percentage: 100, // Default to 100% of the formula
         status: data.formula.status,
       };
+
+      // Ensure initial state is saved before first action
+      ensureInitialStateSaved();
 
       // Add formula percentage to active formula column (100% default)
       const formulaColumns = columns.filter(
@@ -431,6 +536,12 @@ const WorkArea = () => {
 
       // Show success toast
       toast.success(`Formula "${data.formula.name}" added to work area`);
+
+      // Save state after action completes
+      saveStateAfterAction(
+        "add_formula_group",
+        `Added formula group: ${data.formula.name}`
+      );
     };
 
     // Add handler for expand/collapse toggle
@@ -476,6 +587,9 @@ const WorkArea = () => {
         group: "Attributes",
         width: 120,
       };
+
+      // Ensure initial state is saved before first action
+      ensureInitialStateSaved();
 
       setColumns((prev) => {
         const attributeAddIndex = prev.findIndex(
@@ -584,6 +698,12 @@ const WorkArea = () => {
       eventBus.emit("work-area-attributes-updated", {
         selectedAttributes: newSelectedAttributes,
       });
+
+      // Save state after action completes
+      saveStateAfterAction(
+        "add_attribute",
+        `Added attribute: ${data.attribute.name}`
+      );
     };
 
     const handleAttributeDeselected = (data: { attributeId: string }) => {
@@ -659,12 +779,8 @@ const WorkArea = () => {
         return;
       }
 
-      // Save current state for undo BEFORE making changes
-      appStateHistory.push(
-        { columns, tableData, formulas, availableFormulas },
-        "add_formula",
-        `Added new formula: ${data.formula.name}`
-      );
+      // Ensure initial state is saved before first action
+      ensureInitialStateSaved();
 
       const newColumnId = `formula_${Date.now()}_${Math.random()
         .toString(36)
@@ -731,11 +847,11 @@ const WorkArea = () => {
       // The useEffect at line 144 will emit the event automatically
       setSelectedFormulaIds((prev) => [...prev, data.formula.id]);
 
-      // Emit undo state update
-      eventBus.emit("undo-state-updated", {
-        canUndo: appStateHistory.canUndo(),
-        count: appStateHistory.getUndoCount(),
-      });
+      // Save state after action completes
+      saveStateAfterAction(
+        "add_formula",
+        `Added formula: ${data.formula.name}`
+      );
     };
 
     const handleFormulaSelectedForColumn = (data: { formula: Formula }) => {
@@ -748,12 +864,8 @@ const WorkArea = () => {
         return;
       }
 
-      // Save current state for undo BEFORE making changes
-      appStateHistory.push(
-        { columns, tableData, formulas, availableFormulas },
-        "add_formula",
-        `Added formula: ${data.formula.name}`
-      );
+      // Ensure initial state is saved before first action
+      ensureInitialStateSaved();
 
       const newColumnId = `formula_${Date.now()}_${Math.random()
         .toString(36)
@@ -996,11 +1108,11 @@ const WorkArea = () => {
         } ingredients`
       );
 
-      // Emit undo state update
-      eventBus.emit("undo-state-updated", {
-        canUndo: appStateHistory.canUndo(),
-        count: appStateHistory.getUndoCount(),
-      });
+      // Save state after action completes
+      saveStateAfterAction(
+        "add_formula",
+        `Added formula: ${data.formula.name}`
+      );
 
       // Emit event to update selected ingredients in library after state update
       // Note: The useEffect at line 151 already handles this automatically when tableData changes
@@ -1015,6 +1127,13 @@ const WorkArea = () => {
         setTableData(previousState.tableData);
         setFormulas(previousState.formulas);
         setAvailableFormulas(previousState.availableFormulas);
+
+        // Restore dilution state
+        if (previousState.dilutions) {
+          dilutionState.restoreDilutions(previousState.dilutions);
+        } else {
+          dilutionState.clearAllDilutions();
+        }
 
         // Emit undo state update
         eventBus.emit("undo-state-updated", {
@@ -1333,6 +1452,11 @@ const WorkArea = () => {
       selectedAttributes.includes(a.id)
     );
 
+    // Ensure initial state is saved before first action
+    if (attributesToAdd.length > 0) {
+      ensureInitialStateSaved();
+    }
+
     attributesToAdd.forEach((attribute) => {
       const newColumnId = `attr_${Date.now()}_${Math.random()
         .toString(36)
@@ -1420,6 +1544,14 @@ const WorkArea = () => {
         });
         return currentColumns;
       });
+
+      // Save state after attributes are added
+      if (attributesToAdd.length > 0) {
+        saveStateAfterAction(
+          "add_attributes_bulk",
+          `Added ${attributesToAdd.length} attribute(s)`
+        );
+      }
     }, 100);
 
     setSelectedAttributes([]);
@@ -1439,6 +1571,9 @@ const WorkArea = () => {
 
   // Row reordering handler
   const handleRowReorder = (rowOrder: string[]) => {
+    // Ensure initial state is saved before first action
+    ensureInitialStateSaved();
+
     setTableData((prev) => {
       // Separate total rows from regular rows
       const totalRows = prev.filter((row) => row.isTotal);
@@ -1455,6 +1590,9 @@ const WorkArea = () => {
       // Return reordered rows followed by total rows
       return [...reorderedRows, ...totalRows];
     });
+
+    // Save state after action completes
+    saveStateAfterAction("reorder_rows", "Reordered rows");
   };
 
   // Save view handler
@@ -1475,6 +1613,9 @@ const WorkArea = () => {
   // Bulk delete handler
   const handleBulkDelete = (rowIds: string[]) => {
     console.log("🗑️ handleBulkDelete called with rowIds:", rowIds);
+
+    // Ensure initial state is saved before first action
+    ensureInitialStateSaved();
 
     setTableData((prev) => {
       const rowsToDelete = prev.filter((row) => rowIds.includes(row.id));
@@ -1556,6 +1697,9 @@ const WorkArea = () => {
 
       return newData;
     });
+
+    // Save state after action completes
+    saveStateAfterAction("bulk_delete", `Deleted ${rowIds.length} row(s)`);
 
     toast.success(
       `${rowIds.length} row${rowIds.length > 1 ? "s" : ""} deleted`
