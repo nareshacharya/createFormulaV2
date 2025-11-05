@@ -1,457 +1,302 @@
-# State Management Guide
+# State Management Documentation
 
 ## Overview
 
-The application uses a combination of React state management patterns including local state, lifted state, custom hooks, and an event bus for cross-component communication.
+The CreateFormulaV2 application uses a hybrid state management approach combining React Context API, custom hooks, and an event bus pattern for cross-component communication. This document details the state management architecture, patterns, and best practices.
 
-## State Management Patterns
+## State Management Layers
 
-### 1. Local Component State (useState)
+### 1. Global State (Context API)
 
-Used for component-specific UI state that doesn't need to be shared.
+Global application state managed through React Context providers.
 
-**Examples**:
+#### WorkspaceContext
+
+The primary global state container managing workspace sessions and shared data.
+
+**Location:** `src/context/WorkspaceContext.tsx`
+
+**Responsibilities:**
+
+- Workspace tab management (create, close, switch, rename)
+- Workspace data isolation
+- Formula locking across workspaces
+- Global shared data (ingredients, formulas, attributes)
+
+**State Structure:**
+
 ```typescript
+interface WorkspaceContextType {
+  // Workspace Tabs
+  tabs: WorkspaceTab[];
+  activeTabId: string;
+  activeWorkspace: WorkspaceData;
+  
+  // Tab Operations
+  addTab: () => void;
+  closeTab: (tabId: string) => void;
+  switchTab: (tabId: string) => void;
+  renameTab: (tabId: string, newName: string) => void;
+  resetWorkspace: (tabId: string) => void;
+  updateWorkspaceData: (data: Partial<WorkspaceData>) => void;
+  
+  // Formula Locking
+  isFormulaLocked: (formulaId: string) => boolean;
+  getFormulaLockedInWorkspace: (formulaId: string) => string | null;
+  lockFormula: (formulaId: string) => void;
+  unlockFormula: (formulaId: string) => void;
+  
+  // Global Data
+  availableFormulas: Formula[];
+  ingredients: Ingredient[];
+  attributes: IngredientAttribute[];
+  setAvailableFormulas: (formulas: Formula[]) => void;
+  setIngredients: (ingredients: Ingredient[]) => void;
+  setAttributes: (attributes: IngredientAttribute[]) => void;
+}
+```
+
+**Usage:**
+
+```typescript
+import { useWorkspace } from '../hooks/useWorkspace';
+
+const Component = () => {
+  const {
+    tabs,
+    activeTabId,
+    activeWorkspace,
+    addTab,
+    switchTab,
+    updateWorkspaceData,
+  } = useWorkspace();
+
+  // Access workspace data
+  const { columns, tableData, formulas } = activeWorkspace;
+
+  // Update workspace
+  const handleDataChange = (newData: any[]) => {
+    updateWorkspaceData({ tableData: newData });
+  };
+
+  return (/* ... */);
+};
+```
+
+**Key Benefits:**
+
+- Centralized workspace state
+- Automatic workspace isolation
+- Formula lock management
+- Global data sharing
+
+---
+
+### 2. Local Component State
+
+Component-specific state using React useState hook.
+
+**Common Patterns:**
+
+```typescript
+// UI State
 const [isOpen, setIsOpen] = useState(false);
-const [searchQuery, setSearchQuery] = useState('');
-const [selectedTab, setSelectedTab] = useState('ingredients');
+const [loading, setLoading] = useState(false);
+const [error, setError] = useState<string | null>(null);
+
+// Form State
+const [formData, setFormData] = useState({
+  name: '',
+  category: '',
+  description: '',
+});
+
+// Selection State
+const [selectedItems, setSelectedItems] = useState<string[]>([]);
+const [activeItem, setActiveItem] = useState<string | null>(null);
+
+// Computed State (derived from props/context)
+const filteredItems = useMemo(() => {
+  return items.filter(item => item.status === 'active');
+}, [items]);
 ```
 
-**When to use**:
-- Modal/dialog visibility
-- Form inputs
-- Loading/error states local to a component
-- UI toggles (expanded/collapsed)
+**Best Practices:**
 
-### 2. Lifted State
+- Keep state as local as possible
+- Use derived state with useMemo for computed values
+- Lift state up only when necessary
+- Initialize state with meaningful defaults
 
-Shared state managed in a parent component and passed down via props.
+---
 
-**Example**: WorkArea State Management
-```typescript
-// Parent: WorkArea.tsx
-const [tableData, setTableData] = useState<any[]>([]);
-const [columns, setColumns] = useState<Column[]>([]);
-const [editableFormula, setEditableFormula] = useState<string>('');
+### 3. Custom Hooks State
 
-// Passed to children
-<DataGrid 
-  data={tableData}
-  columns={columns}
-  editableFormula={editableFormula}
-  onCellEdit={handleCellEdit}
-/>
-```
-
-**When to use**:
-- State shared between sibling components
-- Parent needs to coordinate multiple children
-- Clear parent-child relationship
-
-### 3. Custom Hooks
-
-Encapsulate and reuse stateful logic across components.
-
-**Location**: `src/view/WorkArea/hooks/`
+Encapsulated state logic in reusable custom hooks.
 
 #### useWorkAreaState
 
-**Purpose**: Centralized state management for the work area
+Manages main workspace state for formula operations.
 
-**File**: `src/view/WorkArea/hooks/useWorkAreaState.ts`
+**Location:** `src/view/WorkArea/hooks/useWorkAreaState.ts`
 
-**State Managed**:
+**State:**
+
 ```typescript
 const useWorkAreaState = () => {
-  // Data state
-  const [tableData, setTableData] = useState<any[]>([]);
   const [columns, setColumns] = useState<Column[]>([]);
+  const [tableData, setTableData] = useState<any[]>([]);
   const [formulas, setFormulas] = useState<Formula[]>([]);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [attributes, setAttributes] = useState<IngredientAttribute[]>([]);
-  
-  // UI state
-  const [editableFormula, setEditableFormula] = useState<string>('');
+  const [editableFormula, setEditableFormula] = useState<string | null>(null);
   const [selectedFormulaIds, setSelectedFormulaIds] = useState<string[]>([]);
-  const [showFormulaModal, setShowFormulaModal] = useState(false);
-  const [showFormulaSelector, setShowFormulaSelector] = useState(false);
-  const [availableFormulas, setAvailableFormulas] = useState<Formula[]>([]);
   const [activeFormula, setActiveFormula] = useState<Formula | null>(null);
-  const [selectedAttributes, setSelectedAttributes] = useState<string[]>([]);
-  const [selectedFormulas, setSelectedFormulas] = useState<string[]>([]);
-  
-  // Configuration
-  const [maxAttributeSelections] = useState(10);
-  const [maxFormulaSelections] = useState(5);
   
   return {
-    columns,
-    tableData,
-    formulas,
-    ingredients,
-    attributes,
-    editableFormula,
-    maxAttributeSelections,
-    maxFormulaSelections,
-    selectedFormulaIds,
-    showFormulaModal,
-    showFormulaSelector,
-    availableFormulas,
-    activeFormula,
-    selectedAttributes,
-    selectedFormulas,
-    setColumns,
-    setTableData,
-    setFormulas,
-    setIngredients,
-    setAttributes,
-    setEditableFormula,
-    setSelectedFormulaIds,
-    setShowFormulaModal,
-    setShowFormulaSelector,
-    setAvailableFormulas,
-    setActiveFormula,
-    setSelectedAttributes,
-    setSelectedFormulas,
+    columns, setColumns,
+    tableData, setTableData,
+    formulas, setFormulas,
+    ingredients, setIngredients,
+    attributes, setAttributes,
+    editableFormula, setEditableFormula,
+    selectedFormulaIds, setSelectedFormulaIds,
+    activeFormula, setActiveFormula,
+    // ... other state
   };
 };
 ```
 
-**Usage**:
-```typescript
-// In WorkArea.tsx
-const state = useWorkAreaState();
-const {
-  columns,
-  tableData,
-  editableFormula,
-  setTableData,
-  setColumns,
-  // ... other state and setters
-} = state;
-```
+#### useDilution
 
-#### useDataGridHandlers
+Manages ingredient dilution state.
 
-**Purpose**: Encapsulate event handlers for data grid operations
+**Location:** `src/components/dilution/useDilution.ts`
 
-**File**: `src/view/WorkArea/hooks/useDataGridHandlers.ts`
+**API:**
 
-**Handlers Provided**:
-```typescript
-const useDataGridHandlers = ({
-  columns,
-  selectedFormulaIds,
-  editableFormula,
-  formulas,
-  pendingFormulaIds,
-  setTableData,
-  setColumns,
-  setSelectedFormulaIds,
-  setEditableFormula,
-}) => {
-  // Handle cell value changes
-  const handleCellEdit = useCallback((rowId, columnId, value) => {
-    setTableData(prev => {
-      const updatedData = prev.map(row => {
-        if (row.id === rowId) {
-          const updatedRow = { ...row, [columnId]: value };
-          
-          // Recalculate contribution cost if editing active formula
-          if (columnId === editableFormula) {
-            const percentage = parseFloat(value) || 0;
-            const costPerKg = parseFloat(row.costKg) || 0;
-            updatedRow.contCost = parseFloat(
-              ((percentage * costPerKg) / 1000).toFixed(4)
-            );
-          }
-          
-          return updatedRow;
-        }
-        return row;
-      });
-      
-      // Recalculate totals
-      return calculateTotals(updatedData, columns);
-    });
-  }, [columns, editableFormula, setTableData]);
-  
-  // Handle row deletion
-  const handleRowDelete = useCallback((rowId: string) => {
-    setTableData(prev => {
-      const filtered = prev.filter(row => row.id !== rowId);
-      return calculateTotals(filtered, columns);
-    });
-    toast.success('Ingredient removed');
-  }, [columns, setTableData]);
-  
-  // Handle column deletion
-  const handleDeleteColumn = useCallback((columnId: string) => {
-    const column = columns.find(c => c.id === columnId);
-    if (!column?.formulaId) return;
-    
-    // Remove from columns
-    setColumns(prev => prev.filter(c => c.id !== columnId));
-    
-    // Remove from selected formulas
-    setSelectedFormulaIds(prev => 
-      prev.filter(id => id !== column.formulaId)
-    );
-    
-    // Clear active formula if it was deleted
-    if (editableFormula === columnId) {
-      setEditableFormula('');
-    }
-    
-    toast.success('Formula column removed');
-  }, [columns, editableFormula, setColumns, setSelectedFormulaIds, setEditableFormula]);
-  
-  // Handle column reordering
-  const handleColumnReorder = useCallback((fromIndex: number, toIndex: number) => {
-    setColumns(prev => {
-      const newColumns = [...prev];
-      const [removed] = newColumns.splice(fromIndex, 1);
-      newColumns.splice(toIndex, 0, removed);
-      return newColumns;
-    });
-  }, [setColumns]);
-  
-  return {
-    handleCellEdit,
-    handleRowDelete,
-    handleDeleteColumn,
-    handleColumnReorder,
-  };
-};
-```
-
-**Usage**:
 ```typescript
 const {
-  handleCellEdit,
-  handleRowDelete,
-  handleDeleteColumn,
-  handleColumnReorder,
-} = useDataGridHandlers({
-  columns,
-  selectedFormulaIds,
-  editableFormula,
-  formulas,
-  pendingFormulaIds,
-  setTableData,
-  setColumns,
-  setSelectedFormulaIds,
-  setEditableFormula,
-});
+  dilutions,
+  getDilution,
+  setDilution,
+  removeDilution,
+  hasDilution,
+  clearAllDilutions,
+  restoreDilutions,
+} = useDilution();
 ```
 
-#### useFormulaOperations
+**Implementation Highlights:**
 
-**Purpose**: Complex formula operations (normalize, merge, explode)
-
-**File**: `src/view/WorkArea/hooks/useFormulaOperations.ts`
-
-**Operations Provided**:
 ```typescript
-const useFormulaOperations = ({
-  columns,
-  editableFormula,
-  formulas,
-  ingredients,
-  setTableData,
-}) => {
-  // Normalize formula percentages to 100%
-  const handleNormalize = useCallback(() => {
-    if (!editableFormula) {
-      toast.error("No active formula to normalize");
-      return;
-    }
+export const useDilution = (): UseDilutionReturn => {
+  const [dilutions, setDilutions] = useState<DilutionState>({});
+
+  const setDilution = useCallback((ingredientId: string, dilution: Dilution) => {
+    setDilutions((prev) => ({
+      ...prev,
+      [ingredientId]: dilution,
+    }));
     
-    setTableData(prev => {
-      const targetTotalRow = prev.find(
-        row => row.isTotal && row.totalType === 'target'
-      );
-      const runningTotalRow = prev.find(
-        row => row.isTotal && row.totalType === 'running'
-      );
-      
-      if (!targetTotalRow || !runningTotalRow) {
-        toast.error("Could not find totals");
-        return prev;
-      }
-      
-      const targetTotal = targetTotalRow[editableFormula];
-      const runningTotal = runningTotalRow[editableFormula];
-      const adjustmentFactor = targetTotal / runningTotal;
-      
-      const newData = prev.map(row => {
-        if (!row.isTotal && !row.isFormula) {
-          const currentValue = row[editableFormula] || 0;
-          const newValue = parseFloat(
-            (currentValue * adjustmentFactor).toFixed(2)
-          );
-          return { ...row, [editableFormula]: newValue };
-        }
-        return row;
-      });
-      
-      return calculateTotals(newData, columns);
-    });
-    
-    toast.success('Formula normalized to 100%');
-  }, [editableFormula, columns, setTableData]);
-  
-  // Merge duplicate ingredients by name
-  const handleMergeDuplicates = useCallback(() => {
-    setTableData(prev => {
-      const ingredientRows = prev.filter(row => !row.isTotal);
-      const totalRows = prev.filter(row => row.isTotal);
-      
-      if (totalRows.length === 0) {
-        toast.error("Table structure is incomplete");
-        return prev;
-      }
-      
-      // Group by description (case-insensitive)
-      const grouped = new Map<string, any[]>();
-      ingredientRows.forEach(row => {
-        const key = row.description.toLowerCase().trim();
-        if (!grouped.has(key)) {
-          grouped.set(key, []);
-        }
-        grouped.get(key)!.push(row);
-      });
-      
-      const mergedRows: any[] = [];
-      let mergedCount = 0;
-      
-      grouped.forEach(rows => {
-        if (rows.length === 1) {
-          mergedRows.push(rows[0]);
-        } else {
-          mergedCount += rows.length - 1;
-          
-          // Create clean base object
-          const mergedRow: any = {
-            id: rows[0].id,
-            description: rows[0].description,
-            costKg: rows[0].costKg,
-            isTotal: false,
-            isFormula: false,
-          };
-          
-          // Sum all formula columns
-          const formulaColumns = columns.filter(
-            col => col.group === "Formulas" && col.formulaId
-          );
-          
-          formulaColumns.forEach(col => {
-            const total = rows.reduce((sum, row) => {
-              const value = parseFloat(row[col.key]) || 0;
-              return sum + value;
-            }, 0);
-            mergedRow[col.key] = parseFloat(total.toFixed(2));
-          });
-          
-          // Recalculate contribution cost
-          if (editableFormula) {
-            const percentage = parseFloat(mergedRow[editableFormula]) || 0;
-            const costPerKg = parseFloat(mergedRow.costKg) || 0;
-            mergedRow.contCost = parseFloat(
-              ((percentage * costPerKg) / 1000).toFixed(4)
-            );
-          }
-          
-          mergedRows.push(mergedRow);
-        }
-      });
-      
-      if (mergedCount === 0) {
-        toast.error("No duplicate ingredients found");
-        return prev;
-      }
-      
-      // Combine with total rows and recalculate
-      const dataWithTotals = [...mergedRows, ...totalRows];
-      const finalData = calculateTotals(dataWithTotals, columns);
-      
-      toast.success(`Merged ${mergedCount} duplicate ingredient(s)`);
-      return finalData;
-    });
-  }, [columns, editableFormula, setTableData]);
-  
-  // Explode sub-formula into individual ingredients
-  const handleExplodeFormula = useCallback((formulaId: string) => {
-    const formula = formulas.find(f => f.id === formulaId);
-    if (!formula) return;
-    
-    setTableData(prev => {
-      // Remove formula group row
-      const newData = prev.filter(
-        row => !(row.isFormula && row.formulaId === formulaId)
-      );
-      
-      // Add individual ingredients
-      const formulaIngredients = formula.ingredients.map((ing, index) => ({
-        id: `exploded_${formulaId}_${index}`,
-        description: ing.name,
-        costKg: ingredients.find(i => i.id === ing.ingredientId)?.price || 0,
-        [editableFormula]: parseFloat(ing.percentage.toFixed(2)),
-        contCost: 0,
-        isTotal: false,
-        isFormula: false,
-      }));
-      
-      // Insert before total rows
-      const totalIndex = newData.findIndex(row => row.isTotal);
-      const insertIndex = totalIndex !== -1 ? totalIndex : newData.length;
-      newData.splice(insertIndex, 0, ...formulaIngredients);
-      
-      return calculateTotals(newData, columns);
-    });
-    
-    toast.success(`Formula "${formula.name}" exploded`);
-  }, [formulas, ingredients, editableFormula, columns, setTableData]);
-  
+    // Emit event for state history tracking
+    setTimeout(() => {
+      eventBus.emit("dilution-changed", { ingredientId, dilution });
+    }, 0);
+  }, []);
+
+  const hasDilution = useCallback(
+    (ingredientId: string): boolean => {
+      return !!dilutions[ingredientId]?.solventIds?.length;
+    },
+    [dilutions]
+  );
+
   return {
-    handleNormalize,
-    handleMergeDuplicates,
-    handleExplodeFormula,
+    dilutions,
+    getDilution: useCallback((id) => dilutions[id], [dilutions]),
+    setDilution,
+    removeDilution: useCallback((id) => {
+      setDilutions((prev) => {
+        const { [id]: _, ...rest } = prev;
+        return rest;
+      });
+    }, []),
+    hasDilution,
+    clearAllDilutions: useCallback(() => setDilutions({}), []),
+    restoreDilutions: useCallback((saved) => setDilutions(saved || {}), []),
   };
 };
 ```
+
+#### useRowReordering
+
+Manages drag-and-drop row reordering state.
+
+**Location:** `src/components/DataGrid/hooks/useRowReordering.ts`
+
+```typescript
+const {
+  dragState,
+  handleDragStart,
+  handleDragOver,
+  handleDragEnd,
+  handleDragLeave,
+} = useRowReordering(data, onRowReorder, onDragStart);
+```
+
+#### useBulkSelection
+
+Manages multi-row selection state.
+
+**Location:** `src/components/DataGrid/hooks/useBulkSelection.ts`
+
+```typescript
+const {
+  selectedRows,
+  toggleRowSelection,
+  toggleSelectAll,
+  clearSelection,
+  isRowSelected,
+  isAllSelected,
+  isSomeSelected,
+} = useBulkSelection(data);
+```
+
+---
 
 ### 4. Event Bus Pattern
 
-**Purpose**: Cross-component communication without prop drilling
+Custom event bus for decoupled cross-component communication.
 
-**Location**: `src/utils/bus.ts`
+**Location:** `src/utils/bus.ts`
 
-**Implementation**:
+**Implementation:**
+
 ```typescript
-type EventCallback = (data: any) => void;
+type EventCallback = (data?: any) => void;
 
 class EventBus {
   private events: Map<string, EventCallback[]> = new Map();
-  
-  on(event: string, callback: EventCallback) {
+
+  on(event: string, callback: EventCallback): void {
     if (!this.events.has(event)) {
       this.events.set(event, []);
     }
     this.events.get(event)!.push(callback);
   }
-  
-  off(event: string, callback: EventCallback) {
+
+  off(event: string, callback: EventCallback): void {
     const callbacks = this.events.get(event);
     if (callbacks) {
       const index = callbacks.indexOf(callback);
-      if (index !== -1) {
+      if (index > -1) {
         callbacks.splice(index, 1);
       }
     }
   }
-  
-  emit(event: string, data?: any) {
+
+  emit(event: string, data?: any): void {
     const callbacks = this.events.get(event);
     if (callbacks) {
       callbacks.forEach(callback => callback(data));
@@ -462,300 +307,585 @@ class EventBus {
 export const eventBus = new EventBus();
 ```
 
-**Event Registry**:
+**Event Catalog:**
+
+| Event Name | Emitter | Listener | Data | Purpose |
+|------------|---------|----------|------|---------|
+| `ingredient-selected` | LibraryPanel | WorkArea | `{ ingredient }` | User selects ingredient |
+| `formula-selected` | LibraryPanel | WorkArea | `{ formula }` | User selects formula |
+| `attribute-selected` | LibraryPanel | WorkArea | `{ attribute }` | User selects attribute |
+| `normalize-formula` | Header | WorkArea | none | Trigger normalization |
+| `merge-duplicates` | Header | WorkArea | none | Merge duplicate ingredients |
+| `send-for-compounding` | Header | WorkArea | none | Submit for compounding |
+| `undo-action` | Header | WorkArea | none | Undo last action |
+| `active-formula-changed` | WorkArea | Header | `{ formula }` | Active formula updated |
+| `formula-selections-updated` | WorkArea | Header, Library | `{ count, selectedIds }` | Formula selections changed |
+| `work-area-updated` | WorkArea | Library | `{ ingredients }` | Ingredients updated |
+| `dilution-changed` | DilutionHook | WorkArea | `{ ingredientId, dilution }` | Dilution modified |
+| `undo-state-updated` | WorkArea | Header | `{ canUndo, count }` | Undo state changed |
+| `available-formulas-updated` | WorkArea | Header | `{ formulas }` | Formula list updated |
+
+**Usage Pattern:**
+
 ```typescript
-// Data events
-'ingredient-selected'          // { ingredient: Ingredient }
-'formula-selected'             // { formula: Formula }
-'formula-selected-for-column'  // { formula: Formula }
-'attribute-selected'           // { attribute: IngredientAttribute }
-'attribute-deselected'         // { attribute: IngredientAttribute }
-
-// UI events
-'active-formula-changed'       // { formula: Formula }
-'work-area-updated'           // { ingredients: string[] }
-'available-formulas-updated'  // { formulas: Formula[] }
-'formula-selections-updated'  // { count: number, selectedIds: string[] }
-
-// Action events
-'normalize-formula'           // (no data)
-'merge-duplicates'            // (no data)
-'create-formula'              // (no data)
-'load-formula'                // { formulaId: string }
-'new-formula-created'         // { formula: Formula }
-```
-
-**Usage Pattern**:
-```typescript
-// Component A - Publisher
-eventBus.emit('ingredient-selected', { ingredient: data });
-
-// Component B - Subscriber
-useEffect(() => {
-  const handleIngredientSelected = (data: { ingredient: Ingredient }) => {
-    // Handle the event
-    console.log('Ingredient selected:', data.ingredient);
+// Emitter Component
+const LibraryPanel = () => {
+  const handleIngredientClick = (ingredient: Ingredient) => {
+    eventBus.emit('ingredient-selected', { ingredient });
   };
-  
-  eventBus.on('ingredient-selected', handleIngredientSelected);
-  
-  return () => {
-    eventBus.off('ingredient-selected', handleIngredientSelected);
-  };
-}, []);
+
+  return (/* ... */);
+};
+
+// Listener Component
+const WorkArea = () => {
+  useEffect(() => {
+    const handleIngredientSelected = (data: { ingredient: Ingredient }) => {
+      // Add ingredient to formula
+      addIngredient(data.ingredient);
+    };
+
+    eventBus.on('ingredient-selected', handleIngredientSelected);
+
+    return () => {
+      eventBus.off('ingredient-selected', handleIngredientSelected);
+    };
+  }, []);
+
+  return (/* ... */);
+};
 ```
 
-**When to use**:
-- Sibling components need to communicate
-- Deep component trees (avoid prop drilling)
-- Loose coupling required
-- Multiple subscribers for same event
+**Best Practices:**
 
-**When NOT to use**:
-- Direct parent-child communication (use props)
-- Complex state logic (use Context or state library)
-- Debugging is difficult (hard to trace event flow)
+- Always clean up event listeners in useEffect return
+- Use TypeScript interfaces for event data
+- Document events in catalog above
+- Avoid circular event dependencies
+- Prefer direct props for parent-child communication
 
-## Data Flow Examples
+---
 
-### Example 1: Adding Ingredient to Work Area
+### 5. State History (Undo/Redo)
 
-**Flow**:
-```
-1. User clicks ingredient in LibraryPanel
-2. LibraryPanel.tsx emits event:
-   eventBus.emit('ingredient-selected', { ingredient })
+Time-travel state management for undo/redo functionality.
 
-3. WorkArea.tsx listens for event:
-   useEffect(() => {
-     eventBus.on('ingredient-selected', handleIngredientClick);
-     return () => eventBus.off('ingredient-selected', handleIngredientClick);
-   }, []);
+**Location:** `src/utils/stateHistory.ts`
 
-4. handleIngredientClick adds row:
-   setTableData(prev => [...prev, newRow]);
-
-5. DataGrid re-renders with new data
-
-6. WorkArea.tsx emits update:
-   eventBus.emit('work-area-updated', { ingredients: [...] });
-
-7. LibraryPanel.tsx receives update and highlights selected ingredients
-```
-
-### Example 2: Cell Edit with Calculation
-
-**Flow**:
-```
-1. User edits cell in DataGrid
-2. DataGrid calls onCellEdit prop:
-   onCellEdit(rowId, columnId, value)
-
-3. handleCellEdit (from useDataGridHandlers):
-   a. Update row data with new value
-   b. If editing active formula column:
-      - Recalculate contribution cost for that row
-      - contCost = (percentage × costKg) / 1000
-   c. Call calculateTotals() utility
-   d. Update tableData state
-
-4. calculateTotals utility:
-   a. Separate ingredient rows from total rows
-   b. For each formula column and total type:
-      - Running Total: Sum all ingredient percentages
-      - Target Total: Fixed at 100%
-      - RMC: Sum of (percentage × cost / 100)
-      - Weighted Avg: Weighted average of costs
-   c. Return [...ingredientRows, ...updatedTotals]
-
-5. setTableData triggers re-render
-6. DataGrid displays updated values
-```
-
-### Example 3: Merge Duplicates Operation
-
-**Flow**:
-```
-1. User clicks "Merge Duplicates" button in Header
-2. Header.Actions.tsx emits event:
-   eventBus.emit('merge-duplicates')
-
-3. WorkArea.tsx listens via useEffect:
-   useEffect(() => {
-     eventBus.on('merge-duplicates', handleMergeDuplicates);
-     return () => eventBus.off('merge-duplicates', handleMergeDuplicates);
-   }, [handleMergeDuplicates]);
-
-4. handleMergeDuplicates (from useFormulaOperations):
-   a. Separate ingredient rows and total rows
-   b. Group ingredients by description (case-insensitive)
-   c. For each group with duplicates:
-      - Create clean base object
-      - Sum all formula column values
-      - Recalculate contribution cost
-   d. Combine merged rows with original total rows
-   e. Call calculateTotals()
-   f. Update tableData state
-
-5. Toast notification shows success message
-6. DataGrid re-renders with merged data
-```
-
-## State Update Patterns
-
-### Immutable Updates
-
-Always create new objects/arrays, never mutate:
+**Implementation:**
 
 ```typescript
-// ❌ BAD - Mutating state
-const handleUpdate = () => {
-  tableData[0].value = newValue;  // WRONG!
-  setTableData(tableData);
+export class StateHistoryManager<T = any> {
+  private history: HistoryEntry<T>[] = [];
+  private currentIndex: number = -1;
+  private maxHistorySize: number = 6; // Current + 5 undos
+
+  push(state: T, action: string, description?: string): void {
+    // Remove future states if we've undone
+    this.history = this.history.slice(0, this.currentIndex + 1);
+
+    // Add new entry with deep clone
+    this.history.push({
+      state: JSON.parse(JSON.stringify(state)),
+      timestamp: new Date(),
+      action,
+      description,
+    });
+
+    // Maintain max size
+    if (this.history.length > this.maxHistorySize) {
+      this.history.shift();
+    } else {
+      this.currentIndex++;
+    }
+  }
+
+  undo(): T | null {
+    if (!this.canUndo()) return null;
+    this.currentIndex--;
+    return this.getCurrentState();
+  }
+
+  redo(): T | null {
+    if (!this.canRedo()) return null;
+    this.currentIndex++;
+    return this.getCurrentState();
+  }
+
+  canUndo(): boolean {
+    return this.currentIndex > 0;
+  }
+
+  canRedo(): boolean {
+    return this.currentIndex < this.history.length - 1;
+  }
+
+  getCurrentState(): T | null {
+    if (this.currentIndex < 0 || this.currentIndex >= this.history.length) {
+      return null;
+    }
+    return JSON.parse(JSON.stringify(this.history[this.currentIndex].state));
+  }
+}
+
+// Global instance
+export const appStateHistory = new StateHistoryManager();
+```
+
+**Usage:**
+
+```typescript
+// Save state after action
+const saveStateAfterAction = (action: string, description: string) => {
+  setTimeout(() => {
+    appStateHistory.push(
+      {
+        columns,
+        tableData,
+        formulas,
+        availableFormulas,
+        dilutions: dilutionState.dilutions,
+      },
+      action,
+      description
+    );
+    
+    eventBus.emit("undo-state-updated", {
+      canUndo: appStateHistory.canUndo(),
+      count: appStateHistory.getUndoCount(),
+    });
+  }, 0);
 };
 
-// ✅ GOOD - Immutable update
-const handleUpdate = () => {
-  setTableData(prev => prev.map((row, index) => 
-    index === 0 ? { ...row, value: newValue } : row
-  ));
+// Undo operation
+const handleUndo = () => {
+  const previousState = appStateHistory.undo();
+  if (previousState) {
+    setColumns(previousState.columns);
+    setTableData(previousState.tableData);
+    setFormulas(previousState.formulas);
+    setAvailableFormulas(previousState.availableFormulas);
+    dilutionState.restoreDilutions(previousState.dilutions);
+    
+    toast.success('Undone');
+  }
 };
 ```
 
-### Functional Updates
-
-Use functional form when new state depends on previous:
+**State Snapshot Structure:**
 
 ```typescript
-// ❌ BAD - May use stale state
-const handleAdd = () => {
-  setCount(count + 1);
-};
+interface WorkspaceState {
+  columns: Column[];
+  tableData: Record<string, unknown>[];
+  formulas: Formula[];
+  availableFormulas: Formula[];
+  dilutions: DilutionState;
+}
+```
 
-// ✅ GOOD - Always uses latest state
-const handleAdd = () => {
-  setCount(prev => prev + 1);
-};
+---
+
+## State Flow Diagrams
+
+### Ingredient Addition Flow
+
+```
+User clicks ingredient in Library
+  ↓
+LibraryPanel.handleIngredientClick()
+  ↓
+eventBus.emit('ingredient-selected', { ingredient })
+  ↓
+WorkArea.handleIngredientSelected() receives event
+  ↓
+Validate: ingredient not duplicate, has active formula
+  ↓
+Create new row with ingredient data
+  ↓
+Insert row before total rows
+  ↓
+Recalculate totals (running, RMC, lines)
+  ↓
+Update contribution cost for active formula
+  ↓
+setTableData(newData)
+  ↓
+Save to state history
+  ↓
+eventBus.emit('work-area-updated', { ingredients })
+  ↓
+LibraryPanel updates selected ingredients
+```
+
+### Formula Column Addition Flow
+
+```
+User clicks "+ Formula" button
+  ↓
+Modal opens with formula selection
+  ↓
+User selects formula
+  ↓
+eventBus.emit('formula-selected', { formula })
+  ↓
+WorkArea checks formula not locked
+  ↓
+Create new column definition
+  ↓
+Insert column before "+ Formula" column
+  ↓
+Initialize all rows with 0 for new column
+  ↓
+Lock formula in workspace context
+  ↓
+Set as editableFormula
+  ↓
+setColumns(newColumns)
+  ↓
+setTableData(newData)
+  ↓
+Save to state history
+  ↓
+eventBus.emit('formula-selections-updated')
+  ↓
+Header updates badge count
+```
+
+### Cell Edit Flow
+
+```
+User double-clicks cell
+  ↓
+Cell enters edit mode (input shown)
+  ↓
+User types new value
+  ↓
+User presses Enter or clicks outside
+  ↓
+Validate value (type, range)
+  ↓
+onCellEdit(rowId, columnId, newValue)
+  ↓
+Update tableData at [rowId][columnId]
+  ↓
+If active formula column, recalculate contribution costs
+  ↓
+Recalculate totals (all total rows)
+  ↓
+setTableData(updatedData)
+  ↓
+Save to state history
+  ↓
+eventBus.emit('undo-state-updated')
+```
+
+---
+
+## Performance Optimizations
+
+### Memoization
+
+```typescript
+// Memoize expensive calculations
+const filteredData = useMemo(() => {
+  return data.filter(row => /* filter logic */);
+}, [data, filterCriteria]);
+
+// Memoize callbacks to prevent child re-renders
+const handleClick = useCallback((id: string) => {
+  // Handle click
+}, [/* dependencies */]);
+
+// Memoize component with React.memo
+const ExpensiveComponent = React.memo(({ data }: Props) => {
+  return (/* ... */);
+}, (prevProps, nextProps) => {
+  return prevProps.data === nextProps.data;
+});
+```
+
+### Debouncing
+
+```typescript
+// Debounce search input
+const debouncedSearch = useMemo(
+  () => debounce((query: string) => {
+    setSearchQuery(query);
+  }, 300),
+  []
+);
+
+// Debounce state saves
+const debouncedSave = useMemo(
+  () => debounce((state: WorkspaceState) => {
+    appStateHistory.push(state, 'auto_save');
+  }, 500),
+  []
+);
+```
+
+### Lazy State Initialization
+
+```typescript
+// Expensive initial state
+const [data, setData] = useState(() => {
+  // Only runs once on mount
+  return computeExpensiveInitialState();
+});
 ```
 
 ### Batch Updates
 
-React automatically batches updates in event handlers:
-
 ```typescript
-const handleSave = () => {
-  setName('John');       // Batched
-  setAge(30);           // Batched
-  setEmail('john@...');  // Batched
-  // Only one re-render
+// React 19 automatically batches state updates
+const handleMultipleUpdates = () => {
+  setColumns(newColumns);      // Batched
+  setTableData(newData);        // Batched
+  setFormulas(newFormulas);     // Batched
+  // Single re-render after all updates
 };
 ```
 
-## Performance Optimization
-
-### useMemo for Expensive Calculations
-
-```typescript
-const formulaColumns = useMemo(
-  () => columns.filter(col => col.group === 'Formulas'),
-  [columns]
-);
-
-const totalCost = useMemo(
-  () => tableData.reduce((sum, row) => sum + (row.contCost || 0), 0),
-  [tableData]
-);
-```
-
-### useCallback for Stable References
-
-```typescript
-const handleCellEdit = useCallback((rowId, columnId, value) => {
-  setTableData(prev => {
-    // Update logic
-  });
-}, [setTableData, columns, editableFormula]);
-```
-
-### Avoid Unnecessary Re-renders
-
-```typescript
-// Use React.memo for pure components
-const ExpensiveComponent = React.memo(({ data }) => {
-  // Component logic
-});
-
-// Use key prop for list optimization
-{items.map(item => (
-  <ItemComponent key={item.id} data={item} />
-))}
-```
+---
 
 ## Best Practices
 
-### 1. Single Source of Truth
-- Each piece of state should have one owner
-- Derive values instead of duplicating state
+### 1. State Colocation
 
-### 2. Lift State Appropriately
-- Not too high (unnecessary re-renders)
-- Not too low (hard to share)
-- Just right (common ancestor)
+Keep state as close to where it's used as possible.
 
-### 3. Keep State Minimal
-- Only store what you can't calculate
-- Derive computed values in render
+**Bad:**
 
-### 4. Use TypeScript
-- Define interfaces for state shape
-- Type all handlers and callbacks
-
-### 5. Clean Up Effects
-- Always return cleanup function
-- Unsubscribe from events
-- Clear timers and listeners
-
-### 6. Avoid Prop Drilling
-- Use event bus for distant components
-- Consider Context for app-wide state
-- Extract custom hooks for shared logic
-
-## Future Enhancements
-
-### React Context
 ```typescript
-const FormulationContext = createContext<FormulationState | null>(null);
+// Global state for local UI
+const [isModalOpen, setIsModalOpen] = useState(false); // In App.tsx
+```
 
-export const useFormulation = () => {
-  const context = useContext(FormulationContext);
-  if (!context) throw new Error('Must be used within provider');
-  return context;
+**Good:**
+
+```typescript
+// Local state in component
+const MyComponent = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  // ...
 };
 ```
 
-### State Management Library (Zustand)
-```typescript
-import create from 'zustand';
+### 2. Avoid Prop Drilling
 
-const useFormulaStore = create((set) => ({
-  formulas: [],
-  addFormula: (formula) => set((state) => ({ 
-    formulas: [...state.formulas, formula] 
-  })),
-  removeFormula: (id) => set((state) => ({ 
-    formulas: state.formulas.filter(f => f.id !== id) 
-  })),
-}));
+Use Context or event bus instead of passing props through many levels.
+
+**Bad:**
+
+```typescript
+<App>
+  <Layout data={data}>
+    <Sidebar data={data}>
+      <Menu data={data}>
+        <MenuItem data={data} /> {/* Prop drilling */}
+      </Menu>
+    </Sidebar>
+  </Layout>
+</App>
 ```
 
-### React Query for Server State
+**Good:**
+
 ```typescript
-const { data, isLoading, error } = useQuery(
-  ['ingredients'],
-  () => PegaService.getIngredients(),
-  {
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
-  }
-);
+<WorkspaceProvider>
+  <App>
+    <Layout>
+      <Sidebar>
+        <Menu>
+          <MenuItem /> {/* Gets data from context */}
+        </Menu>
+      </Sidebar>
+    </Layout>
+  </App>
+</WorkspaceProvider>
 ```
+
+### 3. Derived State
+
+Compute derived values instead of storing them.
+
+**Bad:**
+
+```typescript
+const [items, setItems] = useState([]);
+const [activeItems, setActiveItems] = useState([]);
+
+// Must manually sync
+useEffect(() => {
+  setActiveItems(items.filter(i => i.active));
+}, [items]);
+```
+
+**Good:**
+
+```typescript
+const [items, setItems] = useState([]);
+const activeItems = useMemo(() => {
+  return items.filter(i => i.active);
+}, [items]);
+```
+
+### 4. Immutable Updates
+
+Always create new objects/arrays, don't mutate.
+
+**Bad:**
+
+```typescript
+const handleAdd = (item) => {
+  items.push(item);          // Mutation!
+  setItems(items);           // Won't trigger re-render
+};
+```
+
+**Good:**
+
+```typescript
+const handleAdd = (item) => {
+  setItems(prev => [...prev, item]);  // New array
+};
+```
+
+### 5. Cleanup Effects
+
+Always clean up side effects in useEffect.
+
+**Good:**
+
+```typescript
+useEffect(() => {
+  const handleEvent = (data) => {
+    // Handle event
+  };
+
+  eventBus.on('my-event', handleEvent);
+
+  return () => {
+    eventBus.off('my-event', handleEvent);
+  };
+}, []);
+```
+
+---
+
+## Debugging State
+
+### React DevTools
+
+Install React DevTools browser extension to:
+
+- Inspect component state and props
+- View context values
+- Profile component renders
+- Trace state updates
+
+### Console Logging
+
+```typescript
+// Log state changes
+useEffect(() => {
+  console.log('State updated:', { columns, tableData, formulas });
+}, [columns, tableData, formulas]);
+
+// Log event emissions
+eventBus.emit('my-event', data);
+console.log('Event emitted:', 'my-event', data);
+```
+
+### State History Export
+
+```typescript
+// Export history for debugging
+const exportHistory = () => {
+  const history = appStateHistory.exportHistory();
+  console.log(history);
+  
+  // Or download as file
+  const blob = new Blob([history], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'state-history.json';
+  a.click();
+};
+```
+
+---
+
+## Testing State
+
+### Testing Hooks
+
+```typescript
+import { renderHook, act } from '@testing-library/react';
+import { useDilution } from './useDilution';
+
+test('setDilution adds dilution', () => {
+  const { result } = renderHook(() => useDilution());
+
+  act(() => {
+    result.current.setDilution('ING001', {
+      ingredientId: 'ING001',
+      concentration: 10,
+      solventIds: ['SOLV001'],
+      solventPercentages: { 'SOLV001': 90 },
+      totalPercentage: 100,
+    });
+  });
+
+  expect(result.current.hasDilution('ING001')).toBe(true);
+});
+```
+
+### Testing Context
+
+```typescript
+import { render } from '@testing-library/react';
+import { WorkspaceProvider } from './WorkspaceContext';
+import { useWorkspace } from '../hooks/useWorkspace';
+
+test('adds new workspace tab', () => {
+  const TestComponent = () => {
+    const { tabs, addTab } = useWorkspace();
+    return (
+      <div>
+        <div data-testid="count">{tabs.length}</div>
+        <button onClick={addTab}>Add</button>
+      </div>
+    );
+  };
+
+  const { getByTestId, getByText } = render(
+    <WorkspaceProvider>
+      <TestComponent />
+    </WorkspaceProvider>
+  );
+
+  expect(getByTestId('count')).toHaveTextContent('1');
+  
+  fireEvent.click(getByText('Add'));
+  
+  expect(getByTestId('count')).toHaveTextContent('2');
+});
+```
+
+---
+
+## Future Enhancements
+
+- [ ] Implement Redux for more complex state
+- [ ] Add Redux DevTools integration
+- [ ] Implement state persistence to localStorage
+- [ ] Add state migration system for schema changes
+- [ ] Implement optimistic updates for API calls
+- [ ] Add state rehydration on app load
+- [ ] Implement state synchronization across browser tabs
+- [ ] Add state compression for large datasets
+- [ ] Implement undo/redo with branching
+- [ ] Add state snapshot comparison tools

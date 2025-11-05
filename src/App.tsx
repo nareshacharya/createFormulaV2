@@ -3,6 +3,7 @@ import { AppRoutes } from "./router";
 import { useState, createContext, useContext } from "react";
 import Toast from "./components/Toast";
 import { WorkspaceProvider } from "./context/WorkspaceContext";
+import { FeatureFlagsProvider } from "./context/FeatureFlagsContext";
 
 // Modal Context for global modal management
 interface ModalContextType {
@@ -35,15 +36,17 @@ function App() {
 
   return (
     <BrowserRouter basename={__BASE_PATH__}>
-      <WorkspaceProvider>
-        <ModalContext.Provider value={{ showModal, hideModal }}>
-          <Toast />
-          <AppRoutes />
+      <FeatureFlagsProvider>
+        <WorkspaceProvider>
+          <ModalContext.Provider value={{ showModal, hideModal }}>
+            <Toast />
+            <AppRoutes />
 
-          {/* Global Modal Portal */}
-          {modalContent}
-        </ModalContext.Provider>
-      </WorkspaceProvider>
+            {/* Global Modal Portal */}
+            {modalContent}
+          </ModalContext.Provider>
+        </WorkspaceProvider>
+      </FeatureFlagsProvider>
     </BrowserRouter>
   );
 }

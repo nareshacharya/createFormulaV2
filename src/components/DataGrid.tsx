@@ -5,6 +5,7 @@ import { useRowReordering } from "./DataGrid/hooks/useRowReordering";
 import { useSavedViews } from "./DataGrid/hooks/useSavedViews";
 import { useBulkSelection } from "./DataGrid/hooks/useBulkSelection";
 import { useKeyboardNavigation } from "./DataGrid/hooks/useKeyboardNavigation";
+import { useDataGridFeatures } from "../hooks/useFeatureFlags";
 import { BulkActionsToolbar } from "./DataGrid/components/BulkActionsToolbar";
 import { EditableCell } from "./DataGrid/components/EditableCell";
 import { CellRenderer } from "./DataGrid/components/cells/CellRenderer";
@@ -88,11 +89,25 @@ const DataGrid = ({
   editableFormula,
   className = "",
   showEmptyState = false,
-  enableRowReordering = true,
+  enableRowReordering: enableRowReorderingProp,
   enableSavedViews = false,
-  enableBulkSelection = true,
+  enableBulkSelection: enableBulkSelectionProp,
   dilutionState,
 }: DataGridProps) => {
+  // Get feature flags
+  const dataGridFlags = useDataGridFeatures();
+
+  // Use feature flags with prop override capability
+  const enableRowReordering =
+    enableRowReorderingProp !== undefined
+      ? enableRowReorderingProp
+      : dataGridFlags.enableRowReordering;
+
+  const enableBulkSelection =
+    enableBulkSelectionProp !== undefined
+      ? enableBulkSelectionProp
+      : dataGridFlags.enableBulkSelection;
+
   const [sortConfig, setSortConfig] = useState<{
     key: string;
     direction: "asc" | "desc";

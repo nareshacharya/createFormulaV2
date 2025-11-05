@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import type { Formula } from "../../services/pega";
 import { eventBus } from "../../utils/bus";
+import { useHeaderFeatures } from "../../hooks/useFeatureFlags";
 
 interface HeaderBadgesProps {
   activeFormula?: Formula | null;
@@ -13,6 +14,7 @@ interface FormulaMetrics {
 }
 
 const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
+  const headerFlags = useHeaderFeatures();
   const [currentFormula, setCurrentFormula] = useState<Formula | null>(
     activeFormula || null
   );
@@ -239,34 +241,135 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
         {/* Vertical Divider */}
         <div className="w-px h-10 bg-purple-600/50"></div>
 
-        {/* Formula Name - Hidden on small screens */}
-        <div className="hidden xl:flex items-center gap-2 group">
-          <span className="material-symbols-rounded text-pink-300 text-xl">
-            experiment
-          </span>
-          <div className="flex flex-col items-start">
-            <span className="text-xs text-white/50 font-medium">Formula</span>
-            <span className="text-sm font-semibold text-white">
-              {currentFormula?.name || "-"}
-            </span>
-          </div>
-        </div>
-
         {/* Vertical Divider - Hidden on small screens */}
         <div className="hidden xl:block w-px h-10 bg-purple-600/50"></div>
 
-        {/* Formula ID - Hidden on small screens */}
-        <div className="hidden xl:flex items-center gap-2 group">
-          <span className="material-symbols-rounded text-cyan-300 text-xl">
-            tag
-          </span>
-          <div className="flex flex-col items-start">
-            <span className="text-xs text-white/50 font-medium">ID</span>
-            <span className="text-sm font-semibold text-white">
-              {currentFormula?.id || "-"}
+        {/* Formula Name - Hidden on small screens */}
+        {headerFlags.showFormulaName && (
+          <div className="hidden xl:flex items-center gap-2 group">
+            <span className="material-symbols-rounded text-pink-300 text-xl">
+              experiment
             </span>
+            <div className="flex flex-col items-start">
+              <span className="text-xs text-white/50 font-medium">Formula</span>
+              <span className="text-sm font-semibold text-white">
+                {currentFormula?.name || "-"}
+              </span>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Vertical Divider - Hidden on small screens */}
+        {headerFlags.showFormulaId && (
+          <div className="hidden xl:block w-px h-10 bg-purple-600/50"></div>
+        )}
+
+        {/* Formula ID - Hidden on small screens */}
+        {headerFlags.showFormulaId && (
+          <div className="hidden xl:flex items-center gap-2 group">
+            <span className="material-symbols-rounded text-cyan-300 text-xl">
+              tag
+            </span>
+            <div className="flex flex-col items-start">
+              <span className="text-xs text-white/50 font-medium">ID</span>
+              <span className="text-sm font-semibold text-white">
+                {currentFormula?.id || "-"}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Vertical Divider - Hidden on small screens */}
+        {headerFlags.showFormulaStatus && (
+          <div className="hidden xl:block w-px h-10 bg-purple-600/50"></div>
+        )}
+
+        {/* Status - Hidden on small screens */}
+        {headerFlags.showFormulaStatus && (
+          <div className="hidden xl:flex items-center gap-2 group">
+            <span className="material-symbols-rounded text-orange-300 text-xl">
+              check_circle
+            </span>
+            <div className="flex flex-col items-start">
+              <span className="text-xs text-white/50 font-medium mb-1">
+                Status
+              </span>
+              <div
+                className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${getStatusVariant(
+                  currentFormula?.status
+                )}`}
+              >
+                {currentFormula?.status?.toUpperCase() || "NEW"}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Vertical Divider */}
+        {headerFlags.showLineCount && (
+          <div className="w-px h-10 bg-purple-600/50"></div>
+        )}
+
+        {/* Lines Count */}
+        {headerFlags.showLineCount && (
+          <div className="flex items-center gap-2 group">
+            <span className="material-symbols-rounded text-yellow-300 text-xl">
+              checklist
+            </span>
+            <div className="flex flex-col items-start">
+              <span className="text-xs text-white/50 font-medium hidden xl:inline">
+                Lines
+              </span>
+              <span className="text-sm font-semibold text-white">
+                {metrics.lineCount}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Vertical Divider */}
+        {headerFlags.showFormulaCost && (
+          <div className="w-px h-10 bg-purple-600/50"></div>
+        )}
+
+        {/* Formula Cost */}
+        {headerFlags.showFormulaCost && (
+          <div className="flex items-center gap-2 group">
+            <span className="material-symbols-rounded text-green-300 text-xl">
+              local_offer
+            </span>
+            <div className="flex flex-col items-start">
+              <span className="text-xs text-white/50 font-medium hidden xl:inline">
+                Formula Cost
+              </span>
+              <span className="text-sm font-semibold text-white">
+                ${metrics.formulaCost.toFixed(2)}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Vertical Divider */}
+        {headerFlags.showTargetCost && (
+          <div className="w-px h-10 bg-purple-600/50"></div>
+        )}
+
+        {/* Target Cost (RMC) */}
+        {headerFlags.showTargetCost && (
+          <div className="flex items-center gap-2 group">
+            <span className="material-symbols-rounded text-blue-300 text-xl">
+              attach_money
+            </span>
+            <div className="flex flex-col items-start">
+              <span className="text-xs text-white/50 font-medium hidden xl:inline">
+                Target Cost
+              </span>
+              <span className="text-sm font-semibold text-white">
+                ${metrics.targetCost.toFixed(2)}
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Vertical Divider - Hidden on small screens */}
         <div className="hidden xl:block w-px h-10 bg-purple-600/50"></div>

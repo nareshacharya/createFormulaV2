@@ -1,265 +1,465 @@
-# Quick Reference Guide - DataGrid Refactoring
+# Quick Reference Guide
 
-## 🚀 Quick Start
+## Table of Contents
 
-### For Row Reordering
+- [Architecture](#architecture)
+- [Features](#features)
+- [State Management](#state-management)
+- [Common Tasks](#common-tasks)
+- [Event Bus](#event-bus)
+- [Key Components](#key-components)
+- [Calculations](#calculations)
+- [API Reference](#api-reference)
 
-```typescript
-import { applyRowOrder } from '@/components/DataGrid/utils/rowOrdering';
+---
 
-// In your component
-const handleRowReorder = (newOrder: string[]) => {
-  const reordered = applyRowOrder(tableData, newOrder);
-  setTableData(reordered);
-};
+## Architecture
 
-<DataGrid
-  data={tableData}
-  columns={columns}
-  onRowReorder={handleRowReorder}
-/>
+### Stack
+
+- **React 19.0** + TypeScript 5.7
+- **Vite 6.0** (build tool)
+- **Tailwind CSS 3.4** (styling)
+- **React Context API** (state)
+- **Event Bus** (communication)
+
+### Structure
+
+```
+src/
+├── components/     # Reusable UI components
+├── context/        # Context providers
+├── hooks/          # Custom hooks
+├── services/       # API services
+├── utils/          # Utilities
+├── view/           # Main views
+├── mocks/          # Mock data
+└── types/          # TypeScript types
 ```
 
-### For Save View Feature
+---
+
+## Features
+
+| Feature | Description | Files |
+|---------|-------------|-------|
+| **Formula Management** | Create, version, normalize formulas | `FormulaModal.tsx`, `FormulaList.tsx` |
+| **Ingredient Management** | Search, filter, add ingredients | `IngredientList.tsx`, `LibraryPanel.tsx` |
+| **DataGrid** | Advanced table with editing, sorting | `DataGrid.tsx` |
+| **Workspace Management** | Multi-workspace with isolation | `WorkspaceContext.tsx`, `WorkspaceTabs.tsx` |
+| **Dilution** | Dilute ingredients with solvents | `dilution/DilutionModal.tsx` |
+
+---
+
+## State Management
+
+### Global State (Context)
 
 ```typescript
-import { useSavedViews } from '@/components/DataGrid/hooks/useSavedViews';
-import { getCurrentRowOrder } from '@/components/DataGrid/utils/rowOrdering';
+const {
+  tabs,
+  activeWorkspace,
+  addTab,
+  switchTab,
+  updateWorkspaceData,
+  lockFormula,
+} = useWorkspace();
+```
 
-// In your component
-const { savedViews, saveView, loadView, deleteView, loadSavedViews } = useSavedViews();
+### Local State (Hooks)
 
+```typescript
+const [data, setData] = useState([]);
+const filteredData = useMemo(() => filter(data), [data]);
+const handleClick = useCallback(() => {}, []);
+```
+
+### Event Bus
+
+```typescript
+// Emit
+eventBus.emit('ingredient-selected', { ingredient });
+
+// Listen
 useEffect(() => {
-  loadSavedViews(); // Load from localStorage
-}, [loadSavedViews]);
+  eventBus.on('ingredient-selected', handler);
+  return () => eventBus.off('ingredient-selected', handler);
+}, []);
+```
 
-const handleSaveView = (viewName: string) => {
-  const currentOrder = getCurrentRowOrder(tableData);
-  saveView(viewName, currentOrder);
-};
+### History (Undo/Redo)
 
-const handleLoadView = (viewId: string) => {
-  const rowOrder = loadView(viewId);
-  if (rowOrder) {
-    const reordered = applyRowOrder(tableData, rowOrder);
-    setTableData(reordered);
-  }
-};
+```typescript
+appStateHistory.push(state, 'action', 'description');
+const previousState = appStateHistory.undo();
+```
 
+---
+
+## Common Tasks
+
+### Add Ingredient to Formula
+
+1. User clicks ingredient in LibraryPanel
+2. Emits `ingredient-selected` event
+3. WorkArea validates and adds row
+4. Recalculates totals
+5. Saves to history
+
+### Add Formula Column
+
+1. User clicks "+ Formula"
+2. Modal opens, user selects formula
+3. Creates column definition
+4. Initializes data with zeros
+5. Locks formula in workspace
+6. Sets as editable
+
+### Normalize Formula
+
+1. User clicks "Normalize"
+2. Calculates current total
+3. Calculates scale factor (100 / total)
+4. Multiplies all values by factor
+5. Updates target total to 100
+6. Saves to history
+
+### Create Formula Version
+
+1. Gets current formula composition
+2. Increments version number (v1 → v2)
+3. Creates new formula with new ID
+4. Adds to available formulas
+5. Can be added to workspace
+
+---
+
+## Event Bus
+
+### Key Events
+
+| Event | From | To | Data |
+|-------|------|-----|------|
+| `ingredient-selected` | Library | WorkArea | `{ ingredient }` |
+| `formula-selected` | Library | WorkArea | `{ formula }` |
+| `normalize-formula` | Header | WorkArea | none |
+| `undo-action` | Header | WorkArea | none |
+| `active-formula-changed` | WorkArea | Header | `{ formula }` |
+| `formula-selections-updated` | WorkArea | Header, Library | `{ count, selectedIds }` |
+| `dilution-changed` | DilutionHook | WorkArea | `{ ingredientId, dilution }` |
+
+---
+
+## Key Components
+
+### DataGrid
+
+```typescript
 <DataGrid
-  data={tableData}
   columns={columns}
-  savedViews={savedViews}
-  onSaveView={handleSaveView}
-  onLoadView={handleLoadView}
+  data={tableData}
+  onCellEdit={(rowId, colId, value) => {}}
+  onRowDelete={(rowId) => {}}
+  onBulkDelete={(rowIds) => {}}
+  enableRowReordering={true}
+  enableBulkSelection={true}
+  dilutionState={dilutionState}
+/>
+```
+
+### FormulaModal
+
+```typescript
+<FormulaModal
+  isOpen={isOpen}
+  onClose={() => {}}
+  onCreateFormula={(formula) => {}}
+  onSelectFormula={(formula) => {}}
+  availableFormulas={formulas}
+  maxSelections={4}
+  currentSelections={selectedFormulaIds.length}
+/>
+```
+
+### IngredientList
+
+```typescript
+<IngredientList
+  ingredients={ingredients}
+  searchQuery={searchQuery}
+  onIngredientClick={(ing) => {}}
+  selectedIngredients={selectedIngredientIds}
+/>
+```
+
+### DilutionModal
+
+```typescript
+<DilutionModal
+  isOpen={isOpen}
+  onClose={() => {}}
+  ingredientId={ingredientId}
+  ingredientName={name}
+  initialDilution={dilution}
+  onSave={(dilution) => {}}
 />
 ```
 
 ---
 
-## 📦 Imports
+## Calculations
+
+### Running Total
 
 ```typescript
-// Types
-import type { DataGridRow, SavedView, Column } from '@/components/DataGrid/types';
+const runningTotal = ingredientRows
+  .filter(row => !row.isFormula)
+  .reduce((sum, row) => sum + (parseFloat(row[formulaId]) || 0), 0);
+```
 
-// Hooks
-import { useRowReordering } from '@/components/DataGrid/hooks/useRowReordering';
-import { useSavedViews } from '@/components/DataGrid/hooks/useSavedViews';
+### Contribution Cost
 
-// Utils
-import {
-  applyRowOrder,
-  getCurrentRowOrder,
-  isRowDraggable
-} from '@/components/DataGrid/utils/rowOrdering';
+```typescript
+const contCost = (percentage * costPerKg) / 1000;
+```
 
-// Components
-import { ViewManager } from '@/components/DataGrid/components/ViewManager';
-import { DraggableRow } from '@/components/DataGrid/components/DraggableRow';
+### RMC (Raw Material Cost)
+
+```typescript
+const rmc = ingredientRows
+  .reduce((sum, row) => {
+    const pct = parseFloat(row[formulaId]) || 0;
+    const cost = parseFloat(row.costKg) || 0;
+    return sum + (pct * cost) / 1000;
+  }, 0);
+```
+
+### Normalization
+
+```typescript
+const scaleFactor = 100 / currentTotal;
+const normalizedValue = currentValue * scaleFactor;
+```
+
+### Number of Lines
+
+```typescript
+const lineCount = ingredientRows
+  .filter(row => (parseFloat(row[formulaId]) || 0) > 0)
+  .length;
 ```
 
 ---
 
-## 🎯 Common Use Cases
+## API Reference
 
-### 1. Enable Row Reordering Only
+### PegaService
 
 ```typescript
-<DataGrid
-  data={tableData}
-  columns={columns}
-  onRowReorder={(newOrder) => {
-    setTableData(applyRowOrder(tableData, newOrder));
-  }}
-/>
+// Get data
+await PegaService.getFormulas();
+await PegaService.getIngredients();
+await PegaService.getIngredientAttributes();
+
+// Search
+await PegaService.searchIngredients(query, type);
+await PegaService.searchFormulas(query, filters);
+
+// CRUD
+await PegaService.createFormula(formula);
+await PegaService.updateFormula(id, updates);
 ```
 
-### 2. Enable Save View Only
+### CompoundingService
 
 ```typescript
-const { savedViews, saveView, loadView } = useSavedViews();
+// Prepare formula
+const compoundingFormula = prepareFormulaForCompounding(
+  formula,
+  ingredients,
+  attributes,
+  targetTotal
+);
 
-<DataGrid
-  data={tableData}
-  columns={columns}
-  savedViews={savedViews}
-  onSaveView={(name) => saveView(name, getCurrentRowOrder(tableData))}
-  onLoadView={(id) => {
-    const order = loadView(id);
-    if (order) setTableData(applyRowOrder(tableData, order));
-  }}
-/>
-```
+// Validate
+const { isValid, errors } = validateFormulaForCompounding(formula);
 
-### 3. Both Features Together
-
-```typescript
-const { savedViews, saveView, loadView, loadSavedViews } = useSavedViews();
-
-useEffect(() => {
-  loadSavedViews();
-}, [loadSavedViews]);
-
-<DataGrid
-  data={tableData}
-  columns={columns}
-  onRowReorder={(newOrder) => {
-    setTableData(applyRowOrder(tableData, newOrder));
-  }}
-  savedViews={savedViews}
-  onSaveView={(name) => saveView(name, getCurrentRowOrder(tableData))}
-  onLoadView={(id) => {
-    const order = loadView(id);
-    if (order) setTableData(applyRowOrder(tableData, order));
-  }}
-/>
+// Submit
+const { success, submissionId } = await submitForCompounding(submission);
 ```
 
 ---
 
-## 🔍 Utility Functions Reference
+## Keyboard Shortcuts
 
-### `applyRowOrder(rows, rowOrder)`
-Reorders rows based on provided order array.
-- **Input**: `rows: DataGridRow[]`, `rowOrder: string[]`
-- **Output**: `DataGridRow[]`
-- **Note**: Total rows always stay at the end
-
-### `getCurrentRowOrder(rows)`
-Extracts current row order (IDs only).
-- **Input**: `rows: DataGridRow[]`
-- **Output**: `string[]`
-- **Note**: Excludes total rows
-
-### `isRowDraggable(row)`
-Checks if a row can be dragged.
-- **Input**: `row: DataGridRow`
-- **Output**: `boolean`
-- **Returns false for**: Total rows, empty rows
+| Shortcut | Action |
+|----------|--------|
+| Tab | Move to next cell |
+| Shift+Tab | Move to previous cell |
+| Arrow Keys | Navigate cells |
+| Enter | Edit cell / Save |
+| Escape | Cancel edit |
+| Cmd/Ctrl+C | Copy |
+| Cmd/Ctrl+V | Paste |
 
 ---
 
-## 🎨 UI Elements
+## File Locations
 
-### Drag Handle
-- Icon: `ri-draggable` (⋮⋮)
-- Appears on: Draggable rows
-- Color: Gray (hover: darker gray)
+### Core Components
 
-### Visual Feedback
-- **Dragging**: Row opacity 50%
-- **Drop Target**: Blue top border (2px)
-- **Hover**: Light gray background
+- **DataGrid**: `src/components/DataGrid.tsx`
+- **FormulaModal**: `src/components/FormulaModal.tsx`
+- **IngredientList**: `src/components/IngredientList.tsx`
+- **WorkspaceTabs**: `src/components/workspace/WorkspaceTabs.tsx`
 
-### ViewManager Buttons
-- **Save View**: Blue button with save icon
-- **Views List**: Shows count badge
+### Views
+
+- **AppShell**: `src/view/AppShell/AppShell.tsx`
+- **AppHeader**: `src/view/AppShell/AppHeader.tsx`
+- **LibraryPanel**: `src/view/Library/LibraryPanel.tsx`
+- **WorkArea**: `src/view/WorkArea/WorkArea.tsx`
+
+### State & Utils
+
+- **WorkspaceContext**: `src/context/WorkspaceContext.tsx`
+- **Event Bus**: `src/utils/bus.ts`
+- **State History**: `src/utils/stateHistory.ts`
+- **Formula Calculations**: `src/utils/formulaCalculations.ts`
+
+### Services
+
+- **Pega**: `src/services/pega.ts`
+- **Compounding**: `src/services/compounding.ts`
 
 ---
 
-## 📝 Type Definitions
+## Data Models
+
+### Formula
 
 ```typescript
-interface DataGridRow {
-  id: string;
-  [key: string]: any;
-  isTotal?: boolean;
-  totalType?: string;
-  isFormula?: boolean;
-  isEmpty?: boolean;
-}
-
-interface SavedView {
+interface Formula {
   id: string;
   name: string;
-  rowOrder: string[];
-  timestamp: number;
+  version: string;
+  status: 'draft' | 'active' | 'archived' | 'submitted';
+  createdBy: string;
+  lastUpdated: string;
+  category: string;
+  totalPercentage: number;
+  ingredients: FormulaIngredient[];
+  description: string;
 }
+```
 
-interface DataGridProps {
-  // ... existing props
-  onRowReorder?: (rowOrder: string[]) => void;
-  savedViews?: SavedView[];
-  onSaveView?: (viewName: string) => void;
-  onLoadView?: (viewId: string) => void;
+### Ingredient
+
+```typescript
+interface Ingredient {
+  id: string;
+  name: string;
+  code: string;
+  price: number;
+  type: 'natural' | 'synthetic' | 'base';
+  category: string;
+  supplier: string;
+  status: 'active' | 'inactive' | 'palette';
+  mac: number;
+  odorProfile?: string;
+  volatility?: string;
+  allergens?: string[];
+}
+```
+
+### Column
+
+```typescript
+interface Column {
+  id: string;
+  key: string;
+  title: string;
+  type: 'text' | 'number' | 'boolean' | 'select' | 'add-column';
+  sortable?: boolean;
+  editable?: boolean;
+  width?: number;
+  group?: string;
+  formulaId?: string;
+  attributeId?: string;
+}
+```
+
+### Dilution
+
+```typescript
+interface Dilution {
+  ingredientId: string;
+  concentration: number;
+  solventIds: string[];
+  solventPercentages: Record<string, number>;
+  totalPercentage: number;
 }
 ```
 
 ---
 
-## ⚠️ Important Notes
+## Commands
 
-1. **Total Rows**: Always stay at the bottom, cannot be reordered
-2. **Empty Rows**: Cannot be dragged
-3. **localStorage**: 5MB limit per domain
-4. **View IDs**: Auto-generated with timestamp
-5. **Persistence**: Views survive page reloads
+### Development
 
----
+```bash
+npm run dev      # Start dev server
+npm run build    # Production build
+npm run preview  # Preview build
+npm run lint     # Run linter
+```
 
-## 🐛 Troubleshooting
+### Testing (Future)
 
-### Drag not working?
-- Check if `onRowReorder` is provided
-- Verify row has `id` field
-- Ensure row is not marked as `isTotal` or `isEmpty`
-
-### Views not persisting?
-- Check browser localStorage is enabled
-- Verify no privacy/incognito mode
-- Check for localStorage quota errors in console
-
-### Rows not reordering correctly?
-- Ensure `applyRowOrder` is called with correct parameters
-- Check that row IDs are unique
-- Verify `setTableData` updates state properly
+```bash
+npm test         # Run tests
+npm run test:ui  # Test UI
+npm run coverage # Coverage report
+```
 
 ---
 
-## 📚 More Documentation
+## Troubleshooting
 
-- **Full Guide**: `docs/README_REFACTORING.md`
-- **Detailed API**: `docs/DATAGRID_REFACTORING.md`
-- **Summary**: `docs/REFACTORING_SUMMARY.md`
-- **Types**: `src/components/DataGrid/types.ts`
+### Formula not updating
+
+- Check `editableFormula` is set
+- Verify event listeners registered
+- Check console for validation errors
+
+### Workspace data lost
+
+- Ensure `updateWorkspaceData` called
+- Check `WorkspaceContext` provider wraps app
+- Verify `activeWorkspace` is used
+
+### Calculations incorrect
+
+- Check formula column IDs match
+- Verify `calculateTotals` called after updates
+- Check for NaN values
+
+### Performance issues
+
+- Enable virtual scrolling
+- Memoize expensive calculations
+- Check for unnecessary re-renders
 
 ---
 
-## ✅ Checklist for Integration
+## Links
 
-- [ ] Import required hooks and utils
-- [ ] Add `onRowReorder` handler
-- [ ] Initialize `useSavedViews` hook
-- [ ] Load saved views on mount
-- [ ] Pass props to DataGrid
-- [ ] Test drag and drop
-- [ ] Test save/load views
-- [ ] Verify localStorage persistence
-- [ ] Handle errors gracefully
+- **[Full Documentation](./README.md)**
+- **[Architecture](./ARCHITECTURE.md)**
+- **[Features](./features/)**
+- **[State Management](./STATE_MANAGEMENT.md)**
+- **[GitHub Repository](#)**
 
 ---
 
-**Last Updated**: October 15, 2025  
-**Version**: 2.1.0  
-**Branch**: 15oct
+**Last Updated:** November 5, 2025

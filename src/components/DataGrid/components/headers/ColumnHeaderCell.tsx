@@ -1,5 +1,6 @@
 import { GroupingButton } from "../GroupingButton";
 import { isOwnFormula } from "../../../../utils/formulaIdGenerator";
+import { useDataGridFeatures } from "../../../../hooks/useFeatureFlags";
 
 // Use Column type from DataGrid.tsx to match parent component
 interface Column {
@@ -75,6 +76,9 @@ export const ColumnHeaderCell = ({
   onSendForCompounding,
   setShowColumnActions,
 }: ColumnHeaderCellProps) => {
+  // Get feature flags
+  const dataGridFlags = useDataGridFeatures();
+
   const isDraggable =
     column.type !== "add-column" &&
     !column.fixed &&
@@ -238,20 +242,23 @@ export const ColumnHeaderCell = ({
               )}
 
             {/* Remove icon for all formula and attribute columns */}
-            {((column.id.startsWith("formula") && !column.fixed) ||
-              (column.group === "Attributes" &&
-                column.id !== "description")) && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDeleteColumn?.(column.id);
-                }}
-                className="text-gray-400 hover:text-red-600 transition-colors"
-                title="Remove column"
-              >
-                <span className="material-symbols-rounded text-sm">close</span>
-              </button>
-            )}
+            {dataGridFlags.showColumnRemoveIcon &&
+              ((column.id.startsWith("formula") && !column.fixed) ||
+                (column.group === "Attributes" &&
+                  column.id !== "description")) && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeleteColumn?.(column.id);
+                  }}
+                  className="text-gray-400 hover:text-red-600 transition-colors"
+                  title="Remove column"
+                >
+                  <span className="material-symbols-rounded text-sm">
+                    close
+                  </span>
+                </button>
+              )}
 
             {/* Actions menu only for formula columns */}
             {column.id.startsWith("formula") && !column.fixed && (
