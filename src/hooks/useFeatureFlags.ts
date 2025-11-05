@@ -152,7 +152,7 @@ export const useFeature = (
     feature: string
 ): boolean => {
     const { flags } = useFeatureFlags();
-    const value = (flags[category] as Record<string, FlagValue>)?.[feature];
+    const value = (flags[category] as unknown as Record<string, FlagValue>)?.[feature];
     return typeof value === 'boolean' ? value : false;
 };
 
@@ -171,7 +171,7 @@ export const useFeatures = (
 ): boolean => {
     const { flags } = useFeatureFlags();
     return features.every(([category, feature]) => {
-        const value = (flags[category] as Record<string, FlagValue>)?.[feature];
+        const value = (flags[category] as unknown as Record<string, FlagValue>)?.[feature];
         return typeof value === 'boolean' ? value : false;
     });
 };
@@ -192,7 +192,7 @@ export const useAnyFeature = (
 ): boolean => {
     const { flags } = useFeatureFlags();
     return features.some(([category, feature]) => {
-        const value = (flags[category] as Record<string, FlagValue>)?.[feature];
+        const value = (flags[category] as unknown as Record<string, FlagValue>)?.[feature];
         return typeof value === 'boolean' ? value : false;
     });
 };
