@@ -173,8 +173,7 @@ const FormulaModal = ({
   const [expandedSections, setExpandedSections] = useState<
     Record<string, boolean>
   >({
-    general: true,
-    dosage: true,
+    generalAndDosage: true,
     product: true,
     codes: true,
     production: false,
@@ -376,194 +375,185 @@ const FormulaModal = ({
           </div>
         </div>
 
-        {/* General Information Section */}
+        {/* General Information & Dosage Section (Combined - Mandatory) */}
         <div className="border border-gray-200 rounded-lg">
           <button
             type="button"
-            onClick={() => toggleSection("general")}
+            onClick={() => toggleSection("generalAndDosage")}
             className="w-full flex items-center justify-between p-3 hover:bg-gray-50 hover:rounded-tl-lg hover:rounded-tr-lg transition-colors"
           >
             <h3 className="text-sm font-semibold text-gray-900">
-              General Information
+              General Information & Dosage *
             </h3>
             <i
               className={`ri-arrow-${
-                expandedSections.general ? "up" : "down"
+                expandedSections.generalAndDosage ? "up" : "down"
               }-s-line text-gray-500 text-lg`}
             ></i>
           </button>
-          {expandedSections.general && (
-            <div className="p-4">
-              <div className="grid grid-cols-3 gap-4">
-                {/* Category */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category *
-                  </label>
-                  <select
-                    value={newFormulaData.category}
-                    onChange={(e) =>
-                      setNewFormulaData((prev) => ({
-                        ...prev,
-                        category: e.target.value,
-                      }))
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-8"
-                  >
-                    <option value="">Select category...</option>
-                    <option value="Eau de Toilette">Eau de Toilette</option>
-                    <option value="Eau de Parfum">Eau de Parfum</option>
-                    <option value="Eau de Cologne">Eau de Cologne</option>
-                    <option value="Parfum">Parfum</option>
-                    <option value="Eau Fraiche">Eau Fraiche</option>
-                  </select>
-                </div>
-
-                {/* Region */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Region *
-                  </label>
-                  <select
-                    value={newFormulaData.region}
-                    onChange={(e) =>
-                      setNewFormulaData((prev) => ({
-                        ...prev,
-                        region: e.target.value,
-                      }))
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-8"
-                  >
-                    <option value="">Select region...</option>
-                    <option value="NA">North America</option>
-                    <option value="EU">Europe</option>
-                    <option value="APAC">Asia Pacific</option>
-                    <option value="LATAM">Latin America</option>
-                  </select>
-                </div>
-
-                {/* Country */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Country *
-                  </label>
-                  <select
-                    value={newFormulaData.country}
-                    onChange={(e) =>
-                      setNewFormulaData((prev) => ({
-                        ...prev,
-                        country: e.target.value,
-                      }))
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-8"
-                    disabled={!newFormulaData.region}
-                  >
-                    <option value="">Select country...</option>
-                    {newFormulaData.region === "NA" && (
-                      <>
-                        <option value="US">United States</option>
-                        <option value="CA">Canada</option>
-                        <option value="MX">Mexico</option>
-                      </>
-                    )}
-                    {newFormulaData.region === "EU" && (
-                      <>
-                        <option value="UK">United Kingdom</option>
-                        <option value="FR">France</option>
-                        <option value="DE">Germany</option>
-                        <option value="IT">Italy</option>
-                        <option value="ES">Spain</option>
-                      </>
-                    )}
-                    {newFormulaData.region === "APAC" && (
-                      <>
-                        <option value="CN">China</option>
-                        <option value="JP">Japan</option>
-                        <option value="KR">South Korea</option>
-                        <option value="AU">Australia</option>
-                      </>
-                    )}
-                    {newFormulaData.region === "LATAM" && (
-                      <>
-                        <option value="BR">Brazil</option>
-                        <option value="AR">Argentina</option>
-                        <option value="CL">Chile</option>
-                      </>
-                    )}
-                  </select>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Dosage & Format Section */}
-        <div className="border border-gray-200 rounded-lg">
-          <button
-            type="button"
-            onClick={() => toggleSection("dosage")}
-            className="w-full flex items-center justify-between p-3 hover:bg-gray-50 hover:rounded-tl-lg hover:rounded-tr-lg transition-colors"
-          >
-            <h3 className="text-sm font-semibold text-gray-900">
-              Dosage & Product Format
-            </h3>
-            <i
-              className={`ri-arrow-${
-                expandedSections.dosage ? "up" : "down"
-              }-s-line text-gray-500 text-lg`}
-            ></i>
-          </button>
-          {expandedSections.dosage && (
-            <div className="p-4">
-              <div className="grid grid-cols-2 gap-4">
-                {/* Fragrance Dosage - Mandatory for all types */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Fragrance Dosage (%, Actual) *
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      value={newFormulaData.fragranceDosage || ""}
+          {expandedSections.generalAndDosage && (
+            <div className="p-4 space-y-4">
+              {/* General Information Fields */}
+              <div>
+                <h4 className="text-xs font-semibold text-gray-600 uppercase mb-3">
+                  General Information
+                </h4>
+                <div className="grid grid-cols-3 gap-4">
+                  {/* Category */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Category *
+                    </label>
+                    <select
+                      value={newFormulaData.category}
                       onChange={(e) =>
                         setNewFormulaData((prev) => ({
                           ...prev,
-                          fragranceDosage: parseFloat(e.target.value),
+                          category: e.target.value,
                         }))
                       }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="0.00"
-                      min="0"
-                      step="0.01"
-                    />
-                    <span className="absolute right-3 top-2.5 text-gray-500">
-                      %
-                    </span>
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-8"
+                    >
+                      <option value="">Select category...</option>
+                      <option value="Eau de Toilette">Eau de Toilette</option>
+                      <option value="Eau de Parfum">Eau de Parfum</option>
+                      <option value="Eau de Cologne">Eau de Cologne</option>
+                      <option value="Parfum">Parfum</option>
+                      <option value="Eau Fraiche">Eau Fraiche</option>
+                    </select>
+                  </div>
+
+                  {/* Region */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Region *
+                    </label>
+                    <select
+                      value={newFormulaData.region}
+                      onChange={(e) =>
+                        setNewFormulaData((prev) => ({
+                          ...prev,
+                          region: e.target.value,
+                        }))
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-8"
+                    >
+                      <option value="">Select region...</option>
+                      <option value="NA">North America</option>
+                      <option value="EU">Europe</option>
+                      <option value="APAC">Asia Pacific</option>
+                      <option value="LATAM">Latin America</option>
+                    </select>
+                  </div>
+
+                  {/* Country */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Country *
+                    </label>
+                    <select
+                      value={newFormulaData.country}
+                      onChange={(e) =>
+                        setNewFormulaData((prev) => ({
+                          ...prev,
+                          country: e.target.value,
+                        }))
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-8"
+                      disabled={!newFormulaData.region}
+                    >
+                      <option value="">Select country...</option>
+                      {newFormulaData.region === "NA" && (
+                        <>
+                          <option value="US">United States</option>
+                          <option value="CA">Canada</option>
+                          <option value="MX">Mexico</option>
+                        </>
+                      )}
+                      {newFormulaData.region === "EU" && (
+                        <>
+                          <option value="UK">United Kingdom</option>
+                          <option value="FR">France</option>
+                          <option value="DE">Germany</option>
+                          <option value="IT">Italy</option>
+                          <option value="ES">Spain</option>
+                        </>
+                      )}
+                      {newFormulaData.region === "APAC" && (
+                        <>
+                          <option value="CN">China</option>
+                          <option value="JP">Japan</option>
+                          <option value="KR">South Korea</option>
+                          <option value="AU">Australia</option>
+                        </>
+                      )}
+                      {newFormulaData.region === "LATAM" && (
+                        <>
+                          <option value="BR">Brazil</option>
+                          <option value="AR">Argentina</option>
+                          <option value="CL">Chile</option>
+                        </>
+                      )}
+                    </select>
                   </div>
                 </div>
+              </div>
 
-                {/* Product Format - Mandatory for all types */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Product Format *
-                  </label>
-                  <select
-                    value={newFormulaData.productFormat || ""}
-                    onChange={(e) =>
-                      setNewFormulaData((prev) => ({
-                        ...prev,
-                        productFormat: e.target.value,
-                      }))
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-8"
-                  >
-                    <option value="">Select format...</option>
-                    <option value="Spray">Spray</option>
-                    <option value="Splash">Splash</option>
-                    <option value="Roll-on">Roll-on</option>
-                    <option value="Solid">Solid</option>
-                    <option value="Oil">Oil</option>
-                  </select>
+              {/* Dosage & Format Fields */}
+              <div>
+                <h4 className="text-xs font-semibold text-gray-600 uppercase mb-3">
+                  Dosage & Product Format
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Fragrance Dosage - Mandatory for all types */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Fragrance Dosage (%, Actual) *
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        value={newFormulaData.fragranceDosage || ""}
+                        onChange={(e) =>
+                          setNewFormulaData((prev) => ({
+                            ...prev,
+                            fragranceDosage: parseFloat(e.target.value),
+                          }))
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="0.00"
+                        min="0"
+                        step="0.01"
+                      />
+                      <span className="absolute right-3 top-2.5 text-gray-500">
+                        %
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Product Format - Mandatory for all types */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Product Format *
+                    </label>
+                    <select
+                      value={newFormulaData.productFormat || ""}
+                      onChange={(e) =>
+                        setNewFormulaData((prev) => ({
+                          ...prev,
+                          productFormat: e.target.value,
+                        }))
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-8"
+                    >
+                      <option value="">Select format...</option>
+                      <option value="Spray">Spray</option>
+                      <option value="Splash">Splash</option>
+                      <option value="Roll-on">Roll-on</option>
+                      <option value="Solid">Solid</option>
+                      <option value="Oil">Oil</option>
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>
