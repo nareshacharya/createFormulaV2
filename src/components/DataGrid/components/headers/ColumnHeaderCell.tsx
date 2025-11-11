@@ -15,8 +15,8 @@ interface Column {
   minWidth?: number;
   maxWidth?: number;
   group?: string;
-  formulaId?: string;  // Universal formula ID (F00001v1)
-  formulaDisplayId?: string;  // Type-specific display ID (B00001v1, MZ00001v1, etc.)
+  formulaId?: string; // Universal formula ID (F00001v1)
+  formulaDisplayId?: string; // Type-specific display ID (B00001v1, MZ00001v1, etc.)
   attributeId?: string;
   values?: string[];
   options?: string[];

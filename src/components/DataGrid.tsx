@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useClickOutside } from "../hooks/useClickOutside";
 import { useRowReordering } from "./DataGrid/hooks/useRowReordering";
-import { useSavedViews } from "./DataGrid/hooks/useSavedViews";
 import { useBulkSelection } from "./DataGrid/hooks/useBulkSelection";
 import { useKeyboardNavigation } from "./DataGrid/hooks/useKeyboardNavigation";
 import { useDataGridFeatures } from "../hooks/useFeatureFlags";
@@ -28,8 +27,8 @@ export interface Column {
   minWidth?: number;
   maxWidth?: number;
   group?: string;
-  formulaId?: string;  // Universal formula ID (F00001v1)
-  formulaDisplayId?: string;  // Type-specific display ID (B00001v1, MZ00001v1, etc.)
+  formulaId?: string; // Universal formula ID (F00001v1)
+  formulaDisplayId?: string; // Type-specific display ID (B00001v1, MZ00001v1, etc.)
   attributeId?: string;
   values?: string[];
   options?: string[];
@@ -53,17 +52,24 @@ interface DataGridProps {
   onToggleFormulaExpansion?: (formulaId: string) => void;
   onColumnReorder?: (fromIndex: number, toIndex: number) => void;
   onRowReorder?: (rowOrder: string[]) => void;
-  onSaveView?: (viewName: string) => void;
-  onLoadView?: (viewId: string) => void;
   onToggleGrouping?: (columnId: string) => void;
   groupedByColumn?: string | null;
   editableFormula?: string;
   className?: string;
   showEmptyState?: boolean;
   enableRowReordering?: boolean;
-  enableSavedViews?: boolean;
   enableBulkSelection?: boolean;
   dilutionState?: UseDilutionReturn;
+  // Toolbar actions
+  onToolbarAddFormula?: () => void;
+  onToolbarMergeDuplicates?: () => void;
+  onToolbarNormalize?: () => void;
+  onToolbarSend?: () => void;
+  onToolbarUndo?: () => void;
+  onToolbarExport?: () => void;
+  toolbarCanUndo?: boolean;
+  toolbarUndoCount?: number;
+  toolbarCanSend?: boolean;
 }
 
 const DataGrid = ({
@@ -71,7 +77,7 @@ const DataGrid = ({
   data,
   onAddColumn,
   onAddFormula,
-  onRowDelete,
+  onRowDelete: _onRowDelete,
   onBulkDelete,
   onCellEdit,
   onDeleteColumn,
@@ -83,17 +89,24 @@ const DataGrid = ({
   onToggleFormulaExpansion,
   onColumnReorder,
   onRowReorder,
-  onSaveView,
-  onLoadView,
   onToggleGrouping,
   groupedByColumn,
   editableFormula,
   className = "",
-  showEmptyState = false,
+  showEmptyState: _showEmptyState = false,
   enableRowReordering: enableRowReorderingProp,
-  enableSavedViews = false,
   enableBulkSelection: enableBulkSelectionProp,
   dilutionState,
+  // Toolbar actions
+  onToolbarAddFormula,
+  onToolbarMergeDuplicates,
+  onToolbarNormalize,
+  onToolbarSend,
+  onToolbarUndo,
+  onToolbarExport,
+  toolbarCanUndo = false,
+  toolbarUndoCount = 0,
+  toolbarCanSend = false,
 }: DataGridProps) => {
   // Get feature flags
   const dataGridFlags = useDataGridFeatures();
@@ -145,15 +158,6 @@ const DataGrid = ({
   });
 
   // Saved views hooks
-  const {
-    savedViews,
-    currentViewId,
-    saveView,
-    loadView,
-    deleteView,
-    loadSavedViews,
-  } = useSavedViews();
-
   // Bulk selection hooks
   const {
     selectedRows,
@@ -224,13 +228,6 @@ const DataGrid = ({
       window.removeEventListener("resize", handleResize);
     };
   }, [data]); // Recheck when data changes (might affect scrollability)
-
-  // Load saved views on mount
-  useEffect(() => {
-    if (enableSavedViews) {
-      loadSavedViews();
-    }
-  }, [enableSavedViews, loadSavedViews]);
 
   // Close menu when clicking outside
   useClickOutside(
@@ -439,25 +436,15 @@ const DataGrid = ({
           }
         }}
         onClearSelection={clearSelection}
-        enableSavedViews={enableSavedViews}
-        savedViews={savedViews}
-        currentViewId={currentViewId}
-        onSaveView={(viewName) => {
-          saveView(
-            viewName,
-            data.map((row) => row.id)
-          );
-          onSaveView?.(viewName);
-        }}
-        onLoadView={(viewId) => {
-          const rowOrder = loadView(viewId);
-          if (rowOrder && onRowReorder) {
-            console.log("Loading view with row order:", rowOrder);
-            onRowReorder(rowOrder);
-          }
-          onLoadView?.(viewId);
-        }}
-        onDeleteView={deleteView}
+        onAddFormula={onToolbarAddFormula}
+        onMergeDuplicates={onToolbarMergeDuplicates}
+        onNormalize={onToolbarNormalize}
+        onSend={onToolbarSend}
+        onUndo={onToolbarUndo}
+        onExport={onToolbarExport}
+        canUndo={toolbarCanUndo}
+        undoCount={toolbarUndoCount}
+        canSend={toolbarCanSend}
       />
 
       <div

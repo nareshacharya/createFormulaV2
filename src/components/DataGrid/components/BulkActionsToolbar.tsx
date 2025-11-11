@@ -1,89 +1,81 @@
-import { useState, useEffect, useRef } from "react";
-import type { SavedView } from "../types";
+import type React from "react";
 
 interface BulkActionsToolbarProps {
   selectedCount: number;
   onBulkDelete: () => void;
   onClearSelection: () => void;
-  // Saved views props
-  enableSavedViews?: boolean;
-  savedViews?: SavedView[];
-  currentViewId?: string | null;
-  onSaveView?: (viewName: string) => void;
-  onLoadView?: (viewId: string) => void;
-  onDeleteView?: (viewId: string) => void;
+  // Action buttons (Add Formula, Merge, Normalize, Send, Undo)
+  onAddFormula?: () => void;
+  onMergeDuplicates?: () => void;
+  onNormalize?: () => void;
+  onSend?: () => void;
+  onUndo?: () => void;
+  onExport?: () => void;
+  canUndo?: boolean;
+  undoCount?: number;
+  canSend?: boolean;
 }
+
+// Helper function to render toolbar buttons with responsive text
+const ToolbarButton = ({
+  onClick,
+  disabled,
+  icon,
+  label,
+  title,
+  children,
+  className = "",
+}: {
+  onClick: () => void;
+  disabled?: boolean;
+  icon: string;
+  label: string;
+  title: string;
+  children?: React.ReactNode;
+  className?: string;
+}) => {
+  const baseClasses = `group relative flex items-center justify-center px-2 py-1 rounded-lg transition-all duration-200 
+    ${!disabled ? "hover:bg-blue-600 hover:shadow-sm" : ""} 
+    ${className}`;
+
+  const colorClasses = disabled
+    ? "bg-blue-100 text-blue-400 cursor-not-allowed"
+    : "bg-blue-250 text-blue-700 hover:text-white";
+
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`${baseClasses} ${colorClasses}`}
+      title={title}
+    >
+      <span className="material-symbols-rounded text-base">{icon}</span>
+      {/* Show label only on xl screens and up (1280px+) */}
+      <span className="hidden xl:inline text-xs font-medium ml-1">{label}</span>
+      {children}
+    </button>
+  );
+};
 
 export const BulkActionsToolbar = ({
   selectedCount,
   onBulkDelete,
   onClearSelection,
-  enableSavedViews = false,
-  savedViews = [],
-  currentViewId = null,
-  onSaveView,
-  onLoadView,
-  onDeleteView,
+  onAddFormula,
+  onMergeDuplicates,
+  onNormalize,
+  onSend,
+  onUndo,
+  onExport,
+  canUndo = false,
+  undoCount = 0,
+  canSend = false,
 }: BulkActionsToolbarProps) => {
-  const [showSaveDialog, setShowSaveDialog] = useState(false);
-  const [viewName, setViewName] = useState("");
-  const [showViewsList, setShowViewsList] = useState(false);
-
-  const saveDialogRef = useRef<HTMLDivElement>(null);
-  const viewsListRef = useRef<HTMLDivElement>(null);
-
-  const handleSaveView = () => {
-    if (viewName.trim() && onSaveView) {
-      onSaveView(viewName.trim());
-      setViewName("");
-      setShowSaveDialog(false);
-    }
-  };
-
-  // Handle click outside for save dialog
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        saveDialogRef.current &&
-        !saveDialogRef.current.contains(event.target as Node)
-      ) {
-        setShowSaveDialog(false);
-        setViewName("");
-      }
-    };
-
-    if (showSaveDialog) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
-    }
-  }, [showSaveDialog]);
-
-  // Handle click outside for views list
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        viewsListRef.current &&
-        !viewsListRef.current.contains(event.target as Node)
-      ) {
-        setShowViewsList(false);
-      }
-    };
-
-    if (showViewsList) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
-    }
-  }, [showViewsList]);
-
   return (
-    <div className="flex items-center justify-between mb-3 px-6 py-2.5 bg-gray-50/50">
-      {/* Left side - Bulk actions */}
-      <div className="flex items-center space-x-3 text-xs">
-        <span className="text-gray-600 font-medium">
+    <div className="flex items-center justify-between mb-3 px-3 xl:px-6 py-2.5 bg-gray-50/50 gap-3">
+      {/* Left side - Selection count and bulk actions */}
+      <div className="flex items-center space-x-2 xl:space-x-3 text-xs">
+        <span className="text-gray-600 font-medium hidden lg:inline">
           {selectedCount} selected
         </span>
 
@@ -91,143 +83,111 @@ export const BulkActionsToolbar = ({
           <>
             <button
               onClick={onClearSelection}
-              className="text-gray-600 hover:text-gray-900 transition-colors"
+              className="bg-gray-150 text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition-all duration-200 hover:shadow-sm flex items-center gap-1 px-2 py-1 rounded-lg"
+              title="Clear selection"
             >
-              Clear
+              <span className="material-symbols-rounded text-base">clear</span>
+              <span className="hidden xl:inline text-xs font-medium">
+                Clear
+              </span>
             </button>
 
             {onBulkDelete && (
               <button
                 onClick={onBulkDelete}
-                className="text-red-600 hover:text-red-700 transition-colors flex items-center space-x-1"
+                className="bg-red-100 text-red-700 hover:bg-red-200 hover:text-red-900 transition-all duration-200 hover:shadow-sm flex items-center gap-1 px-2 py-1 rounded-lg"
+                title="Delete selected items"
               >
-                <i className="ri-delete-bin-line"></i>
-                <span>Delete</span>
+                <span className="material-symbols-rounded text-base">
+                  delete
+                </span>
+                <span className="hidden xl:inline text-xs font-medium">
+                  Delete
+                </span>
               </button>
             )}
           </>
         )}
       </div>
 
-      {/* Right side - Saved views */}
-      {enableSavedViews && (
-        <div className="flex items-center space-x-2 text-xs">
-          {/* Save View Button */}
-          <div className="relative" ref={saveDialogRef}>
-            <button
-              onClick={() => setShowSaveDialog(!showSaveDialog)}
-              className="flex items-center space-x-1 text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              <i className="ri-save-line"></i>
-              <span>Save View</span>
-            </button>
+      {/* Right side - Data Grid Actions (Add Formula, Merge, Normalize, Send, Undo, Export) */}
+      <div className="flex items-center gap-1 xl:gap-2 overflow-x-auto">
+        {/* Add Formula Button */}
+        {onAddFormula && (
+          <ToolbarButton
+            onClick={onAddFormula}
+            icon="experiment"
+            label="Add Formula"
+            title="Add Formula"
+          />
+        )}
 
-            {/* Save Dialog */}
-            {showSaveDialog && (
-              <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-3 z-30 min-w-[250px]">
-                <div className="space-y-2">
-                  <label className="block text-xs font-medium text-gray-700">
-                    View Name
-                  </label>
-                  <input
-                    type="text"
-                    value={viewName}
-                    onChange={(e) => setViewName(e.target.value)}
-                    placeholder="Enter view name..."
-                    className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        handleSaveView();
-                      } else if (e.key === "Escape") {
-                        setShowSaveDialog(false);
-                        setViewName("");
-                      }
-                    }}
-                    autoFocus
-                  />
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={handleSaveView}
-                      disabled={!viewName.trim()}
-                      className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowSaveDialog(false);
-                        setViewName("");
-                      }}
-                      className="px-2 py-1 text-xs border border-gray-300 rounded hover:bg-gray-50 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              </div>
+        {/* Merge Duplicates Button */}
+        {onMergeDuplicates && (
+          <ToolbarButton
+            onClick={onMergeDuplicates}
+            icon="call_merge"
+            label="Merge"
+            title="Merge Duplicates"
+          />
+        )}
+
+        {/* Normalize Formula Button */}
+        {onNormalize && (
+          <ToolbarButton
+            onClick={onNormalize}
+            icon="balance"
+            label="Normalize"
+            title="Normalize Formula"
+          />
+        )}
+
+        {/* Send for Compounding Button */}
+        {onSend && (
+          <ToolbarButton
+            onClick={onSend}
+            disabled={!canSend}
+            icon="send"
+            label="Send"
+            title={
+              canSend
+                ? "Send Active Formula for Compounding"
+                : "Select an active formula"
+            }
+          />
+        )}
+
+        {/* Undo Button */}
+        {onUndo && (
+          <ToolbarButton
+            onClick={onUndo}
+            disabled={!canUndo}
+            icon="undo"
+            label="Undo"
+            title={
+              canUndo ? `Undo (${undoCount} available)` : "No actions to undo"
+            }
+          >
+            {undoCount > 0 && (
+              <span className="ml-1 bg-blue-500 text-white text-[9px] px-1 rounded-full font-semibold">
+                {undoCount}
+              </span>
             )}
-          </div>
+          </ToolbarButton>
+        )}
 
-          {/* Views List Button */}
-          <div className="relative" ref={viewsListRef}>
-            <button
-              onClick={() => setShowViewsList(!showViewsList)}
-              className="flex items-center space-x-1 text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              <i className="ri-folder-line"></i>
-              <span>Views ({savedViews.length})</span>
-            </button>
-
-            {/* Views List */}
-            {showViewsList && (
-              <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded shadow-lg py-1 z-30 min-w-[300px] max-h-[400px] overflow-y-auto">
-                {savedViews.length === 0 ? (
-                  <div className="px-3 py-2 text-xs text-gray-500 text-center">
-                    No saved views yet
-                  </div>
-                ) : (
-                  <div>
-                    {savedViews.map((view) => (
-                      <div
-                        key={view.id}
-                        className={`px-3 py-1.5 hover:bg-gray-50 cursor-pointer flex items-center justify-between ${
-                          currentViewId === view.id ? "bg-blue-50" : ""
-                        }`}
-                      >
-                        <div
-                          className="flex-1"
-                          onClick={() => {
-                            onLoadView?.(view.id);
-                            setShowViewsList(false);
-                          }}
-                        >
-                          <div className="text-xs font-medium text-gray-900">
-                            {view.name}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {new Date(view.timestamp).toLocaleString()}
-                          </div>
-                        </div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            console.log("Deleting view:", view.id, view.name);
-                            onDeleteView?.(view.id);
-                          }}
-                          className="ml-2 p-1 text-gray-400 hover:text-red-600 rounded transition-colors"
-                          title="Delete view"
-                        >
-                          <i className="ri-delete-bin-line text-sm"></i>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+        {/* Export Button */}
+        {onExport && (
+          <ToolbarButton
+            onClick={onExport}
+            icon="download"
+            label="Export"
+            title="Export as Excel"
+          />
+        )}
+      </div>
     </div>
   );
 };
+
+export default BulkActionsToolbar;

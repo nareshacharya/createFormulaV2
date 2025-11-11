@@ -4,16 +4,16 @@
  */
 
 import {
-  generateFormulaId,
-  generatePerfumerFormulaId,
-  generateUCode,
-  parseFormulaId,
-  getNextSequenceNumber,
-  getNextVersionNumber,
-  setCurrentUserInitials,
-  getCurrentUserInitials,
-  isOwnFormula,
-  PERFUMER_DIRECTORY
+    generateFormulaId,
+    generatePerfumerFormulaId,
+    generateUCode,
+    parseFormulaId,
+    getNextSequenceNumber,
+    getNextVersionNumber,
+    setCurrentUserInitials,
+    getCurrentUserInitials,
+    isOwnFormula,
+    PERFUMER_DIRECTORY
 } from '../idGeneration';
 import { FORMULA_TYPES } from '../../config/formulaTypes.config';
 
@@ -22,246 +22,246 @@ import { FORMULA_TYPES } from '../../config/formulaTypes.config';
  */
 
 describe('ID Generation - User Story Scenarios', () => {
-  
-  // Mock existing formulas for testing
-  const existingFormulas = [
-    { id: 'F00001v1', createdBy: 'Mariazel' },
-    { id: 'F00001v2', createdBy: 'Mariazel' },
-    { id: 'MZ00001v1', createdBy: 'Mariazel' },
-    { id: 'MZ00001v2', createdBy: 'Mariazel' },
-  ];
 
-  describe('Scenario 1: Mariazel creates new theme (Base Formula)', () => {
-    it('should generate F00002v1 for new base formula', () => {
-      setCurrentUserInitials('MZ');
-      
-      const formulaId = generateFormulaId({
-        formulaType: FORMULA_TYPES.BASE,
-        userInitials: 'MZ',
-        existingFormulas
-      });
-      
-      expect(formulaId).toBe('B00001v1'); // First base formula
-    });
-  });
+    // Mock existing formulas for testing
+    const existingFormulas = [
+        { id: 'F00001v1', createdBy: 'Mariazel' },
+        { id: 'F00001v2', createdBy: 'Mariazel' },
+        { id: 'MZ00001v1', createdBy: 'Mariazel' },
+        { id: 'MZ00001v2', createdBy: 'Mariazel' },
+    ];
 
-  describe('Scenario 2: Mariazel creates new trial (version)', () => {
-    it('should increment version for same user copying own formula', () => {
-      setCurrentUserInitials('MZ');
-      
-      const formulaId = generateFormulaId({
-        formulaType: FORMULA_TYPES.PERFUMER,
-        userInitials: 'MZ',
-        existingFormulas,
-        baseFormulaId: 'MZ00001v2',
-        isUserCopy: true
-      });
-      
-      expect(formulaId).toBe('MZ00001v3'); // Increment version
-    });
-  });
+    describe('Scenario 1: Mariazel creates new theme (Base Formula)', () => {
+        it('should generate F00002v1 for new base formula', () => {
+            setCurrentUserInitials('MZ');
 
-  describe('Scenario 3: Mathieu creates editable copy of Mariazel formula', () => {
-    it('should create new ID with different initials, version v1', () => {
-      setCurrentUserInitials('ML');
-      
-      const formulaId = generateFormulaId({
-        formulaType: FORMULA_TYPES.PERFUMER,
-        userInitials: 'ML',
-        existingFormulas,
-        baseFormulaId: 'MZ00001v2',
-        isUserCopy: false // Different user
-      });
-      
-      expect(formulaId).toBe('ML00001v1'); // New sequence for Mathieu
-    });
-  });
+            const formulaId = generateFormulaId({
+                formulaType: FORMULA_TYPES.BASE,
+                userInitials: 'MZ',
+                existingFormulas
+            });
 
-  describe('Scenario 4: Mathieu creates a new version', () => {
-    it('should increment version for Mathieu own formula', () => {
-      const formulasWithMathieu = [
-        ...existingFormulas,
-        { id: 'ML00001v1', createdBy: 'Mathieu' }
-      ];
-      
-      setCurrentUserInitials('ML');
-      
-      const formulaId = generateFormulaId({
-        formulaType: FORMULA_TYPES.PERFUMER,
-        userInitials: 'ML',
-        existingFormulas: formulasWithMathieu,
-        baseFormulaId: 'ML00001v1',
-        isUserCopy: true
-      });
-      
-      expect(formulaId).toBe('ML00001v2'); // Increment version
-    });
-  });
-
-  describe('U-Code Generation', () => {
-    it('should generate UAD00001A for first locked formula', () => {
-      const uCode = generateUCode([], 1);
-      expect(uCode).toBe('UAD00001A');
+            expect(formulaId).toBe('B00001v1'); // First base formula
+        });
     });
 
-    it('should increment letter suffix for same theme', () => {
-      const existingUCodes = ['UAD00001A'];
-      const uCode = generateUCode(existingUCodes, 1);
-      expect(uCode).toBe('UAD00001B');
+    describe('Scenario 2: Mariazel creates new trial (version)', () => {
+        it('should increment version for same user copying own formula', () => {
+            setCurrentUserInitials('MZ');
+
+            const formulaId = generateFormulaId({
+                formulaType: FORMULA_TYPES.PERFUMER,
+                userInitials: 'MZ',
+                existingFormulas,
+                baseFormulaId: 'MZ00001v2',
+                isUserCopy: true
+            });
+
+            expect(formulaId).toBe('MZ00001v3'); // Increment version
+        });
     });
 
-    it('should generate UAD00001C for third version', () => {
-      const existingUCodes = ['UAD00001A', 'UAD00001B'];
-      const uCode = generateUCode(existingUCodes, 1);
-      expect(uCode).toBe('UAD00001C');
-    });
-  });
+    describe('Scenario 3: Mathieu creates editable copy of Mariazel formula', () => {
+        it('should create new ID with different initials, version v1', () => {
+            setCurrentUserInitials('ML');
 
-  describe('Formula Type-specific IDs', () => {
-    it('should generate B00001v1 for Base formula', () => {
-      const formulaId = generateFormulaId({
-        formulaType: FORMULA_TYPES.BASE,
-        userInitials: 'MZ',
-        existingFormulas: []
-      });
-      
-      expect(formulaId).toBe('B00001v1');
+            const formulaId = generateFormulaId({
+                formulaType: FORMULA_TYPES.PERFUMER,
+                userInitials: 'ML',
+                existingFormulas,
+                baseFormulaId: 'MZ00001v2',
+                isUserCopy: false // Different user
+            });
+
+            expect(formulaId).toBe('ML00001v1'); // New sequence for Mathieu
+        });
     });
 
-    it('should generate D00001v1 for Dilution formula', () => {
-      const formulaId = generateFormulaId({
-        formulaType: FORMULA_TYPES.DILUTION,
-        userInitials: 'MZ',
-        existingFormulas: []
-      });
-      
-      expect(formulaId).toBe('D00001v1');
+    describe('Scenario 4: Mathieu creates a new version', () => {
+        it('should increment version for Mathieu own formula', () => {
+            const formulasWithMathieu = [
+                ...existingFormulas,
+                { id: 'ML00001v1', createdBy: 'Mathieu' }
+            ];
+
+            setCurrentUserInitials('ML');
+
+            const formulaId = generateFormulaId({
+                formulaType: FORMULA_TYPES.PERFUMER,
+                userInitials: 'ML',
+                existingFormulas: formulasWithMathieu,
+                baseFormulaId: 'ML00001v1',
+                isUserCopy: true
+            });
+
+            expect(formulaId).toBe('ML00001v2'); // Increment version
+        });
     });
 
-    it('should generate A00001v1 for Analytical formula', () => {
-      const formulaId = generateFormulaId({
-        formulaType: FORMULA_TYPES.ANALYTICAL,
-        userInitials: 'MZ',
-        existingFormulas: []
-      });
-      
-      expect(formulaId).toBe('A00001v1');
+    describe('U-Code Generation', () => {
+        it('should generate UAD00001A for first locked formula', () => {
+            const uCode = generateUCode([], 1);
+            expect(uCode).toBe('UAD00001A');
+        });
+
+        it('should increment letter suffix for same theme', () => {
+            const existingUCodes = ['UAD00001A'];
+            const uCode = generateUCode(existingUCodes, 1);
+            expect(uCode).toBe('UAD00001B');
+        });
+
+        it('should generate UAD00001C for third version', () => {
+            const existingUCodes = ['UAD00001A', 'UAD00001B'];
+            const uCode = generateUCode(existingUCodes, 1);
+            expect(uCode).toBe('UAD00001C');
+        });
     });
 
-    it('should generate MZ00001v1 for Perfumer formula', () => {
-      const formulaId = generateFormulaId({
-        formulaType: FORMULA_TYPES.PERFUMER,
-        userInitials: 'MZ',
-        existingFormulas: []
-      });
-      
-      expect(formulaId).toBe('MZ00001v1');
-    });
-  });
+    describe('Formula Type-specific IDs', () => {
+        it('should generate B00001v1 for Base formula', () => {
+            const formulaId = generateFormulaId({
+                formulaType: FORMULA_TYPES.BASE,
+                userInitials: 'MZ',
+                existingFormulas: []
+            });
 
-  describe('Parse Formula ID', () => {
-    it('should parse Base formula ID correctly', () => {
-      const parsed = parseFormulaId('B00005v3');
-      
-      expect(parsed).toEqual({
-        prefix: 'B',
-        sequenceNumber: 5,
-        version: 3,
-        fullId: 'B00005v3',
-        isPerfumerFormula: false,
-        userInitials: undefined
-      });
-    });
+            expect(formulaId).toBe('B00001v1');
+        });
 
-    it('should parse Perfumer formula ID correctly', () => {
-      const parsed = parseFormulaId('MZ00001v2');
-      
-      expect(parsed).toEqual({
-        prefix: 'MZ',
-        sequenceNumber: 1,
-        version: 2,
-        fullId: 'MZ00001v2',
-        isPerfumerFormula: true,
-        userInitials: 'MZ'
-      });
-    });
+        it('should generate D00001v1 for Dilution formula', () => {
+            const formulaId = generateFormulaId({
+                formulaType: FORMULA_TYPES.DILUTION,
+                userInitials: 'MZ',
+                existingFormulas: []
+            });
 
-    it('should return null for invalid format', () => {
-      const parsed = parseFormulaId('INVALID-ID');
-      expect(parsed).toBeNull();
-    });
-  });
+            expect(formulaId).toBe('D00001v1');
+        });
 
-  describe('Ownership Checks', () => {
-    it('should identify own perfumer formula', () => {
-      setCurrentUserInitials('MZ');
-      
-      const isOwn = isOwnFormula('MZ00001v1', 'MZ');
-      expect(isOwn).toBe(true);
+        it('should generate A00001v1 for Analytical formula', () => {
+            const formulaId = generateFormulaId({
+                formulaType: FORMULA_TYPES.ANALYTICAL,
+                userInitials: 'MZ',
+                existingFormulas: []
+            });
+
+            expect(formulaId).toBe('A00001v1');
+        });
+
+        it('should generate MZ00001v1 for Perfumer formula', () => {
+            const formulaId = generateFormulaId({
+                formulaType: FORMULA_TYPES.PERFUMER,
+                userInitials: 'MZ',
+                existingFormulas: []
+            });
+
+            expect(formulaId).toBe('MZ00001v1');
+        });
     });
 
-    it('should identify other user formula', () => {
-      setCurrentUserInitials('MZ');
-      
-      const isOwn = isOwnFormula('ML00001v1', 'MZ');
-      expect(isOwn).toBe(false);
+    describe('Parse Formula ID', () => {
+        it('should parse Base formula ID correctly', () => {
+            const parsed = parseFormulaId('B00005v3');
+
+            expect(parsed).toEqual({
+                prefix: 'B',
+                sequenceNumber: 5,
+                version: 3,
+                fullId: 'B00005v3',
+                isPerfumerFormula: false,
+                userInitials: undefined
+            });
+        });
+
+        it('should parse Perfumer formula ID correctly', () => {
+            const parsed = parseFormulaId('MZ00001v2');
+
+            expect(parsed).toEqual({
+                prefix: 'MZ',
+                sequenceNumber: 1,
+                version: 2,
+                fullId: 'MZ00001v2',
+                isPerfumerFormula: true,
+                userInitials: 'MZ'
+            });
+        });
+
+        it('should return null for invalid format', () => {
+            const parsed = parseFormulaId('INVALID-ID');
+            expect(parsed).toBeNull();
+        });
     });
 
-    it('should return false for non-perfumer formula', () => {
-      setCurrentUserInitials('MZ');
-      
-      const isOwn = isOwnFormula('B00001v1', 'MZ');
-      expect(isOwn).toBe(false);
-    });
-  });
+    describe('Ownership Checks', () => {
+        it('should identify own perfumer formula', () => {
+            setCurrentUserInitials('MZ');
 
-  describe('Sequence Number Generation', () => {
-    it('should get next sequence number for new prefix', () => {
-      const nextSeq = getNextSequenceNumber(existingFormulas, 'B');
-      expect(nextSeq).toBe(1); // No base formulas exist
-    });
+            const isOwn = isOwnFormula('MZ00001v1', 'MZ');
+            expect(isOwn).toBe(true);
+        });
 
-    it('should increment existing sequence', () => {
-      const formulasWithBase = [
-        ...existingFormulas,
-        { id: 'B00001v1' },
-        { id: 'B00002v1' }
-      ];
-      
-      const nextSeq = getNextSequenceNumber(formulasWithBase, 'B');
-      expect(nextSeq).toBe(3);
-    });
-  });
+        it('should identify other user formula', () => {
+            setCurrentUserInitials('MZ');
 
-  describe('Version Number Generation', () => {
-    it('should get next version for existing sequence', () => {
-      const nextVersion = getNextVersionNumber(existingFormulas, 'MZ', 1);
-      expect(nextVersion).toBe(3); // MZ00001v1 and MZ00001v2 exist
+            const isOwn = isOwnFormula('ML00001v1', 'MZ');
+            expect(isOwn).toBe(false);
+        });
+
+        it('should return false for non-perfumer formula', () => {
+            setCurrentUserInitials('MZ');
+
+            const isOwn = isOwnFormula('B00001v1', 'MZ');
+            expect(isOwn).toBe(false);
+        });
     });
 
-    it('should return v1 for new sequence', () => {
-      const nextVersion = getNextVersionNumber(existingFormulas, 'MZ', 999);
-      expect(nextVersion).toBe(1); // No formulas with sequence 999
-    });
-  });
+    describe('Sequence Number Generation', () => {
+        it('should get next sequence number for new prefix', () => {
+            const nextSeq = getNextSequenceNumber(existingFormulas, 'B');
+            expect(nextSeq).toBe(1); // No base formulas exist
+        });
 
-  describe('Perfumer Directory', () => {
-    it('should have all required perfumers', () => {
-      expect(PERFUMER_DIRECTORY['AC']).toBe('Clemente, Augustin');
-      expect(PERFUMER_DIRECTORY['MZ']).toBe('Montejo-Coll, Mariazel');
-      expect(PERFUMER_DIRECTORY['ML']).toBe('Lenoir, Mathieu');
-      expect(PERFUMER_DIRECTORY['NP']).toBe('Pentapati, Naresh');
-      expect(PERFUMER_DIRECTORY['AA']).toBe('Default User');
-    });
-  });
+        it('should increment existing sequence', () => {
+            const formulasWithBase = [
+                ...existingFormulas,
+                { id: 'B00001v1' },
+                { id: 'B00002v1' }
+            ];
 
-  describe('Default User Handling', () => {
-    it('should use AA as default when no user set', () => {
-      localStorage.removeItem('userInitials');
-      const initials = getCurrentUserInitials();
-      expect(initials).toBe('AA');
+            const nextSeq = getNextSequenceNumber(formulasWithBase, 'B');
+            expect(nextSeq).toBe(3);
+        });
     });
-  });
+
+    describe('Version Number Generation', () => {
+        it('should get next version for existing sequence', () => {
+            const nextVersion = getNextVersionNumber(existingFormulas, 'MZ', 1);
+            expect(nextVersion).toBe(3); // MZ00001v1 and MZ00001v2 exist
+        });
+
+        it('should return v1 for new sequence', () => {
+            const nextVersion = getNextVersionNumber(existingFormulas, 'MZ', 999);
+            expect(nextVersion).toBe(1); // No formulas with sequence 999
+        });
+    });
+
+    describe('Perfumer Directory', () => {
+        it('should have all required perfumers', () => {
+            expect(PERFUMER_DIRECTORY['AC']).toBe('Clemente, Augustin');
+            expect(PERFUMER_DIRECTORY['MZ']).toBe('Montejo-Coll, Mariazel');
+            expect(PERFUMER_DIRECTORY['ML']).toBe('Lenoir, Mathieu');
+            expect(PERFUMER_DIRECTORY['NP']).toBe('Pentapati, Naresh');
+            expect(PERFUMER_DIRECTORY['AA']).toBe('Default User');
+        });
+    });
+
+    describe('Default User Handling', () => {
+        it('should use AA as default when no user set', () => {
+            localStorage.removeItem('userInitials');
+            const initials = getCurrentUserInitials();
+            expect(initials).toBe('AA');
+        });
+    });
 });
 
 /**

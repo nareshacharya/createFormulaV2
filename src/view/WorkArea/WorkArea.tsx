@@ -27,6 +27,7 @@ import { useDilution } from "../../components/dilution";
 import { generateNewFormulaId } from "../../utils/formulaIdGenerator";
 import type { WorkspaceState } from "../../utils/workspaceManager";
 import { appStateHistory } from "../../utils/stateHistory";
+import { exportData } from "../../utils/exportUtils";
 
 const WorkArea = () => {
   // Use custom hooks for state management
@@ -69,6 +70,12 @@ const WorkArea = () => {
   // Local state for attribute dialog and grouping
   const [showAttributeDialog, setShowAttributeDialog] = useState(false);
   const [groupedByColumn, setGroupedByColumn] = useState<string | null>(null);
+
+  // Undo state tracking
+  const [undoState, setUndoState] = useState({
+    canUndo: false,
+    undoCount: 0,
+  });
 
   // Track if initial state has been saved for undo
   const initialStateSaved = useRef(false);
@@ -173,6 +180,88 @@ const WorkArea = () => {
     setTableData,
     handleNormalize,
   });
+
+  // Handle undo action
+  const handleUndoAction = useCallback(() => {
+    const previousState = appStateHistory.undo();
+    if (previousState) {
+      // Restore the previous state
+      setColumns(previousState.columns);
+      setTableData(previousState.tableData);
+      setFormulas(previousState.formulas);
+      setAvailableFormulas(previousState.availableFormulas);
+
+      // Restore dilution state
+      if (previousState.dilutions) {
+        dilutionState.restoreDilutions(previousState.dilutions);
+      } else {
+        dilutionState.clearAllDilutions();
+      }
+
+      // Emit undo state update
+      eventBus.emit("undo-state-updated", {
+        canUndo: appStateHistory.canUndo(),
+        count: appStateHistory.getUndoCount(),
+      });
+
+      // Update formula selections count
+      const formulaColumns = previousState.columns.filter(
+        (col: Column) => col.group === "Formulas" && col.formulaId
+      );
+      const formulaIds = formulaColumns.map((col: Column) => col.formulaId!);
+      setSelectedFormulaIds(formulaIds);
+
+      toast.success("Action undone successfully");
+    } else {
+      toast.error("Nothing to undo");
+    }
+  }, [
+    dilutionState,
+    setColumns,
+    setTableData,
+    setFormulas,
+    setAvailableFormulas,
+    setSelectedFormulaIds,
+  ]);
+
+  // Wrapper for send action that uses the current active formula
+  const handleToolbarSend = useCallback(() => {
+    if (!editableFormula) {
+      toast.error("Please select an active formula first");
+      return;
+    }
+    handleSendForCompoundingFromMenu(editableFormula);
+  }, [editableFormula, handleSendForCompoundingFromMenu]);
+
+  // Handle export to Excel
+  const handleExportToExcel = useCallback(() => {
+    try {
+      // Use getDisplayColumns directly without adding to dependencies
+      // This is safe because getDisplayColumns is defined in the component
+      const exportColumns = getDisplayColumns();
+      const exportData_impl = getEmptyStateData(tableData, false); // Get all data, not empty state
+
+      const fileName = editableFormula
+        ? `formula-${editableFormula.replace(/\s+/g, "_")}-${
+            new Date().toISOString().split("T")[0]
+          }`
+        : `formulation-${new Date().toISOString().split("T")[0]}`;
+
+      exportData(
+        {
+          columns: exportColumns,
+          data: exportData_impl,
+          filename: fileName,
+        },
+        "excel"
+      );
+      toast.success("Data exported successfully");
+    } catch (error) {
+      console.error("Export failed:", error);
+      toast.error("Failed to export data");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tableData, editableFormula]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -785,21 +874,21 @@ const WorkArea = () => {
       const newColumnId = `formula_${Date.now()}_${Math.random()
         .toString(36)
         .substr(2, 9)}`;
-      
+
       // Get the display ID (type-specific ID to show in header)
-      const displayId = 
+      const displayId =
         data.formula.perfumerFormulaId ||
         data.formula.baseFormulaId ||
         data.formula.dilutionFormulaId ||
         data.formula.analyticalFormulaId ||
         data.formula.id;
-      
+
       const newColumn: Column = {
         id: newColumnId,
         key: newColumnId,
         title: data.formula.name,
-        formulaId: data.formula.id,  // Universal ID
-        formulaDisplayId: displayId,  // Type-specific display ID
+        formulaId: data.formula.id, // Universal ID
+        formulaDisplayId: displayId, // Type-specific display ID
         type: "number",
         sortable: true,
         editable: true,
@@ -880,21 +969,21 @@ const WorkArea = () => {
       const newColumnId = `formula_${Date.now()}_${Math.random()
         .toString(36)
         .substr(2, 9)}`;
-      
+
       // Get the display ID (type-specific ID to show in header)
-      const displayId = 
+      const displayId =
         data.formula.perfumerFormulaId ||
         data.formula.baseFormulaId ||
         data.formula.dilutionFormulaId ||
         data.formula.analyticalFormulaId ||
         data.formula.id;
-      
+
       const newColumn: Column = {
         id: newColumnId,
         key: newColumnId,
         title: data.formula.name,
-        formulaId: data.formula.id,  // Universal ID
-        formulaDisplayId: displayId,  // Type-specific display ID
+        formulaId: data.formula.id, // Universal ID
+        formulaDisplayId: displayId, // Type-specific display ID
         type: "number",
         sortable: true,
         editable: true,
@@ -1183,6 +1272,12 @@ const WorkArea = () => {
     eventBus.on("new-formula-created", handleNewFormulaCreated);
     eventBus.on("formula-selected-for-column", handleFormulaSelectedForColumn);
     eventBus.on("undo-action", handleUndoAction);
+    eventBus.on("undo-state-updated", (data) => {
+      setUndoState({
+        canUndo: data.canUndo,
+        undoCount: data.count,
+      });
+    });
 
     return () => {
       eventBus.off("ingredient-selected", handleIngredientClick);
@@ -1197,6 +1292,12 @@ const WorkArea = () => {
         handleFormulaSelectedForColumn
       );
       eventBus.off("undo-action", handleUndoAction);
+      eventBus.off("undo-state-updated", (data) => {
+        setUndoState({
+          canUndo: data.canUndo,
+          undoCount: data.count,
+        });
+      });
     };
   }, [
     columns,
@@ -1614,20 +1715,9 @@ const WorkArea = () => {
     // Save state after action completes
     saveStateAfterAction("reorder_rows", "Reordered rows");
   };
-
-  // Save view handler
-  const handleSaveView = (viewName: string) => {
-    toast.success(`View "${viewName}" saved successfully`);
-  };
-
   // Toggle grouping handler
   const handleToggleGrouping = (columnId: string) => {
     setGroupedByColumn((prev) => (prev === columnId ? null : columnId));
-  };
-
-  // Load view handler
-  const handleLoadView = (viewId: string) => {
-    toast.success(`View loaded successfully`);
   };
 
   // Bulk delete handler
@@ -1831,17 +1921,24 @@ const WorkArea = () => {
           onToggleFormulaExpansion={handleToggleFormulaExpansion}
           onColumnReorder={handleColumnReorder}
           onRowReorder={handleRowReorder}
-          onSaveView={handleSaveView}
-          onLoadView={handleLoadView}
           onToggleGrouping={handleToggleGrouping}
           groupedByColumn={groupedByColumn}
           editableFormula={editableFormula}
           className="h-full"
           showEmptyState={!hasIngredients}
           enableRowReordering={true}
-          enableSavedViews={true}
           enableBulkSelection={true}
           dilutionState={dilutionState}
+          // Toolbar actions
+          onToolbarAddFormula={handleAddFormulaColumn}
+          onToolbarMergeDuplicates={handleMergeDuplicates}
+          onToolbarNormalize={handleNormalize}
+          onToolbarSend={handleToolbarSend}
+          onToolbarUndo={handleUndoAction}
+          onToolbarExport={handleExportToExcel}
+          toolbarCanUndo={undoState.canUndo}
+          toolbarUndoCount={undoState.undoCount}
+          toolbarCanSend={!!activeFormula}
         />
       </div>
 

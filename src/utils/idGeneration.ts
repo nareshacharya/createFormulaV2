@@ -32,20 +32,20 @@ import { FORMULA_TYPES } from "../config/formulaTypes.config";
  * Default to 'AA' if no user available
  */
 export const PERFUMER_DIRECTORY: Record<string, string> = {
-  'AC': 'Clemente, Augustin',
-  'AD': 'Dulio, Andrea',
-  'DC': "C'Ailceta, Daniel",
-  'JM': 'Mastrocola, John',
-  'JP': 'Jean-Pascal, Osmont',
-  'ML': 'Lenoir, Mathieu',
-  'MZ': 'Montejo-Coll, Mariazel',
-  'RK': 'Kumar, Raj',
-  'TS': 'Thierry, Suong',
-  'VC': 'Vincent, Chevalier',
-  'ZF': 'Jose, Juarez',
-  'MK': 'Makarand',
-  'NP': 'Pentapati, Naresh',
-  'AA': 'Default User'
+    'AC': 'Clemente, Augustin',
+    'AD': 'Dulio, Andrea',
+    'DC': "C'Ailceta, Daniel",
+    'JM': 'Mastrocola, John',
+    'JP': 'Jean-Pascal, Osmont',
+    'ML': 'Lenoir, Mathieu',
+    'MZ': 'Montejo-Coll, Mariazel',
+    'RK': 'Kumar, Raj',
+    'TS': 'Thierry, Suong',
+    'VC': 'Vincent, Chevalier',
+    'ZF': 'Jose, Juarez',
+    'MK': 'Makarand',
+    'NP': 'Pentapati, Naresh',
+    'AA': 'Default User'
 };
 
 /**
@@ -53,36 +53,36 @@ export const PERFUMER_DIRECTORY: Record<string, string> = {
  * In production, this should fetch from Pega user service
  */
 export const getCurrentUserInitials = (): string => {
-  // TODO: Replace with actual Pega user service call
-  // For now, return 'AA' as default if no user
-  return localStorage.getItem('userInitials') || 'AA';
+    // TODO: Replace with actual Pega user service call
+    // For now, return 'AA' as default if no user
+    return localStorage.getItem('userInitials') || 'AA';
 };
 
 /**
  * Set current user initials (for testing/mock purposes)
  */
 export const setCurrentUserInitials = (initials: string): void => {
-  if (PERFUMER_DIRECTORY[initials]) {
-    localStorage.setItem('userInitials', initials);
-  }
+    if (PERFUMER_DIRECTORY[initials]) {
+        localStorage.setItem('userInitials', initials);
+    }
 };
 
 /**
  * Get type prefix for formula type
  */
 const getTypePrefix = (formulaType: FormulaType): string => {
-  switch (formulaType) {
-    case FORMULA_TYPES.BASE:
-      return 'B';
-    case FORMULA_TYPES.DILUTION:
-      return 'D';
-    case FORMULA_TYPES.ANALYTICAL:
-      return 'A';
-    case FORMULA_TYPES.PERFUMER:
-      return ''; // Perfumer uses user initials instead of type prefix
-    default:
-      return 'F';
-  }
+    switch (formulaType) {
+        case FORMULA_TYPES.BASE:
+            return 'B';
+        case FORMULA_TYPES.DILUTION:
+            return 'D';
+        case FORMULA_TYPES.ANALYTICAL:
+            return 'A';
+        case FORMULA_TYPES.PERFUMER:
+            return ''; // Perfumer uses user initials instead of type prefix
+        default:
+            return 'F';
+    }
 };
 
 /**
@@ -95,39 +95,39 @@ const getTypePrefix = (formulaType: FormulaType): string => {
  * - MZ00001v1 (Perfumer with initials)
  */
 export interface ParsedFormulaId {
-  prefix: string;           // F, B, D, A, or user initials (MZ, etc.)
-  sequenceNumber: number;   // 00001
-  version: number;          // 1 from v1
-  fullId: string;           // Complete ID
-  isPerfumerFormula: boolean;
-  userInitials?: string;    // Only for perfumer formulas
+    prefix: string;           // F, B, D, A, or user initials (MZ, etc.)
+    sequenceNumber: number;   // 00001
+    version: number;          // 1 from v1
+    fullId: string;           // Complete ID
+    isPerfumerFormula: boolean;
+    userInitials?: string;    // Only for perfumer formulas
 }
 
 export const parseFormulaId = (formulaId: string): ParsedFormulaId | null => {
-  // Match patterns:
-  // - F00001v1, B00001v1, D00001v1, A00001v1 (single letter + 5 digits + version)
-  // - MZ00001v1, NP00001v1 (2-3 letters + 5 digits + version)
-  const match = formulaId.match(/^([A-Z]{1,3})(\d{5})v(\d+)$/);
-  
-  if (!match) {
-    return null;
-  }
+    // Match patterns:
+    // - F00001v1, B00001v1, D00001v1, A00001v1 (single letter + 5 digits + version)
+    // - MZ00001v1, NP00001v1 (2-3 letters + 5 digits + version)
+    const match = formulaId.match(/^([A-Z]{1,3})(\d{5})v(\d+)$/);
 
-  const [, prefix, seqStr, versionStr] = match;
-  const sequenceNumber = parseInt(seqStr, 10);
-  const version = parseInt(versionStr, 10);
+    if (!match) {
+        return null;
+    }
 
-  // Check if it's a perfumer formula (2-3 letter prefix that's in the directory)
-  const isPerfumerFormula = prefix.length > 1 && PERFUMER_DIRECTORY[prefix] !== undefined;
+    const [, prefix, seqStr, versionStr] = match;
+    const sequenceNumber = parseInt(seqStr, 10);
+    const version = parseInt(versionStr, 10);
 
-  return {
-    prefix,
-    sequenceNumber,
-    version,
-    fullId: formulaId,
-    isPerfumerFormula,
-    userInitials: isPerfumerFormula ? prefix : undefined
-  };
+    // Check if it's a perfumer formula (2-3 letter prefix that's in the directory)
+    const isPerfumerFormula = prefix.length > 1 && PERFUMER_DIRECTORY[prefix] !== undefined;
+
+    return {
+        prefix,
+        sequenceNumber,
+        version,
+        fullId: formulaId,
+        isPerfumerFormula,
+        userInitials: isPerfumerFormula ? prefix : undefined
+    };
 };
 
 /**
@@ -135,21 +135,21 @@ export const parseFormulaId = (formulaId: string): ParsedFormulaId | null => {
  * Looks through existing formulas and finds the highest number with the same prefix
  */
 export const getNextSequenceNumber = (
-  existingFormulas: Array<{ id: string }>,
-  prefix: string
+    existingFormulas: Array<{ id: string }>,
+    prefix: string
 ): number => {
-  let maxNumber = 0;
+    let maxNumber = 0;
 
-  existingFormulas.forEach((formula) => {
-    const parsed = parseFormulaId(formula.id);
-    if (parsed && parsed.prefix === prefix) {
-      if (parsed.sequenceNumber > maxNumber) {
-        maxNumber = parsed.sequenceNumber;
-      }
-    }
-  });
+    existingFormulas.forEach((formula) => {
+        const parsed = parseFormulaId(formula.id);
+        if (parsed && parsed.prefix === prefix) {
+            if (parsed.sequenceNumber > maxNumber) {
+                maxNumber = parsed.sequenceNumber;
+            }
+        }
+    });
 
-  return maxNumber + 1;
+    return maxNumber + 1;
 };
 
 /**
@@ -157,35 +157,35 @@ export const getNextSequenceNumber = (
  * When a user creates a new version of their own formula (same sequence number)
  */
 export const getNextVersionNumber = (
-  existingFormulas: Array<{ id: string }>,
-  prefix: string,
-  sequenceNumber: number
+    existingFormulas: Array<{ id: string }>,
+    prefix: string,
+    sequenceNumber: number
 ): number => {
-  let maxVersion = 0;
+    let maxVersion = 0;
 
-  existingFormulas.forEach((formula) => {
-    const parsed = parseFormulaId(formula.id);
-    if (parsed && 
-        parsed.prefix === prefix && 
-        parsed.sequenceNumber === sequenceNumber) {
-      if (parsed.version > maxVersion) {
-        maxVersion = parsed.version;
-      }
-    }
-  });
+    existingFormulas.forEach((formula) => {
+        const parsed = parseFormulaId(formula.id);
+        if (parsed &&
+            parsed.prefix === prefix &&
+            parsed.sequenceNumber === sequenceNumber) {
+            if (parsed.version > maxVersion) {
+                maxVersion = parsed.version;
+            }
+        }
+    });
 
-  return maxVersion + 1;
+    return maxVersion + 1;
 };
 
 /**
  * Configuration for ID generation
  */
 export interface IdGenerationConfig {
-  formulaType: FormulaType;
-  userInitials?: string;
-  existingFormulas: Array<{ id: string; createdBy?: string }>;
-  baseFormulaId?: string;        // If creating a version/copy of existing formula
-  isUserCopy?: boolean;          // If current user is copying their own formula
+    formulaType: FormulaType;
+    userInitials?: string;
+    existingFormulas: Array<{ id: string; createdBy?: string }>;
+    baseFormulaId?: string;        // If creating a version/copy of existing formula
+    isUserCopy?: boolean;          // If current user is copying their own formula
 }
 
 /**
@@ -197,45 +197,45 @@ export interface IdGenerationConfig {
  * 3. Different user copying formula: New sequence for that user, v1
  */
 export const generateFormulaId = (config: IdGenerationConfig): string => {
-  const {
-    formulaType,
-    userInitials: providedInitials,
-    existingFormulas,
-    baseFormulaId,
-    isUserCopy = false
-  } = config;
-
-  const userInitials = providedInitials || getCurrentUserInitials();
-
-  // Determine prefix based on formula type
-  let prefix: string;
-  if (formulaType === FORMULA_TYPES.PERFUMER) {
-    prefix = userInitials;
-  } else {
-    prefix = getTypePrefix(formulaType);
-  }
-
-  // CASE 1: Creating a new version of user's own formula
-  if (baseFormulaId && isUserCopy) {
-    const parsed = parseFormulaId(baseFormulaId);
-    if (parsed && parsed.prefix === prefix) {
-      // Same prefix (same user for perfumer, same type for others)
-      // Get next version for this sequence number
-      const nextVersion = getNextVersionNumber(
+    const {
+        formulaType,
+        userInitials: providedInitials,
         existingFormulas,
-        prefix,
-        parsed.sequenceNumber
-      );
-      return `${prefix}${parsed.sequenceNumber.toString().padStart(5, '0')}v${nextVersion}`;
-    }
-  }
+        baseFormulaId,
+        isUserCopy = false
+    } = config;
 
-  // CASE 2: Different user copying OR new formula
-  // Get next available sequence number for this prefix
-  const nextSequence = getNextSequenceNumber(existingFormulas, prefix);
-  const sequenceStr = nextSequence.toString().padStart(5, '0');
-  
-  return `${prefix}${sequenceStr}v1`;
+    const userInitials = providedInitials || getCurrentUserInitials();
+
+    // Determine prefix based on formula type
+    let prefix: string;
+    if (formulaType === FORMULA_TYPES.PERFUMER) {
+        prefix = userInitials;
+    } else {
+        prefix = getTypePrefix(formulaType);
+    }
+
+    // CASE 1: Creating a new version of user's own formula
+    if (baseFormulaId && isUserCopy) {
+        const parsed = parseFormulaId(baseFormulaId);
+        if (parsed && parsed.prefix === prefix) {
+            // Same prefix (same user for perfumer, same type for others)
+            // Get next version for this sequence number
+            const nextVersion = getNextVersionNumber(
+                existingFormulas,
+                prefix,
+                parsed.sequenceNumber
+            );
+            return `${prefix}${parsed.sequenceNumber.toString().padStart(5, '0')}v${nextVersion}`;
+        }
+    }
+
+    // CASE 2: Different user copying OR new formula
+    // Get next available sequence number for this prefix
+    const nextSequence = getNextSequenceNumber(existingFormulas, prefix);
+    const sequenceStr = nextSequence.toString().padStart(5, '0');
+
+    return `${prefix}${sequenceStr}v1`;
 };
 
 /**
@@ -243,18 +243,18 @@ export const generateFormulaId = (config: IdGenerationConfig): string => {
  * Alias for generateFormulaId with PERFUMER type for clarity
  */
 export const generatePerfumerFormulaId = (
-  userInitials: string,
-  existingFormulas: Array<{ id: string }>,
-  baseFormulaId?: string,
-  isUserCopy?: boolean
+    userInitials: string,
+    existingFormulas: Array<{ id: string }>,
+    baseFormulaId?: string,
+    isUserCopy?: boolean
 ): string => {
-  return generateFormulaId({
-    formulaType: FORMULA_TYPES.PERFUMER,
-    userInitials,
-    existingFormulas,
-    baseFormulaId,
-    isUserCopy
-  });
+    return generateFormulaId({
+        formulaType: FORMULA_TYPES.PERFUMER,
+        userInitials,
+        existingFormulas,
+        baseFormulaId,
+        isUserCopy
+    });
 };
 
 /**
@@ -264,53 +264,53 @@ export const generatePerfumerFormulaId = (
  * U-Codes increment the letter suffix for different versions within same theme
  */
 export const generateUCode = (
-  existingUCodes: string[],
-  themeNumber: number
+    existingUCodes: string[],
+    themeNumber: number
 ): string => {
-  const prefix = 'UAD';
-  const themeStr = themeNumber.toString().padStart(5, '0');
-  
-  // Find highest letter suffix for this theme
-  const pattern = new RegExp(`^${prefix}${themeStr}([A-Z])$`);
-  let maxCharCode = 64; // 'A' is 65
-  
-  existingUCodes.forEach(code => {
-    const match = code.match(pattern);
-    if (match) {
-      const charCode = match[1].charCodeAt(0);
-      if (charCode > maxCharCode) {
-        maxCharCode = charCode;
-      }
-    }
-  });
-  
-  const nextLetter = String.fromCharCode(maxCharCode + 1);
-  return `${prefix}${themeStr}${nextLetter}`;
+    const prefix = 'UAD';
+    const themeStr = themeNumber.toString().padStart(5, '0');
+
+    // Find highest letter suffix for this theme
+    const pattern = new RegExp(`^${prefix}${themeStr}([A-Z])$`);
+    let maxCharCode = 64; // 'A' is 65
+
+    existingUCodes.forEach(code => {
+        const match = code.match(pattern);
+        if (match) {
+            const charCode = match[1].charCodeAt(0);
+            if (charCode > maxCharCode) {
+                maxCharCode = charCode;
+            }
+        }
+    });
+
+    const nextLetter = String.fromCharCode(maxCharCode + 1);
+    return `${prefix}${themeStr}${nextLetter}`;
 };
 
 /**
  * Validate formula ID format
  */
 export const isValidFormulaId = (formulaId: string): boolean => {
-  const parsed = parseFormulaId(formulaId);
-  return parsed !== null;
+    const parsed = parseFormulaId(formulaId);
+    return parsed !== null;
 };
 
 /**
  * Check if user owns this formula (for perfumer formulas)
  */
 export const isOwnFormula = (
-  formulaId: string,
-  userInitials?: string
+    formulaId: string,
+    userInitials?: string
 ): boolean => {
-  const initials = userInitials || getCurrentUserInitials();
-  const parsed = parseFormulaId(formulaId);
-  
-  if (!parsed || !parsed.isPerfumerFormula) {
-    return false;
-  }
-  
-  return parsed.userInitials === initials;
+    const initials = userInitials || getCurrentUserInitials();
+    const parsed = parseFormulaId(formulaId);
+
+    if (!parsed || !parsed.isPerfumerFormula) {
+        return false;
+    }
+
+    return parsed.userInitials === initials;
 };
 
 /**
@@ -318,15 +318,15 @@ export const isOwnFormula = (
  * For integration with U-Code generation
  */
 export const getThemeNumber = (formulaId: string): number | null => {
-  const parsed = parseFormulaId(formulaId);
-  return parsed ? parsed.sequenceNumber : null;
+    const parsed = parseFormulaId(formulaId);
+    return parsed ? parsed.sequenceNumber : null;
 };
 
 /**
  * Format version for display
  */
 export const formatVersion = (version: number): string => {
-  return `v${version}`;
+    return `v${version}`;
 };
 
 /**
@@ -335,11 +335,11 @@ export const formatVersion = (version: number): string => {
  */
 
 export interface PegaIdResponse {
-  formulaId: string;
-  perfumerFormulaId?: string;
-  uCode?: string;
-  success: boolean;
-  error?: string;
+    formulaId: string;
+    perfumerFormulaId?: string;
+    uCode?: string;
+    success: boolean;
+    error?: string;
 }
 
 /**
@@ -347,13 +347,13 @@ export interface PegaIdResponse {
  * This is a placeholder - actual implementation will call Pega API
  */
 export const requestPegaIdGeneration = async (
-  _formulaType: FormulaType,
-  _userInitials: string,
-  _baseFormulaId?: string
+    _formulaType: FormulaType,
+    _userInitials: string,
+    _baseFormulaId?: string
 ): Promise<PegaIdResponse> => {
-  // TODO: Implement actual Pega API call
-  // For now, throw error to indicate Pega integration not available
-  throw new Error('Pega integration not yet available - using fallback ID generation');
+    // TODO: Implement actual Pega API call
+    // For now, throw error to indicate Pega integration not available
+    throw new Error('Pega integration not yet available - using fallback ID generation');
 };
 
 /**
@@ -361,42 +361,42 @@ export const requestPegaIdGeneration = async (
  * This function tries Pega first, falls back to local generation
  */
 export const generateIdsWithPegaFallback = async (
-  config: IdGenerationConfig
+    config: IdGenerationConfig
 ): Promise<{
-  formulaId: string;
-  perfumerFormulaId?: string;
-  usingFallback: boolean;
+    formulaId: string;
+    perfumerFormulaId?: string;
+    usingFallback: boolean;
 }> => {
-  try {
-    // Try Pega integration first
-    const response = await requestPegaIdGeneration(
-      config.formulaType,
-      config.userInitials || getCurrentUserInitials(),
-      config.baseFormulaId
-    );
-    
-    if (response.success) {
-      return {
-        formulaId: response.formulaId,
-        perfumerFormulaId: response.perfumerFormulaId,
-        usingFallback: false
-      };
+    try {
+        // Try Pega integration first
+        const response = await requestPegaIdGeneration(
+            config.formulaType,
+            config.userInitials || getCurrentUserInitials(),
+            config.baseFormulaId
+        );
+
+        if (response.success) {
+            return {
+                formulaId: response.formulaId,
+                perfumerFormulaId: response.perfumerFormulaId,
+                usingFallback: false
+            };
+        }
+    } catch (error) {
+        console.warn('Pega ID generation failed, using fallback:', error);
     }
-  } catch (error) {
-    console.warn('Pega ID generation failed, using fallback:', error);
-  }
-  
-  // Fallback to local generation
-  const formulaId = generateFormulaId(config);
-  const perfumerFormulaId = config.formulaType === FORMULA_TYPES.PERFUMER
-    ? formulaId
-    : undefined;
-    
-  return {
-    formulaId,
-    perfumerFormulaId,
-    usingFallback: true
-  };
+
+    // Fallback to local generation
+    const formulaId = generateFormulaId(config);
+    const perfumerFormulaId = config.formulaType === FORMULA_TYPES.PERFUMER
+        ? formulaId
+        : undefined;
+
+    return {
+        formulaId,
+        perfumerFormulaId,
+        usingFallback: true
+    };
 };
 
 /**
@@ -405,18 +405,18 @@ export const generateIdsWithPegaFallback = async (
  * @returns The type-specific display ID (e.g., B00001v1, MZ00001v1)
  */
 export const getFormulaDisplayId = (formula: {
-  id: string;
-  perfumerFormulaId?: string;
-  baseFormulaId?: string;
-  dilutionFormulaId?: string;
-  analyticalFormulaId?: string;
+    id: string;
+    perfumerFormulaId?: string;
+    baseFormulaId?: string;
+    dilutionFormulaId?: string;
+    analyticalFormulaId?: string;
 }): string => {
-  // Return type-specific ID if available, otherwise fall back to universal ID
-  return (
-    formula.perfumerFormulaId ||
-    formula.baseFormulaId ||
-    formula.dilutionFormulaId ||
-    formula.analyticalFormulaId ||
-    formula.id
-  );
+    // Return type-specific ID if available, otherwise fall back to universal ID
+    return (
+        formula.perfumerFormulaId ||
+        formula.baseFormulaId ||
+        formula.dilutionFormulaId ||
+        formula.analyticalFormulaId ||
+        formula.id
+    );
 };

@@ -83,10 +83,10 @@ export const useFormulaColumnHandlers = (config: FormulaHandlersConfig) => {
       const isUserCopy = formula.createdBy === userInitials;
 
       // Get the type-specific ID to increment version from
-      const currentTypeSpecificId = 
-        formula.perfumerFormulaId || 
-        formula.baseFormulaId || 
-        formula.dilutionFormulaId || 
+      const currentTypeSpecificId =
+        formula.perfumerFormulaId ||
+        formula.baseFormulaId ||
+        formula.dilutionFormulaId ||
         formula.analyticalFormulaId ||
         formula.id; // Fallback to universal ID if type-specific not set
 
@@ -95,7 +95,9 @@ export const useFormulaColumnHandlers = (config: FormulaHandlersConfig) => {
 
       if (isUserCopy && currentTypeSpecificId) {
         // Same user - increment version on existing sequence
-        const match = currentTypeSpecificId.match(/^([A-Z]{1,3})(\d{5})v(\d+)$/);
+        const match = currentTypeSpecificId.match(
+          /^([A-Z]{1,3})(\d{5})v(\d+)$/
+        );
         if (match) {
           const [, prefix, sequence, versionNum] = match;
           const nextVersion = parseInt(versionNum, 10) + 1;
@@ -108,56 +110,75 @@ export const useFormulaColumnHandlers = (config: FormulaHandlersConfig) => {
         }
       } else {
         // Different user - generate new sequence with their initials, reset to v1
-        const userFormulas = availableFormulas.filter(f => {
-          const id = f.perfumerFormulaId || f.baseFormulaId || f.dilutionFormulaId || f.analyticalFormulaId || f.id;
+        const userFormulas = availableFormulas.filter((f) => {
+          const id =
+            f.perfumerFormulaId ||
+            f.baseFormulaId ||
+            f.dilutionFormulaId ||
+            f.analyticalFormulaId ||
+            f.id;
           return id.startsWith(userInitials);
         });
-        
+
         const sequences = userFormulas
-          .map(f => {
-            const id = f.perfumerFormulaId || f.baseFormulaId || f.dilutionFormulaId || f.analyticalFormulaId || f.id;
+          .map((f) => {
+            const id =
+              f.perfumerFormulaId ||
+              f.baseFormulaId ||
+              f.dilutionFormulaId ||
+              f.analyticalFormulaId ||
+              f.id;
             const match = id.match(/^[A-Z]{1,3}(\d{5})v\d+$/);
             return match ? parseInt(match[1], 10) : 0;
           })
-          .filter(n => n > 0);
-        
-        const nextSequence = (sequences.length > 0 ? Math.max(...sequences) : 0) + 1;
-        newTypeSpecificId = `${userInitials}${nextSequence.toString().padStart(5, '0')}v1`;
+          .filter((n) => n > 0);
+
+        const nextSequence =
+          (sequences.length > 0 ? Math.max(...sequences) : 0) + 1;
+        newTypeSpecificId = `${userInitials}${nextSequence
+          .toString()
+          .padStart(5, "0")}v1`;
         newVersion = "v1";
-        
-        toast.success(
-          "Creating new version with your initials",
-          { duration: 3000 }
-        );
+
+        toast.success("Creating new version with your initials", {
+          duration: 3000,
+        });
       }
 
       // Generate new universal formula ID (F-sequence)
       const fSequenceNumbers = availableFormulas
-        .map(f => {
+        .map((f) => {
           const match = f.id.match(/^F(\d{5})v\d+$/);
           return match ? parseInt(match[1], 10) : 0;
         })
-        .filter(n => n > 0);
-      const nextFSequence = (fSequenceNumbers.length > 0 ? Math.max(...fSequenceNumbers) : 0) + 1;
-      const newUniversalId = `F${nextFSequence.toString().padStart(5, '0')}v1`;
+        .filter((n) => n > 0);
+      const nextFSequence =
+        (fSequenceNumbers.length > 0 ? Math.max(...fSequenceNumbers) : 0) + 1;
+      const newUniversalId = `F${nextFSequence.toString().padStart(5, "0")}v1`;
 
       // Determine which type-specific ID field to update
-      const typeSpecificIdField = 
-        formula.perfumerFormulaId ? 'perfumerFormulaId' :
-        formula.baseFormulaId ? 'baseFormulaId' :
-        formula.dilutionFormulaId ? 'dilutionFormulaId' :
-        formula.analyticalFormulaId ? 'analyticalFormulaId' : null;
+      const typeSpecificIdField = formula.perfumerFormulaId
+        ? "perfumerFormulaId"
+        : formula.baseFormulaId
+        ? "baseFormulaId"
+        : formula.dilutionFormulaId
+        ? "dilutionFormulaId"
+        : formula.analyticalFormulaId
+        ? "analyticalFormulaId"
+        : null;
 
       // Create new formula with updated IDs and version
       const newFormula: Formula = {
         ...formula,
-        id: newUniversalId,  // New universal ID
+        id: newUniversalId, // New universal ID
         version: newVersion,
         name: `${formula.name.replace(/\s*\(v\d+\)$/, "")} (${newVersion})`,
         createdBy: userInitials,
         lastUpdated: new Date().toISOString(),
         status: "draft",
-        ...(typeSpecificIdField ? { [typeSpecificIdField]: newTypeSpecificId } : {}),
+        ...(typeSpecificIdField
+          ? { [typeSpecificIdField]: newTypeSpecificId }
+          : {}),
       };
 
       // Add new formula to available formulas list

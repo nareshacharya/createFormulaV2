@@ -11,7 +11,10 @@ import {
 } from "../config/formulaTypes.config";
 import type { FormulaType } from "../config/formulaTypes.config";
 import { isFieldVisible } from "../config/formulaCreation.config";
-import { generateFormulaId, getCurrentUserInitials } from "../utils/idGeneration";
+import {
+  generateFormulaId,
+  getCurrentUserInitials,
+} from "../utils/idGeneration";
 
 interface FormulaModalProps {
   isOpen: boolean;
@@ -156,13 +159,16 @@ const FormulaModal = ({
     // Generate universal formula ID (F00001v1) - not displayed on screen
     // Find highest F-sequence number across all formulas
     const fSequenceNumbers = availableFormulas
-      .map(f => {
+      .map((f) => {
         const match = f.id.match(/^F(\d{5})v\d+$/);
         return match ? parseInt(match[1], 10) : 0;
       })
-      .filter(n => n > 0);
-    const nextFSequence = (fSequenceNumbers.length > 0 ? Math.max(...fSequenceNumbers) : 0) + 1;
-    const universalFormulaId = `F${nextFSequence.toString().padStart(5, '0')}v1`;
+      .filter((n) => n > 0);
+    const nextFSequence =
+      (fSequenceNumbers.length > 0 ? Math.max(...fSequenceNumbers) : 0) + 1;
+    const universalFormulaId = `F${nextFSequence
+      .toString()
+      .padStart(5, "0")}v1`;
 
     // Generate formula name based on type
     const formulaName =
@@ -172,7 +178,7 @@ const FormulaModal = ({
 
     // Extract version from generated ID (e.g., v1 from B00001v1)
     const versionMatch = typeSpecificId.match(/v(\d+)$/);
-    const version = versionMatch ? `v${versionMatch[1]}` : 'v1';
+    const version = versionMatch ? `v${versionMatch[1]}` : "v1";
 
     // Determine which type-specific ID field to populate
     const typeSpecificIdFields: Record<string, Partial<Formula>> = {
@@ -183,7 +189,7 @@ const FormulaModal = ({
     };
 
     const newFormula: Formula = {
-      id: universalFormulaId,  // Universal ID (F00001v1) - not displayed
+      id: universalFormulaId, // Universal ID (F00001v1) - not displayed
       name: formulaName,
       version: version,
       status: "draft" as const,
@@ -199,7 +205,7 @@ const FormulaModal = ({
       },
       description: newFormulaData.description,
       formulaType: newFormulaData.formulaType,
-      ...typeSpecificIdFields[newFormulaData.formulaType],  // Add type-specific ID
+      ...typeSpecificIdFields[newFormulaData.formulaType], // Add type-specific ID
     };
     onCreateFormula(newFormula);
     handleClose();
