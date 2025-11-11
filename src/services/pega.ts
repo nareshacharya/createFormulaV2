@@ -23,7 +23,7 @@ export interface Ingredient {
 
 // Formula types
 export interface Formula {
-  id: string;
+  id: string;  // Universal formula ID (F00001v1) - not displayed on screen
   name: string;
   version: string;
   status: 'draft' | 'active' | 'archived';
@@ -41,6 +41,18 @@ export interface Formula {
     base: string[];
   };
   description: string;
+  
+  // Formula type-specific fields
+  formulaType?: 'BASE' | 'DILUTION' | 'ANALYTICAL' | 'PERFUMER';
+  
+  // Type-specific display IDs (shown on data grid)
+  perfumerFormulaId?: string;  // e.g., MZ00001v1 (for PERFUMER type)
+  baseFormulaId?: string;       // e.g., B00001v1 (for BASE type)
+  dilutionFormulaId?: string;   // e.g., D00001v1 (for DILUTION type)
+  analyticalFormulaId?: string; // e.g., A00001v1 (for ANALYTICAL type)
+  
+  // U-Code (generated when formula is locked)
+  uCode?: string;  // e.g., UAD00001A
 }
 
 export interface FormulaIngredient {

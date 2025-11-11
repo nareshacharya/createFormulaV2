@@ -15,7 +15,8 @@ interface Column {
   minWidth?: number;
   maxWidth?: number;
   group?: string;
-  formulaId?: string;
+  formulaId?: string;  // Universal formula ID (F00001v1)
+  formulaDisplayId?: string;  // Type-specific display ID (B00001v1, MZ00001v1, etc.)
   attributeId?: string;
   values?: string[];
   options?: string[];
@@ -169,12 +170,12 @@ export const ColumnHeaderCell = ({
               <span className="truncate text-xs" title={column.title}>
                 {column.title}
               </span>
-              {column.formulaId && (
+              {column.formulaDisplayId && (
                 <span
                   className="text-xs text-gray-400 font-normal truncate"
-                  title={column.formulaId}
+                  title={column.formulaDisplayId}
                 >
-                  {column.formulaId}
+                  {column.formulaDisplayId}
                 </span>
               )}
             </div>

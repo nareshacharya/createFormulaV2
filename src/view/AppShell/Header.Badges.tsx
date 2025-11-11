@@ -371,28 +371,6 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
           </div>
         )}
 
-        {/* Vertical Divider - Hidden on small screens */}
-        <div className="hidden xl:block w-px h-10 bg-purple-600/50"></div>
-
-        {/* Status - Hidden on small screens */}
-        <div className="hidden xl:flex items-center gap-2 group">
-          <span className="material-symbols-rounded text-orange-300 text-xl">
-            check_circle
-          </span>
-          <div className="flex flex-col items-start">
-            <span className="text-xs text-white/50 font-medium mb-1">
-              Status
-            </span>
-            <div
-              className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${getStatusVariant(
-                currentFormula?.status
-              )}`}
-            >
-              {currentFormula?.status?.toUpperCase() || "NEW"}
-            </div>
-          </div>
-        </div>
-
         {/* Vertical Divider */}
         <div className="w-px h-10 bg-purple-600/50"></div>
 

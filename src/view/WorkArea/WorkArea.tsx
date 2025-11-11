@@ -785,11 +785,21 @@ const WorkArea = () => {
       const newColumnId = `formula_${Date.now()}_${Math.random()
         .toString(36)
         .substr(2, 9)}`;
+      
+      // Get the display ID (type-specific ID to show in header)
+      const displayId = 
+        data.formula.perfumerFormulaId ||
+        data.formula.baseFormulaId ||
+        data.formula.dilutionFormulaId ||
+        data.formula.analyticalFormulaId ||
+        data.formula.id;
+      
       const newColumn: Column = {
         id: newColumnId,
         key: newColumnId,
         title: data.formula.name,
-        formulaId: data.formula.id,
+        formulaId: data.formula.id,  // Universal ID
+        formulaDisplayId: displayId,  // Type-specific display ID
         type: "number",
         sortable: true,
         editable: true,
@@ -870,11 +880,21 @@ const WorkArea = () => {
       const newColumnId = `formula_${Date.now()}_${Math.random()
         .toString(36)
         .substr(2, 9)}`;
+      
+      // Get the display ID (type-specific ID to show in header)
+      const displayId = 
+        data.formula.perfumerFormulaId ||
+        data.formula.baseFormulaId ||
+        data.formula.dilutionFormulaId ||
+        data.formula.analyticalFormulaId ||
+        data.formula.id;
+      
       const newColumn: Column = {
         id: newColumnId,
         key: newColumnId,
         title: data.formula.name,
-        formulaId: data.formula.id,
+        formulaId: data.formula.id,  // Universal ID
+        formulaDisplayId: displayId,  // Type-specific display ID
         type: "number",
         sortable: true,
         editable: true,

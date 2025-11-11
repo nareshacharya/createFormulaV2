@@ -1,11 +1,18 @@
 
 // Mock formulas data for development
-// Format: [USER_INITIALS]-F-[SEQUENTIAL_NUMBER]v[VERSION]
-// Example: NP-F-00001v1 (Naresh Pentapati, Formula, #1, version 1)
+// Format: Universal ID (F00001v1) + Type-specific Display ID (NP00001v1, B00001v1, etc.)
+// Universal ID: F[SEQUENCE]v[VERSION] (not displayed)
+// Display ID: Based on formula type:
+//   - Perfumer: [USER_INITIALS][SEQUENCE]v[VERSION] (e.g., NP00001v1)
+//   - Base: B[SEQUENCE]v[VERSION] (e.g., B00001v1)
+//   - Dilution: D[SEQUENCE]v[VERSION] (e.g., D00001v1)
+//   - Analytical: A[SEQUENCE]v[VERSION] (e.g., A00001v1)
 
 export const mockFormulas = [
   {
-    id: 'NP-F-00001v1',
+    id: 'F00001v1',
+    formulaType: 'PERFUMER' as const,
+    perfumerFormulaId: 'NP00001v1',
     name: 'Fresh Citrus Blend',
     version: 'v1',
     status: 'active',
@@ -30,7 +37,9 @@ export const mockFormulas = [
     }
   },
   {
-    id: 'NP-F-00002v1',
+    id: 'F00002v1',
+    formulaType: 'PERFUMER' as const,
+    perfumerFormulaId: 'NP00002v1',
     name: 'Romantic Rose Garden',
     version: 'v1',
     status: 'active',
@@ -56,7 +65,9 @@ export const mockFormulas = [
     }
   },
   {
-    id: 'NP-F-00003v1',
+    id: 'F00003v1',
+    formulaType: 'BASE' as const,
+    baseFormulaId: 'B00001v1',
     name: 'Woody Amber Signature',
     version: 'v1',
     status: 'draft',
@@ -83,7 +94,9 @@ export const mockFormulas = [
     }
   },
   {
-    id: 'NP-F-00004v1',
+    id: 'F00004v1',
+    formulaType: 'DILUTION' as const,
+    dilutionFormulaId: 'D00001v1',
     name: 'Lavender Dreams',
     version: 'v1',
     status: 'active',
@@ -109,7 +122,9 @@ export const mockFormulas = [
     }
   },
   {
-    id: 'SJ-F-00001v1',
+    id: 'F00005v1',
+    formulaType: 'PERFUMER' as const,
+    perfumerFormulaId: 'SJ00001v1',
     name: 'Vanilla Gourmand',
     version: 'v1',
     status: 'active',
@@ -135,7 +150,9 @@ export const mockFormulas = [
     }
   },
   {
-    id: 'MC-F-00001v1',
+    id: 'F00006v1',
+    formulaType: 'ANALYTICAL' as const,
+    analyticalFormulaId: 'A00001v1',
     name: 'Ocean Breeze',
     version: 'v1',
     status: 'archived',
@@ -161,7 +178,9 @@ export const mockFormulas = [
     }
   },
   {
-    id: 'ER-F-00001v1',
+    id: 'F00007v1',
+    formulaType: 'BASE' as const,
+    baseFormulaId: 'B00002v1',
     name: 'Spiced Patchouli',
     version: 'v1',
     status: 'draft',
@@ -187,7 +206,9 @@ export const mockFormulas = [
     }
   },
   {
-    id: 'DK-F-00001v1',
+    id: 'F00008v1',
+    formulaType: 'DILUTION' as const,
+    dilutionFormulaId: 'D00002v1',
     name: 'Clean Cotton',
     version: 'v1',
     status: 'active',
@@ -217,7 +238,9 @@ export const mockFormulas = [
 
 export const formulas = [
   {
-    id: 'NP-F-00001v1',
+    id: 'F00001v1',
+    formulaType: 'PERFUMER' as const,
+    perfumerFormulaId: 'NP00001v1',
     name: 'Fresh Citrus Blend',
     version: 'v1',
     status: 'active' as const,
@@ -242,7 +265,9 @@ export const formulas = [
     }
   },
   {
-    id: 'NP-F-00002v1',
+    id: 'F00002v1',
+    formulaType: 'PERFUMER' as const,
+    perfumerFormulaId: 'NP00002v1',
     name: 'Romantic Rose Garden',
     version: 'v1',
     status: 'active' as const,
@@ -267,7 +292,9 @@ export const formulas = [
     }
   },
   {
-    id: 'NP-F-00003v1',
+    id: 'F00003v1',
+    formulaType: 'BASE' as const,
+    baseFormulaId: 'B00001v1',
     name: 'Woody Amber Signature',
     version: 'v1',
     status: 'draft' as const,
@@ -292,7 +319,9 @@ export const formulas = [
     }
   },
   {
-    id: 'NP-F-00004v1',
+    id: 'F00004v1',
+    formulaType: 'DILUTION' as const,
+    dilutionFormulaId: 'D00001v1',
     name: 'Lavender Dreams',
     version: 'v1',
     status: 'active' as const,
@@ -317,7 +346,9 @@ export const formulas = [
     }
   },
   {
-    id: 'SJ-F-00001v1',
+    id: 'F00005v1',
+    formulaType: 'PERFUMER' as const,
+    perfumerFormulaId: 'SJ00001v1',
     name: 'Vanilla Gourmand',
     version: 'v1',
     status: 'active' as const,
@@ -342,7 +373,9 @@ export const formulas = [
     }
   },
   {
-    id: 'MC-F-00001v1',
+    id: 'F00006v1',
+    formulaType: 'ANALYTICAL' as const,
+    analyticalFormulaId: 'A00001v1',
     name: 'Ocean Breeze',
     version: 'v1',
     status: 'archived' as const,
@@ -367,7 +400,9 @@ export const formulas = [
     }
   },
   {
-    id: 'ER-F-00001v1',
+    id: 'F00007v1',
+    formulaType: 'BASE' as const,
+    baseFormulaId: 'B00002v1',
     name: 'Spiced Patchouli',
     version: 'v1',
     status: 'draft' as const,
@@ -392,7 +427,9 @@ export const formulas = [
     }
   },
   {
-    id: 'DK-F-00001v1',
+    id: 'F00008v1',
+    formulaType: 'DILUTION' as const,
+    dilutionFormulaId: 'D00002v1',
     name: 'Clean Cotton',
     version: 'v1',
     status: 'active' as const,

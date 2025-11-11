@@ -425,8 +425,8 @@ export const featureFlags: FeatureFlags = {
     dataGrid: {
         // Features ready but hidden from client
         enableRowReordering: false, // TODO: Enable after client approval
-        showColumnRemoveIcon: false, // TODO: Enable after client approval (already in actions menu)
-        showAttributeRemoveIcon: false, // TODO: Enable after client approval
+        showColumnRemoveIcon: true, // Enabled - shows X icon on formula/attribute column headers
+        showAttributeRemoveIcon: true, // Enabled - shows X icon on attribute column headers
 
         // Enabled features
         enableBulkSelection: true,

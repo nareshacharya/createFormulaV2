@@ -14,7 +14,8 @@ export interface Column {
     fixed?: boolean;
     editable?: boolean;
     group?: string;
-    formulaId?: string;
+    formulaId?: string;  // Universal formula ID (F00001v1)
+    formulaDisplayId?: string;  // Type-specific display ID (B00001v1, MZ00001v1, etc.)
     sortable?: boolean;
     groupable?: boolean;
     attributeId?: string;

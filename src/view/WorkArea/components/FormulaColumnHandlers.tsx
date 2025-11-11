@@ -10,10 +10,9 @@ import { eventBus } from "../../../utils/bus";
 import { appStateHistory } from "../../../utils/stateHistory";
 import {
   getCurrentUserInitials,
-  isFormulaFromOtherProject,
-  isValidFormulaId,
-} from "../../../utils/formulaNaming";
-import { generateNewFormulaId } from "../../../utils/formulaIdGenerator";
+  parseFormulaId as parseOldFormulaId,
+} from "../../../utils/idGeneration";
+import { FORMULA_TYPES } from "../../../config/formulaTypes.config";
 
 export interface FormulaHandlersConfig {
   columns: Column[];
@@ -80,49 +79,85 @@ export const useFormulaColumnHandlers = (config: FormulaHandlersConfig) => {
       // Get current user initials
       const userInitials = getCurrentUserInitials();
 
-      // Check if formula is from another project
-      const isFromOtherProject = isFormulaFromOtherProject(
-        formula.id,
-        userInitials
-      );
+      // Determine if this is the same user or different user
+      const isUserCopy = formula.createdBy === userInitials;
 
-      let newFormulaId: string;
+      // Get the type-specific ID to increment version from
+      const currentTypeSpecificId = 
+        formula.perfumerFormulaId || 
+        formula.baseFormulaId || 
+        formula.dilutionFormulaId || 
+        formula.analyticalFormulaId ||
+        formula.id; // Fallback to universal ID if type-specific not set
+
+      let newTypeSpecificId: string;
       let newVersion: string;
 
-      if (isFromOtherProject || !isValidFormulaId(formula.id)) {
-        // Formula is from another project or doesn't follow naming convention
-        // Generate completely new ID with v1
-        newFormulaId = generateNewFormulaId({
-          existingFormulas: availableFormulas,
-          isReferenceFromOtherProject: true,
+      if (isUserCopy && currentTypeSpecificId) {
+        // Same user - increment version on existing sequence
+        const match = currentTypeSpecificId.match(/^([A-Z]{1,3})(\d{5})v(\d+)$/);
+        if (match) {
+          const [, prefix, sequence, versionNum] = match;
+          const nextVersion = parseInt(versionNum, 10) + 1;
+          newTypeSpecificId = `${prefix}${sequence}v${nextVersion}`;
+          newVersion = `v${nextVersion}`;
+        } else {
+          // Fallback if ID doesn't match expected format
+          newTypeSpecificId = `${userInitials}00001v1`;
+          newVersion = "v1";
+        }
+      } else {
+        // Different user - generate new sequence with their initials, reset to v1
+        const userFormulas = availableFormulas.filter(f => {
+          const id = f.perfumerFormulaId || f.baseFormulaId || f.dilutionFormulaId || f.analyticalFormulaId || f.id;
+          return id.startsWith(userInitials);
         });
+        
+        const sequences = userFormulas
+          .map(f => {
+            const id = f.perfumerFormulaId || f.baseFormulaId || f.dilutionFormulaId || f.analyticalFormulaId || f.id;
+            const match = id.match(/^[A-Z]{1,3}(\d{5})v\d+$/);
+            return match ? parseInt(match[1], 10) : 0;
+          })
+          .filter(n => n > 0);
+        
+        const nextSequence = (sequences.length > 0 ? Math.max(...sequences) : 0) + 1;
+        newTypeSpecificId = `${userInitials}${nextSequence.toString().padStart(5, '0')}v1`;
         newVersion = "v1";
+        
         toast.success(
-          "Formula adapted from reference. New formula ID generated.",
+          "Creating new version with your initials",
           { duration: 3000 }
         );
-      } else {
-        // Formula is from same project - just increment version
-        // Use baseFormula to ensure proper version increment (e.g., NP-F-00003v1 -> NP-F-00003v2)
-        newFormulaId = generateNewFormulaId({
-          existingFormulas: availableFormulas,
-          baseFormula: formula,
-          isReferenceFromOtherProject: false,
-        });
-        // Extract version from generated ID
-        const versionMatch = newFormulaId.match(/(v\d+)$/);
-        newVersion = versionMatch ? versionMatch[1] : "v2";
       }
 
-      // Create new formula with updated ID and version
+      // Generate new universal formula ID (F-sequence)
+      const fSequenceNumbers = availableFormulas
+        .map(f => {
+          const match = f.id.match(/^F(\d{5})v\d+$/);
+          return match ? parseInt(match[1], 10) : 0;
+        })
+        .filter(n => n > 0);
+      const nextFSequence = (fSequenceNumbers.length > 0 ? Math.max(...fSequenceNumbers) : 0) + 1;
+      const newUniversalId = `F${nextFSequence.toString().padStart(5, '0')}v1`;
+
+      // Determine which type-specific ID field to update
+      const typeSpecificIdField = 
+        formula.perfumerFormulaId ? 'perfumerFormulaId' :
+        formula.baseFormulaId ? 'baseFormulaId' :
+        formula.dilutionFormulaId ? 'dilutionFormulaId' :
+        formula.analyticalFormulaId ? 'analyticalFormulaId' : null;
+
+      // Create new formula with updated IDs and version
       const newFormula: Formula = {
         ...formula,
-        id: newFormulaId,
+        id: newUniversalId,  // New universal ID
         version: newVersion,
         name: `${formula.name.replace(/\s*\(v\d+\)$/, "")} (${newVersion})`,
         createdBy: userInitials,
         lastUpdated: new Date().toISOString(),
         status: "draft",
+        ...(typeSpecificIdField ? { [typeSpecificIdField]: newTypeSpecificId } : {}),
       };
 
       // Add new formula to available formulas list
@@ -138,6 +173,12 @@ export const useFormulaColumnHandlers = (config: FormulaHandlersConfig) => {
 
       // Create new column with the new formula version
       const newColumnId = `formula_${Date.now()}`;
+      const displayId =
+        newFormula.perfumerFormulaId ||
+        newFormula.baseFormulaId ||
+        newFormula.dilutionFormulaId ||
+        newFormula.analyticalFormulaId ||
+        newFormula.id;
       const newColumn: Column = {
         id: newColumnId,
         key: newColumnId,
@@ -147,6 +188,7 @@ export const useFormulaColumnHandlers = (config: FormulaHandlersConfig) => {
         sortable: true,
         group: "Formulas",
         formulaId: newFormula.id,
+        formulaDisplayId: displayId,
       };
 
       setColumns((prev) => {
@@ -187,7 +229,7 @@ export const useFormulaColumnHandlers = (config: FormulaHandlersConfig) => {
         formulas: [...availableFormulas, newFormula],
       });
 
-      toast.success(`Created ${newVersion}: ${newFormulaId}`, {
+      toast.success(`Created ${newVersion}: ${newTypeSpecificId}`, {
         id: "create-version",
         duration: 4000,
       });
