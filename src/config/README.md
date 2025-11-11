@@ -4,6 +4,49 @@ This directory contains centralized configuration for the application.
 
 ## Files
 
+### Formula Creation Configuration
+
+#### `formulaTypes.config.ts`
+Defines the 4 formula types (BASE, DILUTION, ANALYTICAL, PERFUMER) with labels, descriptions, and helper functions.
+
+**Key Exports**:
+- `FORMULA_TYPES` - Enum of formula type constants
+- `FORMULA_TYPE_LABELS` - Display names for each type
+- `FORMULA_TYPE_DESCRIPTIONS` - Detailed descriptions
+- Helper functions: `getFormulaTypeLabel()`, `getFormulaTypeDescription()`, `getAllFormulaTypes()`, `isValidFormulaType()`
+
+#### `formulaCreation.config.ts`
+Main configuration for the formula creation wizard, including steps, field visibility, validation, and auto-generation patterns.
+
+**Key Exports**:
+- `FORM_STEPS` - 5-step wizard configuration
+- `FIELD_VISIBILITY` - Field visibility matrix by formula type
+- `VALIDATION_RULES` - Validation rules for all fields
+- `AUTO_GENERATION` - Auto-ID generation patterns (#1168, #1255)
+- `STATUS_WORKFLOW` - Status management configuration
+- `REFERENCE_DATA_ENDPOINTS` - API endpoints for reference data
+- Helper functions: `getVisibleFields()`, `getRequiredFields()`, `isFieldRequired()`, `isFieldHidden()`, `isFieldVisible()`
+
+**Documentation**: See [../../docs/FORMULA_CREATION_ENHANCEMENT.md](../../docs/FORMULA_CREATION_ENHANCEMENT.md)
+
+#### `fieldConfigs/` Directory
+Step-by-step field configurations for the formula creation wizard.
+
+**Files**:
+- `typeSelection.fields.ts` - Step 1: Formula type selection
+- `generalInfo.fields.ts` - Step 2: General information (category, region, country)
+- `formulaDetails.fields.ts` - Step 3: Formula-specific details (conditional by type)
+- `productInfo.fields.ts` - Step 4: Product information (format, brand, supplier)
+- `projectReference.fields.ts` - Step 5: Project integration (US-1048)
+- `index.ts` - Central export with helper functions
+
+**Key Features**:
+- Data-driven field definitions
+- Conditional visibility by formula type
+- API-backed dropdowns
+- Computed fields (e.g., UFI Code)
+- Dependency management
+
 ### `theme.ts`
 Centralized theme configuration for consistent UI styling across all components.
 
