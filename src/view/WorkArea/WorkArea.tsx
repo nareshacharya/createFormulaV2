@@ -6,6 +6,8 @@ import AttributeSelector from "../../components/AttributeSelector";
 import Dialog from "../../components/Dialog";
 import Modal from "../../components/Modal";
 import FormulaModal from "../../components/FormulaModal";
+import FormulaDetailsModal from "../../components/FormulaDetailsModal";
+import ExcelUploadModal from "../../components/ExcelUploadModal";
 import Button from "../../components/Button";
 import Badge from "../../components/Badge";
 import { PegaService } from "../../services/pega";
@@ -29,6 +31,8 @@ import type { WorkspaceState } from "../../utils/workspaceManager";
 import { appStateHistory } from "../../utils/stateHistory";
 import { exportData } from "../../utils/exportUtils";
 import { useWorkspace } from "../../hooks/useWorkspace";
+import { useFormulaDetails } from "../../hooks/useFormulaDetails";
+import { useExcelUpload } from "../../hooks/useExcelUpload";
 
 const WorkArea = () => {
   // Workspace context - manages data isolation between tabs
@@ -184,6 +188,77 @@ const WorkArea = () => {
     setTableData,
     handleNormalize,
   });
+
+  // Callback for updating formula details
+  const handleUpdateFormula = useCallback(
+    (formulaId: string, updates: Partial<Formula>) => {
+      setFormulas((prevFormulas) =>
+        prevFormulas.map((formula) =>
+          formula.id === formulaId ? { ...formula, ...updates } : formula
+        )
+      );
+      // Also update in availableFormulas if it exists there
+      setAvailableFormulas((prevFormulas) =>
+        prevFormulas.map((formula) =>
+          formula.id === formulaId ? { ...formula, ...updates } : formula
+        )
+      );
+    },
+    [setFormulas, setAvailableFormulas]
+  );
+
+  // Callback for adding ingredients from Excel upload
+  const handleAddIngredientsToFormula = useCallback(
+    (formulaId: string, parsedIngredients: Array<{ mappedIngredientId: string; percentage: number }>) => {
+      const formula = formulas.find((f) => f.id === formulaId);
+      if (!formula) return;
+
+      // Add new rows to tableData for each ingredient
+      const newRows = parsedIngredients.map((parsed) => {
+        const ingredient = ingredients.find((ing) => ing.id === parsed.mappedIngredientId);
+        if (!ingredient) return null;
+
+        const newRow: Record<string, unknown> = {
+          id: `${Date.now()}-${Math.random()}`,
+          ingredient: ingredient.name,
+          ingredientId: ingredient.id,
+        };
+
+        // Add formula percentage - find column by formulaId
+        const formulaColumn = columns.find((col) => col.formulaId === formulaId);
+
+        if (formulaColumn) {
+          newRow[formulaColumn.id] = parsed.percentage;
+        }
+
+        return newRow;
+      }).filter(Boolean);
+
+      setTableData((prevData) => [...prevData, ...newRows]);
+    },
+    [formulas, ingredients, columns, setTableData]
+  );
+
+  // Use formula details hook
+  const {
+    isFormulaDetailsModalOpen,
+    selectedFormula,
+    isReadOnly,
+    handleEditFormulaDetails,
+    handleViewFormulaDetails,
+    handleSaveFormula,
+    handleCloseFormulaDetails,
+  } = useFormulaDetails(formulas, handleUpdateFormula);
+
+  // Use Excel upload hook
+  const {
+    isExcelUploadModalOpen,
+    selectedFormulaId,
+    availableIngredients,
+    handleUploadExcel,
+    handleUploadIngredients,
+    handleCloseExcelUpload,
+  } = useExcelUpload(formulas, ingredients, handleAddIngredientsToFormula);
 
   // Handle undo action
   const handleUndoAction = useCallback(() => {
@@ -1959,6 +2034,9 @@ const WorkArea = () => {
           onCreateVersion={handleCreateVersion}
           onNormalizeFormula={handleNormalizeFromMenu}
           onSendForCompounding={handleSendForCompoundingFromMenu}
+          onEditFormulaDetails={handleEditFormulaDetails}
+          onViewFormulaDetails={handleViewFormulaDetails}
+          onUploadExcel={handleUploadExcel}
           onExplodeFormula={handleExplodeFormula}
           onToggleFormulaExpansion={handleToggleFormulaExpansion}
           onColumnReorder={handleColumnReorder}
@@ -1997,6 +2075,23 @@ const WorkArea = () => {
             .length
         }
         selectedFormulaIds={selectedFormulaIds} // Pass selected formula IDs
+      />
+
+      {/* Formula Details Modal */}
+      <FormulaDetailsModal
+        isOpen={isFormulaDetailsModalOpen}
+        onClose={handleCloseFormulaDetails}
+        formula={selectedFormula}
+        isReadOnly={isReadOnly}
+        onSave={handleSaveFormula}
+      />
+
+      {/* Excel Upload Modal */}
+      <ExcelUploadModal
+        isOpen={isExcelUploadModalOpen}
+        onClose={handleCloseExcelUpload}
+        onUpload={handleUploadIngredients}
+        availableIngredients={availableIngredients}
       />
 
       {/* Load Formula Modal */}

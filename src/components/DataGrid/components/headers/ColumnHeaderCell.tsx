@@ -50,6 +50,9 @@ interface ColumnHeaderCellProps {
   onCreateVersion?: (columnId: string) => void;
   onNormalizeFormula?: (columnId: string) => void;
   onSendForCompounding?: (columnId: string) => void;
+  onEditFormulaDetails?: (columnId: string) => void;
+  onViewFormulaDetails?: (columnId: string) => void;
+  onUploadExcel?: (columnId: string) => void;
   setShowColumnActions: (columnId: string | null) => void;
 }
 
@@ -75,6 +78,9 @@ export const ColumnHeaderCell = ({
   onCreateVersion,
   onNormalizeFormula,
   onSendForCompounding,
+  onEditFormulaDetails,
+  onViewFormulaDetails,
+  onUploadExcel,
   setShowColumnActions,
 }: ColumnHeaderCellProps) => {
   // Get feature flags
@@ -306,6 +312,54 @@ export const ColumnHeaderCell = ({
                                 edit
                               </span>
                               <span>Set Active</span>
+                            </button>
+                          )}
+
+                          {/* View/Edit Formula Details - always available */}
+                          {isOwned ? (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onEditFormulaDetails?.(column.id);
+                                setShowColumnActions(null);
+                              }}
+                              className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2 whitespace-nowrap"
+                            >
+                              <span className="material-symbols-rounded text-xs">
+                                description
+                              </span>
+                              <span>Edit Formula Details</span>
+                            </button>
+                          ) : (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onViewFormulaDetails?.(column.id);
+                                setShowColumnActions(null);
+                              }}
+                              className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2 whitespace-nowrap"
+                            >
+                              <span className="material-symbols-rounded text-xs">
+                                visibility
+                              </span>
+                              <span>View Formula Details</span>
+                            </button>
+                          )}
+
+                          {/* Upload Excel - only for owned analytical formulas */}
+                          {isOwned && column.formulaId && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onUploadExcel?.(column.id);
+                                setShowColumnActions(null);
+                              }}
+                              className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2 whitespace-nowrap"
+                            >
+                              <span className="material-symbols-rounded text-xs">
+                                upload_file
+                              </span>
+                              <span>Upload Excel</span>
                             </button>
                           )}
 

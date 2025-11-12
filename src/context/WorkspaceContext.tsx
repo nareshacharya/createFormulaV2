@@ -60,7 +60,7 @@ const WorkspaceContext = createContext<WorkspaceContextType | undefined>(
 );
 
 const MAX_TABS = 3;
-const DEFAULT_TAB_NAME = "Alpha";
+const DEFAULT_TAB_NAME = "Workspace 1";
 
 const createEmptyWorkspaceData = (): WorkspaceData => ({
   columns: [
@@ -173,15 +173,15 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
 
     setTabs((prev) => [...prev, newTab]);
     setActiveTabId(newTab.id);
-    
+
     // Clear LibraryPanel transient selections for fresh workspace
     import("../utils/bus").then(({ eventBus }) => {
-      eventBus.emit("workspace-created", { 
+      eventBus.emit("workspace-created", {
         workspaceId: newTab.id,
-        workspaceName: newTab.name 
+        workspaceName: newTab.name,
       });
     });
-    
+
     toast.success(
       `New workspace "${newTab.name}" created - Fresh session started`
     );
@@ -208,13 +208,13 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
       if (activeTabId === tabId) {
         const newActiveTab = updatedTabs[0];
         setActiveTabId(newActiveTab.id);
-        
+
         // Clear LibraryPanel transient selections when switching to another tab
         import("../utils/bus").then(({ eventBus }) => {
-          eventBus.emit("workspace-switched", { 
+          eventBus.emit("workspace-switched", {
             workspaceId: newActiveTab.id,
             workspaceName: newActiveTab.name,
-            previousWorkspaceId: tabId
+            previousWorkspaceId: tabId,
           });
         });
       }
@@ -224,22 +224,25 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
     [tabs, activeTabId]
   );
 
-  const switchTab = useCallback((tabId: string) => {
-    const previousTabId = activeTabId;
-    setActiveTabId(tabId);
-    
-    // Clear LibraryPanel transient selections when switching tabs
-    if (previousTabId !== tabId) {
-      import("../utils/bus").then(({ eventBus }) => {
-        const tab = tabs.find(t => t.id === tabId);
-        eventBus.emit("workspace-switched", { 
-          workspaceId: tabId,
-          workspaceName: tab?.name || "Unknown",
-          previousWorkspaceId: previousTabId
+  const switchTab = useCallback(
+    (tabId: string) => {
+      const previousTabId = activeTabId;
+      setActiveTabId(tabId);
+
+      // Clear LibraryPanel transient selections when switching tabs
+      if (previousTabId !== tabId) {
+        import("../utils/bus").then(({ eventBus }) => {
+          const tab = tabs.find((t) => t.id === tabId);
+          eventBus.emit("workspace-switched", {
+            workspaceId: tabId,
+            workspaceName: tab?.name || "Unknown",
+            previousWorkspaceId: previousTabId,
+          });
         });
-      });
-    }
-  }, [activeTabId, tabs]);
+      }
+    },
+    [activeTabId, tabs]
+  );
 
   const renameTab = useCallback((tabId: string, newName: string) => {
     if (!newName.trim()) return;

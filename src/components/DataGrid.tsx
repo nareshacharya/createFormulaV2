@@ -48,6 +48,9 @@ interface DataGridProps {
   onCreateVersion?: (columnId: string) => void;
   onNormalizeFormula?: (columnId: string) => void;
   onSendForCompounding?: (columnId: string) => void;
+  onEditFormulaDetails?: (columnId: string) => void;
+  onViewFormulaDetails?: (columnId: string) => void;
+  onUploadExcel?: (columnId: string) => void;
   onExplodeFormula?: (formulaId: string) => void;
   onToggleFormulaExpansion?: (formulaId: string) => void;
   onColumnReorder?: (fromIndex: number, toIndex: number) => void;
@@ -85,6 +88,9 @@ const DataGrid = ({
   onCreateVersion,
   onNormalizeFormula,
   onSendForCompounding,
+  onEditFormulaDetails,
+  onViewFormulaDetails,
+  onUploadExcel,
   onExplodeFormula,
   onToggleFormulaExpansion,
   onColumnReorder,
@@ -482,6 +488,9 @@ const DataGrid = ({
             onCreateVersion={onCreateVersion}
             onNormalizeFormula={onNormalizeFormula}
             onSendForCompounding={onSendForCompounding}
+            onEditFormulaDetails={onEditFormulaDetails}
+            onViewFormulaDetails={onViewFormulaDetails}
+            onUploadExcel={onUploadExcel}
             setShowColumnActions={setShowColumnActions}
           />
 

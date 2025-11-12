@@ -9,7 +9,7 @@ interface WorkspaceTab {
 }
 
 const MAX_TABS = 3;
-const DEFAULT_TAB_NAME = "Alpha";
+const DEFAULT_TAB_NAME = "Workspace 1";
 
 /**
  * Workspace tabs component for managing multiple workspace sessions

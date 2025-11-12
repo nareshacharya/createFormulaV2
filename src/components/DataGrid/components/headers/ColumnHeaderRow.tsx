@@ -51,6 +51,9 @@ interface ColumnHeaderRowProps {
   onCreateVersion?: (columnId: string) => void;
   onNormalizeFormula?: (columnId: string) => void;
   onSendForCompounding?: (columnId: string) => void;
+  onEditFormulaDetails?: (columnId: string) => void;
+  onViewFormulaDetails?: (columnId: string) => void;
+  onUploadExcel?: (columnId: string) => void;
   setShowColumnActions: (columnId: string | null) => void;
 }
 
@@ -80,6 +83,9 @@ export const ColumnHeaderRow = ({
   onCreateVersion,
   onNormalizeFormula,
   onSendForCompounding,
+  onEditFormulaDetails,
+  onViewFormulaDetails,
+  onUploadExcel,
   setShowColumnActions,
 }: ColumnHeaderRowProps) => {
   return (
@@ -137,6 +143,9 @@ export const ColumnHeaderRow = ({
           onCreateVersion={onCreateVersion}
           onNormalizeFormula={onNormalizeFormula}
           onSendForCompounding={onSendForCompounding}
+          onEditFormulaDetails={onEditFormulaDetails}
+          onViewFormulaDetails={onViewFormulaDetails}
+          onUploadExcel={onUploadExcel}
           setShowColumnActions={setShowColumnActions}
         />
       ))}
