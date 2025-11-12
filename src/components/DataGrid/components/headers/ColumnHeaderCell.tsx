@@ -291,16 +291,25 @@ export const ColumnHeaderCell = ({
                     ref={menuRef}
                     className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-20 min-w-[200px]"
                   >
-                    {/* Check if formula is owned by current user */}
+                    {/* Check if formula is owned by current user or is a newly created draft */}
                     {(() => {
-                      const isOwned = column.formulaId
+                      // Check if formula is owned by user
+                      const isFormulaOwned = column.formulaId
                         ? isOwnFormula(column.formulaId)
                         : true;
+                      
+                      // Check if formula is in draft status (newly created, always editable)
+                      const isDraft = column.formulaId
+                        ? formulas.find(f => f.id === column.formulaId)?.status === 'draft'
+                        : false;
+                      
+                      // Formula is editable if owned by user OR is a draft
+                      const isOwned = isFormulaOwned || isDraft;
                       const isReadonly = !isOwned;
 
                       return (
                         <>
-                          {/* Set Active - only show for owned formulas */}
+                          {/* Set Active - only show for owned or draft formulas */}
                           {isOwned && (
                             <button
                               onClick={(e) => {
@@ -357,8 +366,9 @@ export const ColumnHeaderCell = ({
                             column.formulaId &&
                             (() => {
                               const formula = formulas.find(
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                 (f: any) => f.id === column.formulaId
-                              ); // eslint-disable-line @typescript-eslint/no-explicit-any
+                              );
                               return formula?.formulaType === "ANALYTICAL";
                             })() && (
                               <button

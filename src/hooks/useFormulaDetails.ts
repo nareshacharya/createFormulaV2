@@ -23,6 +23,7 @@ export const useFormulaDetails = (
   /**
    * Open formula details modal in edit mode
    * For owned/editable formulas
+   * Draft formulas are always editable regardless of ownership
    */
   const handleEditFormulaDetails = useCallback((formulaId: string) => {
     // Find formula by universal formula ID
@@ -30,7 +31,9 @@ export const useFormulaDetails = (
 
     if (formula) {
       setSelectedFormula(formula);
-      setIsReadOnly(false);
+      // Draft formulas are always editable (isReadOnly = false)
+      // Non-draft formulas are read-only in edit view
+      setIsReadOnly(formula.status !== 'draft');
       setIsModalOpen(true);
     } else {
       toast.error("Formula not found");
