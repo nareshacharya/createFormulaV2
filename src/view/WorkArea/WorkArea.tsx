@@ -462,7 +462,8 @@ const WorkArea = () => {
         setAvailableFormulas(formulasData);
         setIngredients(ingredientsData);
         setAttributes(attributesData);
-        setFormulas(formulasData);
+        // Don't set formulas here - they should only be added when loaded as columns
+        // setFormulas(formulasData);
 
         // Emit available formulas to header
         eventBus.emit("available-formulas-updated", { formulas: formulasData });
@@ -1438,6 +1439,15 @@ const WorkArea = () => {
       // The useEffect at line 144 will emit the event automatically
       setSelectedFormulaIds((prev) => [...prev, data.formula.id]);
 
+      // Add formula to workspace formulas array
+      setFormulas((prev) => {
+        // Check if formula already exists in workspace
+        if (prev.some((f) => f.id === data.formula.id)) {
+          return prev;
+        }
+        return [...prev, data.formula];
+      });
+
       // If this is the first formula column, automatically activate it
       if (currentFormulaColumns.length === 0) {
         setEditableFormula(newColumnId);
@@ -2108,7 +2118,8 @@ const WorkArea = () => {
         <DataGrid
           columns={getDisplayColumns()}
           data={getEmptyStateData(tableData, hasIngredients)}
-          formulas={allFormulas}
+          formulas={formulas}
+          availableFormulas={availableFormulas}
           onAddColumn={(columnType) => {
             if (columnType === "formula") {
               handleAddFormulaColumn();

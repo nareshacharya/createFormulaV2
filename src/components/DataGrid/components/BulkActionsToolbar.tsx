@@ -4,6 +4,7 @@ interface BulkActionsToolbarProps {
   selectedCount: number;
   onBulkDelete: () => void;
   onClearSelection: () => void;
+  onYield?: () => void; // New yield function
   // Action buttons (Add Formula, Merge, Normalize, Send, Undo)
   onAddFormula?: () => void;
   onMergeDuplicates?: () => void;
@@ -61,6 +62,7 @@ export const BulkActionsToolbar = ({
   selectedCount,
   onBulkDelete,
   onClearSelection,
+  onYield,
   onAddFormula,
   onMergeDuplicates,
   onNormalize,
@@ -103,6 +105,22 @@ export const BulkActionsToolbar = ({
                 </span>
                 <span className="hidden xl:inline text-xs font-medium">
                   Delete
+                </span>
+              </button>
+            )}
+
+            {/* Yield button - only show when exactly 1 ingredient is selected */}
+            {selectedCount === 1 && onYield && (
+              <button
+                onClick={onYield}
+                className="bg-green-100 text-green-700 hover:bg-green-200 hover:text-green-900 transition-all duration-200 hover:shadow-sm flex items-center gap-1 px-2 py-1 rounded-lg"
+                title="Adjust ingredient amount to match target total"
+              >
+                <span className="material-symbols-rounded text-base">
+                  sync_alt
+                </span>
+                <span className="hidden xl:inline text-xs font-medium">
+                  Yield
                 </span>
               </button>
             )}

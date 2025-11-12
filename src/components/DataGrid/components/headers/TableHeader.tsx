@@ -34,6 +34,7 @@ interface ScrollState {
 interface TableHeaderProps {
   columns: Column[];
   formulas?: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
+  availableFormulas?: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
   groupedColumns: Record<string, Column[]>;
   enableRowReordering?: boolean;
   enableBulkSelection?: boolean;
@@ -71,6 +72,7 @@ interface TableHeaderProps {
 export const TableHeader = ({
   columns,
   formulas = [],
+  availableFormulas = [],
   groupedColumns,
   enableRowReordering = false,
   enableBulkSelection = false,
@@ -124,6 +126,7 @@ export const TableHeader = ({
       <ColumnHeaderRow
         columns={columns}
         formulas={formulas}
+        availableFormulas={availableFormulas}
         enableRowReordering={enableRowReordering}
         enableBulkSelection={enableBulkSelection}
         editableFormula={editableFormula}

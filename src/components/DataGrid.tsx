@@ -39,6 +39,7 @@ interface DataGridProps {
   columns: Column[];
   data: any[];
   formulas?: any[]; // Array of formulas to check formula types
+  availableFormulas?: any[]; // Global formulas for cross-workspace access
   onAddColumn?: (columnType: "formula" | "attribute") => void;
   onAddFormula?: () => void;
   onRowDelete?: (rowId: string) => void;
@@ -80,6 +81,7 @@ const DataGrid = ({
   columns,
   data,
   formulas = [],
+  availableFormulas = [],
   onAddColumn,
   onAddFormula,
   onRowDelete: _onRowDelete,
@@ -432,6 +434,72 @@ const DataGrid = ({
     );
   };
 
+  // Handle yield adjustment for a single selected ingredient
+  const handleYield = () => {
+    if (selectedRows.size !== 1 || !editableFormula) return;
+
+    const selectedRowId = Array.from(selectedRows)[0];
+    const selectedRow = data.find((row) => row.id === selectedRowId);
+
+    // Only allow yield for ingredient rows (not total rows or formula group rows)
+    if (!selectedRow || selectedRow.isTotal || selectedRow.isFormula) {
+      toast.error("Yield can only be applied to ingredient rows");
+      return;
+    }
+
+    // Find the total row for the active formula
+    const totalRow = data.find(
+      (row) => row.isTotal && row.totalType === "running"
+    );
+    if (!totalRow) {
+      toast.error("No total row found");
+      return;
+    }
+
+    // Find the target total row for the active formula
+    const targetRow = data.find(
+      (row) => row.isTotal && row.totalType === "target"
+    );
+    if (!targetRow) {
+      toast.error("No target total row found");
+      return;
+    }
+
+    // Get current values
+    const currentAmount = parseFloat(selectedRow[editableFormula]) || 0;
+    const currentTotal = parseFloat(totalRow[editableFormula]) || 0;
+    const targetTotal = parseFloat(targetRow[editableFormula]) || 100;
+
+    // Calculate the difference that needs to be adjusted
+    const difference = targetTotal - currentTotal;
+
+    // Calculate the new amount for the selected ingredient
+    const newAmount = currentAmount + difference;
+
+    // Validate that the new amount is not negative
+    if (newAmount < 0) {
+      toast.error(
+        `Cannot adjust: resulting amount would be negative (${newAmount.toFixed(
+          2
+        )})`
+      );
+      return;
+    }
+
+    // Apply the change
+    if (onCellEdit) {
+      onCellEdit(selectedRowId, editableFormula, newAmount);
+      toast.success(
+        `Adjusted ${
+          selectedRow.description || "ingredient"
+        } from ${currentAmount.toFixed(2)} to ${newAmount.toFixed(2)} (${
+          difference > 0 ? "+" : ""
+        }${difference.toFixed(2)})`
+      );
+      clearSelection();
+    }
+  };
+
   return (
     <div className={`flex flex-col h-full p-2 ${className}`} ref={tableRef}>
       {/* Bulk Actions Toolbar */}
@@ -444,6 +512,7 @@ const DataGrid = ({
           }
         }}
         onClearSelection={clearSelection}
+        onYield={editableFormula ? handleYield : undefined}
         onAddFormula={onToolbarAddFormula}
         onMergeDuplicates={onToolbarMergeDuplicates}
         onNormalize={onToolbarNormalize}
@@ -463,6 +532,7 @@ const DataGrid = ({
           <TableHeader
             columns={columns}
             formulas={formulas}
+            availableFormulas={availableFormulas}
             groupedColumns={groupedColumns}
             enableRowReordering={enableRowReordering}
             enableBulkSelection={enableBulkSelection}

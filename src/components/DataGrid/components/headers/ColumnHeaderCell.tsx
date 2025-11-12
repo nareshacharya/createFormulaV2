@@ -31,6 +31,7 @@ interface SortConfig {
 interface ColumnHeaderCellProps {
   column: Column;
   formulas?: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
+  availableFormulas?: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
   index: number;
   editableFormula?: string | null;
   draggedColumn: number | null;
@@ -60,6 +61,7 @@ interface ColumnHeaderCellProps {
 export const ColumnHeaderCell = ({
   column,
   formulas = [],
+  availableFormulas = [],
   index,
   editableFormula,
   draggedColumn,
@@ -195,10 +197,26 @@ export const ColumnHeaderCell = ({
                 lock
               </span>
             )}
-            {/* Show lock icon for reference formulas not owned by current user */}
+            {/* Show lock icon for reference formulas not owned by current user and not in draft status */}
             {!column.fixed &&
               column.formulaId &&
-              !isOwnFormula(column.formulaId) && (
+              (() => {
+                // Check if formula is in draft status (newly created formulas)
+                const workspaceFormula = formulas.find(
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  (f: any) => f.id === column.formulaId
+                );
+                const availableFormula = availableFormulas.find(
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  (f: any) => f.id === column.formulaId
+                );
+                const isDraft =
+                  workspaceFormula?.status === "draft" ||
+                  availableFormula?.status === "draft";
+
+                // Show lock only if not owned AND not a draft
+                return !isOwnFormula(column.formulaId) && !isDraft;
+              })() && (
                 <span
                   className="material-symbols-rounded text-xs text-amber-600 flex-shrink-0"
                   title="Reference formula (read-only)"
@@ -291,7 +309,6 @@ export const ColumnHeaderCell = ({
                     ref={menuRef}
                     className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-20 min-w-[200px]"
                   >
-                    {/* Check if formula is owned by current user or is a newly created draft */}
                     {(() => {
                       // Check if formula is owned by user
                       const isFormulaOwned = column.formulaId
@@ -299,10 +316,21 @@ export const ColumnHeaderCell = ({
                         : true;
 
                       // Check if formula is in draft status (newly created, always editable)
-                      const isDraft = column.formulaId
-                        ? formulas.find((f) => f.id === column.formulaId)
-                            ?.status === "draft"
-                        : false;
+                      // Check both workspace formulas and available formulas
+                      let isDraft = false;
+                      if (column.formulaId) {
+                        const workspaceFormula = formulas.find(
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                          (f: any) => f.id === column.formulaId
+                        );
+                        const availableFormula = availableFormulas.find(
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                          (f: any) => f.id === column.formulaId
+                        );
+                        isDraft =
+                          workspaceFormula?.status === "draft" ||
+                          availableFormula?.status === "draft";
+                      }
 
                       // Formula is editable if owned by user OR is a draft
                       const isOwned = isFormulaOwned || isDraft;
@@ -328,39 +356,41 @@ export const ColumnHeaderCell = ({
                           )}
 
                           {/* View/Edit Formula Details - always available */}
-                          {isOwned ? (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (column.formulaId) {
-                                  onEditFormulaDetails?.(column.formulaId);
-                                }
-                                setShowColumnActions(null);
-                              }}
-                              className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2 whitespace-nowrap"
-                            >
-                              <span className="material-symbols-rounded text-xs">
-                                description
-                              </span>
-                              <span>Edit Formula Details</span>
-                            </button>
-                          ) : (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (column.formulaId) {
-                                  onViewFormulaDetails?.(column.formulaId);
-                                }
-                                setShowColumnActions(null);
-                              }}
-                              className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2 whitespace-nowrap"
-                            >
-                              <span className="material-symbols-rounded text-xs">
-                                visibility
-                              </span>
-                              <span>View Formula Details</span>
-                            </button>
-                          )}
+                          {(() => {
+                            return isOwned ? (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (column.formulaId) {
+                                    onEditFormulaDetails?.(column.formulaId);
+                                  }
+                                  setShowColumnActions(null);
+                                }}
+                                className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2 whitespace-nowrap"
+                              >
+                                <span className="material-symbols-rounded text-xs">
+                                  description
+                                </span>
+                                <span>Edit Formula Details</span>
+                              </button>
+                            ) : (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (column.formulaId) {
+                                    onViewFormulaDetails?.(column.formulaId);
+                                  }
+                                  setShowColumnActions(null);
+                                }}
+                                className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2 whitespace-nowrap"
+                              >
+                                <span className="material-symbols-rounded text-xs">
+                                  visibility
+                                </span>
+                                <span>View Formula Details</span>
+                              </button>
+                            );
+                          })()}
 
                           {/* Upload Composition - only for owned analytical formulas */}
                           {isOwned &&
