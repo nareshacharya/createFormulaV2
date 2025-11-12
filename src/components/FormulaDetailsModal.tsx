@@ -3,7 +3,13 @@ import Modal from "./Modal";
 import Button from "./Button";
 import type { Formula } from "../services/pega";
 import { FORMULA_TYPES, getFormulaTypeLabel } from "../config/formulaTypes.config";
-import { isFieldVisible } from "../config/formulaCreation.config";
+import type { FormulaType } from "../config/formulaTypes.config";
+import { GENERAL_INFO_FIELDS } from "../config/fieldConfigs/generalInfo.fields";
+import { FORMULA_DETAILS_FIELDS } from "../config/fieldConfigs/formulaDetails.fields";
+import { PRODUCT_INFO_FIELDS } from "../config/fieldConfigs/productInfo.fields";
+import { PROJECT_REFERENCE_FIELDS } from "../config/fieldConfigs/projectReference.fields";
+import type { FormField } from "../models/FormField.model";
+import { isFieldVisibleForType } from "../models/FormField.model";
 
 interface FormulaDetailsModalProps {
   isOpen: boolean;
@@ -20,8 +26,8 @@ interface FormulaDetailsModalProps {
  * - Edit mode (for editable/owned formulas)
  * - View-only mode (for locked/reference formulas)
  * 
- * Shows all fields that were captured during formula creation
- * based on formula type configuration.
+ * Dynamically renders all fields from formula creation configuration
+ * based on formula type with proper field types (dropdowns, text, etc.)
  */
 const FormulaDetailsModal = ({
   isOpen,
@@ -32,24 +38,23 @@ const FormulaDetailsModal = ({
 }: FormulaDetailsModalProps) => {
   const [formData, setFormData] = useState<Partial<Formula> | null>(null);
 
+  // Combine all field configurations
+  const allFields: FormField[] = [
+    ...GENERAL_INFO_FIELDS,
+    ...FORMULA_DETAILS_FIELDS,
+    ...PRODUCT_INFO_FIELDS,
+    ...PROJECT_REFERENCE_FIELDS,
+  ];
+
   useEffect(() => {
     if (formula) {
-      setFormData({
-        name: formula.name,
-        category: formula.category,
-        description: formula.description,
-        formulaType: formula.formulaType,
-        // Add all relevant fields from formula
-        projectName: formula.projectName,
-        projectId: formula.projectId,
-        ...formula,
-      });
+      setFormData({ ...formula });
     }
   }, [formula]);
 
-  const handleInputChange = (field: keyof Formula, value: string | number | undefined) => {
+  const handleInputChange = (fieldName: string, value: string | number | string[] | undefined) => {
     if (isReadOnly) return;
-    setFormData((prev) => prev ? ({ ...prev, [field]: value }) : null);
+    setFormData((prev) => prev ? ({ ...prev, [fieldName]: value }) : null);
   };
 
   const handleSave = () => {
@@ -65,7 +70,196 @@ const FormulaDetailsModal = ({
 
   if (!formula || !formData) return null;
 
-  const formulaType = formula.formulaType || FORMULA_TYPES.BASE;
+  const formulaType = (formula.formulaType || FORMULA_TYPES.BASE) as FormulaType;
+
+  // Filter fields visible for this formula type
+  const visibleFields = allFields.filter((field) =>
+    isFieldVisibleForType(field, formulaType, formData as Record<string, unknown>)
+  );
+
+  // Group fields by category
+  const generalInfoFields = visibleFields.filter((f) => f.group === "general-info");
+  const formulaDetailsFields = visibleFields.filter((f) => f.group === "formula-details");
+  const productInfoFields = visibleFields.filter((f) => f.group === "product-info");
+  const projectReferenceFields = visibleFields.filter((f) => f.group === "project-ref");
+
+  // Mock data for dropdown fields (in production, these would be loaded from API)
+  const mockOptions: Record<string, Array<{ value: string; label: string }>> = {
+    category: [
+      { value: "Fine Fragrance", label: "Fine Fragrance" },
+      { value: "Eau de Toilette", label: "Eau de Toilette" },
+      { value: "Eau de Parfum", label: "Eau de Parfum" },
+      { value: "Home Care", label: "Home Care" },
+      { value: "Personal Care", label: "Personal Care" },
+      { value: "Deodorant", label: "Deodorant" },
+    ],
+    region: [
+      { value: "EMEA", label: "EMEA" },
+      { value: "Americas", label: "Americas" },
+      { value: "APAC", label: "APAC" },
+    ],
+    country: [
+      { value: "US", label: "United States" },
+      { value: "UK", label: "United Kingdom" },
+      { value: "FR", label: "France" },
+      { value: "DE", label: "Germany" },
+      { value: "IT", label: "Italy" },
+      { value: "ES", label: "Spain" },
+      { value: "CN", label: "China" },
+      { value: "JP", label: "Japan" },
+      { value: "IN", label: "India" },
+    ],
+    productFormat: [
+      { value: "spray", label: "Spray" },
+      { value: "lotion", label: "Lotion" },
+      { value: "cream", label: "Cream" },
+      { value: "gel", label: "Gel" },
+      { value: "powder", label: "Powder" },
+      { value: "stick", label: "Stick" },
+    ],
+  };
+
+  /**
+   * Render individual field based on type
+   */
+  const renderField = (field: FormField) => {
+    const value = (formData as Record<string, unknown>)[field.name] ?? "";
+    const isDisabled = isReadOnly || field.disabled;
+
+    const inputClassName = `w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+      isDisabled ? "bg-gray-50 cursor-not-allowed" : ""
+    }`;
+
+    switch (field.type) {
+      case "select": {
+        // Use field options if available, otherwise use mock options
+        const options = field.options || mockOptions[field.name] || [];
+        return (
+          <select
+            value={value as string}
+            onChange={(e) => handleInputChange(field.name, e.target.value)}
+            disabled={isDisabled}
+            className={inputClassName}
+          >
+            <option value="">{field.placeholder || `Select ${field.label}`}</option>
+            {options.map((option) => (
+              <option 
+                key={option.value} 
+                value={option.value} 
+                disabled={"disabled" in option ? Boolean(option.disabled) : false}
+              >
+                {option.label}
+              </option>
+            ))}
+          </select>
+        );
+      }
+
+      case "multi-select": {
+        // Render as text input showing comma-separated values
+        const multiValue = Array.isArray(value) ? value.join(", ") : String(value || "");
+        return (
+          <input
+            type="text"
+            value={multiValue}
+            onChange={(e) =>
+              handleInputChange(
+                field.name,
+                e.target.value.split(",").map((v) => v.trim())
+              )
+            }
+            disabled={isDisabled}
+            placeholder={field.placeholder}
+            className={inputClassName}
+          />
+        );
+      }
+
+      case "number":
+        return (
+          <input
+            type="number"
+            value={value as string}
+            onChange={(e) =>
+              handleInputChange(field.name, e.target.value ? Number(e.target.value) : undefined)
+            }
+            disabled={isDisabled}
+            placeholder={field.placeholder}
+            min={field.validation?.min}
+            max={field.validation?.max}
+            className={inputClassName}
+          />
+        );
+
+      case "date":
+        return (
+          <input
+            type="date"
+            value={value as string}
+            onChange={(e) => handleInputChange(field.name, e.target.value)}
+            disabled={isDisabled}
+            className={inputClassName}
+          />
+        );
+
+      case "textarea":
+        return (
+          <textarea
+            value={value as string}
+            onChange={(e) => handleInputChange(field.name, e.target.value)}
+            disabled={isDisabled}
+            placeholder={field.placeholder}
+            rows={3}
+            maxLength={field.maxLength}
+            className={inputClassName}
+          />
+        );
+
+      case "text":
+      default:
+        return (
+          <input
+            type="text"
+            value={value as string}
+            onChange={(e) => handleInputChange(field.name, e.target.value)}
+            disabled={isDisabled}
+            placeholder={field.placeholder}
+            maxLength={field.maxLength}
+            className={inputClassName}
+          />
+        );
+    }
+  };
+
+  /**
+   * Render field section
+   */
+  const renderFieldSection = (fields: FormField[], title: string) => {
+    if (fields.length === 0) return null;
+
+    return (
+      <div className="border-b border-gray-200 pb-5">
+        <h3 className="text-sm font-semibold text-gray-900 mb-3">{title}</h3>
+        <div className="grid grid-cols-2 gap-4">
+          {fields.map((field) => (
+            <div
+              key={field.name}
+              className={field.type === "textarea" ? "col-span-2" : ""}
+            >
+              <label className="block text-xs font-medium text-gray-700 mb-1">
+                {field.label}
+                {field.required && <span className="text-red-500 ml-1">*</span>}
+              </label>
+              {renderField(field)}
+              {field.helpText && !isReadOnly && (
+                <p className="text-xs text-gray-500 mt-1">{field.helpText}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <Modal
@@ -102,121 +296,19 @@ const FormulaDetailsModal = ({
 
         {/* Form Fields organized by sections */}
         <div className="space-y-5">
-          {/* Basic Information Section */}
-          <div className="border-b border-gray-200 pb-5">
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">
-              Basic Information
-            </h3>
-            <div className="grid grid-cols-2 gap-4">
-              {/* Formula Name/Fragrance Name */}
-              {isFieldVisible("fragranceName", formulaType) && (
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Fragrance Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.name || ""}
-                    onChange={(e) => handleInputChange("name", e.target.value)}
-                    disabled={isReadOnly}
-                    className={`w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                      isReadOnly ? "bg-gray-50 cursor-not-allowed" : ""
-                    }`}
-                  />
-                </div>
-              )}
+          {/* General Information Section */}
+          {renderFieldSection(generalInfoFields, "General Information")}
 
-              {/* Sample ID (for Analytical) */}
-              {isFieldVisible("sampleId", formulaType) && (
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Sample ID <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={(formData as Record<string, unknown>).sampleId as string || ""}
-                    onChange={(e) =>
-                      handleInputChange("sampleId" as keyof Formula, e.target.value)
-                    }
-                    disabled={isReadOnly}
-                    className={`w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                      isReadOnly ? "bg-gray-50 cursor-not-allowed" : ""
-                    }`}
-                  />
-                </div>
-              )}
+          {/* Formula Details Section */}
+          {renderFieldSection(formulaDetailsFields, "Formula Details")}
 
-              {/* Category */}
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
-                  Category <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.category || ""}
-                  onChange={(e) => handleInputChange("category", e.target.value)}
-                  disabled={isReadOnly}
-                  className={`w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    isReadOnly ? "bg-gray-50 cursor-not-allowed" : ""
-                  }`}
-                />
-              </div>
+          {/* Product Information Section */}
+          {renderFieldSection(productInfoFields, "Product Information")}
 
-              {/* Version */}
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
-                  Version
-                </label>
-                <input
-                  type="text"
-                  value={formula.version || ""}
-                  disabled
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed"
-                />
-              </div>
-            </div>
-          </div>
+          {/* Project Reference Section */}
+          {renderFieldSection(projectReferenceFields, "Project Reference")}
 
-          {/* Project Information */}
-          <div className="border-b border-gray-200 pb-5">
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">
-              Project Information
-            </h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
-                  Project Name
-                </label>
-                <input
-                  type="text"
-                  value={formData.projectName || ""}
-                  onChange={(e) =>
-                    handleInputChange("projectName", e.target.value)
-                  }
-                  disabled={isReadOnly}
-                  className={`w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    isReadOnly ? "bg-gray-50 cursor-not-allowed" : ""
-                  }`}
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
-                  Project ID
-                </label>
-                <input
-                  type="text"
-                  value={formData.projectId || ""}
-                  onChange={(e) => handleInputChange("projectId", e.target.value)}
-                  disabled={isReadOnly}
-                  className={`w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    isReadOnly ? "bg-gray-50 cursor-not-allowed" : ""
-                  }`}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Description */}
+          {/* Description - Always visible */}
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">
               Description
@@ -226,13 +318,14 @@ const FormulaDetailsModal = ({
               onChange={(e) => handleInputChange("description", e.target.value)}
               disabled={isReadOnly}
               rows={3}
+              placeholder="Enter description (optional)"
               className={`w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                 isReadOnly ? "bg-gray-50 cursor-not-allowed" : ""
               }`}
             />
           </div>
 
-          {/* Created By and Last Updated */}
+          {/* Metadata - Read-only */}
           <div className="grid grid-cols-2 gap-4 pt-2">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">
@@ -240,7 +333,7 @@ const FormulaDetailsModal = ({
               </label>
               <input
                 type="text"
-                value={formula.createdBy || ""}
+                value={formula.createdBy || "Current User"}
                 disabled
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed"
               />
@@ -254,7 +347,7 @@ const FormulaDetailsModal = ({
                 value={
                   formula.lastUpdated
                     ? new Date(formula.lastUpdated).toLocaleDateString()
-                    : ""
+                    : new Date().toLocaleDateString()
                 }
                 disabled
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed"
