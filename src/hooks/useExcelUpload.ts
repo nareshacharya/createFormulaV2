@@ -71,7 +71,7 @@ export const useExcelUpload = (
 
       // Add ingredients to formula
       onAddIngredientsToFormula(selectedFormulaId, parsedIngredients);
-      
+
       toast.success(`Successfully added ${parsedIngredients.length} ingredients to formula`);
       setIsModalOpen(false);
       setSelectedFormulaId(null);
@@ -94,7 +94,7 @@ export const useExcelUpload = (
     isExcelUploadModalOpen: isModalOpen,
     selectedFormulaId,
     availableIngredients: ingredients,
-    
+
     // Handlers
     handleUploadExcel,
     handleUploadIngredients,

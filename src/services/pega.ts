@@ -53,6 +53,30 @@ export interface Formula {
 
   // U-Code (generated when formula is locked)
   uCode?: string;  // e.g., UAD00001A
+
+  // Extended fields from formula creation configuration
+  region?: string;
+  country?: string;
+  sapPlmCode?: string;
+  limsCode?: string;
+  fragranceName?: string;
+  sampleId?: string;
+  fragranceDosageActual?: number;
+  formulaVersion?: number;
+  formulaInclusionLevel?: number;
+  productFormat?: string;
+  brand?: string;
+  supplier?: string;
+  claims?: string[];
+  variant?: string;
+  productionCode?: string;
+  productionDate?: string;
+  recommendedProductDosage?: number;
+  unitOfRecommendedDosage?: string;
+  ufiCode?: string;
+  commentOnProduct?: string;
+  briefCptTarget?: number;
+  briefFragranceDosageTarget?: number;
 }
 
 export interface FormulaIngredient {

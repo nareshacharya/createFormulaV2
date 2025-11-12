@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import Modal from "./Modal";
 import Button from "./Button";
 import type { Formula } from "../services/pega";
-import { FORMULA_TYPES, getFormulaTypeLabel } from "../config/formulaTypes.config";
+import {
+  FORMULA_TYPES,
+  getFormulaTypeLabel,
+} from "../config/formulaTypes.config";
 import type { FormulaType } from "../config/formulaTypes.config";
 import { GENERAL_INFO_FIELDS } from "../config/fieldConfigs/generalInfo.fields";
 import { FORMULA_DETAILS_FIELDS } from "../config/fieldConfigs/formulaDetails.fields";
@@ -21,11 +24,11 @@ interface FormulaDetailsModalProps {
 
 /**
  * FormulaDetailsModal Component (View Layer)
- * 
+ *
  * Displays formula details in either:
  * - Edit mode (for editable/owned formulas)
  * - View-only mode (for locked/reference formulas)
- * 
+ *
  * Dynamically renders all fields from formula creation configuration
  * based on formula type with proper field types (dropdowns, text, etc.)
  */
@@ -48,18 +51,34 @@ const FormulaDetailsModal = ({
 
   useEffect(() => {
     if (formula) {
-      setFormData({ ...formula });
+      // Map formula data to field names expected by field configurations
+      const mappedData = {
+        ...formula,
+        // Map 'name' to 'fragranceName' for BASE/DILUTION/PERFUMER formulas
+        fragranceName: formula.fragranceName || formula.name,
+        // Ensure formulaVersion is set from version if not already set
+        formulaVersion: formula.formulaVersion || parseInt(formula.version?.replace('v', '') || '1'),
+      };
+      setFormData(mappedData);
     }
   }, [formula]);
 
-  const handleInputChange = (fieldName: string, value: string | number | string[] | undefined) => {
+  const handleInputChange = (
+    fieldName: string,
+    value: string | number | string[] | undefined
+  ) => {
     if (isReadOnly) return;
-    setFormData((prev) => prev ? ({ ...prev, [fieldName]: value }) : null);
+    setFormData((prev) => (prev ? { ...prev, [fieldName]: value } : null));
   };
 
   const handleSave = () => {
     if (!formData || isReadOnly) return;
-    onSave?.(formData);
+    // Map fragranceName back to name for the formula object
+    const saveData = {
+      ...formData,
+      name: formData.fragranceName || formData.name,
+    };
+    onSave?.(saveData);
     onClose();
   };
 
@@ -70,18 +89,31 @@ const FormulaDetailsModal = ({
 
   if (!formula || !formData) return null;
 
-  const formulaType = (formula.formulaType || FORMULA_TYPES.BASE) as FormulaType;
+  const formulaType = (formula.formulaType ||
+    FORMULA_TYPES.BASE) as FormulaType;
 
   // Filter fields visible for this formula type
   const visibleFields = allFields.filter((field) =>
-    isFieldVisibleForType(field, formulaType, formData as Record<string, unknown>)
+    isFieldVisibleForType(
+      field,
+      formulaType,
+      formData as Record<string, unknown>
+    )
   );
 
   // Group fields by category
-  const generalInfoFields = visibleFields.filter((f) => f.group === "general-info");
-  const formulaDetailsFields = visibleFields.filter((f) => f.group === "formula-details");
-  const productInfoFields = visibleFields.filter((f) => f.group === "product-info");
-  const projectReferenceFields = visibleFields.filter((f) => f.group === "project-ref");
+  const generalInfoFields = visibleFields.filter(
+    (f) => f.group === "general-info"
+  );
+  const formulaDetailsFields = visibleFields.filter(
+    (f) => f.group === "formula-details"
+  );
+  const productInfoFields = visibleFields.filter(
+    (f) => f.group === "product-info"
+  );
+  const projectReferenceFields = visibleFields.filter(
+    (f) => f.group === "project-ref"
+  );
 
   // Mock data for dropdown fields (in production, these would be loaded from API)
   const mockOptions: Record<string, Array<{ value: string; label: string }>> = {
@@ -141,12 +173,16 @@ const FormulaDetailsModal = ({
             disabled={isDisabled}
             className={inputClassName}
           >
-            <option value="">{field.placeholder || `Select ${field.label}`}</option>
+            <option value="">
+              {field.placeholder || `Select ${field.label}`}
+            </option>
             {options.map((option) => (
-              <option 
-                key={option.value} 
-                value={option.value} 
-                disabled={"disabled" in option ? Boolean(option.disabled) : false}
+              <option
+                key={option.value}
+                value={option.value}
+                disabled={
+                  "disabled" in option ? Boolean(option.disabled) : false
+                }
               >
                 {option.label}
               </option>
@@ -157,7 +193,9 @@ const FormulaDetailsModal = ({
 
       case "multi-select": {
         // Render as text input showing comma-separated values
-        const multiValue = Array.isArray(value) ? value.join(", ") : String(value || "");
+        const multiValue = Array.isArray(value)
+          ? value.join(", ")
+          : String(value || "");
         return (
           <input
             type="text"
@@ -181,7 +219,10 @@ const FormulaDetailsModal = ({
             type="number"
             value={value as string}
             onChange={(e) =>
-              handleInputChange(field.name, e.target.value ? Number(e.target.value) : undefined)
+              handleInputChange(
+                field.name,
+                e.target.value ? Number(e.target.value) : undefined
+              )
             }
             disabled={isDisabled}
             placeholder={field.placeholder}
@@ -246,14 +287,22 @@ const FormulaDetailsModal = ({
               key={field.name}
               className={field.type === "textarea" ? "col-span-2" : ""}
             >
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                {field.label}
+              <label className="block text-xs font-medium text-gray-700 mb-1 flex items-center">
+                <span>{field.label}</span>
                 {field.required && <span className="text-red-500 ml-1">*</span>}
+                {field.helpText && (
+                  <div className="group relative inline-block ml-1">
+                    <span className="material-symbols-rounded text-gray-400 hover:text-gray-600 cursor-help" style={{ fontSize: '14px' }}>
+                      info
+                    </span>
+                    <div className="invisible group-hover:visible absolute left-0 bottom-full mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg z-50 pointer-events-none">
+                      {field.helpText}
+                      <div className="absolute top-full left-4 -mt-1 border-4 border-transparent border-t-gray-900"></div>
+                    </div>
+                  </div>
+                )}
               </label>
               {renderField(field)}
-              {field.helpText && !isReadOnly && (
-                <p className="text-xs text-gray-500 mt-1">{field.helpText}</p>
-              )}
             </div>
           ))}
         </div>
@@ -288,7 +337,9 @@ const FormulaDetailsModal = ({
 
         {/* Formula Type Badge */}
         <div className="flex items-center space-x-3">
-          <span className="text-sm font-medium text-gray-700">Formula Type:</span>
+          <span className="text-sm font-medium text-gray-700">
+            Formula Type:
+          </span>
           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
             {getFormulaTypeLabel(formulaType)}
           </span>

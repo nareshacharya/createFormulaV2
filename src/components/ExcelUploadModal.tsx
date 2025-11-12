@@ -19,11 +19,11 @@ interface ParsedIngredient {
 
 /**
  * ExcelUploadModal Component (View Layer)
- * 
+ *
  * Exclusive for analytical formulas.
  * Allows users to upload an Excel file containing ingredients
  * and map them to the system's ingredient library.
- * 
+ *
  * Expected Excel format:
  * - Column 1: Ingredient Name
  * - Column 2: Percentage
@@ -35,7 +35,9 @@ const ExcelUploadModal = ({
   availableIngredients,
 }: ExcelUploadModalProps) => {
   const [file, setFile] = useState<File | null>(null);
-  const [parsedIngredients, setParsedIngredients] = useState<ParsedIngredient[]>([]);
+  const [parsedIngredients, setParsedIngredients] = useState<
+    ParsedIngredient[]
+  >([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,8 +50,11 @@ const ExcelUploadModal = ({
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "text/csv",
       ];
-      
-      if (!validTypes.includes(selectedFile.type) && !selectedFile.name.match(/\.(xlsx|xls|csv)$/i)) {
+
+      if (
+        !validTypes.includes(selectedFile.type) &&
+        !selectedFile.name.match(/\.(xlsx|xls|csv)$/i)
+      ) {
         setError("Please upload a valid Excel file (.xlsx, .xls) or CSV file");
         return;
       }
@@ -68,25 +73,27 @@ const ExcelUploadModal = ({
     try {
       // Parse the Excel file
       const fileReader = new FileReader();
-      
+
       fileReader.onload = (event) => {
         try {
           const data = event.target?.result;
-          
+
           // For CSV files
-          if (file.name.endsWith('.csv')) {
+          if (file.name.endsWith(".csv")) {
             const text = data as string;
-            const rows = text.split('\n').filter(row => row.trim());
-            
+            const rows = text.split("\n").filter((row) => row.trim());
+
             // Skip header row and parse ingredients
-            const ingredients: ParsedIngredient[] = rows.slice(1).map(row => {
-              const [name, percentage] = row.split(',').map(val => val.trim());
-              
+            const ingredients: ParsedIngredient[] = rows.slice(1).map((row) => {
+              const [name, percentage] = row
+                .split(",")
+                .map((val) => val.trim());
+
               // Try to find matching ingredient
               const match = availableIngredients.find(
-                ing => ing.name.toLowerCase() === name.toLowerCase()
+                (ing) => ing.name.toLowerCase() === name.toLowerCase()
               );
-              
+
               return {
                 name,
                 percentage: parseFloat(percentage) || 0,
@@ -94,14 +101,16 @@ const ExcelUploadModal = ({
                 status: match ? "matched" : "unmatched",
               };
             });
-            
+
             setParsedIngredients(ingredients);
           } else {
             // For Excel files, we'll need a library like xlsx
             // For now, show a message
-            setError("Excel file parsing requires additional library. Please use CSV format for now.");
+            setError(
+              "Excel file parsing requires additional library. Please use CSV format for now."
+            );
           }
-          
+
           setIsProcessing(false);
         } catch (_err) {
           setError("Failed to parse file. Please check the file format.");
@@ -109,7 +118,7 @@ const ExcelUploadModal = ({
         }
       };
 
-      if (file.name.endsWith('.csv')) {
+      if (file.name.endsWith(".csv")) {
         fileReader.readAsText(file);
       } else {
         fileReader.readAsBinaryString(file);
@@ -132,10 +141,14 @@ const ExcelUploadModal = ({
 
   const handleUpload = () => {
     // Check if all ingredients are mapped
-    const unmapped = parsedIngredients.filter(ing => ing.status === "unmatched");
-    
+    const unmapped = parsedIngredients.filter(
+      (ing) => ing.status === "unmatched"
+    );
+
     if (unmapped.length > 0) {
-      setError(`Please map all ingredients. ${unmapped.length} ingredient(s) are still unmapped.`);
+      setError(
+        `Please map all ingredients. ${unmapped.length} ingredient(s) are still unmapped.`
+      );
       return;
     }
 
@@ -184,7 +197,7 @@ const ExcelUploadModal = ({
           <label className="block text-sm font-medium text-gray-700">
             Select Excel File
           </label>
-          
+
           <div className="flex items-center space-x-3">
             <label className="flex-1 flex items-center justify-center px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-400 transition-colors cursor-pointer">
               <input
@@ -200,7 +213,7 @@ const ExcelUploadModal = ({
                 </span>
               </div>
             </label>
-            
+
             {file && (
               <Button
                 variant="primary"
@@ -229,7 +242,7 @@ const ExcelUploadModal = ({
             <h4 className="text-sm font-semibold text-gray-900">
               Ingredient Mapping ({parsedIngredients.length} ingredients)
             </h4>
-            
+
             <div className="border border-gray-200 rounded-lg overflow-hidden">
               <div className="max-h-96 overflow-y-auto">
                 <table className="w-full">
@@ -304,14 +317,17 @@ const ExcelUploadModal = ({
 
             {/* Summary */}
             <div className="flex items-center justify-between text-sm text-gray-600 bg-gray-50 px-4 py-2 rounded">
-              <span>
-                Total: {parsedIngredients.length} ingredients
-              </span>
+              <span>Total: {parsedIngredients.length} ingredients</span>
               <span className="text-green-600">
-                Mapped: {parsedIngredients.filter(i => i.status === "matched").length}
+                Mapped:{" "}
+                {parsedIngredients.filter((i) => i.status === "matched").length}
               </span>
               <span className="text-yellow-600">
-                Unmapped: {parsedIngredients.filter(i => i.status === "unmatched").length}
+                Unmapped:{" "}
+                {
+                  parsedIngredients.filter((i) => i.status === "unmatched")
+                    .length
+                }
               </span>
             </div>
           </div>
@@ -326,7 +342,9 @@ const ExcelUploadModal = ({
             <Button
               variant="primary"
               onClick={handleUpload}
-              disabled={parsedIngredients.some(ing => ing.status === "unmatched")}
+              disabled={parsedIngredients.some(
+                (ing) => ing.status === "unmatched"
+              )}
             >
               Upload Ingredients
             </Button>

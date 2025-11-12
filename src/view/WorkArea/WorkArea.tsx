@@ -37,7 +37,7 @@ import { useExcelUpload } from "../../hooks/useExcelUpload";
 const WorkArea = () => {
   // Workspace context - manages data isolation between tabs
   const workspace = useWorkspace();
-  
+
   // Use custom hooks for state management
   const state = useWorkAreaState();
 
@@ -209,30 +209,42 @@ const WorkArea = () => {
 
   // Callback for adding ingredients from Excel upload
   const handleAddIngredientsToFormula = useCallback(
-    (formulaId: string, parsedIngredients: Array<{ mappedIngredientId: string; percentage: number }>) => {
+    (
+      formulaId: string,
+      parsedIngredients: Array<{
+        mappedIngredientId: string;
+        percentage: number;
+      }>
+    ) => {
       const formula = formulas.find((f) => f.id === formulaId);
       if (!formula) return;
 
       // Add new rows to tableData for each ingredient
-      const newRows = parsedIngredients.map((parsed) => {
-        const ingredient = ingredients.find((ing) => ing.id === parsed.mappedIngredientId);
-        if (!ingredient) return null;
+      const newRows = parsedIngredients
+        .map((parsed) => {
+          const ingredient = ingredients.find(
+            (ing) => ing.id === parsed.mappedIngredientId
+          );
+          if (!ingredient) return null;
 
-        const newRow: Record<string, unknown> = {
-          id: `${Date.now()}-${Math.random()}`,
-          ingredient: ingredient.name,
-          ingredientId: ingredient.id,
-        };
+          const newRow: Record<string, unknown> = {
+            id: `${Date.now()}-${Math.random()}`,
+            ingredient: ingredient.name,
+            ingredientId: ingredient.id,
+          };
 
-        // Add formula percentage - find column by formulaId
-        const formulaColumn = columns.find((col) => col.formulaId === formulaId);
+          // Add formula percentage - find column by formulaId
+          const formulaColumn = columns.find(
+            (col) => col.formulaId === formulaId
+          );
 
-        if (formulaColumn) {
-          newRow[formulaColumn.id] = parsed.percentage;
-        }
+          if (formulaColumn) {
+            newRow[formulaColumn.id] = parsed.percentage;
+          }
 
-        return newRow;
-      }).filter(Boolean);
+          return newRow;
+        })
+        .filter(Boolean);
 
       setTableData((prevData) => [...prevData, ...newRows]);
     },
@@ -370,8 +382,11 @@ const WorkArea = () => {
 
   // Sync workspace data when active workspace changes (tab switch)
   useEffect(() => {
-    console.log("🔄 Workspace changed - restoring data for:", workspace.activeTabId);
-    
+    console.log(
+      "🔄 Workspace changed - restoring data for:",
+      workspace.activeTabId
+    );
+
     // Restore workspace data
     const wsData = workspace.activeWorkspace;
     setColumns(wsData.columns);
@@ -380,9 +395,9 @@ const WorkArea = () => {
     setSelectedFormulaIds(wsData.selectedFormulaIds);
     setEditableFormula(wsData.editableFormula || "");
     setSelectedAttributes(wsData.selectedAttributes);
-    
+
     // Convert Formula[] to string[] for local state
-    const formulaIds = wsData.selectedFormulas.map(f => f.id);
+    const formulaIds = wsData.selectedFormulas.map((f) => f.id);
     setSelectedFormulas(formulaIds);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workspace.activeTabId]);
@@ -390,10 +405,12 @@ const WorkArea = () => {
   // Save workspace data whenever it changes
   useEffect(() => {
     console.log("💾 Saving workspace data...");
-    
+
     // Convert string[] to Formula[] for workspace context
-    const selectedFormulaObjects = formulas.filter(f => selectedFormulas.includes(f.id));
-    
+    const selectedFormulaObjects = formulas.filter((f) =>
+      selectedFormulas.includes(f.id)
+    );
+
     workspace.updateWorkspaceData({
       columns,
       tableData,
@@ -404,7 +421,15 @@ const WorkArea = () => {
       selectedFormulas: selectedFormulaObjects,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [columns, tableData, formulas, selectedFormulaIds, editableFormula, selectedAttributes, selectedFormulas]);
+  }, [
+    columns,
+    tableData,
+    formulas,
+    selectedFormulaIds,
+    editableFormula,
+    selectedAttributes,
+    selectedFormulas,
+  ]);
 
   // Sync selected formula IDs with LibraryPanel whenever they change
   useEffect(() => {

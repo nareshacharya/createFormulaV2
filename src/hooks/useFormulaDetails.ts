@@ -87,7 +87,7 @@ export const useFormulaDetails = (
     isFormulaDetailsModalOpen: isModalOpen,
     selectedFormula,
     isReadOnly,
-    
+
     // Handlers
     handleEditFormulaDetails,
     handleViewFormulaDetails,

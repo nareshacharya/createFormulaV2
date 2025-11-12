@@ -353,24 +353,28 @@ export const ColumnHeaderCell = ({
                           )}
 
                           {/* Upload Composition - only for owned analytical formulas */}
-                          {isOwned && column.formulaId && (() => {
-                            const formula = formulas.find((f: any) => f.id === column.formulaId); // eslint-disable-line @typescript-eslint/no-explicit-any
-                            return formula?.formulaType === "ANALYTICAL";
-                          })() && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onUploadExcel?.(column.formulaId);
-                                setShowColumnActions(null);
-                              }}
-                              className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2 whitespace-nowrap"
-                            >
-                              <span className="material-symbols-rounded text-xs">
-                                upload_file
-                              </span>
-                              <span>Upload Composition</span>
-                            </button>
-                          )}
+                          {isOwned &&
+                            column.formulaId &&
+                            (() => {
+                              const formula = formulas.find(
+                                (f: any) => f.id === column.formulaId
+                              ); // eslint-disable-line @typescript-eslint/no-explicit-any
+                              return formula?.formulaType === "ANALYTICAL";
+                            })() && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onUploadExcel?.(column.formulaId);
+                                  setShowColumnActions(null);
+                                }}
+                                className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2 whitespace-nowrap"
+                              >
+                                <span className="material-symbols-rounded text-xs">
+                                  upload_file
+                                </span>
+                                <span>Upload Composition</span>
+                              </button>
+                            )}
 
                           {/* Create Version - always available */}
                           <button
