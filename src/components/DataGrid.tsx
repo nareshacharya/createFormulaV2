@@ -38,6 +38,7 @@ export interface Column {
 interface DataGridProps {
   columns: Column[];
   data: any[];
+  formulas?: any[]; // Array of formulas to check formula types
   onAddColumn?: (columnType: "formula" | "attribute") => void;
   onAddFormula?: () => void;
   onRowDelete?: (rowId: string) => void;
@@ -78,6 +79,7 @@ interface DataGridProps {
 const DataGrid = ({
   columns,
   data,
+  formulas = [],
   onAddColumn,
   onAddFormula,
   onRowDelete: _onRowDelete,
@@ -460,6 +462,7 @@ const DataGrid = ({
         <table className="w-full">
           <TableHeader
             columns={columns}
+            formulas={formulas}
             groupedColumns={groupedColumns}
             enableRowReordering={enableRowReordering}
             enableBulkSelection={enableBulkSelection}

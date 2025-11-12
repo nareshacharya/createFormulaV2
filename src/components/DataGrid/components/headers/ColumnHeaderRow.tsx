@@ -27,6 +27,7 @@ interface SortConfig {
 
 interface ColumnHeaderRowProps {
   columns: Column[];
+  formulas?: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
   enableRowReordering?: boolean;
   enableBulkSelection?: boolean;
   editableFormula?: string | null;
@@ -59,6 +60,7 @@ interface ColumnHeaderRowProps {
 
 export const ColumnHeaderRow = ({
   columns,
+  formulas = [],
   enableRowReordering = false,
   enableBulkSelection = false,
   editableFormula,
@@ -123,6 +125,7 @@ export const ColumnHeaderRow = ({
         <ColumnHeaderCell
           key={column.id}
           column={column}
+          formulas={formulas}
           index={index}
           editableFormula={editableFormula}
           draggedColumn={draggedColumn}

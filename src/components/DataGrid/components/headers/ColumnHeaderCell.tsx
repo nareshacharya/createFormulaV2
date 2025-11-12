@@ -30,6 +30,7 @@ interface SortConfig {
 
 interface ColumnHeaderCellProps {
   column: Column;
+  formulas?: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
   index: number;
   editableFormula?: string | null;
   draggedColumn: number | null;
@@ -58,6 +59,7 @@ interface ColumnHeaderCellProps {
 
 export const ColumnHeaderCell = ({
   column,
+  formulas = [],
   index,
   editableFormula,
   draggedColumn,
@@ -351,7 +353,10 @@ export const ColumnHeaderCell = ({
                           )}
 
                           {/* Upload Composition - only for owned analytical formulas */}
-                          {isOwned && column.formulaId && (
+                          {isOwned && column.formulaId && (() => {
+                            const formula = formulas.find((f: any) => f.id === column.formulaId); // eslint-disable-line @typescript-eslint/no-explicit-any
+                            return formula?.formulaType === "ANALYTICAL";
+                          })() && (
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();

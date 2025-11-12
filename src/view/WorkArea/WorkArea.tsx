@@ -2018,6 +2018,7 @@ const WorkArea = () => {
         <DataGrid
           columns={getDisplayColumns()}
           data={getEmptyStateData(tableData, hasIngredients)}
+          formulas={formulas}
           onAddColumn={(columnType) => {
             if (columnType === "formula") {
               handleAddFormulaColumn();

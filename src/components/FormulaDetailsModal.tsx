@@ -74,7 +74,7 @@ const FormulaDetailsModal = ({
       title={isReadOnly ? "View Formula Details" : "Edit Formula Details"}
       size="xl"
     >
-      <div className="space-y-6">
+      <div className="space-y-5 px-6 py-4">
         {/* Read-only indicator */}
         {isReadOnly && (
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 flex items-center space-x-2">
@@ -101,9 +101,9 @@ const FormulaDetailsModal = ({
         </div>
 
         {/* Form Fields organized by sections */}
-        <div className="space-y-4">
+        <div className="space-y-5">
           {/* Basic Information Section */}
-          <div className="border-b border-gray-200 pb-4">
+          <div className="border-b border-gray-200 pb-5">
             <h3 className="text-sm font-semibold text-gray-900 mb-3">
               Basic Information
             </h3>
@@ -178,7 +178,7 @@ const FormulaDetailsModal = ({
           </div>
 
           {/* Project Information */}
-          <div className="border-b border-gray-200 pb-4">
+          <div className="border-b border-gray-200 pb-5">
             <h3 className="text-sm font-semibold text-gray-900 mb-3">
               Project Information
             </h3>
@@ -264,7 +264,7 @@ const FormulaDetailsModal = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+        <div className="flex justify-end space-x-3 pt-5 border-t border-gray-200">
           <Button variant="secondary" onClick={handleCancel}>
             {isReadOnly ? "Close" : "Cancel"}
           </Button>
