@@ -57,25 +57,15 @@ export const GroupHeaderRow = ({
         </th>
       )}
 
-      {/* Description column (no group) */}
-      {columns.find((col) => col.key === "description") && (
-        <th className="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-r border-gray-200 bg-gray-50">
-          {/* Empty for description */}
-        </th>
-      )}
-
-      {/* Other non-grouped columns */}
+      {/* Non-grouped columns (columns without a group property) */}
       {columns
-        .filter(
-          (col) =>
-            !col.group && col.key !== "description" && col.type !== "add-column"
-        )
+        .filter((col) => !col.group && col.type !== "add-column")
         .map((col) => (
           <th
             key={col.id}
             className="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-r border-gray-200 bg-gray-50"
           >
-            {col.title}
+            {/* Empty header for non-grouped columns */}
           </th>
         ))}
 
