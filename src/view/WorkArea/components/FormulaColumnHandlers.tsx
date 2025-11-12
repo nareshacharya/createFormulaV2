@@ -61,7 +61,11 @@ export const useFormulaColumnHandlers = (config: FormulaHandlersConfig) => {
       return;
     }
 
-    const formula = formulas.find((f) => f.id === column.formulaId);
+    // Search in both workspace formulas and available formulas
+    let formula = formulas.find((f) => f.id === column.formulaId);
+    if (!formula) {
+      formula = availableFormulas.find((f) => f.id === column.formulaId);
+    }
     if (!formula) {
       toast.error("Formula data not found");
       return;
@@ -294,7 +298,11 @@ export const useFormulaColumnHandlers = (config: FormulaHandlersConfig) => {
       return;
     }
 
-    const formula = formulas.find((f) => f.id === column.formulaId);
+    // Search in both workspace formulas and available formulas
+    let formula = formulas.find((f) => f.id === column.formulaId);
+    if (!formula) {
+      formula = availableFormulas.find((f) => f.id === column.formulaId);
+    }
     if (!formula) {
       toast.error("Formula data not found");
       return;

@@ -8,12 +8,12 @@ import toast from "react-hot-toast";
  * Manages formula details modal state and operations.
  * Handles both edit mode (for owned formulas) and view mode (for locked formulas).
  * 
- * @param formulas - List of all available formulas
+ * @param allFormulas - Combined list of workspace formulas and available formulas
  * @param onUpdateFormula - Callback to update formula details
  * @returns Modal state and handlers
  */
 export const useFormulaDetails = (
-  formulas: Formula[],
+  allFormulas: Formula[],
   onUpdateFormula: (formulaId: string, updates: Partial<Formula>) => void
 ) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -26,7 +26,7 @@ export const useFormulaDetails = (
    */
   const handleEditFormulaDetails = useCallback((formulaId: string) => {
     // Find formula by universal formula ID
-    const formula = formulas.find(f => f.id === formulaId);
+    const formula = allFormulas.find(f => f.id === formulaId);
 
     if (formula) {
       setSelectedFormula(formula);
@@ -34,9 +34,9 @@ export const useFormulaDetails = (
       setIsModalOpen(true);
     } else {
       toast.error("Formula not found");
-      console.error("Formula not found with ID:", formulaId, "Available formulas:", formulas.map(f => f.id));
+      console.error("Formula not found with ID:", formulaId, "Available formulas:", allFormulas.map(f => f.id));
     }
-  }, [formulas]);
+  }, [allFormulas]);
 
   /**
    * Open formula details modal in view-only mode
@@ -44,7 +44,7 @@ export const useFormulaDetails = (
    */
   const handleViewFormulaDetails = useCallback((formulaId: string) => {
     // Find formula by universal formula ID
-    const formula = formulas.find(f => f.id === formulaId);
+    const formula = allFormulas.find(f => f.id === formulaId);
 
     if (formula) {
       setSelectedFormula(formula);
@@ -52,9 +52,9 @@ export const useFormulaDetails = (
       setIsModalOpen(true);
     } else {
       toast.error("Formula not found");
-      console.error("Formula not found with ID:", formulaId, "Available formulas:", formulas.map(f => f.id));
+      console.error("Formula not found with ID:", formulaId, "Available formulas:", allFormulas.map(f => f.id));
     }
-  }, [formulas]);
+  }, [allFormulas]);
 
   /**
    * Save formula details updates

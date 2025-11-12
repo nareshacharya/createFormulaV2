@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import toast from "react-hot-toast";
 import DataGrid from "../../components/DataGrid";
 import type { Column } from "../../components/DataGrid";
@@ -321,6 +321,31 @@ const WorkArea = () => {
     [formulas, ingredients, columns, setTableData]
   );
 
+  // Combine workspace formulas with available formulas for lookup
+  // This ensures formulas from other workspaces can be found
+  const allFormulas = useMemo(() => {
+    const seen = new Set<string>();
+    const combined: Formula[] = [];
+
+    // Add workspace formulas first
+    for (const formula of formulas) {
+      if (!seen.has(formula.id)) {
+        seen.add(formula.id);
+        combined.push(formula);
+      }
+    }
+
+    // Add available formulas (from other workspaces/global)
+    for (const formula of availableFormulas) {
+      if (!seen.has(formula.id)) {
+        seen.add(formula.id);
+        combined.push(formula);
+      }
+    }
+
+    return combined;
+  }, [formulas, availableFormulas]);
+
   // Use formula details hook
   const {
     isFormulaDetailsModalOpen,
@@ -330,7 +355,7 @@ const WorkArea = () => {
     handleViewFormulaDetails,
     handleSaveFormula,
     handleCloseFormulaDetails,
-  } = useFormulaDetails(formulas, handleUpdateFormula);
+  } = useFormulaDetails(allFormulas, handleUpdateFormula);
 
   // Use Excel upload hook
   const {
