@@ -57,7 +57,9 @@ const FormulaDetailsModal = ({
         // Map 'name' to 'fragranceName' for BASE/DILUTION/PERFUMER formulas
         fragranceName: formula.fragranceName || formula.name,
         // Ensure formulaVersion is set from version if not already set
-        formulaVersion: formula.formulaVersion || parseInt(formula.version?.replace('v', '') || '1'),
+        formulaVersion:
+          formula.formulaVersion ||
+          parseInt(formula.version?.replace("v", "") || "1"),
       };
       setFormData(mappedData);
     }
@@ -158,7 +160,7 @@ const FormulaDetailsModal = ({
     const value = (formData as Record<string, unknown>)[field.name] ?? "";
     const isDisabled = isReadOnly || field.disabled;
 
-    const inputClassName = `w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+    const inputClassName = `w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
       isDisabled ? "bg-gray-50 cursor-not-allowed" : ""
     }`;
 
@@ -292,7 +294,10 @@ const FormulaDetailsModal = ({
                 {field.required && <span className="text-red-500 ml-1">*</span>}
                 {field.helpText && (
                   <div className="group relative inline-block ml-1">
-                    <span className="material-symbols-rounded text-gray-400 hover:text-gray-600 cursor-help" style={{ fontSize: '14px' }}>
+                    <span
+                      className="material-symbols-rounded text-gray-400 hover:text-gray-600 cursor-help"
+                      style={{ fontSize: "14px" }}
+                    >
                       info
                     </span>
                     <div className="invisible group-hover:visible absolute left-0 bottom-full mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg z-50 pointer-events-none">
@@ -370,7 +375,7 @@ const FormulaDetailsModal = ({
               disabled={isReadOnly}
               rows={3}
               placeholder="Enter description (optional)"
-              className={`w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+              className={`w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                 isReadOnly ? "bg-gray-50 cursor-not-allowed" : ""
               }`}
             />
