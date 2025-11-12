@@ -28,8 +28,12 @@ import { generateNewFormulaId } from "../../utils/formulaIdGenerator";
 import type { WorkspaceState } from "../../utils/workspaceManager";
 import { appStateHistory } from "../../utils/stateHistory";
 import { exportData } from "../../utils/exportUtils";
+import { useWorkspace } from "../../hooks/useWorkspace";
 
 const WorkArea = () => {
+  // Workspace context - manages data isolation between tabs
+  const workspace = useWorkspace();
+  
   // Use custom hooks for state management
   const state = useWorkAreaState();
 
@@ -288,6 +292,44 @@ const WorkArea = () => {
 
     loadData();
   }, []);
+
+  // Sync workspace data when active workspace changes (tab switch)
+  useEffect(() => {
+    console.log("🔄 Workspace changed - restoring data for:", workspace.activeTabId);
+    
+    // Restore workspace data
+    const wsData = workspace.activeWorkspace;
+    setColumns(wsData.columns);
+    setTableData(wsData.tableData);
+    setFormulas(wsData.formulas);
+    setSelectedFormulaIds(wsData.selectedFormulaIds);
+    setEditableFormula(wsData.editableFormula || "");
+    setSelectedAttributes(wsData.selectedAttributes);
+    
+    // Convert Formula[] to string[] for local state
+    const formulaIds = wsData.selectedFormulas.map(f => f.id);
+    setSelectedFormulas(formulaIds);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workspace.activeTabId]);
+
+  // Save workspace data whenever it changes
+  useEffect(() => {
+    console.log("💾 Saving workspace data...");
+    
+    // Convert string[] to Formula[] for workspace context
+    const selectedFormulaObjects = formulas.filter(f => selectedFormulas.includes(f.id));
+    
+    workspace.updateWorkspaceData({
+      columns,
+      tableData,
+      formulas,
+      selectedFormulaIds,
+      editableFormula,
+      selectedAttributes,
+      selectedFormulas: selectedFormulaObjects,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [columns, tableData, formulas, selectedFormulaIds, editableFormula, selectedAttributes, selectedFormulas]);
 
   // Sync selected formula IDs with LibraryPanel whenever they change
   useEffect(() => {

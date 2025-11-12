@@ -164,6 +164,15 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
 
     setTabs((prev) => [...prev, newTab]);
     setActiveTabId(newTab.id);
+    
+    // Clear LibraryPanel transient selections for fresh workspace
+    import("../utils/bus").then(({ eventBus }) => {
+      eventBus.emit("workspace-created", { 
+        workspaceId: newTab.id,
+        workspaceName: newTab.name 
+      });
+    });
+    
     toast.success(
       `New workspace "${newTab.name}" created - Fresh session started`
     );
@@ -186,9 +195,19 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
       const updatedTabs = tabs.filter((t) => t.id !== tabId);
       setTabs(updatedTabs);
 
-      // If closing active tab, switch to first tab
+      // If closing active tab, switch to first tab (which clears library selections)
       if (activeTabId === tabId) {
-        setActiveTabId(updatedTabs[0].id);
+        const newActiveTab = updatedTabs[0];
+        setActiveTabId(newActiveTab.id);
+        
+        // Clear LibraryPanel transient selections when switching to another tab
+        import("../utils/bus").then(({ eventBus }) => {
+          eventBus.emit("workspace-switched", { 
+            workspaceId: newActiveTab.id,
+            workspaceName: newActiveTab.name,
+            previousWorkspaceId: tabId
+          });
+        });
       }
 
       toast.success(`Workspace "${tab?.name}" closed`);
@@ -197,8 +216,21 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const switchTab = useCallback((tabId: string) => {
+    const previousTabId = activeTabId;
     setActiveTabId(tabId);
-  }, []);
+    
+    // Clear LibraryPanel transient selections when switching tabs
+    if (previousTabId !== tabId) {
+      import("../utils/bus").then(({ eventBus }) => {
+        const tab = tabs.find(t => t.id === tabId);
+        eventBus.emit("workspace-switched", { 
+          workspaceId: tabId,
+          workspaceName: tab?.name || "Unknown",
+          previousWorkspaceId: previousTabId
+        });
+      });
+    }
+  }, [activeTabId, tabs]);
 
   const renameTab = useCallback((tabId: string, newName: string) => {
     if (!newName.trim()) return;

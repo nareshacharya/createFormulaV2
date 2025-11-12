@@ -5,7 +5,6 @@ import IngredientList from "../../components/IngredientList";
 import FormulaList from "../../components/FormulaList";
 import IngredientAttributeList from "../../components/IngredientAttributeList";
 import AdvancedFilterSheet from "../../components/AdvancedFilterSheet";
-import Button from "../../components/Button";
 import { PegaService } from "../../services/pega";
 import type {
   Ingredient,
@@ -27,7 +26,6 @@ const LibraryPanel = () => {
   });
   const [activeFilter, setActiveFilter] = useState<string>("all");
   const [selectedAttributes, setSelectedAttributes] = useState<string[]>([]);
-  const [maxAttributeSelections] = useState(5); // Configurable later
   const [selectedFormulaIds, setSelectedFormulaIds] = useState<string[]>([]);
   const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
 
@@ -35,7 +33,7 @@ const LibraryPanel = () => {
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [formulas, setFormulas] = useState<Formula[]>([]);
   const [attributes, setAttributes] = useState<IngredientAttribute[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
 
   const tabs = [
     { id: "ingredients", label: "Ingredients", icon: "labs" },
@@ -115,6 +113,44 @@ const LibraryPanel = () => {
 
     return () => {
       eventBus.off("work-area-updated", handleWorkAreaIngredientsUpdate);
+    };
+  }, []);
+
+  // Listen for workspace events to clear transient selections
+  useEffect(() => {
+    const clearAllSelections = () => {
+      setSelectedIngredients([]);
+      setSelectedFormulaIds([]);
+      setSelectedAttributes([]);
+      setSearchQuery("");
+      setActiveFilter("all");
+      setCurrentQuery({
+        id: "root",
+        combinator: "and",
+        rules: [],
+      });
+    };
+
+    const handleWorkspaceCreated = () => {
+      console.log("🆕 Workspace created - clearing library selections");
+      clearAllSelections();
+    };
+
+    const handleWorkspaceSwitched = (data: {
+      workspaceId: string;
+      workspaceName: string;
+      previousWorkspaceId: string;
+    }) => {
+      console.log("🔄 Workspace switched - clearing library selections", data);
+      clearAllSelections();
+    };
+
+    eventBus.on("workspace-created", handleWorkspaceCreated);
+    eventBus.on("workspace-switched", handleWorkspaceSwitched);
+
+    return () => {
+      eventBus.off("workspace-created", handleWorkspaceCreated);
+      eventBus.off("workspace-switched", handleWorkspaceSwitched);
     };
   }, []);
 
