@@ -320,7 +320,9 @@ export const ColumnHeaderCell = ({
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                onEditFormulaDetails?.(column.id);
+                                if (column.formulaId) {
+                                  onEditFormulaDetails?.(column.formulaId);
+                                }
                                 setShowColumnActions(null);
                               }}
                               className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2 whitespace-nowrap"
@@ -334,7 +336,9 @@ export const ColumnHeaderCell = ({
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                onViewFormulaDetails?.(column.id);
+                                if (column.formulaId) {
+                                  onViewFormulaDetails?.(column.formulaId);
+                                }
                                 setShowColumnActions(null);
                               }}
                               className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2 whitespace-nowrap"
@@ -346,12 +350,12 @@ export const ColumnHeaderCell = ({
                             </button>
                           )}
 
-                          {/* Upload Excel - only for owned analytical formulas */}
+                          {/* Upload Composition - only for owned analytical formulas */}
                           {isOwned && column.formulaId && (
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                onUploadExcel?.(column.id);
+                                onUploadExcel?.(column.formulaId);
                                 setShowColumnActions(null);
                               }}
                               className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2 whitespace-nowrap"
@@ -359,7 +363,7 @@ export const ColumnHeaderCell = ({
                               <span className="material-symbols-rounded text-xs">
                                 upload_file
                               </span>
-                              <span>Upload Excel</span>
+                              <span>Upload Composition</span>
                             </button>
                           )}
 

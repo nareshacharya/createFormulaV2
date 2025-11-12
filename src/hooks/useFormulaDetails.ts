@@ -24,16 +24,9 @@ export const useFormulaDetails = (
    * Open formula details modal in edit mode
    * For owned/editable formulas
    */
-  const handleEditFormulaDetails = useCallback((columnId: string) => {
-    // Find formula by column ID
-    // Column ID might be formulaId or a formula column identifier
-    const formula = formulas.find(f => 
-      f.id === columnId || 
-      f.baseFormulaId === columnId || 
-      f.dilutionFormulaId === columnId ||
-      f.analyticalFormulaId === columnId ||
-      f.perfumerFormulaId === columnId
-    );
+  const handleEditFormulaDetails = useCallback((formulaId: string) => {
+    // Find formula by universal formula ID
+    const formula = formulas.find(f => f.id === formulaId);
 
     if (formula) {
       setSelectedFormula(formula);
@@ -41,6 +34,7 @@ export const useFormulaDetails = (
       setIsModalOpen(true);
     } else {
       toast.error("Formula not found");
+      console.error("Formula not found with ID:", formulaId, "Available formulas:", formulas.map(f => f.id));
     }
   }, [formulas]);
 
@@ -48,14 +42,9 @@ export const useFormulaDetails = (
    * Open formula details modal in view-only mode
    * For locked/reference formulas
    */
-  const handleViewFormulaDetails = useCallback((columnId: string) => {
-    const formula = formulas.find(f => 
-      f.id === columnId || 
-      f.baseFormulaId === columnId || 
-      f.dilutionFormulaId === columnId ||
-      f.analyticalFormulaId === columnId ||
-      f.perfumerFormulaId === columnId
-    );
+  const handleViewFormulaDetails = useCallback((formulaId: string) => {
+    // Find formula by universal formula ID
+    const formula = formulas.find(f => f.id === formulaId);
 
     if (formula) {
       setSelectedFormula(formula);
@@ -63,6 +52,7 @@ export const useFormulaDetails = (
       setIsModalOpen(true);
     } else {
       toast.error("Formula not found");
+      console.error("Formula not found with ID:", formulaId, "Available formulas:", formulas.map(f => f.id));
     }
   }, [formulas]);
 

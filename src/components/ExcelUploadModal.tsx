@@ -155,7 +155,7 @@ const ExcelUploadModal = ({
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title="Upload Ingredients from Excel"
+      title="Upload Composition from Excel"
       size="xl"
     >
       <div className="space-y-6">

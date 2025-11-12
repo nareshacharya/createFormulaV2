@@ -32,21 +32,19 @@ export const useExcelUpload = (
    * Open Excel upload modal
    * Only available for analytical formulas
    */
-  const handleUploadExcel = useCallback((columnId: string) => {
-    // Find formula by column ID
-    const formula = formulas.find(f => 
-      f.id === columnId || 
-      f.analyticalFormulaId === columnId
-    );
+  const handleUploadExcel = useCallback((formulaId: string) => {
+    // Find formula by universal formula ID
+    const formula = formulas.find(f => f.id === formulaId);
 
     if (!formula) {
       toast.error("Formula not found");
+      console.error("Formula not found with ID:", formulaId, "Available formulas:", formulas.map(f => f.id));
       return;
     }
 
     // Verify it's an analytical formula
     if (formula.formulaType !== "ANALYTICAL") {
-      toast.error("Excel upload is only available for analytical formulas");
+      toast.error("Composition upload is only available for analytical formulas");
       return;
     }
 
