@@ -2108,7 +2108,7 @@ const WorkArea = () => {
         <DataGrid
           columns={getDisplayColumns()}
           data={getEmptyStateData(tableData, hasIngredients)}
-          formulas={formulas}
+          formulas={allFormulas}
           onAddColumn={(columnType) => {
             if (columnType === "formula") {
               handleAddFormulaColumn();

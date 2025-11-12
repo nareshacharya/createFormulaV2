@@ -297,12 +297,13 @@ export const ColumnHeaderCell = ({
                       const isFormulaOwned = column.formulaId
                         ? isOwnFormula(column.formulaId)
                         : true;
-                      
+
                       // Check if formula is in draft status (newly created, always editable)
                       const isDraft = column.formulaId
-                        ? formulas.find(f => f.id === column.formulaId)?.status === 'draft'
+                        ? formulas.find((f) => f.id === column.formulaId)
+                            ?.status === "draft"
                         : false;
-                      
+
                       // Formula is editable if owned by user OR is a draft
                       const isOwned = isFormulaOwned || isDraft;
                       const isReadonly = !isOwned;
