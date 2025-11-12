@@ -28,15 +28,18 @@ import { useFormulaColumnHandlers } from "./components/FormulaColumnHandlers";
 import { useDilution } from "../../components/dilution";
 import { generateNewFormulaId } from "../../utils/formulaIdGenerator";
 import type { WorkspaceState } from "../../utils/workspaceManager";
-import { appStateHistory } from "../../utils/stateHistory";
 import { exportData } from "../../utils/exportUtils";
 import { useWorkspace } from "../../hooks/useWorkspace";
+import { useWorkspaceHistory } from "../../hooks/useWorkspaceHistory";
 import { useFormulaDetails } from "../../hooks/useFormulaDetails";
 import { useExcelUpload } from "../../hooks/useExcelUpload";
 
 const WorkArea = () => {
   // Workspace context - manages data isolation between tabs
   const workspace = useWorkspace();
+
+  // Get workspace-scoped history manager
+  const workspaceHistory = useWorkspaceHistory();
 
   // Use custom hooks for state management
   const state = useWorkAreaState();
@@ -88,10 +91,13 @@ const WorkArea = () => {
   // Track if initial state has been saved for undo
   const initialStateSaved = useRef(false);
 
+  // Track the current active workspace ID to detect switches
+  const currentWorkspaceId = useRef(workspace.activeTabId);
+
   // Helper function to save initial state before first user action
   const ensureInitialStateSaved = useCallback(() => {
     if (!initialStateSaved.current && columns.length > 0) {
-      appStateHistory.push(
+      workspaceHistory.push(
         {
           columns,
           tableData,
@@ -104,11 +110,18 @@ const WorkArea = () => {
       );
       initialStateSaved.current = true;
       eventBus.emit("undo-state-updated", {
-        canUndo: appStateHistory.canUndo(),
-        count: appStateHistory.getUndoCount(),
+        canUndo: workspaceHistory.canUndo(),
+        count: workspaceHistory.getUndoCount(),
       });
     }
-  }, [columns, tableData, formulas, availableFormulas, dilutionState]);
+  }, [
+    columns,
+    tableData,
+    formulas,
+    availableFormulas,
+    dilutionState,
+    workspaceHistory,
+  ]);
 
   // Helper function to save state after an action completes
   const saveStateAfterAction = useCallback(
@@ -117,7 +130,7 @@ const WorkArea = () => {
       setTimeout(() => {
         // Access dilutionState directly to get current value
         const currentDilutions = dilutionState.dilutions;
-        appStateHistory.push(
+        workspaceHistory.push(
           {
             columns,
             tableData,
@@ -129,13 +142,70 @@ const WorkArea = () => {
           description
         );
         eventBus.emit("undo-state-updated", {
-          canUndo: appStateHistory.canUndo(),
-          count: appStateHistory.getUndoCount(),
+          canUndo: workspaceHistory.canUndo(),
+          count: workspaceHistory.getUndoCount(),
         });
       }, 0);
     },
-    [columns, tableData, formulas, availableFormulas, dilutionState]
+    [
+      columns,
+      tableData,
+      formulas,
+      availableFormulas,
+      dilutionState,
+      workspaceHistory,
+    ]
   );
+
+  // Listen to workspace switches and reset undo state for the new workspace
+  useEffect(() => {
+    const handleWorkspaceSwitched = () => {
+      // Reset the initial state saved flag so the new workspace starts fresh
+      initialStateSaved.current = false;
+
+      // Get the current workspace's actual undo state
+      const actualCanUndo = workspaceHistory.canUndo();
+      const actualUndoCount = workspaceHistory.getUndoCount();
+
+      // Update UI state with actual workspace history state
+      setUndoState({
+        canUndo: actualCanUndo,
+        undoCount: actualUndoCount,
+      });
+
+      // Update the current workspace ID reference
+      currentWorkspaceId.current = workspace.activeTabId;
+    };
+
+    eventBus.on("workspace-switched", handleWorkspaceSwitched);
+
+    return () => {
+      eventBus.off("workspace-switched", handleWorkspaceSwitched);
+    };
+  }, [workspace.activeTabId, workspaceHistory]);
+
+  // Listen to workspace creation and reset undo state for the new workspace
+  useEffect(() => {
+    const handleWorkspaceCreated = () => {
+      // Reset the initial state saved flag so the new workspace starts fresh
+      initialStateSaved.current = false;
+
+      // New workspace has no history, so always disable undo
+      setUndoState({
+        canUndo: false,
+        undoCount: 0,
+      });
+
+      // Update the current workspace ID reference
+      currentWorkspaceId.current = workspace.activeTabId;
+    };
+
+    eventBus.on("workspace-created", handleWorkspaceCreated);
+
+    return () => {
+      eventBus.off("workspace-created", handleWorkspaceCreated);
+    };
+  }, [workspace.activeTabId]);
 
   // Use custom hooks for handlers
   const {
@@ -274,7 +344,7 @@ const WorkArea = () => {
 
   // Handle undo action
   const handleUndoAction = useCallback(() => {
-    const previousState = appStateHistory.undo();
+    const previousState = workspaceHistory.undo();
     if (previousState) {
       // Restore the previous state
       setColumns(previousState.columns);
@@ -291,8 +361,8 @@ const WorkArea = () => {
 
       // Emit undo state update
       eventBus.emit("undo-state-updated", {
-        canUndo: appStateHistory.canUndo(),
-        count: appStateHistory.getUndoCount(),
+        canUndo: workspaceHistory.canUndo(),
+        count: workspaceHistory.getUndoCount(),
       });
 
       // Update formula selections count
@@ -307,6 +377,7 @@ const WorkArea = () => {
       toast.error("Nothing to undo");
     }
   }, [
+    workspaceHistory,
     dilutionState,
     setColumns,
     setTableData,
@@ -489,7 +560,7 @@ const WorkArea = () => {
       setTimeout(() => {
         // Access dilutionState directly here to get the current value, not from closure
         const currentDilutions = dilutionState.dilutions;
-        appStateHistory.push(
+        workspaceHistory.push(
           {
             columns,
             tableData,
@@ -501,8 +572,8 @@ const WorkArea = () => {
           "Applied dilution to ingredient"
         );
         eventBus.emit("undo-state-updated", {
-          canUndo: appStateHistory.canUndo(),
-          count: appStateHistory.getUndoCount(),
+          canUndo: workspaceHistory.canUndo(),
+          count: workspaceHistory.getUndoCount(),
         });
       }, 100); // Longer delay to ensure React has updated dilution state
     };
@@ -523,6 +594,7 @@ const WorkArea = () => {
     formulas,
     availableFormulas,
     dilutionState,
+    workspaceHistory,
   ]);
 
   useEffect(() => {
@@ -1370,41 +1442,6 @@ const WorkArea = () => {
       // No need for manual emission here
     };
 
-    const handleUndoAction = () => {
-      const previousState = appStateHistory.undo();
-      if (previousState) {
-        // Restore the previous state
-        setColumns(previousState.columns);
-        setTableData(previousState.tableData);
-        setFormulas(previousState.formulas);
-        setAvailableFormulas(previousState.availableFormulas);
-
-        // Restore dilution state
-        if (previousState.dilutions) {
-          dilutionState.restoreDilutions(previousState.dilutions);
-        } else {
-          dilutionState.clearAllDilutions();
-        }
-
-        // Emit undo state update
-        eventBus.emit("undo-state-updated", {
-          canUndo: appStateHistory.canUndo(),
-          count: appStateHistory.getUndoCount(),
-        });
-
-        // Update formula selections count
-        const formulaColumns = previousState.columns.filter(
-          (col: Column) => col.group === "Formulas" && col.formulaId
-        );
-        const formulaIds = formulaColumns.map((col: Column) => col.formulaId!);
-        setSelectedFormulaIds(formulaIds);
-
-        toast.success("Action undone successfully");
-      } else {
-        toast.error("Nothing to undo");
-      }
-    };
-
     eventBus.on("ingredient-selected", handleIngredientClick);
     eventBus.on("formula-selected", handleFormulaSelected);
     eventBus.on("attribute-selected", handleAttributeSelected);
@@ -1442,6 +1479,9 @@ const WorkArea = () => {
       });
     };
   }, [
+    handleUndoAction,
+    ensureInitialStateSaved,
+    saveStateAfterAction,
     columns,
     tableData,
     selectedFormulaIds,

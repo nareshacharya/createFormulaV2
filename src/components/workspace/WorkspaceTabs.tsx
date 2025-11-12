@@ -1,16 +1,18 @@
 import { useState, useRef, useEffect } from "react";
 import { useWorkspace } from "../../hooks/useWorkspace";
-
-const MAX_TABS = 3;
+import { useWorkspaceFeatures } from "../../hooks/useFeatureFlags";
 
 /**
  * Workspace tabs component for managing multiple workspace sessions
- * Allows users to have up to 3 workspace tabs with rename and close capabilities
+ * Allows users to have multiple workspace tabs with rename and close capabilities
  * Each tab maintains its own isolated session state
+ *
+ * Tab limit configured via feature flag: workspace.maxWorkspaces
  */
 const WorkspaceTabs = () => {
   const { tabs, activeTabId, addTab, closeTab, switchTab, renameTab } =
     useWorkspace();
+  const { maxWorkspaces } = useWorkspaceFeatures();
 
   const [editingTabId, setEditingTabId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
@@ -162,11 +164,11 @@ const WorkspaceTabs = () => {
                 addTab();
                 setShowMenu(false);
               }}
-              disabled={tabs.length >= MAX_TABS}
+              disabled={tabs.length >= maxWorkspaces}
               className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               <i className="ri-add-line"></i>
-              Add Workspace ({tabs.length}/{MAX_TABS})
+              Add Workspace ({tabs.length}/{maxWorkspaces})
             </button>
             <button
               onClick={() => {

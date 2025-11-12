@@ -6,6 +6,7 @@ import type {
   IngredientAttribute,
 } from "../services/pega";
 import type { Column } from "../components/DataGrid";
+import { StateHistoryManager } from "../utils/stateHistory";
 
 interface WorkspaceData {
   columns: Column[];
@@ -16,6 +17,7 @@ interface WorkspaceData {
   selectedFormulas: Formula[];
   formulas: Formula[];
   lockedFormulas: Set<string>; // Formulas used in this workspace
+  history: StateHistoryManager; // Per-workspace undo/redo history
 }
 
 interface WorkspaceTab {
@@ -39,6 +41,9 @@ interface WorkspaceContextType {
   // Session Management
   resetWorkspace: (tabId: string) => void;
   updateWorkspaceData: (data: Partial<WorkspaceData>) => void;
+
+  // Per-Workspace History Management
+  getActiveWorkspaceHistory: () => StateHistoryManager;
 
   // Formula Locking
   isFormulaLocked: (formulaId: string) => boolean;
@@ -78,16 +83,6 @@ const createEmptyWorkspaceData = (): WorkspaceData => ({
       maxWidth: 400,
     },
     {
-      id: "costKg",
-      key: "costKg",
-      title: "Cost/Kg",
-      type: "number",
-      sortable: true,
-      editable: false,
-      group: "Ingredient",
-      width: 100,
-    },
-    {
       id: "formulaAdd",
       key: "formulaAdd",
       title: "",
@@ -99,6 +94,16 @@ const createEmptyWorkspaceData = (): WorkspaceData => ({
       minWidth: 50,
       maxWidth: 50,
       fixed: false,
+    },
+    {
+      id: "costKg",
+      key: "costKg",
+      title: "Cost/Kg",
+      type: "number",
+      sortable: true,
+      editable: false,
+      group: "Contribution",
+      width: 100,
     },
     {
       id: "contCost",
@@ -131,6 +136,7 @@ const createEmptyWorkspaceData = (): WorkspaceData => ({
   selectedFormulas: [],
   formulas: [],
   lockedFormulas: new Set<string>(),
+  history: new StateHistoryManager(), // Create new history manager for this workspace
 });
 
 export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -356,6 +362,11 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
     [activeTabId]
   );
 
+  // Get the active workspace's history manager
+  const getActiveWorkspaceHistory = useCallback(() => {
+    return activeWorkspace.history;
+  }, [activeWorkspace.history]);
+
   const value: WorkspaceContextType = {
     tabs,
     activeTabId,
@@ -366,6 +377,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
     renameTab,
     resetWorkspace,
     updateWorkspaceData,
+    getActiveWorkspaceHistory,
     isFormulaLocked,
     getFormulaLockedInWorkspace,
     lockFormula,
