@@ -156,6 +156,9 @@ export interface DataGridFeatureFlags {
 
     /** Show RMC (Raw Material Cost) calculations */
     showRmcCalculations: boolean;
+
+    /** Enable inline add ingredient/formula button on row hover */
+    enableInlineAddItem: boolean;
 }
 
 export interface HeaderFeatureFlags {
@@ -440,6 +443,9 @@ export const featureFlags: FeatureFlags = {
         enableExport: true,
         showRunningTotals: true,
         showRmcCalculations: true,
+
+        // Inline add ingredient/formula feature
+        enableInlineAddItem: true, // NEW: Enable add button on row hover
     },
 
     // ============================================================================

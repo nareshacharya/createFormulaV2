@@ -627,7 +627,10 @@ const WorkArea = () => {
   ]);
 
   useEffect(() => {
-    const handleIngredientClick = (data: { ingredient: Ingredient }) => {
+    const handleIngredientClick = (data: {
+      ingredient: Ingredient;
+      insertAfterRowId?: string;
+    }) => {
       // VALIDATION: Check if we have at least one formula (column or group row) before adding ingredients
       const hasFormulaColumns = columns.some(
         (col) => col.group === "Formulas" && col.formulaId
@@ -685,6 +688,21 @@ const WorkArea = () => {
           return [newRow, totalRow];
         }
 
+        // If insertAfterRowId is provided, insert after that specific row
+        if (data.insertAfterRowId) {
+          const insertIndex = prev.findIndex(
+            (row) => row.id === data.insertAfterRowId
+          );
+          if (insertIndex !== -1) {
+            return [
+              ...prev.slice(0, insertIndex + 1),
+              newRow,
+              ...prev.slice(insertIndex + 1),
+            ];
+          }
+        }
+
+        // Default behavior: insert before the total row
         const totalIndex = prev.findIndex((row) => row.isTotal);
         if (totalIndex !== -1) {
           return [
@@ -714,7 +732,10 @@ const WorkArea = () => {
       );
     };
 
-    const handleFormulaSelected = (data: { formula: Formula }) => {
+    const handleFormulaSelected = (data: {
+      formula: Formula;
+      insertAfterRowId?: string;
+    }) => {
       // REQUIREMENT 1: Check if there are any formula columns
       // Formulas can only be added if at least one formula column exists
       const hasFormulaColumns = columns.some(
@@ -836,6 +857,7 @@ const WorkArea = () => {
 
       setTableData((prev) => {
         let newData = [...prev];
+        const formulaRowsToInsert = [formulaGroupRow, ...formulaIngredientRows];
 
         // If this is the first item, also add the total row
         if (prev.length === 0) {
@@ -847,18 +869,42 @@ const WorkArea = () => {
             isTotal: true,
             totalType: "running",
           };
-          newData = [formulaGroupRow, ...formulaIngredientRows, totalRow];
+          newData = [...formulaRowsToInsert, totalRow];
+        } else if (data.insertAfterRowId) {
+          // Insert after specific row if provided
+          const insertIndex = prev.findIndex(
+            (row) => row.id === data.insertAfterRowId
+          );
+          if (insertIndex !== -1) {
+            newData = [
+              ...prev.slice(0, insertIndex + 1),
+              ...formulaRowsToInsert,
+              ...prev.slice(insertIndex + 1),
+            ];
+          } else {
+            // Fallback to default behavior if row not found
+            const totalIndex = prev.findIndex((row) => row.isTotal);
+            if (totalIndex !== -1) {
+              newData = [
+                ...prev.slice(0, totalIndex),
+                ...formulaRowsToInsert,
+                ...prev.slice(totalIndex),
+              ];
+            } else {
+              newData = [...prev, ...formulaRowsToInsert];
+            }
+          }
         } else {
+          // Default behavior: insert before total row
           const totalIndex = prev.findIndex((row) => row.isTotal);
           if (totalIndex !== -1) {
             newData = [
               ...prev.slice(0, totalIndex),
-              formulaGroupRow,
-              ...formulaIngredientRows,
+              ...formulaRowsToInsert,
               ...prev.slice(totalIndex),
             ];
           } else {
-            newData = [...prev, formulaGroupRow, ...formulaIngredientRows];
+            newData = [...prev, ...formulaRowsToInsert];
           }
         }
 
@@ -2161,6 +2207,8 @@ const WorkArea = () => {
           data={getEmptyStateData(tableData, hasIngredients)}
           formulas={formulas}
           availableFormulas={availableFormulas}
+          ingredients={ingredients}
+          libraryFormulas={availableFormulas}
           onAddColumn={(columnType) => {
             if (columnType === "formula") {
               handleAddFormulaColumn();

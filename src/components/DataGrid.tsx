@@ -9,12 +9,16 @@ import { BulkActionsToolbar } from "./DataGrid/components/BulkActionsToolbar";
 import { EditableCell } from "./DataGrid/components/EditableCell";
 import { CellRenderer } from "./DataGrid/components/cells/CellRenderer";
 import { TableHeader } from "./DataGrid/components/headers/TableHeader";
+import { AddItemButton } from "./DataGrid/components/AddItemButton";
+import { AddItemModal } from "./DataGrid/components/AddItemModal";
 import { isRowDraggable } from "./DataGrid/utils/rowOrdering";
 import { DilutionModal } from "./dilution";
 import { mockSolvents } from "../mocks/solvents";
+import { eventBus } from "../utils/bus";
 import type { Dilution } from "../types/dilution";
 import type { UseDilutionReturn } from "./dilution";
 import { isOwnFormula } from "../utils/formulaIdGenerator";
+import type { Ingredient, Formula } from "../services/pega";
 
 export interface Column {
   id: string;
@@ -41,6 +45,9 @@ interface DataGridProps {
   data: any[];
   formulas?: any[]; // Array of formulas to check formula types
   availableFormulas?: any[]; // Global formulas for cross-workspace access
+  // Library data for inline add feature
+  ingredients?: Ingredient[];
+  libraryFormulas?: Formula[];
   onAddColumn?: (columnType: "formula" | "attribute") => void;
   onAddFormula?: () => void;
   onRowDelete?: (rowId: string) => void;
@@ -83,6 +90,8 @@ const DataGrid = ({
   data,
   formulas = [],
   availableFormulas = [],
+  ingredients = [],
+  libraryFormulas = [],
   onAddColumn,
   onAddFormula,
   onRowDelete: _onRowDelete,
@@ -150,6 +159,15 @@ const DataGrid = ({
     ingredientName: string;
   } | null>(null);
 
+  // Add item modal state
+  const [addItemModal, setAddItemModal] = useState<{
+    isOpen: boolean;
+    insertAfterRowId: string;
+  }>({
+    isOpen: false,
+    insertAfterRowId: "",
+  });
+
   // Row reordering hooks
   const {
     dragState: rowDragState,
@@ -204,6 +222,41 @@ const DataGrid = ({
   const tableRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Handlers for inline add feature
+  const handleAddItemClick = (rowId: string) => {
+    setAddItemModal({
+      isOpen: true,
+      insertAfterRowId: rowId,
+    });
+  };
+
+  const handleAddIngredient = (ingredient: Ingredient) => {
+    // Emit event that WorkArea's existing handler will process
+    // Include insertAfterRowId to specify where the ingredient should be inserted
+    eventBus.emit("ingredient-selected", {
+      ingredient,
+      insertAfterRowId: addItemModal.insertAfterRowId,
+    });
+    toast.success(`Added ${ingredient.name}`);
+  };
+
+  const handleAddFormula = (formula: Formula) => {
+    // Emit event that WorkArea's existing handler will process
+    // Include insertAfterRowId to specify where the formula should be inserted
+    eventBus.emit("formula-selected", {
+      formula,
+      insertAfterRowId: addItemModal.insertAfterRowId,
+    });
+    toast.success(`Added ${formula.name}`);
+  };
+
+  const handleCloseAddItemModal = () => {
+    setAddItemModal({
+      isOpen: false,
+      insertAfterRowId: "",
+    });
+  };
 
   // Scroll state for conditional shadows
   const [scrollState, setScrollState] = useState({
@@ -637,6 +690,7 @@ const DataGrid = ({
                     onDragEnd={handleRowDragEnd}
                     onDragLeave={handleRowDragLeave}
                     className={`
+                    group relative
                     ${
                       row.isTotal
                         ? "bg-gray-100 border-t-2 border-gray-300"
@@ -829,6 +883,7 @@ const DataGrid = ({
                           key={`${row.id}-${column.id}`}
                           className={`
                           px-3 py-2 border-r border-gray-100 last:border-r-0 font-sans
+                          ${column.key === "description" ? "relative" : ""}
                           ${
                             isTargetTotalInActiveFormula
                               ? "cursor-pointer hover:bg-blue-50"
@@ -886,6 +941,18 @@ const DataGrid = ({
                               : row[column.key]
                             : // For all other cells, use normal renderCell
                               renderCell(row, column)}
+
+                          {/* Add Item Button inside description cell */}
+                          {column.key === "description" &&
+                            dataGridFlags.enableInlineAddItem &&
+                            !row.isEmpty && (
+                              <AddItemButton
+                                rowId={row.id}
+                                isTotal={row.isTotal}
+                                isFormula={!!row.formulaId}
+                                onAdd={handleAddItemClick}
+                              />
+                            )}
                         </td>
                       );
                     })}
@@ -1052,6 +1119,19 @@ const DataGrid = ({
             dilutionModal.ingredientId
           )}
           solvents={mockSolvents}
+        />
+      )}
+
+      {/* Add Item Modal */}
+      {dataGridFlags.enableInlineAddItem && (
+        <AddItemModal
+          isOpen={addItemModal.isOpen}
+          onClose={handleCloseAddItemModal}
+          onAddIngredient={handleAddIngredient}
+          onAddFormula={handleAddFormula}
+          ingredients={ingredients}
+          formulas={libraryFormulas}
+          insertAfterRowId={addItemModal.insertAfterRowId}
         />
       )}
     </div>
