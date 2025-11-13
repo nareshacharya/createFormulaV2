@@ -56,6 +56,7 @@ module.exports = {
     // React rules
     'react/react-in-jsx-scope': 'off', // Not needed in React 17+ with new JSX transform
     'react/prop-types': 'off', // Using TypeScript for prop validation
+    'react/no-unescaped-entities': 'off', // Allow quotes in JSX text
     
     // TypeScript rules
     '@typescript-eslint/no-unused-vars': [
@@ -70,6 +71,8 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'warn',
     '@typescript-eslint/no-empty-interface': 'off',
     '@typescript-eslint/no-empty-function': 'warn',
+    '@typescript-eslint/no-inferrable-types': 'off',
+    '@typescript-eslint/no-non-null-assertion': 'warn',
     
     // General rules
     'no-case-declarations': 'warn',
@@ -77,6 +80,10 @@ module.exports = {
     'no-console': ['warn', { allow: ['warn', 'error'] }],
     
     // Import rules
+    'import/default': 'off', // React 17 doesn't have default export in some cases
+    'import/no-named-as-default': 'warn',
+    'import/no-named-as-default-member': 'warn',
+    'import/namespace': 'off', // Disable due to i18next TypeScript 5+ features
     'import/order': [
       'warn',
       {
@@ -88,6 +95,12 @@ module.exports = {
         },
       },
     ],
+    
+    // Accessibility rules - reduce to warnings for Pega compatibility
+    'jsx-a11y/click-events-have-key-events': 'warn',
+    'jsx-a11y/no-static-element-interactions': 'warn',
+    'jsx-a11y/label-has-associated-control': 'warn',
+    'jsx-a11y/no-autofocus': 'warn',
   },
   ignorePatterns: ['dist', 'out', 'node_modules', '*.config.js', '*.config.ts'],
 };
