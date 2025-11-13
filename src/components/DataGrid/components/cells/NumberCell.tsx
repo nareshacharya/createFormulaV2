@@ -127,26 +127,16 @@ export const NumberCell = ({
 
   // Total rows for formula columns
   if (isTotal && isFormulaColumn) {
-    // Target total row for active formula should be editable
+    // Target total row for active formula: display as regular value
+    // The DataGrid component handles making it editable via EditableCell when focused
+    // So here we just display it as a read-only value
     if (row.totalType === "target" && isActiveFormula) {
+      const displayValue =
+        typeof value === "number" ? value.toFixed(5) : value || "100.00000";
       return (
-        <input
-          type="number"
-          value={typeof value === "number" ? value.toFixed(5) : value || 100}
-          onChange={(e) => {
-            const newValue = parseFloat(e.target.value);
-            if (!isNaN(newValue)) {
-              onCellEdit?.(row.id, column.id, newValue);
-            }
-          }}
-          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold text-right"
-          min="0"
-          step="0.1"
-          style={{
-            MozAppearance: "textfield",
-            appearance: "textfield",
-          }}
-        />
+        <span className="text-sm font-semibold text-gray-900 text-right block">
+          {displayValue}
+        </span>
       );
     }
 

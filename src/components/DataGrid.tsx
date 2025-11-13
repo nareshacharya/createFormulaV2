@@ -758,10 +758,13 @@ const DataGrid = ({
                         !row.isEmpty &&
                         isFormulaEditable; // Add ownership/draft check
 
-                      // Use EditableCell for editable formula columns (including target total)
+                      // Use EditableCell for ingredient rows in editable formula columns
+                      // For Target Total, use regular cell rendering (only becomes input on focus)
                       if (
-                        isEditable ||
-                        (isFocused && column.id === editableFormula)
+                        (isEditable && !isTargetTotalInActiveFormula) ||
+                        (isFocused &&
+                          column.id === editableFormula &&
+                          !isTargetTotalInActiveFormula)
                       ) {
                         return (
                           <EditableCell
@@ -778,11 +781,6 @@ const DataGrid = ({
                             align={column.type === "number" ? "right" : "left"}
                             className={`
                             border-r border-gray-100 last:border-r-0 font-sans
-                            ${
-                              row.isTotal && !isTargetTotalInActiveFormula
-                                ? "font-medium bg-gray-100"
-                                : ""
-                            }
                             ${column.fixed ? "bg-gray-25" : ""}
                             ${
                               column.id === editableFormula && !column.fixed
@@ -794,20 +792,53 @@ const DataGrid = ({
                         );
                       }
 
-                      // Regular cells (description, fixed columns, etc.)
+                      // For Target Total in active formula ONLY when focused or editing, render as EditableCell
+                      if (
+                        isTargetTotalInActiveFormula &&
+                        (isFocused || isEditing)
+                      ) {
+                        return (
+                          <EditableCell
+                            key={`${row.id}-${column.id}`}
+                            value={row[column.key]}
+                            isEditing={isEditing}
+                            isFocused={isFocused}
+                            editValue={navigation.editValue}
+                            onChange={navigation.handleInputChange}
+                            onKeyDown={navigation.handleKeyDown}
+                            onClick={() =>
+                              navigation.handleCellFocus(row.id, column.id)
+                            }
+                            align={column.type === "number" ? "right" : "left"}
+                            className={`
+                            border-r border-gray-100 last:border-r-0 font-sans
+                            ${column.fixed ? "bg-gray-25" : ""}
+                            ${
+                              column.id === editableFormula && !column.fixed
+                                ? "bg-green-50"
+                                : ""
+                            }
+                          `}
+                          />
+                        );
+                      }
+
+                      // Regular cells (Target Total when not focused, other rows, etc.)
                       return (
                         <td
                           key={`${row.id}-${column.id}`}
                           className={`
                           px-3 py-2 border-r border-gray-100 last:border-r-0 font-sans
                           ${
-                            row.isTotal &&
-                            row.totalType === "target" &&
-                            column.id === editableFormula
+                            isTargetTotalInActiveFormula
                               ? "cursor-pointer hover:bg-blue-50"
                               : ""
                           }
-                          ${row.isTotal ? "font-medium bg-gray-100" : ""}
+                          ${
+                            row.isTotal && !isTargetTotalInActiveFormula
+                              ? "font-medium bg-gray-100"
+                              : ""
+                          }
                           ${column.fixed ? "bg-gray-25" : ""}
                           ${
                             column.id === editableFormula && !column.fixed
@@ -830,8 +861,31 @@ const DataGrid = ({
                               ? columns.length
                               : 1
                           }
+                          onClick={() => {
+                            // Make Target Total clickable to focus
+                            if (isTargetTotalInActiveFormula) {
+                              navigation.handleCellFocus(row.id, column.id);
+                            }
+                          }}
                         >
-                          {renderCell(row, column)}
+                          {isTargetTotalInActiveFormula
+                            ? // For Target Total in active formula (not focused), display value directly
+                              column.type === "number"
+                              ? (() => {
+                                  const val = row[column.key];
+                                  const displayValue =
+                                    typeof val === "number"
+                                      ? val.toFixed(5)
+                                      : val || "100.00000";
+                                  return (
+                                    <span className="text-sm font-semibold text-gray-900 text-right block">
+                                      {displayValue}
+                                    </span>
+                                  );
+                                })()
+                              : row[column.key]
+                            : // For all other cells, use normal renderCell
+                              renderCell(row, column)}
                         </td>
                       );
                     })}
@@ -876,12 +930,67 @@ const DataGrid = ({
                         return "auto";
                       };
 
+                      // Check if it's editing/focused (same as tbody)
+                      const isEditing =
+                        navigation.editingCell?.rowId === row.id &&
+                        navigation.editingCell?.columnId === column.id;
+                      const isFocused =
+                        navigation.focusedCell?.rowId === row.id &&
+                        navigation.focusedCell?.columnId === column.id;
+
+                      // Check if it's target total in active formula (same as tbody)
+                      const isTargetTotalInActiveFormula =
+                        row.isTotal &&
+                        row.totalType === "target" &&
+                        column.id === editableFormula;
+
+                      // For Target Total in active formula ONLY when focused or editing, render as EditableCell
+                      if (
+                        isTargetTotalInActiveFormula &&
+                        (isFocused || isEditing)
+                      ) {
+                        return (
+                          <EditableCell
+                            key={`${row.id}-${column.id}`}
+                            value={row[column.key]}
+                            isEditing={isEditing}
+                            isFocused={isFocused}
+                            editValue={navigation.editValue}
+                            onChange={navigation.handleInputChange}
+                            onKeyDown={navigation.handleKeyDown}
+                            onClick={() =>
+                              navigation.handleCellFocus(row.id, column.id)
+                            }
+                            align={column.type === "number" ? "right" : "left"}
+                            className={`
+                            border-r border-gray-100 last:border-r-0 font-sans
+                            ${column.fixed ? "bg-gray-25" : ""}
+                            ${
+                              column.id === editableFormula && !column.fixed
+                                ? "bg-green-50"
+                                : ""
+                            }
+                          `}
+                          />
+                        );
+                      }
+
+                      // Regular cell rendering
                       return (
                         <td
                           key={`${row.id}-${column.id}`}
                           className={`
                             px-3 py-2 border-r border-gray-100 last:border-r-0 font-sans
-                            font-medium bg-gray-100
+                            ${
+                              isTargetTotalInActiveFormula
+                                ? "cursor-pointer hover:bg-blue-50"
+                                : ""
+                            }
+                            ${
+                              row.isTotal && !isTargetTotalInActiveFormula
+                                ? "font-medium bg-gray-100"
+                                : ""
+                            }
                             ${column.fixed ? "bg-gray-25" : ""}
                             ${
                               column.id === editableFormula && !column.fixed
@@ -894,8 +1003,31 @@ const DataGrid = ({
                             minWidth: getColumnWidth(),
                             maxWidth: getColumnWidth(),
                           }}
+                          onClick={() => {
+                            // Make Target Total clickable to focus
+                            if (isTargetTotalInActiveFormula) {
+                              navigation.handleCellFocus(row.id, column.id);
+                            }
+                          }}
                         >
-                          {renderCell(row, column)}
+                          {isTargetTotalInActiveFormula
+                            ? // For Target Total in active formula (not focused), display value directly
+                              column.type === "number"
+                              ? (() => {
+                                  const val = row[column.key];
+                                  const displayValue =
+                                    typeof val === "number"
+                                      ? val.toFixed(5)
+                                      : val || "100.00000";
+                                  return (
+                                    <span className="text-sm font-semibold text-gray-900 text-right block">
+                                      {displayValue}
+                                    </span>
+                                  );
+                                })()
+                              : row[column.key]
+                            : // For all other cells, use normal renderCell
+                              renderCell(row, column)}
                         </td>
                       );
                     })}

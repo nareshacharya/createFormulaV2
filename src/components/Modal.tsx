@@ -76,7 +76,7 @@ const Modal = ({
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-auto relative">{children}</div>
+          <div className="flex-1 overflow-auto relative p-6">{children}</div>
 
           {/* Footer */}
           {footerActions && (

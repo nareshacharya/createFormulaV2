@@ -33,17 +33,41 @@ export const EditableCell = ({
   align = "right",
 }: EditableCellProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
+  const hasSelectedRef = useRef(false);
+  const previousEditingRef = useRef(isEditing);
+
+  // Reset selection flag when editing stops
+  useEffect(() => {
+    if (!isEditing) {
+      hasSelectedRef.current = false;
+      previousEditingRef.current = false;
+    }
+  }, [isEditing]);
 
   // Focus input when cell becomes focused or starts editing
   useEffect(() => {
     if ((isFocused || isEditing) && inputRef.current) {
       inputRef.current.focus();
-      // Select all text only when editing starts
-      if (isEditing) {
-        inputRef.current.select();
+
+      // Select all text only ONCE when editing first starts
+      // AND only if editValue is empty (meaning Enter/Space was pressed, not a digit typed)
+      if (isEditing && !previousEditingRef.current && !hasSelectedRef.current) {
+        // Only select if editValue is empty (Enter/Space pressed)
+        // If editValue has content, user already typed a digit, so don't select
+        if (editValue === "") {
+          // Small delay to ensure the input is ready
+          setTimeout(() => {
+            if (inputRef.current) {
+              inputRef.current.select();
+            }
+          }, 0);
+        }
+        hasSelectedRef.current = true;
       }
+
+      previousEditingRef.current = isEditing;
     }
-  }, [isFocused, isEditing]);
+  }, [isFocused, isEditing, editValue]);
 
   // Render focused/editing state
   if (isFocused || isEditing) {

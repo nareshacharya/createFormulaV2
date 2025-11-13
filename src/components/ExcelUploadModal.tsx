@@ -40,27 +40,55 @@ const ExcelUploadModal = ({
   >([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      // Validate file type
-      const validTypes = [
-        "application/vnd.ms-excel",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "text/csv",
-      ];
+      validateAndSetFile(selectedFile);
+    }
+  };
 
-      if (
-        !validTypes.includes(selectedFile.type) &&
-        !selectedFile.name.match(/\.(xlsx|xls|csv)$/i)
-      ) {
-        setError("Please upload a valid Excel file (.xlsx, .xls) or CSV file");
-        return;
-      }
+  const validateAndSetFile = (selectedFile: File) => {
+    // Validate file type
+    const validTypes = [
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "text/csv",
+    ];
 
-      setFile(selectedFile);
-      setError(null);
+    if (
+      !validTypes.includes(selectedFile.type) &&
+      !selectedFile.name.match(/\.(xlsx|xls|csv)$/i)
+    ) {
+      setError("Please upload a valid Excel file (.xlsx, .xls) or CSV file");
+      return;
+    }
+
+    setFile(selectedFile);
+    setError(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const droppedFile = e.dataTransfer.files?.[0];
+    if (droppedFile) {
+      validateAndSetFile(droppedFile);
     }
   };
 
@@ -198,19 +226,37 @@ const ExcelUploadModal = ({
             Select Excel File
           </label>
 
-          <div className="flex items-center space-x-3">
-            <label className="flex-1 flex items-center justify-center px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-400 transition-colors cursor-pointer">
+          <div
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`flex items-center justify-center px-4 py-8 border-2 border-dashed rounded-lg transition-colors cursor-pointer ${
+              isDragging
+                ? "border-blue-500 bg-blue-50"
+                : "border-gray-300 hover:border-blue-400 bg-white hover:bg-blue-50"
+            }`}
+          >
+            <label className="flex-1 flex flex-col items-center justify-center cursor-pointer">
               <input
                 type="file"
                 accept=".xlsx,.xls,.csv"
                 onChange={handleFileChange}
                 className="hidden"
               />
-              <div className="flex items-center space-x-2 text-gray-600">
-                <span className="material-symbols-rounded">upload_file</span>
-                <span className="text-sm">
-                  {file ? file.name : "Click to select file"}
+              <div className="flex flex-col items-center space-y-2 text-gray-600">
+                <span className="material-symbols-rounded text-3xl text-blue-500">
+                  upload_file
                 </span>
+                <div className="text-center">
+                  <p className="text-sm font-medium text-gray-900">
+                    {file ? file.name : "Drag and drop your file here"}
+                  </p>
+                  {!file && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      or click to select file
+                    </p>
+                  )}
+                </div>
               </div>
             </label>
 
@@ -219,6 +265,7 @@ const ExcelUploadModal = ({
                 variant="primary"
                 onClick={handleProcessFile}
                 disabled={isProcessing}
+                className="ml-4"
               >
                 {isProcessing ? "Processing..." : "Process File"}
               </Button>

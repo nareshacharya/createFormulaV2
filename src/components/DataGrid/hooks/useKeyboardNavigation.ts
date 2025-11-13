@@ -137,6 +137,13 @@ export const useKeyboardNavigation = ({
                 return;
             }
 
+            // Save the current editing cell before moving to new cell
+            if (editingCell && (editingCell.rowId !== rowId || editingCell.columnId !== columnId)) {
+                const numericValue = parseFloat(editValue);
+                const finalValue = isNaN(numericValue) ? editValue : numericValue;
+                onCellEdit?.(editingCell.rowId, editingCell.columnId, finalValue);
+            }
+
             setFocusedCell({ rowId, columnId });
             setEditingCell(null);
             // Initialize editValue with current cell value
@@ -144,7 +151,7 @@ export const useKeyboardNavigation = ({
             setEditValue(currentValue !== null && currentValue !== undefined ? String(currentValue) : "");
             onNavigate?.({ rowId, columnId });
         },
-        [editableFormula, data, columns, onNavigate]
+        [editableFormula, data, columns, onNavigate, editingCell, editValue, onCellEdit]
     );
 
     // Navigate to the next/previous cell
