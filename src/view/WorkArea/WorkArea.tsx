@@ -26,7 +26,10 @@ import { useDataGridHandlers } from "./hooks/useDataGridHandlers";
 import { useFormulaOperations } from "./hooks/useFormulaOperations";
 import { useFormulaColumnHandlers } from "./components/FormulaColumnHandlers";
 import { useDilution } from "../../components/dilution";
-import { generateNewFormulaId } from "../../utils/formulaIdGenerator";
+import {
+  generateNewFormulaId,
+  isOwnFormula,
+} from "../../utils/formulaIdGenerator";
 import type { WorkspaceState } from "../../utils/workspaceManager";
 import { exportData } from "../../utils/exportUtils";
 import { useWorkspace } from "../../hooks/useWorkspace";
@@ -1161,15 +1164,22 @@ const WorkArea = () => {
         return calculateTotals(updatedData, columns);
       });
 
-      // If this is the first formula column, automatically activate it
+      // If this is the first formula column, automatically activate it (only if owned or draft)
       if (currentFormulaColumns.length === 0) {
-        setEditableFormula(newColumnId);
-        eventBus.emit("active-formula-changed", { formula: data.formula });
+        const isFormulaOwned = isOwnFormula(data.formula.id);
+        const isDraft = data.formula.status === "draft";
 
-        // Immediately trigger totals calculation for the new active formula
-        setTimeout(() => {
-          setTableData((prev) => calculateTotals(prev, columns, [newColumnId]));
-        }, 0);
+        if (isFormulaOwned || isDraft) {
+          setEditableFormula(newColumnId);
+          eventBus.emit("active-formula-changed", { formula: data.formula });
+
+          // Immediately trigger totals calculation for the new active formula
+          setTimeout(() => {
+            setTableData((prev) =>
+              calculateTotals(prev, columns, [newColumnId])
+            );
+          }, 0);
+        }
       }
 
       // Add the formula to the available formulas list
@@ -1448,15 +1458,22 @@ const WorkArea = () => {
         return [...prev, data.formula];
       });
 
-      // If this is the first formula column, automatically activate it
+      // If this is the first formula column, automatically activate it (only if owned or draft)
       if (currentFormulaColumns.length === 0) {
-        setEditableFormula(newColumnId);
-        eventBus.emit("active-formula-changed", { formula: data.formula });
+        const isFormulaOwned = isOwnFormula(data.formula.id);
+        const isDraft = data.formula.status === "draft";
 
-        // Immediately trigger totals calculation for the new active formula
-        setTimeout(() => {
-          setTableData((prev) => calculateTotals(prev, columns, [newColumnId]));
-        }, 0);
+        if (isFormulaOwned || isDraft) {
+          setEditableFormula(newColumnId);
+          eventBus.emit("active-formula-changed", { formula: data.formula });
+
+          // Immediately trigger totals calculation for the new active formula
+          setTimeout(() => {
+            setTableData((prev) =>
+              calculateTotals(prev, columns, [newColumnId])
+            );
+          }, 0);
+        }
       }
 
       // Show success toast
@@ -2037,10 +2054,34 @@ const WorkArea = () => {
   const hasIngredients = tableData.some((row) => !row.isTotal);
 
   const handleSetActiveFormula = (columnId: string) => {
+    // Find the formula associated with this column
+    const column = columns.find((col) => col.id === columnId);
+
+    // Check if formula is locked (not owned and not draft)
+    if (column && column.formulaId) {
+      const isFormulaOwned = isOwnFormula(column.formulaId);
+
+      // Check if formula is in draft status
+      const workspaceFormula = formulas.find((f) => f.id === column.formulaId);
+      const availableFormula = availableFormulas.find(
+        (f) => f.id === column.formulaId
+      );
+      const isDraft =
+        workspaceFormula?.status === "draft" ||
+        availableFormula?.status === "draft";
+
+      // Prevent setting locked formulas as active
+      if (!isFormulaOwned && !isDraft) {
+        toast.error(
+          "Cannot set locked formula as active. Create a new version to edit."
+        );
+        return;
+      }
+    }
+
     setEditableFormula(columnId);
 
-    // Find the formula associated with this column and emit to header
-    const column = columns.find((col) => col.id === columnId);
+    // Find the formula and emit to header
     if (column && column.formulaId) {
       const formula = formulas.find((f) => f.id === column.formulaId);
       if (formula) {

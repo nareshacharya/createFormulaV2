@@ -14,6 +14,7 @@ import { DilutionModal } from "./dilution";
 import { mockSolvents } from "../mocks/solvents";
 import type { Dilution } from "../types/dilution";
 import type { UseDilutionReturn } from "./dilution";
+import { isOwnFormula } from "../utils/formulaIdGenerator";
 
 export interface Column {
   id: string;
@@ -438,6 +439,26 @@ const DataGrid = ({
   const handleYield = () => {
     if (selectedRows.size !== 1 || !editableFormula) return;
 
+    // Check if the active formula is editable (owned or draft)
+    const activeColumn = columns.find((col) => col.id === editableFormula);
+    if (activeColumn?.formulaId) {
+      const isFormulaOwned = isOwnFormula(activeColumn.formulaId);
+      const workspaceFormula = formulas.find(
+        (f) => f.id === activeColumn.formulaId
+      );
+      const availableFormula = availableFormulas.find(
+        (f) => f.id === activeColumn.formulaId
+      );
+      const isDraft =
+        workspaceFormula?.status === "draft" ||
+        availableFormula?.status === "draft";
+
+      if (!isFormulaOwned && !isDraft) {
+        toast.error("Cannot adjust yield for locked formulas");
+        return;
+      }
+    }
+
     const selectedRowId = Array.from(selectedRows)[0];
     const selectedRow = data.find((row) => row.id === selectedRowId);
 
@@ -507,6 +528,30 @@ const DataGrid = ({
         selectedCount={selectedRows.size}
         onBulkDelete={() => {
           if (selectedRows.size > 0) {
+            // Check if the active formula is editable (owned or draft)
+            if (editableFormula) {
+              const activeColumn = columns.find(
+                (col) => col.id === editableFormula
+              );
+              if (activeColumn?.formulaId) {
+                const isFormulaOwned = isOwnFormula(activeColumn.formulaId);
+                const workspaceFormula = formulas.find(
+                  (f) => f.id === activeColumn.formulaId
+                );
+                const availableFormula = availableFormulas.find(
+                  (f) => f.id === activeColumn.formulaId
+                );
+                const isDraft =
+                  workspaceFormula?.status === "draft" ||
+                  availableFormula?.status === "draft";
+
+                if (!isFormulaOwned && !isDraft) {
+                  toast.error("Cannot delete ingredients from locked formulas");
+                  return;
+                }
+              }
+            }
+
             onBulkDelete?.(Array.from(selectedRows));
             clearSelection();
           }
@@ -684,13 +729,34 @@ const DataGrid = ({
                         row.totalType === "target" &&
                         column.id === editableFormula;
 
+                      // Check if formula is owned by user or is a draft
+                      let isFormulaEditable = true;
+                      if (column.formulaId && column.id === editableFormula) {
+                        const isFormulaOwned = isOwnFormula(column.formulaId);
+
+                        // Check if formula is in draft status
+                        const workspaceFormula = formulas.find(
+                          (f) => f.id === column.formulaId
+                        );
+                        const availableFormula = availableFormulas.find(
+                          (f) => f.id === column.formulaId
+                        );
+                        const isDraft =
+                          workspaceFormula?.status === "draft" ||
+                          availableFormula?.status === "draft";
+
+                        // Formula is editable only if owned or is a draft
+                        isFormulaEditable = isFormulaOwned || isDraft;
+                      }
+
                       const isEditable =
                         column.editable &&
                         (!row.isTotal || isTargetTotalInActiveFormula) &&
                         !column.fixed &&
                         column.id === editableFormula &&
                         column.type !== "add-column" &&
-                        !row.isEmpty;
+                        !row.isEmpty &&
+                        isFormulaEditable; // Add ownership/draft check
 
                       // Use EditableCell for editable formula columns (including target total)
                       if (
