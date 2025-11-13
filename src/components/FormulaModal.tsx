@@ -1,20 +1,20 @@
 import { useState } from "react";
-import Modal from "./Modal";
-import Button from "./Button";
-import PillTabs from "./PillTabs";
-import FormulaDataGrid from "./FormulaDataGrid";
-import type { Formula } from "../services/pega";
+import { isFieldVisible } from "../config/formulaCreation.config";
 import {
   FORMULA_TYPES,
   getFormulaTypeLabel,
   getFormulaTypeDescription,
 } from "../config/formulaTypes.config";
 import type { FormulaType } from "../config/formulaTypes.config";
-import { isFieldVisible } from "../config/formulaCreation.config";
+import type { Formula } from "../services/pega";
 import {
   generateFormulaId,
   getCurrentUserInitials,
 } from "../utils/idGeneration";
+import Button from "./Button";
+import FormulaDataGrid from "./FormulaDataGrid";
+import Modal from "./Modal";
+import PillTabs from "./PillTabs";
 
 interface FormulaModalProps {
   isOpen: boolean;

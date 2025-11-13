@@ -10,8 +10,8 @@
  */
 
 import type { FormField } from '../../models/FormField.model';
-import { FORMULA_TYPES } from '../formulaTypes.config';
 import { REFERENCE_DATA_ENDPOINTS, getValidationRule } from '../formulaCreation.config';
+import { FORMULA_TYPES } from '../formulaTypes.config';
 
 export const GENERAL_INFO_FIELDS: FormField[] = [
   {

@@ -1,5 +1,5 @@
-import Badge from "../Badge";
 import type { Ingredient } from "../../services/pega";
+import Badge from "../Badge";
 
 interface ComplianceSectionProps {
   ingredient: Ingredient;

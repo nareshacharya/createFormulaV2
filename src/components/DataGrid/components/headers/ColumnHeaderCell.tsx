@@ -1,6 +1,6 @@
-import { GroupingButton } from "../GroupingButton";
-import { isOwnFormula } from "../../../../utils/formulaIdGenerator";
 import { useDataGridFeatures } from "../../../../hooks/useFeatureFlags";
+import { isOwnFormula } from "../../../../utils/formulaIdGenerator";
+import { GroupingButton } from "../GroupingButton";
 
 // Use Column type from DataGrid.tsx to match parent component
 interface Column {

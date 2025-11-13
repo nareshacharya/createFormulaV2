@@ -1,6 +1,6 @@
 import { useState } from "react";
-import ListRow from "./ListRow";
 import { eventBus } from "../utils/bus";
+import ListRow from "./ListRow";
 
 interface IngredientAttribute {
   id: string;

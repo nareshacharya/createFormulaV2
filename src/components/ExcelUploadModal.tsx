@@ -1,7 +1,7 @@
 import { useState } from "react";
-import Modal from "./Modal";
-import Button from "./Button";
 import type { Ingredient } from "../services/pega";
+import Button from "./Button";
+import Modal from "./Modal";
 
 interface ExcelUploadModalProps {
   isOpen: boolean;

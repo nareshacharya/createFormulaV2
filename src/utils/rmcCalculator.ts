@@ -148,7 +148,7 @@ export function validateIngredientData(ingredients: IngredientCostData[]): {
 /**
  * Format currency value for display
  */
-export function formatCurrency(value: number, currency: string = "USD"): string {
+export function formatCurrency(value: number, currency = "USD"): string {
     return new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: currency,
@@ -160,6 +160,6 @@ export function formatCurrency(value: number, currency: string = "USD"): string 
 /**
  * Format percentage value for display
  */
-export function formatPercentage(value: number, decimals: number = 2): string {
+export function formatPercentage(value: number, decimals = 2): string {
     return `${value.toFixed(decimals)}%`;
 }

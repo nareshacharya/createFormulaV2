@@ -77,7 +77,7 @@ export function prepareFormulaForCompounding(
     formula: Formula,
     ingredients: CompoundingIngredient[],
     attributes: CompoundingAttribute[],
-    targetTotal: number = 100,
+    targetTotal = 100,
     _auditTrail?: AuditEntry[]
 ): CompoundingFormula {
     // Calculate RMC from contribution costs

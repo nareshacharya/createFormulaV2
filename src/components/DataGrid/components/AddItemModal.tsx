@@ -14,10 +14,10 @@
  */
 
 import { useState, useEffect } from "react";
-import Modal from "../../Modal";
-import SearchBar from "../../SearchBar";
-import PillTabs from "../../PillTabs";
 import type { Ingredient, Formula } from "../../../services/pega";
+import Modal from "../../Modal";
+import PillTabs from "../../PillTabs";
+import SearchBar from "../../SearchBar";
 
 interface AddItemModalProps {
   /** Whether the modal is open */

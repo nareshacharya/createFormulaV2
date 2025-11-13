@@ -96,7 +96,7 @@ export const generateFormulaId = (config: FormulaNameConfig): string => {
  */
 export const generateFormulaIdentifier = (
     config: FormulaNameConfig,
-    version: string = "v1"
+    version = "v1"
 ): string => {
     const baseId = generateFormulaId(config);
     return `${baseId}${version}`;

@@ -13,8 +13,8 @@ export interface HistoryEntry<T = any> {
 
 export class StateHistoryManager<T = any> {
     private history: HistoryEntry<T>[] = [];
-    private currentIndex: number = -1;
-    private maxHistorySize: number = 6; // Current state + 5 undos
+    private currentIndex = -1;
+    private maxHistorySize = 6; // Current state + 5 undos
 
     /**
      * Push a new state to history

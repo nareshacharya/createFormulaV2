@@ -1,8 +1,8 @@
 import { useState, lazy, Suspense } from "react";
-import Modal from "./Modal";
-import Button from "./Button";
 import type { Ingredient } from "../services/pega";
 import { eventBus } from "../utils/bus";
+import Button from "./Button";
+import Modal from "./Modal";
 
 // Lazy load sections for better performance
 const OverviewSection = lazy(

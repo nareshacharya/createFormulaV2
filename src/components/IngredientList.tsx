@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import ListRow from "./ListRow";
-import IngredientQuickView from "./IngredientQuickView";
 import type { Ingredient } from "../services/pega";
 import { eventBus } from "../utils/bus";
+import IngredientQuickView from "./IngredientQuickView";
+import ListRow from "./ListRow";
 
 interface IngredientListProps {
   ingredients: Ingredient[];

@@ -1,9 +1,9 @@
-import { BrowserRouter } from "react-router-dom";
-import { AppRoutes } from "./router";
 import { useState, createContext, useContext } from "react";
+import { BrowserRouter } from "react-router-dom";
 import Toast from "./components/Toast";
-import { WorkspaceProvider } from "./context/WorkspaceContext";
 import { FeatureFlagsProvider } from "./context/FeatureFlagsContext";
+import { WorkspaceProvider } from "./context/WorkspaceContext";
+import { AppRoutes } from "./router";
 
 // Modal Context for global modal management
 interface ModalContextType {

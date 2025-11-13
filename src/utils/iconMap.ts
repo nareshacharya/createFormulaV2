@@ -144,7 +144,7 @@ export const getIconName = (iconName: IconName): string => {
  */
 export const createIconHTML = (
     name: IconName,
-    className: string = ""
+    className = ""
 ): string => {
     return `<span class="material-symbols-rounded ${className}">${iconMap[name]}</span>`;
 };

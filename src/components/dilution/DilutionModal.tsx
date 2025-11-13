@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import Modal from "../Modal";
 import type { Dilution, DilutionPreset, Solvent } from "../../types/dilution";
 import { DILUTION_PRESETS } from "../../types/dilution";
+import Modal from "../Modal";
 
 interface DilutionModalProps {
   isOpen: boolean;

@@ -1,8 +1,8 @@
 import { useEffect } from "react";
-import { eventBus } from "../../utils/bus";
-import SaveWorkspaceModal from "../../components/SaveWorkspaceModal";
-import { useModal } from "../../App";
 import toast from "react-hot-toast";
+import { useModal } from "../../App";
+import SaveWorkspaceModal from "../../components/SaveWorkspaceModal";
+import { eventBus } from "../../utils/bus";
 import {
   saveWorkspace,
   canCreateWorkspace,

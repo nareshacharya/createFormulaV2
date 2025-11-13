@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { useWorkspace } from "../../hooks/useWorkspace";
 import { useWorkspaceFeatures } from "../../hooks/useFeatureFlags";
+import { useWorkspace } from "../../hooks/useWorkspace";
 
 /**
  * Workspace tabs component for managing multiple workspace sessions

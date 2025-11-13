@@ -2,9 +2,9 @@ import type { Dispatch, SetStateAction } from "react";
 import toast from "react-hot-toast";
 import type { Column } from "../../../components/DataGrid";
 import type { Formula, Ingredient } from "../../../services/pega";
+import { eventBus } from "../../../utils/bus";
 import { calculateTotals } from "../../../utils/formulaCalculations";
 import { appStateHistory } from "../../../utils/stateHistory";
-import { eventBus } from "../../../utils/bus";
 
 interface UseFormulaOperationsProps {
     columns: Column[];

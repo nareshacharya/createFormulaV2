@@ -1,24 +1,24 @@
 import { useState, useRef, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useClickOutside } from "../hooks/useClickOutside";
-import { useRowReordering } from "./DataGrid/hooks/useRowReordering";
-import { useBulkSelection } from "./DataGrid/hooks/useBulkSelection";
-import { useKeyboardNavigation } from "./DataGrid/hooks/useKeyboardNavigation";
 import { useDataGridFeatures } from "../hooks/useFeatureFlags";
+import { mockSolvents } from "../mocks/solvents";
+import type { Ingredient, Formula } from "../services/pega";
+import type { Dilution } from "../types/dilution";
+import { eventBus } from "../utils/bus";
+import { isOwnFormula } from "../utils/formulaIdGenerator";
+import { AddItemButton } from "./DataGrid/components/AddItemButton";
+import { AddItemModal } from "./DataGrid/components/AddItemModal";
 import { BulkActionsToolbar } from "./DataGrid/components/BulkActionsToolbar";
+import { useBulkSelection } from "./DataGrid/hooks/useBulkSelection";
+import { useRowReordering } from "./DataGrid/hooks/useRowReordering";
+import { useKeyboardNavigation } from "./DataGrid/hooks/useKeyboardNavigation";
 import { EditableCell } from "./DataGrid/components/EditableCell";
 import { CellRenderer } from "./DataGrid/components/cells/CellRenderer";
 import { TableHeader } from "./DataGrid/components/headers/TableHeader";
-import { AddItemButton } from "./DataGrid/components/AddItemButton";
-import { AddItemModal } from "./DataGrid/components/AddItemModal";
 import { isRowDraggable } from "./DataGrid/utils/rowOrdering";
 import { DilutionModal } from "./dilution";
-import { mockSolvents } from "../mocks/solvents";
-import { eventBus } from "../utils/bus";
-import type { Dilution } from "../types/dilution";
 import type { UseDilutionReturn } from "./dilution";
-import { isOwnFormula } from "../utils/formulaIdGenerator";
-import type { Ingredient, Formula } from "../services/pega";
 
 export interface Column {
   id: string;

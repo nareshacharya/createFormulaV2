@@ -1,5 +1,5 @@
-import { DilutionIcon } from "../../../dilution";
 import { mockSolvents } from "../../../../mocks/solvents";
+import { DilutionIcon } from "../../../dilution";
 import type { UseDilutionReturn } from "../../../dilution";
 
 interface DescriptionCellProps {

@@ -3,10 +3,10 @@
  * Extracted to keep WorkArea.tsx under 1000 lines
  */
 
-import FormulaModal from "../../../components/FormulaModal";
-import Dialog from "../../../components/Dialog";
 import AttributeSelector from "../../../components/AttributeSelector";
 import Button from "../../../components/Button";
+import Dialog from "../../../components/Dialog";
+import FormulaModal from "../../../components/FormulaModal";
 import type { Formula, IngredientAttribute } from "../../../services/pega";
 
 interface ModalsProps {

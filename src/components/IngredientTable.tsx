@@ -1,8 +1,8 @@
 import { useState } from "react";
 import type { Ingredient } from "../services/pega";
+import { eventBus } from "../utils/bus";
 import Badge from "./Badge";
 import Button from "./Button";
-import { eventBus } from "../utils/bus";
 
 interface IngredientTableProps {
   ingredients: Ingredient[];

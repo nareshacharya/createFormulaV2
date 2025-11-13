@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
-import { eventBus } from '../../utils/bus';
 import type { Dilution } from '../../types/dilution';
+import { eventBus } from '../../utils/bus';
 
 export interface DilutionState {
     [ingredientId: string]: Dilution;

@@ -1,8 +1,8 @@
 import { useState } from "react";
-import Modal from "./Modal";
-import Button from "./Button";
 import type { Formula } from "../services/pega";
 import { eventBus } from "../utils/bus";
+import Button from "./Button";
+import Modal from "./Modal";
 
 interface FormulaQuickViewProps {
   formula: Formula | null;

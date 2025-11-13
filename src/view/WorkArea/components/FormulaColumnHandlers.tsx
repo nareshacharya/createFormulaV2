@@ -5,14 +5,14 @@
 
 import toast from "react-hot-toast";
 import type { Column } from "../../../components/DataGrid";
+import { FORMULA_TYPES } from "../../../config/formulaTypes.config";
 import type { Formula } from "../../../services/pega";
 import { eventBus } from "../../../utils/bus";
-import { appStateHistory } from "../../../utils/stateHistory";
 import {
   getCurrentUserInitials,
   parseFormulaId as parseOldFormulaId,
 } from "../../../utils/idGeneration";
-import { FORMULA_TYPES } from "../../../config/formulaTypes.config";
+import { appStateHistory } from "../../../utils/stateHistory";
 
 export interface FormulaHandlersConfig {
   columns: Column[];

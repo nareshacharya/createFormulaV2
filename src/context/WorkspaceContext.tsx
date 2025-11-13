@@ -1,11 +1,11 @@
 import React, { createContext, useState, useCallback } from "react";
 import toast from "react-hot-toast";
+import type { Column } from "../components/DataGrid";
 import type {
   Formula,
   Ingredient,
   IngredientAttribute,
 } from "../services/pega";
-import type { Column } from "../components/DataGrid";
 import { StateHistoryManager } from "../utils/stateHistory";
 
 interface WorkspaceData {

@@ -4,13 +4,12 @@
  * Exports all field configurations for the formula creation process
  */
 
-import TYPE_SELECTION_FIELDS from './typeSelection.fields';
-import GENERAL_INFO_FIELDS from './generalInfo.fields';
+import type { FormField } from '../../models/FormField.model';
 import FORMULA_DETAILS_FIELDS from './formulaDetails.fields';
+import GENERAL_INFO_FIELDS from './generalInfo.fields';
 import PRODUCT_INFO_FIELDS from './productInfo.fields';
 import PROJECT_REFERENCE_FIELDS from './projectReference.fields';
-
-import type { FormField } from '../../models/FormField.model';
+import TYPE_SELECTION_FIELDS from './typeSelection.fields';
 
 /**
  * All field configurations organized by step

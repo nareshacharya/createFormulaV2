@@ -1,5 +1,5 @@
-import { useWorkspace } from "./useWorkspace";
 import type { StateHistoryManager } from "../utils/stateHistory";
+import { useWorkspace } from "./useWorkspace";
 
 /**
  * Custom hook to access the active workspace's undo/redo history

@@ -3,6 +3,7 @@
  * This demonstrates the ID generation logic with examples from the user story
  */
 
+import { FORMULA_TYPES } from '../../config/formulaTypes.config';
 import {
     generateFormulaId,
     generatePerfumerFormulaId,
@@ -15,7 +16,6 @@ import {
     isOwnFormula,
     PERFUMER_DIRECTORY
 } from '../idGeneration';
-import { FORMULA_TYPES } from '../../config/formulaTypes.config';
 
 /**
  * Example test scenarios based on the user story

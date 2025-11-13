@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import type { Formula } from "../services/pega";
-import Badge from "./Badge";
-import Alert from "./Alert";
 import { getListItemClasses, selectionStyles } from "../config/theme";
+import type { Formula } from "../services/pega";
+import Alert from "./Alert";
+import Badge from "./Badge";
 
 interface FormulaDataGridProps {
   formulas: Formula[];

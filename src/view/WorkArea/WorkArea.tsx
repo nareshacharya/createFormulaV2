@@ -1,15 +1,20 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import toast from "react-hot-toast";
+import AttributeSelector from "../../components/AttributeSelector";
+import Badge from "../../components/Badge";
+import Button from "../../components/Button";
 import DataGrid from "../../components/DataGrid";
 import type { Column } from "../../components/DataGrid";
-import AttributeSelector from "../../components/AttributeSelector";
 import Dialog from "../../components/Dialog";
-import Modal from "../../components/Modal";
-import FormulaModal from "../../components/FormulaModal";
-import FormulaDetailsModal from "../../components/FormulaDetailsModal";
+import { useDilution } from "../../components/dilution";
 import ExcelUploadModal from "../../components/ExcelUploadModal";
-import Button from "../../components/Button";
-import Badge from "../../components/Badge";
+import FormulaDetailsModal from "../../components/FormulaDetailsModal";
+import FormulaModal from "../../components/FormulaModal";
+import Modal from "../../components/Modal";
+import { useExcelUpload } from "../../hooks/useExcelUpload";
+import { useFormulaDetails } from "../../hooks/useFormulaDetails";
+import { useWorkspace } from "../../hooks/useWorkspace";
+import { useWorkspaceHistory } from "../../hooks/useWorkspaceHistory";
 import { PegaService } from "../../services/pega";
 import type {
   Formula,
@@ -17,25 +22,20 @@ import type {
   IngredientAttribute,
 } from "../../services/pega";
 import { eventBus } from "../../utils/bus";
+import { exportData } from "../../utils/exportUtils";
 import {
   calculateTotals,
   getEmptyStateData,
 } from "../../utils/formulaCalculations";
-import { useWorkAreaState } from "./hooks/useWorkAreaState";
-import { useDataGridHandlers } from "./hooks/useDataGridHandlers";
-import { useFormulaOperations } from "./hooks/useFormulaOperations";
-import { useFormulaColumnHandlers } from "./components/FormulaColumnHandlers";
-import { useDilution } from "../../components/dilution";
 import {
   generateNewFormulaId,
   isOwnFormula,
 } from "../../utils/formulaIdGenerator";
 import type { WorkspaceState } from "../../utils/workspaceManager";
-import { exportData } from "../../utils/exportUtils";
-import { useWorkspace } from "../../hooks/useWorkspace";
-import { useWorkspaceHistory } from "../../hooks/useWorkspaceHistory";
-import { useFormulaDetails } from "../../hooks/useFormulaDetails";
-import { useExcelUpload } from "../../hooks/useExcelUpload";
+import { useFormulaColumnHandlers } from "./components/FormulaColumnHandlers";
+import { useDataGridHandlers } from "./hooks/useDataGridHandlers";
+import { useFormulaOperations } from "./hooks/useFormulaOperations";
+import { useWorkAreaState } from "./hooks/useWorkAreaState";
 
 const WorkArea = () => {
   // Workspace context - manages data isolation between tabs

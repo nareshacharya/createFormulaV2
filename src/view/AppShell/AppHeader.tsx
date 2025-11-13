@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { headerTokens } from "../../utils/tokens";
-import HeaderBadges from "./Header.Badges";
-import HeaderActions from "./Header.Actions";
-import { eventBus } from "../../utils/bus";
 import type { Formula } from "../../services/pega";
+import { eventBus } from "../../utils/bus";
+import { headerTokens } from "../../utils/tokens";
+import HeaderActions from "./Header.Actions";
+import HeaderBadges from "./Header.Badges";
 
 const AppHeader = () => {
   const [activeFormula, setActiveFormula] = useState<Formula | null>(null);

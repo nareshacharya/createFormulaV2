@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
-import Modal from "./Modal";
-import Button from "./Button";
-import type { Formula } from "../services/pega";
+import { FORMULA_DETAILS_FIELDS } from "../config/fieldConfigs/formulaDetails.fields";
+import { GENERAL_INFO_FIELDS } from "../config/fieldConfigs/generalInfo.fields";
+import { PRODUCT_INFO_FIELDS } from "../config/fieldConfigs/productInfo.fields";
+import { PROJECT_REFERENCE_FIELDS } from "../config/fieldConfigs/projectReference.fields";
+import type { FormulaType } from "../config/formulaTypes.config";
 import {
   FORMULA_TYPES,
   getFormulaTypeLabel,
 } from "../config/formulaTypes.config";
-import type { FormulaType } from "../config/formulaTypes.config";
-import { GENERAL_INFO_FIELDS } from "../config/fieldConfigs/generalInfo.fields";
-import { FORMULA_DETAILS_FIELDS } from "../config/fieldConfigs/formulaDetails.fields";
-import { PRODUCT_INFO_FIELDS } from "../config/fieldConfigs/productInfo.fields";
-import { PROJECT_REFERENCE_FIELDS } from "../config/fieldConfigs/projectReference.fields";
 import type { FormField } from "../models/FormField.model";
 import { isFieldVisibleForType } from "../models/FormField.model";
+import type { Formula } from "../services/pega";
+import Button from "./Button";
+import Modal from "./Modal";
 
 interface FormulaDetailsModalProps {
   isOpen: boolean;

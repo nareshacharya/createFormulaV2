@@ -1,19 +1,19 @@
 import { useState, useEffect } from "react";
-import SearchBar from "../../components/SearchBar";
-import PillTabs from "../../components/PillTabs";
-import IngredientList from "../../components/IngredientList";
+import AdvancedFilterSheet from "../../components/AdvancedFilterSheet";
 import FormulaList from "../../components/FormulaList";
 import IngredientAttributeList from "../../components/IngredientAttributeList";
-import AdvancedFilterSheet from "../../components/AdvancedFilterSheet";
+import IngredientList from "../../components/IngredientList";
+import PillTabs from "../../components/PillTabs";
+import type { FilterGroup } from "../../components/QueryBuilder";
+import SearchBar from "../../components/SearchBar";
 import { PegaService } from "../../services/pega";
 import type {
   Ingredient,
   Formula,
   IngredientAttribute,
 } from "../../services/pega";
-import { evaluateQuery } from "../../utils/queryEvaluator";
-import type { FilterGroup } from "../../components/QueryBuilder";
 import { eventBus } from "../../utils/bus";
+import { evaluateQuery } from "../../utils/queryEvaluator";
 
 const LibraryPanel = () => {
   const [activeTab, setActiveTab] = useState("ingredients");

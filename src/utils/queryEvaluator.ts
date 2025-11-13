@@ -1,6 +1,6 @@
 
-import type { Ingredient } from '../services/pega';
 import type { FilterGroup, FilterRule } from '../components/QueryBuilder';
+import type { Ingredient } from '../services/pega';
 
 export const evaluateQuery = (ingredient: Ingredient, query: FilterGroup): boolean => {
   if (!query.rules || query.rules.length === 0) {

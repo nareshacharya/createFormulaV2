@@ -1,9 +1,9 @@
 import { useState } from "react";
-import AppHeader from "./AppHeader";
-import LibraryPanel from "../Library/LibraryPanel";
-import WorkArea from "../WorkArea/WorkArea";
 import WorkspaceTabs from "../../components/workspace/WorkspaceTabs";
 import { useWorkspaceFeatures } from "../../hooks/useFeatureFlags";
+import LibraryPanel from "../Library/LibraryPanel";
+import WorkArea from "../WorkArea/WorkArea";
+import AppHeader from "./AppHeader";
 
 const AppShell = () => {
   const [isLibraryCollapsed, setIsLibraryCollapsed] = useState(false);

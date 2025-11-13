@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
-import type { Formula, Ingredient } from "../services/pega";
 import toast from "react-hot-toast";
+import type { Formula, Ingredient } from "../services/pega";
 
 interface ParsedIngredient {
   name: string;

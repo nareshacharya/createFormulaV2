@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
-import type { Formula } from "../services/pega";
 import toast from "react-hot-toast";
+import type { Formula } from "../services/pega";
 
 /**
  * useFormulaDetails Hook (Controller Layer)

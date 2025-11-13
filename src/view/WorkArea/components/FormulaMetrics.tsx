@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { eventBus } from "../../../utils/bus";
 import type { Formula } from "../../../services/pega";
+import { eventBus } from "../../../utils/bus";
 
 interface FormulaMetrics {
   lineCount: number;

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
+import { useHeaderFeatures } from "../../hooks/useFeatureFlags";
 import type { Formula } from "../../services/pega";
 import { eventBus } from "../../utils/bus";
-import { useHeaderFeatures } from "../../hooks/useFeatureFlags";
 
 interface HeaderBadgesProps {
   activeFormula?: Formula | null;

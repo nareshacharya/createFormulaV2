@@ -1,8 +1,8 @@
 import { useState } from "react";
 import type { Formula } from "../services/pega";
-import ListRow from "./ListRow";
-import FormulaQuickView from "./FormulaQuickView";
 import { eventBus } from "../utils/bus";
+import FormulaQuickView from "./FormulaQuickView";
+import ListRow from "./ListRow";
 
 interface FormulaListProps {
   formulas: Formula[];

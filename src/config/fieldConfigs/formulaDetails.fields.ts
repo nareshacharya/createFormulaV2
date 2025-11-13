@@ -9,8 +9,8 @@
  */
 
 import type { FormField } from '../../models/FormField.model';
-import { FORMULA_TYPES } from '../formulaTypes.config';
 import { getValidationRule } from '../formulaCreation.config';
+import { FORMULA_TYPES } from '../formulaTypes.config';
 
 export const FORMULA_DETAILS_FIELDS: FormField[] = [
   {
