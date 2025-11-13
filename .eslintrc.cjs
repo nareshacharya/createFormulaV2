@@ -36,8 +36,16 @@ module.exports = {
       version: '17.0',
     },
     'import/resolver': {
-      typescript: true,
-      node: true,
+      typescript: {
+        alwaysTryTypes: true,
+        project: './tsconfig.json',
+      },
+      node: {
+        extensions: ['.js', '.jsx', '.ts', '.tsx'],
+      },
+    },
+    'import/parsers': {
+      '@typescript-eslint/parser': ['.ts', '.tsx'],
     },
   },
   rules: {
