@@ -11,6 +11,7 @@ import {
   generateFormulaId,
   getCurrentUserInitials,
 } from "../utils/idGeneration";
+import { tw, mergeStyles } from "../utils/tailwindToInline";
 import Button from "./Button";
 import FormulaDataGrid from "./FormulaDataGrid";
 import Modal from "./Modal";
@@ -239,38 +240,38 @@ const FormulaModal = ({
   ];
 
   const createFormulaForm = (
-    <div className="px-6 pt-3 pb-6">
-      <div className="space-y-6">
+    <div style={tw("px-6 pt-3 pb-6")}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
         {/* Formula Type Selection */}
         <div>
-          <div className="flex items-center gap-2 mb-3">
-            <label className="block text-sm font-medium text-gray-700">
+          <div style={mergeStyles(tw("flex items-center"), { gap: "0.5rem", marginBottom: "0.75rem" })}>
+            <label style={tw("block text-sm font-medium text-gray-700")}>
               Formula Type *
             </label>
             <div className="relative group inline-block">
               <i className="ri-information-line text-gray-400 text-base cursor-help"></i>
               <div className="opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 absolute left-0 top-6 w-80 p-4 bg-gray-900 text-white text-xs rounded-lg shadow-xl z-50 pointer-events-none">
-                <div className="mb-3">
-                  <strong className="text-blue-300">Base Formula:</strong>{" "}
-                  <span className="text-gray-300">
+                <div style={{ marginBottom: "0.75rem" }}>
+                  <strong style={tw("text-blue-300")}>Base Formula:</strong>{" "}
+                  <span style={tw("text-gray-300")}>
                     {getFormulaTypeDescription(FORMULA_TYPES.BASE)}
                   </span>
                 </div>
-                <div className="mb-3">
-                  <strong className="text-blue-300">Dilution Formula:</strong>{" "}
-                  <span className="text-gray-300">
+                <div style={{ marginBottom: "0.75rem" }}>
+                  <strong style={tw("text-blue-300")}>Dilution Formula:</strong>{" "}
+                  <span style={tw("text-gray-300")}>
                     {getFormulaTypeDescription(FORMULA_TYPES.DILUTION)}
                   </span>
                 </div>
-                <div className="mb-3">
-                  <strong className="text-blue-300">Analytical Formula:</strong>{" "}
-                  <span className="text-gray-300">
+                <div style={{ marginBottom: "0.75rem" }}>
+                  <strong style={tw("text-blue-300")}>Analytical Formula:</strong>{" "}
+                  <span style={tw("text-gray-300")}>
                     {getFormulaTypeDescription(FORMULA_TYPES.ANALYTICAL)}
                   </span>
                 </div>
                 <div>
-                  <strong className="text-blue-300">Perfumer Formula:</strong>{" "}
-                  <span className="text-gray-300">
+                  <strong style={tw("text-blue-300")}>Perfumer Formula:</strong>{" "}
+                  <span style={tw("text-gray-300")}>
                     {getFormulaTypeDescription(FORMULA_TYPES.PERFUMER)}
                   </span>
                 </div>
