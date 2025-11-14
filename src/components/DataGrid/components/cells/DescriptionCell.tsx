@@ -1,6 +1,7 @@
 import { mockSolvents } from "../../../../mocks/solvents";
 import { DilutionIcon } from "../../../dilution";
 import type { UseDilutionReturn } from "../../../dilution";
+import { tw } from "../../../../utils/tailwindToInline";
 
 interface DescriptionCellProps {
   row: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -24,23 +25,31 @@ export const DescriptionCell = ({
   // Empty state handling
   if (row.isEmpty) {
     return (
-      <div className="text-center pt-16 pb-[30vh]">
-        <div className="w-24 h-24 mx-auto mb-3 bg-gray-200 rounded-full flex items-center justify-center">
+      <div style={tw("text-center pt-16 pb-[30vh]")}>
+        <div
+          style={tw(
+            "w-24 h-24 mx-auto mb-3 bg-gray-200 rounded-full flex items-center justify-center"
+          )}
+        >
           <span className="material-symbols-rounded text-5xl text-gray-400">
             science
           </span>
         </div>
-        <h3 className="text-lg font-medium text-gray-400 mb-2">
+        <h3 style={tw("text-lg font-medium text-gray-400 mb-2")}>
           Start building by adding a formula to begin <br />
           <br />
         </h3>
-        <button
-          onClick={onAddFormula}
-          className="px-4 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center gap-2 mx-auto shadow-sm"
-        >
-          <span className="material-symbols-rounded text-lg">add</span>
-          Create/Add Formula
-        </button>
+        <div style={tw("flex justify-center")}>
+          <button
+            onClick={onAddFormula}
+            style={tw(
+              "px-4 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center gap-2 shadow-sm"
+            )}
+          >
+            <span className="material-symbols-rounded text-lg">add</span>
+            Create/Add Formula
+          </button>
+        </div>
       </div>
     );
   }
@@ -76,11 +85,13 @@ export const DescriptionCell = ({
   return (
     <div
       className="flex items-center justify-between h-full group"
-      style={{ paddingLeft: `${indent}px` }}
+      style={{
+        paddingLeft: `${indent}px`,
+      }}
     >
-      <div className="flex items-center space-x-2 flex-1 min-w-0">
+      <div style={tw("flex items-center space-x-2 flex-1 min-w-0")}>
         {row.isFormula && (
-          <div className="flex items-center space-x-1 mr-2">
+          <div style={tw("flex items-center space-x-1 mr-2")}>
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -109,7 +120,9 @@ export const DescriptionCell = ({
         {/* Status indicator dot */}
         {statusColor && (
           <div
-            className={`w-1.5 h-1.5 rounded-full ${statusColor} flex-shrink-0`}
+            style={tw(
+              `w-1.5 h-1.5 rounded-full ${statusColor} flex-shrink-0 mr-2`
+            )}
             title={`Status: ${row.status || "active"}${
               row.mac !== undefined && row.mac < 0 ? " (non-compliant)" : ""
             }`}
@@ -133,7 +146,9 @@ export const DescriptionCell = ({
             e.stopPropagation();
             onExplodeFormula?.(row.formulaId);
           }}
-          className="flex-shrink-0 ml-2 text-orange-600 hover:text-orange-700 transition-colors"
+          style={tw(
+            "flex-shrink-0 ml-2 text-orange-600 hover:text-orange-700 transition-colors"
+          )}
           title="Explode Formula"
         >
           <span
@@ -154,10 +169,12 @@ export const DescriptionCell = ({
             onClick={() => {
               onDilutionClick?.(row.id, value || "");
             }}
-            className="flex items-center gap-1 ml-2 text-blue-600 hover:text-blue-700 transition-colors cursor-pointer"
+            style={tw(
+              "flex items-center gap-1 ml-2 text-blue-600 hover:text-blue-700 transition-colors cursor-pointer"
+            )}
             title="Edit Dilution"
           >
-            <span className="text-xs font-medium whitespace-nowrap">
+            <span style={tw("text-xs font-medium whitespace-nowrap")}>
               {(() => {
                 const solventCodes = dilution.solventIds
                   .map(

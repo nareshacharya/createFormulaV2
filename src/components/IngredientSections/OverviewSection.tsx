@@ -1,5 +1,6 @@
 import type { Ingredient } from "../../services/pega";
 import Badge from "../Badge";
+import { tw } from "../../utils/tailwindToInline";
 
 interface OverviewSectionProps {
   ingredient: Ingredient;
@@ -38,75 +39,75 @@ const OverviewSection = ({ ingredient }: OverviewSectionProps) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div style={tw("space-y-6")}>
       {/* Basic Info */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <h3 style={tw("text-lg font-semibold text-gray-900 mb-4")}>
           Basic Information
         </h3>
-        <div className="grid grid-cols-2 gap-4">
+        <div style={tw("grid grid-cols-2 gap-4")}>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label style={tw("block text-sm font-medium text-gray-700 mb-1")}>
               Ingredient Code
             </label>
-            <p className="text-sm text-gray-900">{ingredient.code}</p>
+            <p style={tw("text-sm text-gray-900")}>{ingredient.code}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label style={tw("block text-sm font-medium text-gray-700 mb-1")}>
               Category
             </label>
-            <p className="text-sm text-gray-900">{ingredient.category}</p>
+            <p style={tw("text-sm text-gray-900")}>{ingredient.category}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label style={tw("block text-sm font-medium text-gray-700 mb-1")}>
               Type
             </label>
             <div>{getTypeBadge()}</div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label style={tw("block text-sm font-medium text-gray-700 mb-1")}>
               Status
             </label>
             <div>{getStatusBadge()}</div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label style={tw("block text-sm font-medium text-gray-700 mb-1")}>
               Cost per {ingredient.unit}
             </label>
-            <p className="text-sm text-gray-900 font-medium">
+            <p style={tw("text-sm text-gray-900 font-medium")}>
               ${ingredient.price.toFixed(2)}
             </p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label style={tw("block text-sm font-medium text-gray-700 mb-1")}>
               Supplier
             </label>
-            <p className="text-sm text-gray-900">{ingredient.supplier}</p>
+            <p style={tw("text-sm text-gray-900")}>{ingredient.supplier}</p>
           </div>
         </div>
       </div>
 
       {/* Description */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <h3 style={tw("text-lg font-semibold text-gray-900 mb-4")}>
           Description
         </h3>
-        <p className="text-sm text-gray-700 leading-relaxed">
+        <p style={tw("text-sm text-gray-700 leading-relaxed")}>
           {mockData.description}
         </p>
       </div>
 
       {/* Olfactory Properties */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <h3 style={tw("text-lg font-semibold text-gray-900 mb-4")}>
           Olfactory Properties
         </h3>
-        <div className="grid grid-cols-2 gap-4">
+        <div style={tw("grid grid-cols-2 gap-4")}>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label style={tw("block text-sm font-medium text-gray-700 mb-2")}>
               Odor Profile
             </label>
-            <div className="flex flex-wrap gap-2">
+            <div style={tw("flex flex-wrap gap-2")}>
               {mockData.odorProfile.map((profile) => (
                 <Badge key={profile} variant="info" size="sm">
                   {profile}
@@ -115,7 +116,7 @@ const OverviewSection = ({ ingredient }: OverviewSectionProps) => {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label style={tw("block text-sm font-medium text-gray-700 mb-1")}>
               Volatility
             </label>
             <Badge variant="purple" size="sm">
@@ -123,29 +124,29 @@ const OverviewSection = ({ ingredient }: OverviewSectionProps) => {
             </Badge>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label style={tw("block text-sm font-medium text-gray-700 mb-1")}>
               Strength
             </label>
-            <p className="text-sm text-gray-900">{mockData.strength}</p>
+            <p style={tw("text-sm text-gray-900")}>{mockData.strength}</p>
           </div>
         </div>
       </div>
 
       {/* Metadata */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Metadata</h3>
-        <div className="grid grid-cols-2 gap-4">
+        <h3 style={tw("text-lg font-semibold text-gray-900 mb-4")}>Metadata</h3>
+        <div style={tw("grid grid-cols-2 gap-4")}>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label style={tw("block text-sm font-medium text-gray-700 mb-1")}>
               Created By
             </label>
-            <p className="text-sm text-gray-900">{mockData.createdBy}</p>
+            <p style={tw("text-sm text-gray-900")}>{mockData.createdBy}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label style={tw("block text-sm font-medium text-gray-700 mb-1")}>
               Last Updated
             </label>
-            <p className="text-sm text-gray-900">{mockData.lastUpdated}</p>
+            <p style={tw("text-sm text-gray-900")}>{mockData.lastUpdated}</p>
           </div>
         </div>
       </div>

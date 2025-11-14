@@ -154,23 +154,27 @@ export const DilutionModal = ({
       title={`Dilute ${ingredientName}`}
       noPadding={true}
       footerActions={
-        <div style={tw("flex items-center justify-between w-full")}>
+        <div style={tw("flex items-center justify-between w-full gap-4")}>
           <div>
             {currentDilution && currentDilution.solventIds.length > 0 && (
               <button
                 type="button"
                 onClick={handleRemoveDilution}
-                style={tw("px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors")}
+                style={tw(
+                  "px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+                )}
               >
                 Remove Dilution
               </button>
             )}
           </div>
-          <div style={tw("flex space-x-2")}>
+          <div style={tw("flex gap-3")}>
             <button
               type="button"
               onClick={onClose}
-              style={tw("px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors")}
+              style={tw(
+                "px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              )}
             >
               Cancel
             </button>
@@ -178,7 +182,9 @@ export const DilutionModal = ({
               type="button"
               onClick={handleApply}
               disabled={!selectedSolvent}
-              style={tw("px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-md transition-colors")}
+              style={tw(
+                "px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-md transition-colors"
+              )}
             >
               Apply Dilution
             </button>
@@ -187,23 +193,25 @@ export const DilutionModal = ({
       }
     >
       <div style={tw("p-6")}>
-        <div style={tw("space-y-6")}>
+        <div style={tw("grid grid-cols-2 gap-6")}>
           {/* Section 1: Solvents */}
           <div>
             <h3 style={tw("text-sm font-semibold text-gray-900 mb-3")}>
               Select Solvent
             </h3>
-            <div style={tw("grid grid-cols-2 gap-2")}>
+            <div style={tw("space-y-2")}>
               {solvents.map((solvent) => (
                 <button
                   key={solvent.id}
                   type="button"
                   onClick={() => handleSolventSelect(solvent.id)}
-                  style={tw(`px-3 py-2 text-left rounded-md transition-colors ${
-                    selectedSolvent === solvent.id
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`)}
+                  style={tw(
+                    `w-full px-3 py-2 text-left rounded-md transition-colors ${
+                      selectedSolvent === solvent.id
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`
+                  )}
                 >
                   <div style={tw("flex items-center justify-between gap-2")}>
                     <span style={tw("text-sm font-medium truncate")}>
@@ -225,17 +233,19 @@ export const DilutionModal = ({
             </h3>
 
             {/* Preset Buttons */}
-            <div style={tw("grid grid-cols-3 gap-2 mb-3")}>
+            <div style={tw("grid grid-cols-2 gap-2 mb-3")}>
               {DILUTION_PRESETS.map((preset) => (
                 <button
                   key={preset.label}
                   type="button"
                   onClick={() => handlePresetSelect(preset)}
-                  style={tw(`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                    selectedPreset === preset.value && !showCustomInput
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`)}
+                  style={tw(
+                    `px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                      selectedPreset === preset.value && !showCustomInput
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`
+                  )}
                 >
                   {preset.display}
                 </button>
@@ -247,11 +257,13 @@ export const DilutionModal = ({
               <button
                 type="button"
                 onClick={handleCustomClick}
-                style={tw(`w-full px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                  showCustomInput
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`)}
+                style={tw(
+                  `w-full px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                    showCustomInput
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`
+                )}
               >
                 Custom Concentration
               </button>
@@ -266,9 +278,13 @@ export const DilutionModal = ({
                     min="0"
                     max="100"
                     step="0.00001"
-                    style={tw("flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500")}
+                    style={tw(
+                      "flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    )}
                   />
-                  <span style={tw("text-sm text-gray-600 flex-shrink-0")}>%</span>
+                  <span style={tw("text-sm text-gray-600 flex-shrink-0")}>
+                    %
+                  </span>
                 </div>
               )}
             </div>

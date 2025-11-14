@@ -328,16 +328,24 @@ const FormulaDetailsModal = ({
                   </span>
                 )}
                 {field.helpText && (
-                  <div className="group relative inline-block ml-1">
+                  <div style={tw("group relative inline-block ml-1")}>
                     <span
                       className="material-symbols-rounded text-gray-400 hover:text-gray-600 cursor-help"
                       style={{ fontSize: "14px" }}
                     >
                       info
                     </span>
-                    <div className="invisible group-hover:visible absolute left-0 bottom-full mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg z-50 pointer-events-none">
+                    <div
+                      style={tw(
+                        "invisible group-hover:visible absolute left-0 bottom-full mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg z-50 pointer-events-none"
+                      )}
+                    >
                       {field.helpText}
-                      <div className="absolute top-full left-4 -mt-1 border-4 border-transparent border-t-gray-900"></div>
+                      <div
+                        style={tw(
+                          "absolute top-full left-4 -mt-1 border-4 border-transparent border-t-gray-900"
+                        )}
+                      ></div>
                     </div>
                   </div>
                 )}

@@ -33,8 +33,8 @@ export const DilutionIcon = ({
           hasDilution
             ? "text-blue-600"
             : isHovered
-            ? "text-blue-500"
-            : "text-gray-400"
+              ? "text-blue-500"
+              : "text-gray-400"
         }`}
         style={{ fontVariationSettings: "'FILL' 1" }}
       >

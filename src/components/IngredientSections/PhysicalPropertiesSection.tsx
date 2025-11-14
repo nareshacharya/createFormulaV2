@@ -67,11 +67,17 @@ const PhysicalPropertiesSection = ({
               key={property.label}
               style={tw("flex items-start space-x-3 p-3 bg-gray-50 rounded-lg")}
             >
-              <div style={tw("flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center")}>
+              <div
+                style={tw(
+                  "flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center"
+                )}
+              >
                 <i className={`${property.icon} text-blue-600 text-sm`}></i>
               </div>
               <div style={tw("flex-1 min-w-0")}>
-                <label style={tw("block text-sm font-medium text-gray-700 mb-1")}>
+                <label
+                  style={tw("block text-sm font-medium text-gray-700 mb-1")}
+                >
                   {property.label}
                 </label>
                 <p style={tw("text-sm text-gray-900")}>{property.value}</p>

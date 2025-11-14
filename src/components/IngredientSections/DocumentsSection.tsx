@@ -1,11 +1,14 @@
 import type { Ingredient } from "../../services/pega";
 import Badge from "../Badge";
+import { tw } from "../../utils/tailwindToInline";
 
 interface DocumentsSectionProps {
   ingredient: Ingredient;
 }
 
-const DocumentsSection = ({ ingredient: _ingredient }: DocumentsSectionProps) => {
+const DocumentsSection = ({
+  ingredient: _ingredient,
+}: DocumentsSectionProps) => {
   // Mock documents data
   const mockDocuments = [
     {
@@ -111,30 +114,38 @@ const DocumentsSection = ({ ingredient: _ingredient }: DocumentsSectionProps) =>
   };
 
   return (
-    <div className="space-y-6">
+    <div style={tw("space-y-6")}>
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <h3 style={tw("text-lg font-semibold text-gray-900 mb-4")}>
           Available Documents
         </h3>
-        <div className="space-y-3">
+        <div style={tw("space-y-3")}>
           {mockDocuments.map((doc) => (
             <div
               key={doc.id}
-              className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
+              style={tw(
+                "border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
+              )}
             >
-              <div className="flex items-start justify-between">
-                <div className="flex items-start space-x-3 flex-1">
+              <div style={tw("flex items-start justify-between")}>
+                <div style={tw("flex items-start space-x-3 flex-1")}>
                   {/* File Icon */}
-                  <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <div
+                    style={tw(
+                      "flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"
+                    )}
+                  >
                     <i
                       className={`${getFileIcon(doc.format)} text-blue-600`}
                     ></i>
                   </div>
 
                   {/* Document Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-2 mb-1">
-                      <h4 className="text-sm font-medium text-gray-900 truncate">
+                  <div style={tw("flex-1 min-w-0")}>
+                    <div style={tw("flex items-center space-x-2 mb-1")}>
+                      <h4
+                        style={tw("text-sm font-medium text-gray-900 truncate")}
+                      >
                         {doc.name}
                       </h4>
                       <Badge variant={getTypeVariant(doc.type)} size="sm">
@@ -145,11 +156,15 @@ const DocumentsSection = ({ ingredient: _ingredient }: DocumentsSectionProps) =>
                       </Badge>
                     </div>
 
-                    <p className="text-xs text-gray-600 mb-2">
+                    <p style={tw("text-xs text-gray-600 mb-2")}>
                       {doc.description}
                     </p>
 
-                    <div className="flex items-center space-x-4 text-xs text-gray-500">
+                    <div
+                      style={tw(
+                        "flex items-center space-x-4 text-xs text-gray-500"
+                      )}
+                    >
                       <span>Version {doc.version}</span>
                       <span>{doc.date}</span>
                       <span>{doc.size}</span>
@@ -159,11 +174,19 @@ const DocumentsSection = ({ ingredient: _ingredient }: DocumentsSectionProps) =>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex space-x-2 ml-4">
-                  <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors cursor-pointer">
+                <div style={tw("flex space-x-2 ml-4")}>
+                  <button
+                    style={tw(
+                      "p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors cursor-pointer"
+                    )}
+                  >
                     <i className="ri-eye-line text-sm"></i>
                   </button>
-                  <button className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-md transition-colors cursor-pointer">
+                  <button
+                    style={tw(
+                      "p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-md transition-colors cursor-pointer"
+                    )}
+                  >
                     <i className="ri-download-line text-sm"></i>
                   </button>
                 </div>
@@ -175,10 +198,10 @@ const DocumentsSection = ({ ingredient: _ingredient }: DocumentsSectionProps) =>
 
       {/* Document Categories */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <h3 style={tw("text-lg font-semibold text-gray-900 mb-4")}>
           Document Categories
         </h3>
-        <div className="grid grid-cols-2 gap-4">
+        <div style={tw("grid grid-cols-2 gap-4")}>
           {[
             "Safety",
             "Quality",
@@ -190,9 +213,9 @@ const DocumentsSection = ({ ingredient: _ingredient }: DocumentsSectionProps) =>
               (doc) => doc.type === category
             ).length;
             return (
-              <div key={category} className="p-3 bg-gray-50 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">
+              <div key={category} style={tw("p-3 bg-gray-50 rounded-lg")}>
+                <div style={tw("flex items-center justify-between")}>
+                  <span style={tw("text-sm font-medium text-gray-700")}>
                     {category}
                   </span>
                   <Badge variant={getTypeVariant(category)} size="sm">
@@ -207,19 +230,31 @@ const DocumentsSection = ({ ingredient: _ingredient }: DocumentsSectionProps) =>
 
       {/* Document Actions */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <h3 style={tw("text-lg font-semibold text-gray-900 mb-4")}>
           Document Actions
         </h3>
-        <div className="flex space-x-3">
-          <button className="flex-1 px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors cursor-pointer">
+        <div style={tw("flex space-x-3")}>
+          <button
+            style={tw(
+              "flex-1 px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors cursor-pointer"
+            )}
+          >
             <i className="ri-download-line mr-2"></i>
             Download All
           </button>
-          <button className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 transition-colors cursor-pointer">
+          <button
+            style={tw(
+              "flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 transition-colors cursor-pointer"
+            )}
+          >
             <i className="ri-mail-line mr-2"></i>
             Email Documents
           </button>
-          <button className="flex-1 px-4 py-2 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-md hover:bg-green-100 transition-colors cursor-pointer">
+          <button
+            style={tw(
+              "flex-1 px-4 py-2 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-md hover:bg-green-100 transition-colors cursor-pointer"
+            )}
+          >
             <i className="ri-upload-line mr-2"></i>
             Upload New
           </button>
@@ -227,14 +262,14 @@ const DocumentsSection = ({ ingredient: _ingredient }: DocumentsSectionProps) =>
       </div>
 
       {/* Document Status Alert */}
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-        <div className="flex items-start">
+      <div style={tw("bg-yellow-50 border border-yellow-200 rounded-lg p-4")}>
+        <div style={tw("flex items-start")}>
           <i className="ri-alert-line text-yellow-600 mt-0.5 mr-2"></i>
           <div>
-            <p className="text-sm text-yellow-800 font-medium">
+            <p style={tw("text-sm text-yellow-800 font-medium")}>
               Document Expiration Notice
             </p>
-            <p className="text-sm text-yellow-700 mt-1">
+            <p style={tw("text-sm text-yellow-700 mt-1")}>
               1 document is expiring soon. Please review and update
               certifications as needed.
             </p>
