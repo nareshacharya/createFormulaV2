@@ -83,12 +83,12 @@ const HeaderActions = () => {
           tw(
             "group relative flex flex-col items-center justify-center py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap shadow-sm"
           ),
-          { width: "42px" }
+          { width: "52px" }
         )}
         title="Save current workspace state"
       >
         <span
-          style={mergeStyles(tw("text-xl mb-0.5"), { lineHeight: "1.5rem" })}
+          style={mergeStyles(tw("text-2xl"), { lineHeight: "1.5rem" })}
           className="material-symbols-rounded"
         >
           save

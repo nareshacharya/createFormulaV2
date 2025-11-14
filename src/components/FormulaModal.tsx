@@ -253,9 +253,10 @@ const FormulaModal = ({
             <label style={tw("block text-sm font-medium text-gray-700")}>
               Formula Type *
             </label>
-            <div className="relative group inline-block">
+            <div style={tw("relative group inline-block")}>
               <i className="ri-information-line text-gray-400 text-base cursor-help"></i>
-              <div className="opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 absolute left-0 top-6 w-80 p-4 bg-gray-900 text-white text-xs rounded-lg shadow-xl z-50 pointer-events-none">
+              <div style={tw("opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 absolute left-0 top-6 w-80 p-4 bg-gray-900 text-white text-xs rounded-lg shadow-xl z-50 pointer-events-none")}>
+
                 <div style={{ marginBottom: "0.75rem" }}>
                   <strong style={tw("text-blue-300")}>Base Formula:</strong>{" "}
                   <span style={tw("text-gray-300")}>
@@ -282,11 +283,11 @@ const FormulaModal = ({
                     {getFormulaTypeDescription(FORMULA_TYPES.PERFUMER)}
                   </span>
                 </div>
-                <div className="absolute left-6 -top-2 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-gray-900"></div>
+                <div style={tw("absolute left-6 -top-2 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-gray-900")}></div>
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-4 gap-3">
+          <div style={tw("grid grid-cols-4 gap-3")}>
             {Object.values(FORMULA_TYPES).map((type) => (
               <button
                 key={type}
@@ -300,8 +301,8 @@ const FormulaModal = ({
                     : "border-gray-200 hover:border-gray-300"
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <div className="font-medium text-sm text-gray-900">
+                <div style={tw("flex items-center justify-between")}>
+                  <div style={tw("font-medium text-sm text-gray-900")}>
                     {getFormulaTypeLabel(type)}
                   </div>
                   {newFormulaData.formulaType === type && (
@@ -314,11 +315,11 @@ const FormulaModal = ({
         </div>
 
         {/* Formula Identification Fields */}
-        <div className="space-y-4">
+        <div style={tw("space-y-4")}>
           {/* Fragrance Name / Sample ID - Full Width */}
           {isFieldVisible("fragranceName", newFormulaData.formulaType) && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label style={tw("block text-sm font-medium text-gray-700 mb-2")}>
                 Fragrance Name *
               </label>
               <input
@@ -330,7 +331,7 @@ const FormulaModal = ({
                     fragranceName: e.target.value,
                   }))
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                style={tw("w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent")}
                 placeholder="Enter fragrance name"
               />
             </div>
@@ -338,7 +339,7 @@ const FormulaModal = ({
 
           {isFieldVisible("sampleId", newFormulaData.formulaType) && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label style={tw("block text-sm font-medium text-gray-700 mb-2")}>
                 Sample ID *
               </label>
               <input
@@ -350,7 +351,7 @@ const FormulaModal = ({
                     sampleId: e.target.value,
                   }))
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                style={tw("w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent")}
                 placeholder="Enter sample ID"
               />
             </div>
@@ -358,9 +359,9 @@ const FormulaModal = ({
 
           {/* Base Formula & Dilution % for DILUTION type */}
           {isFieldVisible("baseFormulaId", newFormulaData.formulaType) && (
-            <div className="grid grid-cols-2 gap-4">
+            <div style={tw("grid grid-cols-2 gap-4")}>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label style={tw("block text-sm font-medium text-gray-700 mb-2")}>
                   Base Formula *
                 </label>
                 <input
@@ -372,15 +373,15 @@ const FormulaModal = ({
                       baseFormulaId: e.target.value,
                     }))
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  style={tw("w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent")}
                   placeholder="Search for base formula..."
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label style={tw("block text-sm font-medium text-gray-700 mb-2")}>
                   Dilution Percentage *
                 </label>
-                <div className="relative">
+                <div style={tw("relative")}>
                   <input
                     type="number"
                     value={newFormulaData.dilutionPercentage || ""}
@@ -390,13 +391,13 @@ const FormulaModal = ({
                         dilutionPercentage: parseFloat(e.target.value),
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    style={tw("w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent")}
                     placeholder="0.00"
                     min="0"
                     max="100"
                     step="0.01"
                   />
-                  <span className="absolute right-3 top-2.5 text-gray-500">
+                  <span style={tw("absolute right-3 top-2.5 text-gray-500")}>
                     %
                   </span>
                 </div>
@@ -406,7 +407,7 @@ const FormulaModal = ({
 
           {/* Formula Version */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label style={tw("block text-sm font-medium text-gray-700 mb-2")}>
               Formula Version
             </label>
             <input
@@ -418,20 +419,20 @@ const FormulaModal = ({
                   version: parseInt(e.target.value),
                 }))
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              style={tw("w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent")}
               min="1"
             />
           </div>
         </div>
 
         {/* General Information & Dosage Section (Combined - Mandatory) */}
-        <div className="border border-gray-200 rounded-lg">
+        <div style={tw("border border-gray-200 rounded-lg")}>
           <button
             type="button"
             onClick={() => toggleSection("generalAndDosage")}
-            className="w-full flex items-center justify-between p-3 hover:bg-gray-50 hover:rounded-tl-lg hover:rounded-tr-lg transition-colors"
+            style={tw("w-full flex items-center justify-between p-3 hover:bg-gray-50 hover:rounded-tl-lg hover:rounded-tr-lg transition-colors")}
           >
-            <h3 className="text-sm font-semibold text-gray-900">
+            <h3 style={tw("text-sm font-semibold text-gray-900")}>
               General Information & Dosage *
             </h3>
             <i
@@ -441,16 +442,16 @@ const FormulaModal = ({
             ></i>
           </button>
           {expandedSections.generalAndDosage && (
-            <div className="p-4 space-y-4">
+            <div style={tw("p-4 space-y-4")}>
               {/* General Information Fields */}
               <div>
-                <h4 className="text-xs font-semibold text-gray-600 uppercase mb-3">
+                <h4 style={tw("text-xs font-semibold text-gray-600 uppercase mb-3")}>
                   General Information
                 </h4>
-                <div className="grid grid-cols-3 gap-4">
+                <div style={tw("grid grid-cols-3 gap-4")}>
                   {/* Category */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label style={tw("block text-sm font-medium text-gray-700 mb-2")}>
                       Category *
                     </label>
                     <select
@@ -461,7 +462,7 @@ const FormulaModal = ({
                           category: e.target.value,
                         }))
                       }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-8"
+                      style={tw("w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-8")}
                     >
                       <option value="">Select category...</option>
                       <option value="Eau de Toilette">Eau de Toilette</option>
@@ -474,7 +475,7 @@ const FormulaModal = ({
 
                   {/* Region */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label style={tw("block text-sm font-medium text-gray-700 mb-2")}>
                       Region *
                     </label>
                     <select
@@ -485,7 +486,7 @@ const FormulaModal = ({
                           region: e.target.value,
                         }))
                       }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-8"
+                      style={tw("w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-8")}
                     >
                       <option value="">Select region...</option>
                       <option value="NA">North America</option>
