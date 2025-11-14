@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import type { Ingredient } from "../services/pega";
 import { eventBus } from "../utils/bus";
+import { tw, mergeStyles } from "../utils/tailwindToInline";
 import IngredientQuickView from "./IngredientQuickView";
 import ListRow from "./ListRow";
 
@@ -119,7 +120,7 @@ const IngredientList = ({
 
   return (
     <>
-      <div className="space-y-0">
+      <div>
         {filteredIngredients.map((ingredient) => {
           const isSelected = isIngredientSelected(ingredient.name);
 
@@ -135,22 +136,25 @@ const IngredientList = ({
                 isSelected ? "bg-blue-50 border-l-2 border-blue-400" : ""
               }
             >
-              <div className="flex items-center justify-between w-full px-3">
-                <div className="flex items-center space-x-2 flex-1">
+              <div style={tw("flex items-center justify-between w-full px-3")}>
+                <div style={tw("flex items-center flex-1")}>
                   {/* Status Dot */}
                   <div
-                    className={`w-1.5 h-1.5 rounded-full ${getStatusColor(
-                      ingredient
-                    )} flex-shrink-0`}
+                    style={mergeStyles(
+                      tw(`rounded-full flex-shrink-0 ${getStatusColor(ingredient)}`),
+                      { width: "0.375rem", height: "0.375rem", marginRight: "0.5rem" }
+                    )}
                     title={`Status: ${ingredient.status}`}
                   />
 
                   {/* Ingredient Info */}
-                  <div className="flex-1 min-w-0">
+                  <div style={mergeStyles(tw("flex-1"), { minWidth: 0 })}>
                     <h4
-                      className={`font-medium text-sm truncate ${
-                        isSelected ? "text-blue-900" : "text-gray-900"
-                      }`}
+                      style={tw(
+                        `font-medium text-sm truncate ${
+                          isSelected ? "text-blue-900" : "text-gray-900"
+                        }`
+                      )}
                     >
                       {ingredient.name}
                       {isSelected && (
@@ -160,20 +164,24 @@ const IngredientList = ({
                       )}
                     </h4>
                     <p
-                      className={`text-xs truncate font-normal ${
-                        isSelected ? "text-blue-600" : "text-gray-500"
-                      }`}
+                      style={tw(
+                        `text-xs truncate font-normal ${
+                          isSelected ? "text-blue-600" : "text-gray-500"
+                        }`
+                      )}
                     >
                       {ingredient.code}
                     </p>
                   </div>
 
                   {/* Cost */}
-                  <div className="text-right flex-shrink-0">
+                  <div style={tw("text-right flex-shrink-0")}>
                     <p
-                      className={`text-xs font-normal ${
-                        isSelected ? "text-blue-600" : "text-gray-500"
-                      }`}
+                      style={tw(
+                        `text-xs font-normal ${
+                          isSelected ? "text-blue-600" : "text-gray-500"
+                        }`
+                      )}
                     >
                       ${ingredient.price.toFixed(2)}/{ingredient.unit}
                     </p>
@@ -183,7 +191,8 @@ const IngredientList = ({
                 {/* Info Icon - Only visible on hover, larger size */}
                 {hoveredRow === ingredient.id && (
                   <button
-                    className="ml-2 p-1 rounded hover:bg-gray-100 cursor-pointer flex-shrink-0"
+                    style={mergeStyles(tw("p-1 rounded cursor-pointer flex-shrink-0"), 
+                      { marginLeft: "0.5rem" })}
                     onClick={(e) => handleInfoClick(e, ingredient)}
                     aria-label={`View details for ${ingredient.name}`}
                   >
@@ -198,15 +207,15 @@ const IngredientList = ({
         })}
 
         {filteredIngredients.length === 0 && (
-          <div className="text-center py-6 text-gray-500">
-            <span className="material-symbols-rounded text-xl mb-2">
+          <div style={mergeStyles(tw("text-center text-gray-500"), { paddingTop: "1.5rem", paddingBottom: "1.5rem" })}>
+            <span className="material-symbols-rounded text-xl" style={{ marginBottom: "0.5rem", display: "block" }}>
               search
             </span>
-            <p className="text-sm">No ingredients found</p>
+            <p style={tw("text-sm")}>No ingredients found</p>
             {(searchQuery ||
               activeFilter ||
               Object.keys(appliedFilters).length > 0) && (
-              <p className="text-xs mt-1">
+              <p style={mergeStyles(tw("text-xs"), { marginTop: "0.25rem" })}>
                 Try adjusting your search or filters
               </p>
             )}

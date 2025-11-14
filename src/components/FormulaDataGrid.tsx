@@ -142,7 +142,12 @@ const FormulaDataGrid = ({
    * --------------------------------------------------------------------- */
   if (!formulas || formulas.length === 0) {
     return (
-      <div style={mergeStyles(tw("flex items-center justify-center text-gray-500"), { height: "10rem" })}>
+      <div
+        style={mergeStyles(
+          tw("flex items-center justify-center text-gray-500"),
+          { height: "10rem" }
+        )}
+      >
         <div style={tw("text-center")}>
           <i className="ri-test-tube-line" style={tw("text-3xl")}></i>
           <p style={{ marginTop: "8px" }}>No formulas available</p>
@@ -195,7 +200,11 @@ const FormulaDataGrid = ({
         return Array.isArray(value) ? `${value.length} ingredients` : "-";
       case "notes":
         if (value && typeof value === "object" && "top" in value) {
-          const notes = value as { top?: unknown[]; middle?: unknown[]; base?: unknown[] };
+          const notes = value as {
+            top?: unknown[];
+            middle?: unknown[];
+            base?: unknown[];
+          };
           return `Top: ${notes.top?.length || 0}, Mid: ${
             notes.middle?.length || 0
           }, Base: ${notes.base?.length || 0}`;
@@ -225,27 +234,39 @@ const FormulaDataGrid = ({
       </div>
 
       {/* Compact Search and Counter Row */}
-      <div style={mergeStyles(tw("flex items-center gap-3"), { marginBottom: "12px" })}>
+      <div
+        style={mergeStyles(tw("flex items-center gap-3"), {
+          marginBottom: "12px",
+        })}
+      >
         <div style={tw("flex-1")}>
           <div style={tw("relative")}>
-            <div style={{
-              position: "absolute",
-              top: 0,
-              bottom: 0,
-              left: 0,
-              paddingLeft: "12px",
-              display: "flex",
-              alignItems: "center",
-              pointerEvents: "none"
-            }}>
-              <i className="ri-search-line" style={tw("text-gray-400 text-sm")}></i>
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                bottom: 0,
+                left: 0,
+                paddingLeft: "12px",
+                display: "flex",
+                alignItems: "center",
+                pointerEvents: "none",
+              }}
+            >
+              <i
+                className="ri-search-line"
+                style={tw("text-gray-400 text-sm")}
+              ></i>
             </div>
             <input
               type="text"
               placeholder="Search by name or formula ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={mergeStyles(tw("w-full py-2 text-sm border border-gray-300 rounded-md"), { paddingLeft: "2.5rem", paddingRight: "1rem" })}
+              style={mergeStyles(
+                tw("w-full py-2 text-sm border border-gray-300 rounded-md"),
+                { paddingLeft: "2.5rem", paddingRight: "1rem" }
+              )}
             />
           </div>
         </div>
@@ -260,9 +281,19 @@ const FormulaDataGrid = ({
       </div>
 
       {/* Table */}
-      <div style={mergeStyles(tw("overflow-y-auto border border-gray-200 rounded-lg"), { maxHeight: "24rem" })}>
+      <div
+        style={mergeStyles(
+          tw("overflow-y-auto border border-gray-200 rounded-lg"),
+          { maxHeight: "24rem" }
+        )}
+      >
         <table style={tw("w-full")}>
-          <thead style={mergeStyles(tw("bg-gray-50"), { position: "sticky", top: 0 })}>
+          <thead
+            style={mergeStyles(tw("bg-gray-50"), {
+              position: "sticky",
+              top: 0,
+            })}
+          >
             <tr>
               <th style={mergeStyles(tw("px-3 py-2"), { width: "3rem" })}>
                 <input
@@ -275,18 +306,30 @@ const FormulaDataGrid = ({
                         !isAllCurrentPageSelected
                       : false
                   }
-                  style={mergeStyles(tw("rounded border-gray-300 cursor-pointer"), {
-                    opacity: (maxSelections && selectedFormulas.length >= maxSelections && !isAllCurrentPageSelected) ? 0.5 : 1
-                  })}
+                  style={mergeStyles(
+                    tw("rounded border-gray-300 cursor-pointer"),
+                    {
+                      opacity:
+                        maxSelections &&
+                        selectedFormulas.length >= maxSelections &&
+                        !isAllCurrentPageSelected
+                          ? 0.5
+                          : 1,
+                    }
+                  )}
                 />
               </th>
               {columns.map((column) => (
                 <th
                   key={column.key}
-                  style={tw("px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer")}
+                  style={tw(
+                    "px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer"
+                  )}
                   onClick={() => handleSort(column.key)}
                 >
-                  <div style={mergeStyles(tw("flex items-center"), { gap: "4px" })}>
+                  <div
+                    style={mergeStyles(tw("flex items-center"), { gap: "4px" })}
+                  >
                     <span>{column.title}</span>
                     {sortConfig?.key === column.key ? (
                       <i
@@ -296,7 +339,10 @@ const FormulaDataGrid = ({
                         style={tw("text-xs text-blue-600")}
                       />
                     ) : (
-                      <i className="ri-expand-up-down-line" style={tw("text-xs text-gray-400")} />
+                      <i
+                        className="ri-expand-up-down-line"
+                        style={tw("text-xs text-gray-400")}
+                      />
                     )}
                   </div>
                 </th>
@@ -333,15 +379,23 @@ const FormulaDataGrid = ({
                       checked={isSelected}
                       onChange={() => handleCheckboxChange(formula.id)}
                       disabled={isDisabled}
-                      style={mergeStyles(tw("rounded border-gray-300 cursor-pointer"), {
-                        opacity: isDisabled ? 0.5 : 1
-                      })}
+                      style={mergeStyles(
+                        tw("rounded border-gray-300 cursor-pointer"),
+                        {
+                          opacity: isDisabled ? 0.5 : 1,
+                        }
+                      )}
                     />
                   </td>
                   {displayColumns.map((col) => (
                     <td key={col} style={tw("px-3 py-2 text-sm font-medium")}>
                       {col === "name" ? (
-                        <span style={mergeStyles(tw("font-medium flex items-center"), { gap: "6px" })}>
+                        <span
+                          style={mergeStyles(
+                            tw("font-medium flex items-center"),
+                            { gap: "6px" }
+                          )}
+                        >
                           {renderCellValue(formula, col)}
                           {isHighlighted && (
                             <i
@@ -374,10 +428,15 @@ const FormulaDataGrid = ({
             <button
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               disabled={currentPage === 1}
-              style={mergeStyles(tw("px-3 py-1 text-sm border border-gray-300 rounded-md cursor-pointer"), {
-                opacity: currentPage === 1 ? 0.5 : 1,
-                cursor: currentPage === 1 ? "not-allowed" : "pointer"
-              })}
+              style={mergeStyles(
+                tw(
+                  "px-3 py-1 text-sm border border-gray-300 rounded-md cursor-pointer"
+                ),
+                {
+                  opacity: currentPage === 1 ? 0.5 : 1,
+                  cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                }
+              )}
             >
               <i className="ri-arrow-left-line" />
             </button>
@@ -415,10 +474,16 @@ const FormulaDataGrid = ({
             <button
               onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
               disabled={currentPage === totalPages}
-              style={mergeStyles(tw("px-3 py-1 text-sm border border-gray-300 rounded-md cursor-pointer"), {
-                opacity: currentPage === totalPages ? 0.5 : 1,
-                cursor: currentPage === totalPages ? "not-allowed" : "pointer"
-              })}
+              style={mergeStyles(
+                tw(
+                  "px-3 py-1 text-sm border border-gray-300 rounded-md cursor-pointer"
+                ),
+                {
+                  opacity: currentPage === totalPages ? 0.5 : 1,
+                  cursor:
+                    currentPage === totalPages ? "not-allowed" : "pointer",
+                }
+              )}
             >
               <i className="ri-arrow-right-line" />
             </button>

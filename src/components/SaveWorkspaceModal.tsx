@@ -64,7 +64,9 @@ const SaveWorkspaceModal = ({
         <div style={tw("flex justify-end gap-2 mt-6")}>
           <button
             onClick={onClose}
-            style={tw("px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg")}
+            style={tw(
+              "px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg"
+            )}
           >
             Cancel
           </button>
@@ -72,8 +74,13 @@ const SaveWorkspaceModal = ({
             onClick={handleSave}
             disabled={!workspaceName.trim()}
             style={mergeStyles(
-              tw("px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg flex items-center gap-2"),
-              { opacity: !workspaceName.trim() ? 0.5 : 1, cursor: !workspaceName.trim() ? "not-allowed" : "pointer" }
+              tw(
+                "px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg flex items-center gap-2"
+              ),
+              {
+                opacity: !workspaceName.trim() ? 0.5 : 1,
+                cursor: !workspaceName.trim() ? "not-allowed" : "pointer",
+              }
             )}
           >
             <i className="ri-save-line"></i>
