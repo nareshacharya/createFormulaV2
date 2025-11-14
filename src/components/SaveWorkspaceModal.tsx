@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { tw, mergeStyles } from "../utils/tailwindToInline";
 import Modal from "./Modal";
 
 interface SaveWorkspaceModalProps {
@@ -38,11 +39,11 @@ const SaveWorkspaceModal = ({
       title="Save Workspace"
       noPadding={true}
     >
-      <div className="p-6">
-        <div className="mb-4">
+      <div style={tw("p-6")}>
+        <div style={{ marginBottom: "16px" }}>
           <label
             htmlFor="workspace-name"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            style={tw("block text-sm font-medium text-gray-700")}
           >
             Workspace Name
           </label>
@@ -52,26 +53,28 @@ const SaveWorkspaceModal = ({
             value={workspaceName}
             onChange={(e) => setWorkspaceName(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            style={tw("w-full px-3 py-2 border border-gray-300 rounded-lg")}
             placeholder="Enter workspace name..."
-            autoFocus
           />
-          <p className="mt-2 text-xs text-gray-500">
+          <p style={tw("mt-2 text-xs text-gray-500")}>
             Give your workspace a meaningful name to help identify it later.
           </p>
         </div>
 
-        <div className="flex justify-end gap-2 mt-6">
+        <div style={tw("flex justify-end gap-2 mt-6")}>
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            style={tw("px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg")}
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={!workspaceName.trim()}
-            className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            style={mergeStyles(
+              tw("px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg flex items-center gap-2"),
+              { opacity: !workspaceName.trim() ? 0.5 : 1, cursor: !workspaceName.trim() ? "not-allowed" : "pointer" }
+            )}
           >
             <i className="ri-save-line"></i>
             Save Workspace

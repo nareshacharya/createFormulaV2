@@ -266,7 +266,7 @@ const ExcelUploadModal = ({
                 variant="primary"
                 onClick={handleProcessFile}
                 disabled={isProcessing}
-                className="ml-4"
+                style={{ marginLeft: "1rem" }}
               >
                 {isProcessing ? "Processing..." : "Process File"}
               </Button>

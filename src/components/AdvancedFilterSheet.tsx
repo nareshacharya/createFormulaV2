@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { Ingredient } from "../services/pega";
 import { eventBus } from "../utils/bus";
 import { evaluateQuery } from "../utils/queryEvaluator";
+import { tw } from "../utils/tailwindToInline";
 import Button from "./Button";
 import IngredientTable from "./IngredientTable";
 import Modal from "./Modal";
@@ -125,7 +126,7 @@ const AdvancedFilterSheet = ({
             <Button
               onClick={handleAddToFormula}
               size="sm"
-              className="whitespace-nowrap"
+              style={tw("whitespace-nowrap")}
             >
               <i className="ri-add-line mr-1"></i>
               Add {selectedIngredients.length} to Formula
