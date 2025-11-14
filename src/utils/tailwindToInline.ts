@@ -590,22 +590,50 @@ function parseClassName(className: string): CSSProperties {
     if (cleanClass === 'relative') styles.position = 'relative';
     if (cleanClass === 'sticky') styles.position = 'sticky';
 
-    // Top/Right/Bottom/Left
-    const topMatch = cleanClass.match(/^top-(\d+\.?\d*)$/);
-    if (topMatch) styles.top = spacing[topMatch[1] as keyof typeof spacing] || `${topMatch[1]}px`;
+    // Top/Right/Bottom/Left (with negative value support)
+    const topMatch = cleanClass.match(/^-?top-(\d+\.?\d*)$/);
+    if (topMatch) {
+        const isNegative = cleanClass.startsWith('-');
+        const value = spacing[topMatch[1] as keyof typeof spacing] || `${topMatch[1]}px`;
+        styles.top = isNegative ? `-${value}` : value;
+    }
 
-    const rightMatch = cleanClass.match(/^right-(\d+\.?\d*)$/);
-    if (rightMatch) styles.right = spacing[rightMatch[1] as keyof typeof spacing] || `${rightMatch[1]}px`;
+    const rightMatch = cleanClass.match(/^-?right-(\d+\.?\d*)$/);
+    if (rightMatch) {
+        const isNegative = cleanClass.startsWith('-');
+        const value = spacing[rightMatch[1] as keyof typeof spacing] || `${rightMatch[1]}px`;
+        styles.right = isNegative ? `-${value}` : value;
+    }
 
-    const bottomMatch = cleanClass.match(/^bottom-(\d+\.?\d*)$/);
-    if (bottomMatch) styles.bottom = spacing[bottomMatch[1] as keyof typeof spacing] || `${bottomMatch[1]}px`;
+    const bottomMatch = cleanClass.match(/^-?bottom-(\d+\.?\d*)$/);
+    if (bottomMatch) {
+        const isNegative = cleanClass.startsWith('-');
+        const value = spacing[bottomMatch[1] as keyof typeof spacing] || `${bottomMatch[1]}px`;
+        styles.bottom = isNegative ? `-${value}` : value;
+    }
 
-    const leftMatch = cleanClass.match(/^left-(\d+\.?\d*)$/);
-    if (leftMatch) styles.left = spacing[leftMatch[1] as keyof typeof spacing] || `${leftMatch[1]}px`;
+    const leftMatch = cleanClass.match(/^-?left-(\d+\.?\d*)$/);
+    if (leftMatch) {
+        const isNegative = cleanClass.startsWith('-');
+        const value = spacing[leftMatch[1] as keyof typeof spacing] || `${leftMatch[1]}px`;
+        styles.left = isNegative ? `-${value}` : value;
+    }
 
     // Z-index
     const zMatch = cleanClass.match(/^z-(\d+)$/);
     if (zMatch) styles.zIndex = parseInt(zMatch[1]);
+
+    // Transform & Rotate
+    if (cleanClass === 'transform') {
+        // Base transform class, actual transforms added by rotate, scale, etc.
+    }
+    if (cleanClass === '-rotate-90') styles.transform = 'rotate(-90deg)';
+    if (cleanClass === 'rotate-90') styles.transform = 'rotate(90deg)';
+    if (cleanClass === 'rotate-180') styles.transform = 'rotate(180deg)';
+    if (cleanClass === '-rotate-180') styles.transform = 'rotate(-180deg)';
+    if (cleanClass === 'rotate-0') styles.transform = 'rotate(0deg)';
+    if (cleanClass === 'rotate-45') styles.transform = 'rotate(45deg)';
+    if (cleanClass === '-rotate-45') styles.transform = 'rotate(-45deg)';
 
     // Overflow
     if (cleanClass === 'overflow-auto') styles.overflow = 'auto';
@@ -645,6 +673,14 @@ function parseClassName(className: string): CSSProperties {
     if (cleanClass === 'leading-normal') styles.lineHeight = '1.5';
     if (cleanClass === 'leading-relaxed') styles.lineHeight = '1.625';
     if (cleanClass === 'leading-loose') styles.lineHeight = '2';
+
+    // Letter spacing (tracking)
+    if (cleanClass === 'tracking-tighter') styles.letterSpacing = '-0.05em';
+    if (cleanClass === 'tracking-tight') styles.letterSpacing = '-0.025em';
+    if (cleanClass === 'tracking-normal') styles.letterSpacing = '0em';
+    if (cleanClass === 'tracking-wide') styles.letterSpacing = '0.025em';
+    if (cleanClass === 'tracking-wider') styles.letterSpacing = '0.05em';
+    if (cleanClass === 'tracking-widest') styles.letterSpacing = '0.1em';
 
     // Whitespace
     if (cleanClass === 'whitespace-normal') styles.whiteSpace = 'normal';
