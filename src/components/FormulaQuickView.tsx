@@ -185,8 +185,8 @@ const FormulaQuickView = ({
                         ingredient.type === "natural"
                           ? "bg-green-100 text-green-800"
                           : ingredient.type === "synthetic"
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-gray-100 text-gray-800"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-gray-100 text-gray-800"
                       }`}
                     >
                       {ingredient.type}
@@ -332,11 +332,22 @@ const FormulaQuickView = ({
       onClose={onClose}
       title={formula.name}
       size="3xl"
+      noPadding={true}
       headerActions={
         <Button onClick={handleAddToWorkArea} size="sm">
           <span className="material-symbols-rounded mr-2">add</span>
           Add to Work Area
         </Button>
+      }
+      footerActions={
+        <div className="flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+          >
+            Close
+          </button>
+        </div>
       }
     >
       <div className="flex h-full">

@@ -111,11 +111,22 @@ const IngredientQuickView = ({
       onClose={onClose}
       title={ingredient.name}
       size="3xl"
+      noPadding={true}
       headerActions={
         <Button onClick={handleAddToFormula} size="sm">
           <span className="material-symbols-rounded mr-2">add</span>
           Add to Active Formula
         </Button>
+      }
+      footerActions={
+        <div className="flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+          >
+            Close
+          </button>
+        </div>
       }
     >
       <div className="flex h-full">

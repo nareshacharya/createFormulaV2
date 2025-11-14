@@ -1871,8 +1871,8 @@ const WorkArea = () => {
           attribute.type === "number"
             ? "number"
             : attribute.type === "select"
-            ? "select"
-            : "text",
+              ? "select"
+              : "text",
         sortable: true,
         editable: false,
         group: "Attributes",
@@ -2291,6 +2291,7 @@ const WorkArea = () => {
         onClose={() => setShowFormulaSelector(false)}
         title="Load Formula"
         size="lg"
+        noPadding={true}
       >
         <div className="p-4 max-h-80 overflow-y-auto">
           <div className="space-y-2">
@@ -2313,8 +2314,8 @@ const WorkArea = () => {
                     formula.status === "active"
                       ? "success"
                       : formula.status === "draft"
-                      ? "warning"
-                      : "default"
+                        ? "warning"
+                        : "default"
                   }
                   size="sm"
                 >

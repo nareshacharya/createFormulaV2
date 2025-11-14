@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { tw } from "../utils/tailwindToInline";
 import Portal from "./Portal";
 
 interface DialogProps {
@@ -65,51 +66,98 @@ const Dialog = ({
     <Portal>
       {/* Backdrop - click to close */}
       <div
-        className="fixed inset-0 bg-black/50 z-[9998]"
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          zIndex: 9998,
+        }}
         onClick={onClose}
-        aria-hidden="true"
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => e.key === "Enter" && onClose()}
+        aria-label="Close dialog"
       />
 
       {/* Dialog container - centered */}
       <div
-        className="fixed inset-0 z-[9999] overflow-y-auto"
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          overflowY: "auto",
+          zIndex: 9999,
+        }}
         aria-labelledby="dialog-title"
         role="dialog"
         aria-modal="true"
       >
-        <div className="flex min-h-full items-center justify-center p-4">
+        <div
+          style={{
+            display: "flex",
+            minHeight: "100%",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "16px",
+          }}
+        >
           {/* Dialog panel */}
           <div
             ref={dialogRef}
-            className={`relative w-full ${sizeClasses[size]} bg-white rounded-lg shadow-2xl transform transition-all`}
-            onClick={(e) => e.stopPropagation()}
+            style={{
+              ...tw(
+                `relative w-full ${sizeClasses[size]} bg-white shadow-xl transition`
+              ),
+              borderRadius: "8px",
+              overflow: "hidden",
+            }}
             tabIndex={-1}
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+            <div
+              style={tw(
+                "flex items-center justify-between px-6 py-4 border-b border-gray-200"
+              )}
+            >
               <h3
                 id="dialog-title"
-                className="text-lg font-semibold text-gray-900"
+                style={tw("text-lg font-semibold text-gray-900")}
               >
                 {title}
               </h3>
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-md hover:bg-gray-100"
+                style={tw(
+                  "text-gray-400 transition p-1 rounded-md cursor-pointer"
+                )}
                 aria-label="Close dialog"
               >
-                <i className="ri-close-line text-xl"></i>
+                <i className="ri-close-line" style={tw("text-xl")}></i>
               </button>
             </div>
 
             {/* Content */}
-            <div className="px-6 py-4 max-h-[calc(90vh-180px)] overflow-y-auto">
+            <div
+              style={{
+                ...tw("px-6 py-4 overflow-y-auto"),
+                maxHeight: "calc(90vh - 180px)",
+              }}
+            >
               {children}
             </div>
 
             {/* Footer */}
             {footer && (
-              <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
+              <div
+                style={tw(
+                  "flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50"
+                )}
+              >
                 {footer}
               </div>
             )}

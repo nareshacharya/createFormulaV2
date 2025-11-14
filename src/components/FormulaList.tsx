@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Formula } from "../services/pega";
 import { eventBus } from "../utils/bus";
+import { tw } from "../utils/tailwindToInline";
 import FormulaQuickView from "./FormulaQuickView";
 import ListRow from "./ListRow";
 
@@ -67,18 +68,18 @@ const FormulaList = ({
 
   if (filteredFormulas.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div style={tw("text-center py-8 text-gray-500")}>
         <span className="material-symbols-rounded text-2xl mb-2">science</span>
         <p>No formulas found</p>
         {searchQuery && (
-          <p className="text-sm mt-1">Try adjusting your search term</p>
+          <p style={tw("text-sm mt-1")}>Try adjusting your search term</p>
         )}
       </div>
     );
   }
 
   return (
-    <div className="space-y-0">
+    <div style={tw("space-y-0")}>
       {filteredFormulas.map((formula) => {
         if (!formula || !formula.id) return null;
 
@@ -96,22 +97,26 @@ const FormulaList = ({
               isSelected ? "bg-blue-50 border-l-2 border-blue-400" : ""
             }
           >
-            <div className="flex items-center justify-between w-full px-3">
-              <div className="flex items-center space-x-2 flex-1">
+            <div style={tw("flex items-center justify-between w-full px-3")}>
+              <div style={tw("flex items-center space-x-2 flex-1")}>
                 {/* Status Dot */}
                 <div
-                  className={`w-1.5 h-1.5 rounded-full ${getStatusColor(
-                    formula
-                  )} flex-shrink-0`}
+                  style={tw(
+                    `w-1.5 h-1.5 rounded-full ${getStatusColor(
+                      formula
+                    )} flex-shrink-0`
+                  )}
                   title={`Status: ${formula.status}`}
                 />
 
                 {/* Formula Info */}
-                <div className="flex-1 min-w-0">
+                <div style={tw("flex-1 min-w-0")}>
                   <h4
-                    className={`font-medium text-sm truncate ${
-                      isSelected ? "text-blue-900" : "text-gray-900"
-                    }`}
+                    style={tw(
+                      `font-medium text-sm truncate ${
+                        isSelected ? "text-blue-900" : "text-gray-900"
+                      }`
+                    )}
                   >
                     {formula.name}
                     {isSelected && (
@@ -121,20 +126,24 @@ const FormulaList = ({
                     )}
                   </h4>
                   <p
-                    className={`text-xs truncate font-normal ${
-                      isSelected ? "text-blue-600" : "text-gray-500"
-                    }`}
+                    style={tw(
+                      `text-xs truncate font-normal ${
+                        isSelected ? "text-blue-600" : "text-gray-500"
+                      }`
+                    )}
                   >
                     {formula.id}
                   </p>
                 </div>
 
                 {/* Cost */}
-                <div className="text-right flex-shrink-0">
+                <div style={tw("text-right flex-shrink-0")}>
                   <p
-                    className={`text-xs font-normal ${
-                      isSelected ? "text-blue-600" : "text-gray-500"
-                    }`}
+                    style={tw(
+                      `text-xs font-normal ${
+                        isSelected ? "text-blue-600" : "text-gray-500"
+                      }`
+                    )}
                   >
                     ${formula.costPerKg?.toFixed(2) || "0.00"}/kg
                   </p>
@@ -144,7 +153,9 @@ const FormulaList = ({
               {/* Eye Icon - Only visible on hover */}
               {hoveredFormula === formula.id && (
                 <button
-                  className="ml-2 p-1 rounded hover:bg-gray-100 cursor-pointer flex-shrink-0"
+                  style={tw(
+                    "ml-2 p-1 rounded hover:bg-gray-100 cursor-pointer flex-shrink-0"
+                  )}
                   onClick={(e) => handleViewClick(e, formula)}
                   aria-label={`View details for ${formula.name}`}
                 >

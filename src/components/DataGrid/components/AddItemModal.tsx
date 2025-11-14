@@ -95,9 +95,27 @@ export const AddItemModal = ({
     onClose();
   };
 
+  const footerActions = (
+    <div className="flex justify-end">
+      <button
+        onClick={onClose}
+        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+      >
+        Close
+      </button>
+    </div>
+  );
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Add Item" size="md">
-      <div className="flex flex-col h-full">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Add Item"
+      size="md"
+      noPadding={true}
+      footerActions={footerActions}
+    >
+      <div className="flex flex-col h-full p-6">
         {/* Type Selector */}
         <div className="mb-4">
           <PillTabs
@@ -196,17 +214,6 @@ export const AddItemModal = ({
               )}
             </div>
           )}
-        </div>
-
-        {/* Count */}
-        <div className="mt-3 text-xs text-gray-500 text-center">
-          {itemType === "ingredient"
-            ? `${filteredIngredients.length} ingredient${
-                filteredIngredients.length !== 1 ? "s" : ""
-              } available`
-            : `${filteredFormulas.length} formula${
-                filteredFormulas.length !== 1 ? "s" : ""
-              } available`}
         </div>
       </div>
     </Modal>

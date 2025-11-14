@@ -114,6 +114,7 @@ const AdvancedFilterSheet = ({
       onClose={onClose}
       title="Advanced Ingredient Filters"
       size="3xl"
+      noPadding={true}
       headerActions={
         <div className="flex items-center space-x-4">
           <div className="text-sm text-gray-500">
@@ -130,6 +131,27 @@ const AdvancedFilterSheet = ({
               Add {selectedIngredients.length} to Formula
             </Button>
           )}
+        </div>
+      }
+      footerActions={
+        <div className="flex justify-between items-center w-full">
+          <div className="text-sm text-gray-500">
+            {selectedIngredients.length} ingredients selected
+          </div>
+          <div className="flex space-x-3">
+            <button
+              onClick={handleClearFilters}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+            >
+              Clear All
+            </button>
+            <button
+              onClick={handleApplyFilters}
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+            >
+              Apply to Library
+            </button>
+          </div>
         </div>
       }
     >
@@ -206,27 +228,6 @@ const AdvancedFilterSheet = ({
               showActionsBar={false}
               enableAdvancedFeatures={false}
             />
-          </div>
-
-          {/* Footer Actions */}
-          <div className="p-4 border-t border-gray-200 bg-gray-50 flex justify-between items-center flex-shrink-0">
-            <div className="text-sm text-gray-500">
-              {selectedIngredients.length} ingredients selected
-            </div>
-            <div className="flex space-x-3">
-              <button
-                onClick={handleClearFilters}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-              >
-                Clear All
-              </button>
-              <button
-                onClick={handleApplyFilters}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-              >
-                Apply to Library
-              </button>
-            </div>
           </div>
         </div>
       </div>

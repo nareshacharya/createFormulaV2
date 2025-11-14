@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-// import Button from "./Button";
+import { tw } from "../utils/tailwindToInline";
 
 export interface FilterRule {
   id: string;
@@ -229,52 +229,60 @@ const QueryBuilder = ({
     index: number,
     parentRules: (FilterRule | FilterGroup)[],
     parentCombinator: "and" | "or",
-    parentGroupId: string
+    _parentGroupId: string
   ) => {
     if ("rules" in rule) {
       // This is a group
       return (
         <div
           key={rule.id}
-          className="border border-gray-300 rounded p-3 bg-gray-50 ml-4"
+          style={tw("border border-gray-300 rounded p-3 bg-gray-50 ml-4")}
         >
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center space-x-2">
+          <div style={tw("flex items-center justify-between mb-3")}>
+            <div style={tw("flex items-center space-x-2")}>
               <select
                 value={rule.combinator}
                 onChange={(e) =>
                   updateGroupCombinator(rule.id, e.target.value as "and" | "or")
                 }
-                className="px-2 py-1 border border-gray-300 rounded text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                style={tw(
+                  "px-2 py-1 border border-gray-300 rounded text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                )}
               >
                 <option value="and">AND</option>
                 <option value="or">OR</option>
               </select>
-              <div className="flex space-x-1">
+              <div style={tw("flex space-x-1")}>
                 <button
                   onClick={() => addRuleToGroup(rule.id)}
-                  className="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 border border-blue-200 rounded hover:bg-blue-50 cursor-pointer"
+                  style={tw(
+                    "inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 border border-blue-200 rounded hover:bg-blue-50 cursor-pointer"
+                  )}
                 >
-                  <i className="ri-add-line mr-1"></i>Rule
+                  <i style={tw("mr-1")} className="ri-add-line"></i>Rule
                 </button>
                 <button
                   onClick={() => addGroupToGroup(rule.id)}
-                  className="inline-flex items-center px-2 py-1 text-xs font-medium text-green-600 border border-green-200 rounded hover:bg-green-50 cursor-pointer"
+                  style={tw(
+                    "inline-flex items-center px-2 py-1 text-xs font-medium text-green-600 border border-green-200 rounded hover:bg-green-50 cursor-pointer"
+                  )}
                 >
-                  <i className="ri-folder-add-line mr-1"></i>Group
+                  <i style={tw("mr-1")} className="ri-folder-add-line"></i>Group
                 </button>
               </div>
             </div>
             <button
               onClick={() => removeRule(rule.id)}
-              className="p-1 text-red-600 hover:bg-red-50 rounded cursor-pointer"
+              style={tw(
+                "p-1 text-red-600 hover:bg-red-50 rounded cursor-pointer"
+              )}
             >
               <i className="ri-close-line text-xs"></i>
             </button>
           </div>
-          <div className="space-y-2">
+          <div style={tw("space-y-2")}>
             {rule.rules.length === 0 && (
-              <div className="text-center py-3 text-gray-500 text-xs">
+              <div style={tw("text-center py-3 text-gray-500 text-xs")}>
                 No rules in this group
               </div>
             )}
@@ -293,9 +301,11 @@ const QueryBuilder = ({
     } else {
       // This is a rule
       return (
-        <div key={rule.id} className="flex items-center space-x-2 text-xs">
+        <div key={rule.id} style={tw("flex items-center space-x-2 text-xs")}>
           {index > 0 && (
-            <span className="px-2 py-1 bg-gray-200 rounded text-xs font-medium">
+            <span
+              style={tw("px-2 py-1 bg-gray-200 rounded text-xs font-medium")}
+            >
               {parentCombinator.toUpperCase()}
             </span>
           )}
@@ -303,7 +313,9 @@ const QueryBuilder = ({
           <select
             value={rule.field}
             onChange={(e) => updateRule(rule.id, { field: e.target.value })}
-            className="px-2 py-1 border border-gray-300 rounded text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-0 w-24"
+            style={tw(
+              "px-2 py-1 border border-gray-300 rounded text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-0 w-24"
+            )}
           >
             {fields.map((field) => (
               <option key={field.name} value={field.name}>
@@ -315,7 +327,9 @@ const QueryBuilder = ({
           <select
             value={rule.operator}
             onChange={(e) => updateRule(rule.id, { operator: e.target.value })}
-            className="px-2 py-1 border border-gray-300 rounded text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-0 w-28"
+            style={tw(
+              "px-2 py-1 border border-gray-300 rounded text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-0 w-28"
+            )}
           >
             {operators.map((op) => (
               <option key={op.name} value={op.name}>
@@ -330,13 +344,17 @@ const QueryBuilder = ({
               value={rule.value}
               onChange={(e) => updateRule(rule.id, { value: e.target.value })}
               placeholder="Value"
-              className="px-2 py-1 border border-gray-300 rounded text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-0 flex-1 w-20"
+              style={tw(
+                "px-2 py-1 border border-gray-300 rounded text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-0 flex-1 w-20"
+              )}
             />
           )}
 
           <button
             onClick={() => removeRule(rule.id)}
-            className="p-1 text-red-600 hover:bg-red-50 rounded cursor-pointer flex-shrink-0"
+            style={tw(
+              "p-1 text-red-600 hover:bg-red-50 rounded cursor-pointer flex-shrink-0"
+            )}
           >
             <i className="ri-close-line text-xs"></i>
           </button>
@@ -360,39 +378,49 @@ const QueryBuilder = ({
   };
 
   return (
-    <div className="space-y-3">
-      <div className="space-y-2 max-h-48 overflow-y-auto">
+    <div style={tw("space-y-3")}>
+      <div style={tw("space-y-2 max-h-48 overflow-y-auto")}>
         {query.rules.map((rule, index) =>
           renderRule(rule, index, query.rules, query.combinator, "root")
         )}
 
         {query.rules.length === 0 && (
-          <div className="text-center py-4 text-gray-500 text-xs">
+          <div style={tw("text-center py-4 text-gray-500 text-xs")}>
             No filters added yet
           </div>
         )}
       </div>
 
-      <div className="flex justify-between items-center pt-2 border-t border-gray-200">
-        <div className="flex space-x-1">
+      <div
+        style={tw(
+          "flex justify-between items-center pt-2 border-t border-gray-200"
+        )}
+      >
+        <div style={tw("flex space-x-1")}>
           <button
             onClick={() => addRuleToGroup("root")}
-            className="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 border border-blue-200 rounded hover:bg-blue-50 cursor-pointer"
+            style={tw(
+              "inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 border border-blue-200 rounded hover:bg-blue-50 cursor-pointer"
+            )}
           >
-            <i className="ri-add-line mr-1"></i>Rule
+            <i style={tw("mr-1")} className="ri-add-line"></i>Rule
           </button>
           <button
             onClick={() => addGroupToGroup("root")}
-            className="inline-flex items-center px-2 py-1 text-xs font-medium text-green-600 border border-green-200 rounded hover:bg-green-50 cursor-pointer"
+            style={tw(
+              "inline-flex items-center px-2 py-1 text-xs font-medium text-green-600 border border-green-200 rounded hover:bg-green-50 cursor-pointer"
+            )}
           >
-            <i className="ri-folder-add-line mr-1"></i>Group
+            <i style={tw("mr-1")} className="ri-folder-add-line"></i>Group
           </button>
         </div>
 
-        <div className="flex space-x-1">
+        <div style={tw("flex space-x-1")}>
           <button
             onClick={handleClear}
-            className="px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded hover:bg-gray-200 cursor-pointer"
+            style={tw(
+              "px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded hover:bg-gray-200 cursor-pointer"
+            )}
           >
             Clear
           </button>

@@ -51,7 +51,7 @@ const AttributeDataGrid = ({
   return (
     <div className="space-y-4">
       {/* Header Section - Instruction and Search */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         <p className="text-sm text-gray-600">
           Select up to {maxSelections} attributes to add as columns. You can
           select multiple attributes.
@@ -92,8 +92,8 @@ const AttributeDataGrid = ({
                   isSelected
                     ? "bg-blue-50 border-blue-300 shadow-sm"
                     : isDisabled
-                    ? "bg-gray-50 border-gray-200 opacity-50 cursor-not-allowed"
-                    : "bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm"
+                      ? "bg-gray-50 border-gray-200 opacity-50 cursor-not-allowed"
+                      : "bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm"
                 }
               `}
             >

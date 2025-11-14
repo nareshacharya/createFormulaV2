@@ -1059,6 +1059,7 @@ const FormulaModal = ({
       title="Add Formula"
       size="3xl"
       footerActions={getFooterActions()}
+      noPadding={true}
     >
       <div className="space-y-0">
         <div className="px-6 pt-6 pb-3">

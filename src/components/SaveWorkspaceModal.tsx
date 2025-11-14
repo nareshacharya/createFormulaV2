@@ -32,7 +32,12 @@ const SaveWorkspaceModal = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Save Workspace">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Save Workspace"
+      noPadding={true}
+    >
       <div className="p-6">
         <div className="mb-4">
           <label

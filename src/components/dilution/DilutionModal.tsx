@@ -147,7 +147,44 @@ export const DilutionModal = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`Dilute ${ingredientName}`}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={`Dilute ${ingredientName}`}
+      noPadding={true}
+      footerActions={
+        <div className="flex items-center justify-between w-full">
+          <div>
+            {currentDilution && currentDilution.solventIds.length > 0 && (
+              <button
+                type="button"
+                onClick={handleRemoveDilution}
+                className="px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+              >
+                Remove Dilution
+              </button>
+            )}
+          </div>
+          <div className="flex space-x-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleApply}
+              disabled={!selectedSolvent}
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-md transition-colors"
+            >
+              Apply Dilution
+            </button>
+          </div>
+        </div>
+      }
+    >
       <div className="p-6">
         <div className="space-y-6">
           {/* Section 1: Solvents */}
@@ -233,38 +270,6 @@ export const DilutionModal = ({
                   <span className="text-sm text-gray-600 flex-shrink-0">%</span>
                 </div>
               )}
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-            <div>
-              {currentDilution && currentDilution.solventIds.length > 0 && (
-                <button
-                  type="button"
-                  onClick={handleRemoveDilution}
-                  className="px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
-                >
-                  Remove Dilution
-                </button>
-              )}
-            </div>
-            <div className="flex space-x-2">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleApply}
-                disabled={!selectedSolvent}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-md transition-colors"
-              >
-                Apply Dilution
-              </button>
             </div>
           </div>
         </div>

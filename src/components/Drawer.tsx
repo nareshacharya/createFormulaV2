@@ -1,5 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import type { ReactNode } from "react";
+import { tw } from "../utils/tailwindToInline";
 
 interface DrawerProps {
   isOpen: boolean;
@@ -9,6 +10,14 @@ interface DrawerProps {
   width?: "sm" | "md" | "lg" | "xl" | "2xl";
   headerActions?: ReactNode;
 }
+
+const widthStyles = {
+  sm: "320px", // w-80 = 20rem
+  md: "384px", // w-96 = 24rem
+  lg: "512px", // w-[32rem]
+  xl: "640px", // w-[40rem]
+  "2xl": "768px", // w-[48rem]
+};
 
 const Drawer = ({
   isOpen,
@@ -20,14 +29,6 @@ const Drawer = ({
 }: DrawerProps) => {
   const drawerRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
-
-  const widthClasses = {
-    sm: "w-80",
-    md: "w-96",
-    lg: "w-[32rem]",
-    xl: "w-[40rem]",
-    "2xl": "w-[48rem]",
-  };
 
   useEffect(() => {
     if (isOpen) {
@@ -73,49 +74,86 @@ const Drawer = ({
     }
   };
 
+  const drawerStyle = useMemo(
+    () => ({
+      position: "fixed" as const,
+      top: 0,
+      right: 0,
+      height: "100%",
+      backgroundColor: "#ffffff",
+      boxShadow:
+        "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
+      zIndex: 9999,
+      transform: isOpen ? "translateX(0)" : "translateX(100%)",
+      transition: "transform 300ms cubic-bezier(0.4, 0, 0.2, 1)",
+      width: widthStyles[width],
+    }),
+    [isOpen, width]
+  );
+
   if (!isOpen) return null;
 
   return (
     <div
-      className="fixed inset-0 z-50 overflow-hidden"
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 9998,
+        overflow: "hidden",
+      }}
       onClick={handleBackdropClick}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity" />
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          transition: "opacity 200ms",
+        }}
+      />
 
       {/* Drawer */}
       <div
         ref={drawerRef}
-        className={`
-          fixed top-0 right-0 h-full bg-white shadow-xl z-50
-          transform transition-transform duration-300 ease-in-out
-          ${widthClasses[width]}
-          ${isOpen ? "translate-x-0" : "translate-x-full"}
-        `}
+        style={drawerStyle}
         role="dialog"
         aria-modal="true"
         aria-labelledby="drawer-title"
         tabIndex={-1}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h2 id="drawer-title" className="text-lg font-semibold text-gray-900">
+        <div
+          style={tw(
+            "flex items-center justify-between p-4 border-b border-gray-200"
+          )}
+        >
+          <h2
+            id="drawer-title"
+            style={tw("text-lg font-semibold text-gray-900")}
+          >
             {title}
           </h2>
-          <div className="flex items-center space-x-2">
+          <div style={tw("flex items-center space-x-2")}>
             {headerActions}
             <button
               onClick={onClose}
-              className="p-2 rounded-md hover:bg-gray-100 transition-colors cursor-pointer"
+              style={tw("p-2 rounded-md transition-colors cursor-pointer")}
               aria-label="Close drawer"
             >
-              <i className="ri-close-line text-gray-600"></i>
+              <i className="ri-close-line" style={tw("text-gray-600")}></i>
             </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-hidden">{children}</div>
+        <div style={tw("flex-1 overflow-hidden")}>{children}</div>
       </div>
     </div>
   );

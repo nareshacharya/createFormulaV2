@@ -198,6 +198,7 @@ const ExcelUploadModal = ({
       onClose={handleClose}
       title="Upload Composition from Excel"
       size="xl"
+      noPadding={true}
     >
       <div className="space-y-6">
         {/* Instructions */}

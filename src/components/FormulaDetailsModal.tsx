@@ -321,6 +321,7 @@ const FormulaDetailsModal = ({
       onClose={handleCancel}
       title={isReadOnly ? "View Formula Details" : "Edit Formula Details"}
       size="xl"
+      noPadding={true}
     >
       <div className="space-y-5 px-6 py-4">
         {/* Read-only indicator */}
