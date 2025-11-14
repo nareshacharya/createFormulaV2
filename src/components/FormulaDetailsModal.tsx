@@ -11,6 +11,7 @@ import {
 import type { FormField } from "../models/FormField.model";
 import { isFieldVisibleForType } from "../models/FormField.model";
 import type { Formula } from "../services/pega";
+import { tw, mergeStyles } from "../utils/tailwindToInline";
 import Button from "./Button";
 import Modal from "./Modal";
 
@@ -160,9 +161,10 @@ const FormulaDetailsModal = ({
     const value = (formData as Record<string, unknown>)[field.name] ?? "";
     const isDisabled = isReadOnly || field.disabled;
 
-    const inputClassName = `w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-      isDisabled ? "bg-gray-50 cursor-not-allowed" : ""
-    }`;
+    const inputStyle = mergeStyles(
+      tw("w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"),
+      isDisabled ? tw("bg-gray-50 cursor-not-allowed") : {}
+    );
 
     switch (field.type) {
       case "select": {
@@ -173,7 +175,7 @@ const FormulaDetailsModal = ({
             value={value as string}
             onChange={(e) => handleInputChange(field.name, e.target.value)}
             disabled={isDisabled}
-            className={inputClassName}
+            style={inputStyle}
           >
             <option value="">
               {field.placeholder || `Select ${field.label}`}
@@ -210,7 +212,7 @@ const FormulaDetailsModal = ({
             }
             disabled={isDisabled}
             placeholder={field.placeholder}
-            className={inputClassName}
+            style={inputStyle}
           />
         );
       }
@@ -230,7 +232,7 @@ const FormulaDetailsModal = ({
             placeholder={field.placeholder}
             min={field.validation?.min}
             max={field.validation?.max}
-            className={inputClassName}
+            style={inputStyle}
           />
         );
 
@@ -241,7 +243,7 @@ const FormulaDetailsModal = ({
             value={value as string}
             onChange={(e) => handleInputChange(field.name, e.target.value)}
             disabled={isDisabled}
-            className={inputClassName}
+            style={inputStyle}
           />
         );
 
@@ -254,7 +256,7 @@ const FormulaDetailsModal = ({
             placeholder={field.placeholder}
             rows={3}
             maxLength={field.maxLength}
-            className={inputClassName}
+            style={inputStyle}
           />
         );
 
@@ -268,7 +270,7 @@ const FormulaDetailsModal = ({
             disabled={isDisabled}
             placeholder={field.placeholder}
             maxLength={field.maxLength}
-            className={inputClassName}
+            style={inputStyle}
           />
         );
     }
@@ -281,17 +283,17 @@ const FormulaDetailsModal = ({
     if (fields.length === 0) return null;
 
     return (
-      <div className="border-b border-gray-200 pb-5">
-        <h3 className="text-sm font-semibold text-gray-900 mb-3">{title}</h3>
-        <div className="grid grid-cols-2 gap-4">
+      <div style={mergeStyles(tw("border-b border-gray-200"), { paddingBottom: "1.25rem" })}>
+        <h3 style={mergeStyles(tw("text-sm font-semibold text-gray-900"), { marginBottom: "0.75rem" })}>{title}</h3>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "1rem" }}>
           {fields.map((field) => (
             <div
               key={field.name}
-              className={field.type === "textarea" ? "col-span-2" : ""}
+              style={field.type === "textarea" ? { gridColumn: "span 2" } : {}}
             >
-              <label className="block text-xs font-medium text-gray-700 mb-1 flex items-center">
+              <label style={mergeStyles(tw("block text-xs font-medium text-gray-700 flex items-center"), { marginBottom: "0.25rem" })}>
                 <span>{field.label}</span>
-                {field.required && <span className="text-red-500 ml-1">*</span>}
+                {field.required && <span style={mergeStyles(tw("text-red-500"), { marginLeft: "0.25rem" })}>*</span>}
                 {field.helpText && (
                   <div className="group relative inline-block ml-1">
                     <span
@@ -323,18 +325,18 @@ const FormulaDetailsModal = ({
       size="xl"
       noPadding={true}
     >
-      <div className="space-y-5 px-6 py-4">
+      <div style={mergeStyles(tw("px-6 py-4"), { display: "flex", flexDirection: "column", gap: "1.25rem" })}>
         {/* Read-only indicator */}
         {isReadOnly && (
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 flex items-center space-x-2">
-            <span className="material-symbols-rounded text-gray-500 text-base">
+          <div style={mergeStyles(tw("bg-gray-50 border border-gray-200 rounded-lg p-3 flex items-center"), { gap: "0.5rem" })}>
+            <span style={tw("text-gray-500 text-base")} className="material-symbols-rounded">
               lock
             </span>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-700">
+            <div style={tw("flex-1")}>
+              <p style={tw("text-sm font-medium text-gray-700")}>
                 Reference Formula (Read-Only)
               </p>
-              <p className="text-xs text-gray-500">
+              <p style={tw("text-xs text-gray-500")}>
                 This formula is locked and cannot be edited
               </p>
             </div>
@@ -342,17 +344,17 @@ const FormulaDetailsModal = ({
         )}
 
         {/* Formula Type Badge */}
-        <div className="flex items-center space-x-3">
-          <span className="text-sm font-medium text-gray-700">
+        <div style={mergeStyles(tw("flex items-center"), { gap: "0.75rem" })}>
+          <span style={tw("text-sm font-medium text-gray-700")}>
             Formula Type:
           </span>
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          <span style={tw("inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800")}>
             {getFormulaTypeLabel(formulaType)}
           </span>
         </div>
 
         {/* Form Fields organized by sections */}
-        <div className="space-y-5">
+        <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
           {/* General Information Section */}
           {renderFieldSection(generalInfoFields, "General Information")}
 
@@ -367,7 +369,7 @@ const FormulaDetailsModal = ({
 
           {/* Description - Always visible */}
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">
+            <label style={mergeStyles(tw("block text-xs font-medium text-gray-700"), { marginBottom: "0.25rem" })}>
               Description
             </label>
             <textarea
@@ -376,27 +378,28 @@ const FormulaDetailsModal = ({
               disabled={isReadOnly}
               rows={3}
               placeholder="Enter description (optional)"
-              className={`w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                isReadOnly ? "bg-gray-50 cursor-not-allowed" : ""
-              }`}
+              style={mergeStyles(
+                tw("w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"),
+                isReadOnly ? tw("bg-gray-50 cursor-not-allowed") : {}
+              )}
             />
           </div>
 
           {/* Metadata - Read-only */}
-          <div className="grid grid-cols-2 gap-4 pt-2">
+          <div style={mergeStyles({ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "1rem" }, { paddingTop: "0.5rem" })}>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
+              <label style={mergeStyles(tw("block text-xs font-medium text-gray-700"), { marginBottom: "0.25rem" })}>
                 Created By
               </label>
               <input
                 type="text"
                 value={formula.createdBy || "Current User"}
                 disabled
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed"
+                style={tw("w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed")}
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
+              <label style={mergeStyles(tw("block text-xs font-medium text-gray-700"), { marginBottom: "0.25rem" })}>
                 Last Updated
               </label>
               <input
@@ -407,14 +410,14 @@ const FormulaDetailsModal = ({
                     : new Date().toLocaleDateString()
                 }
                 disabled
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed"
+                style={tw("w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed")}
               />
             </div>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-end space-x-3 pt-5 border-t border-gray-200">
+        <div style={mergeStyles(tw("flex justify-end border-t border-gray-200"), { gap: "0.75rem", paddingTop: "1.25rem" })}>
           <Button variant="secondary" onClick={handleCancel}>
             {isReadOnly ? "Close" : "Cancel"}
           </Button>
