@@ -8,6 +8,7 @@ import {
   canCreateWorkspace,
   type WorkspaceState,
 } from "../../utils/workspaceManager";
+import { tw, mergeStyles } from "../../utils/tailwindToInline";
 
 const HeaderActions = () => {
   const { showModal, hideModal } = useModal();
@@ -74,19 +75,25 @@ const HeaderActions = () => {
   };
 
   return (
-    <div className="flex items-center gap-3">
+    <div style={mergeStyles(tw("flex items-center"), { gap: "0.75rem" })}>
       {/* Save Workspace Button Only */}
       <button
         onClick={handleSaveWorkspace}
-        className="group relative w-[42px] xl:w-[68px] flex flex-col items-center justify-center py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap shadow-sm"
+        style={mergeStyles(
+          tw("group relative flex flex-col items-center justify-center py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap shadow-sm"),
+          { width: "42px" }
+        )}
         title="Save current workspace state"
       >
-        <span className="material-symbols-rounded text-xl leading-6 mb-0.5">
+        <span style={mergeStyles(tw("text-xl mb-0.5"), { lineHeight: "1.5rem" })} className="material-symbols-rounded">
           save
         </span>
-        <span className="text-[10px] font-medium hidden xl:inline">Save</span>
+        <span style={tw("text-[10px] font-medium hidden xl:inline")}>Save</span>
         {/* Tooltip for small screens */}
-        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none xl:hidden">
+        <div style={mergeStyles(
+          tw("absolute bottom-full left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none xl:hidden"),
+          { marginBottom: "0.5rem" }
+        )}>
           Save
         </div>
       </button>
