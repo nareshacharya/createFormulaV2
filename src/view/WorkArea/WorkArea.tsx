@@ -4,6 +4,7 @@ import AttributeSelector from "../../components/AttributeSelector";
 import Badge from "../../components/Badge";
 import Button from "../../components/Button";
 import DataGrid from "../../components/DataGrid";
+import { tw, mergeStyles } from "../../utils/tailwindToInline";
 import type { Column } from "../../components/DataGrid";
 import Dialog from "../../components/Dialog";
 import { useDilution } from "../../components/dilution";
@@ -2199,9 +2200,9 @@ const WorkArea = () => {
   };
 
   return (
-    <div className="h-full bg-white flex flex-col">
+    <div style={tw("h-full bg-white flex flex-col")}>
       {/* Data Grid */}
-      <div className="flex-1 overflow-hidden">
+      <div style={tw("flex-1 overflow-hidden")}>
         <DataGrid
           columns={getDisplayColumns()}
           data={getEmptyStateData(tableData, hasIngredients)}
@@ -2293,19 +2294,19 @@ const WorkArea = () => {
         size="lg"
         noPadding={true}
       >
-        <div className="p-4 max-h-80 overflow-y-auto">
-          <div className="space-y-2">
+        <div style={tw("p-4 max-h-80 overflow-y-auto")}>
+          <div style={mergeStyles({ gap: "0.5rem" }, tw("flex flex-col"))}>
             {availableFormulas.map((formula) => (
               <div
                 key={formula.id}
-                className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+                style={tw("flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer")}
                 onClick={() => handleLoadFormulaFromModal(formula)}
               >
                 <div>
-                  <div className="font-medium text-gray-900">
+                  <div style={tw("font-medium text-gray-900")}>
                     {formula.name}
                   </div>
-                  <div className="text-sm text-gray-500">
+                  <div style={tw("text-sm text-gray-500")}>
                     v{formula.version} • {formula.category}
                   </div>
                 </div>

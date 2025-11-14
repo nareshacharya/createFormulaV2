@@ -236,7 +236,7 @@ export function tw(...classNames: (string | undefined | null | false)[]): CSSPro
 
         const from = colors[fromColor.replace('from-', '') as keyof typeof colors];
         const to = colors[toColor.replace('to-', '') as keyof typeof colors];
-        
+
         if (from && to && directionMap[direction]) {
             if (viaColor) {
                 const via = colors[viaColor.replace('via-', '') as keyof typeof colors];

@@ -215,7 +215,9 @@ const WorkspaceTabs = () => {
                 {!tab.isDefault && (
                   <button
                     onClick={(e) => handleCloseTab(tab.id, e)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-red-500"
+                    style={tw(
+                      "opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-red-500"
+                    )}
                     title="Close workspace"
                   >
                     <span className="material-symbols-rounded">close</span>

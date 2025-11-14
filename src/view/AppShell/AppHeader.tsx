@@ -22,10 +22,14 @@ const AppHeader = () => {
   }, []);
 
   return (
-    <div style={tw("w-full bg-purple-800 border-b border-purple-700 relative z-1")}>
+    <div
+      style={tw("w-full bg-purple-800 border-b border-purple-700 relative z-1")}
+    >
       {/* Header content */}
       <header
-        style={tw(`${headerTokens.height} ${headerTokens.padding} flex items-center justify-between w-full`)}
+        style={tw(
+          `${headerTokens.height} ${headerTokens.padding} flex items-center justify-between w-full`
+        )}
       >
         <HeaderBadges activeFormula={activeFormula} />
         <HeaderActions />

@@ -80,20 +80,29 @@ const HeaderActions = () => {
       <button
         onClick={handleSaveWorkspace}
         style={mergeStyles(
-          tw("group relative flex flex-col items-center justify-center py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap shadow-sm"),
+          tw(
+            "group relative flex flex-col items-center justify-center py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap shadow-sm"
+          ),
           { width: "42px" }
         )}
         title="Save current workspace state"
       >
-        <span style={mergeStyles(tw("text-xl mb-0.5"), { lineHeight: "1.5rem" })} className="material-symbols-rounded">
+        <span
+          style={mergeStyles(tw("text-xl mb-0.5"), { lineHeight: "1.5rem" })}
+          className="material-symbols-rounded"
+        >
           save
         </span>
         <span style={tw("text-[10px] font-medium hidden xl:inline")}>Save</span>
         {/* Tooltip for small screens */}
-        <div style={mergeStyles(
-          tw("absolute bottom-full left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none xl:hidden"),
-          { marginBottom: "0.5rem" }
-        )}>
+        <div
+          style={mergeStyles(
+            tw(
+              "absolute bottom-full left-1/2 transform -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none xl:hidden"
+            ),
+            { marginBottom: "0.5rem" }
+          )}
+        >
           Save
         </div>
       </button>

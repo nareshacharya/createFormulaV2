@@ -256,7 +256,11 @@ const LibraryPanel = () => {
 
         {/* Level 2 Filters for Ingredients */}
         {activeTab === "ingredients" && (
-          <div style={mergeStyles(tw("mt-3 flex items-center"), { gap: "0.25rem" })}>
+          <div
+            style={mergeStyles(tw("mt-3 flex items-center"), {
+              gap: "0.25rem",
+            })}
+          >
             {ingredientFilters.map((filter) => (
               <button
                 key={filter.id}
@@ -274,8 +278,20 @@ const LibraryPanel = () => {
               </button>
             ))}
             {hasActiveFilters && (
-              <div style={mergeStyles(tw("flex items-center text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded"), { gap: "0.25rem", marginLeft: "0.5rem" })}>
-                <span style={tw("text-sm")} className="material-symbols-rounded">tune</span>
+              <div
+                style={mergeStyles(
+                  tw(
+                    "flex items-center text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded"
+                  ),
+                  { gap: "0.25rem", marginLeft: "0.5rem" }
+                )}
+              >
+                <span
+                  style={tw("text-sm")}
+                  className="material-symbols-rounded"
+                >
+                  tune
+                </span>
                 <span>Advanced</span>
               </div>
             )}

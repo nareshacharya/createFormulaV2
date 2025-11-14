@@ -99,7 +99,9 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
       {/* Formula Metrics Container - Project Name, Formula Info, Status, Lines, and Costs */}
       <div
         style={mergeStyles(
-          tw("relative flex items-center px-4 py-1 rounded-lg bg-purple-900/50"),
+          tw(
+            "relative flex items-center px-4 py-1 rounded-lg bg-purple-900/50"
+          ),
           { gap: "0.75rem" }
         )}
         ref={dropdownRef}
@@ -108,13 +110,25 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
         <div style={tw("relative group")}>
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            style={mergeStyles(tw("flex items-center hover:opacity-80 transition-opacity"), { gap: "0.5rem" })}
+            style={mergeStyles(
+              tw("flex items-center hover:opacity-80 transition-opacity"),
+              { gap: "0.5rem" }
+            )}
           >
-            <span style={tw("text-purple-300 text-xl")} className="material-symbols-rounded">
+            <span
+              style={tw("text-purple-300 text-xl")}
+              className="material-symbols-rounded"
+            >
               folder
             </span>
-            <div style={mergeStyles(tw("flex flex-col items-start"), { gap: "0.125rem" })}>
-              <span style={tw("text-xs text-white/50 font-medium")}>Project</span>
+            <div
+              style={mergeStyles(tw("flex flex-col items-start"), {
+                gap: "0.125rem",
+              })}
+            >
+              <span style={tw("text-xs text-white/50 font-medium")}>
+                Project
+              </span>
               <span style={tw("text-sm font-semibold text-white")}>
                 {currentFormula?.projectName || "Fragrance Lab Pro"}
               </span>
@@ -132,58 +146,121 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
 
           {/* Dropdown Menu */}
           {isDropdownOpen && (
-            <div style={mergeStyles(
-              tw("absolute top-full left-0 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-50"),
-              { marginTop: "0.5rem", minWidth: "320px" }
-            )}>
+            <div
+              style={mergeStyles(
+                tw(
+                  "absolute top-full left-0 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-50"
+                ),
+                { marginTop: "0.5rem", minWidth: "320px" }
+              )}
+            >
               {/* Formula Info - Only visible on small screens */}
               <div style={tw("lg:hidden")}>
                 <div style={tw("px-3 py-2 mb-2")}>
-                  <div style={mergeStyles(tw("grid grid-cols-3"), { gap: "0.5rem" })}>
+                  <div
+                    style={mergeStyles(tw("grid grid-cols-3"), {
+                      gap: "0.5rem",
+                    })}
+                  >
                     {/* Formula Name Tile */}
-                    <div style={tw("bg-gradient-to-br from-pink-50 to-pink-100 rounded-lg p-3 border border-pink-200")}>
-                      <div style={mergeStyles(tw("flex items-center mb-1"), { gap: "0.25rem" })}>
-                        <span style={tw("text-pink-600 text-sm")} className="material-symbols-rounded">
+                    <div
+                      style={tw(
+                        "bg-gradient-to-br from-pink-50 to-pink-100 rounded-lg p-3 border border-pink-200"
+                      )}
+                    >
+                      <div
+                        style={mergeStyles(tw("flex items-center mb-1"), {
+                          gap: "0.25rem",
+                        })}
+                      >
+                        <span
+                          style={tw("text-pink-600 text-sm")}
+                          className="material-symbols-rounded"
+                        >
                           experiment
                         </span>
-                        <span style={tw("text-[10px] text-pink-700 font-semibold uppercase tracking-wide")}>
+                        <span
+                          style={tw(
+                            "text-[10px] text-pink-700 font-semibold uppercase tracking-wide"
+                          )}
+                        >
                           Formula
                         </span>
                       </div>
-                      <div style={tw("text-xs text-pink-900 font-semibold truncate")}>
+                      <div
+                        style={tw(
+                          "text-xs text-pink-900 font-semibold truncate"
+                        )}
+                      >
                         {currentFormula?.name || "-"}
                       </div>
                     </div>
 
                     {/* Formula ID Tile */}
-                    <div style={tw("bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-lg p-3 border border-cyan-200")}>
-                      <div style={mergeStyles(tw("flex items-center mb-1"), { gap: "0.25rem" })}>
-                        <span style={tw("text-cyan-600 text-sm")} className="material-symbols-rounded">
+                    <div
+                      style={tw(
+                        "bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-lg p-3 border border-cyan-200"
+                      )}
+                    >
+                      <div
+                        style={mergeStyles(tw("flex items-center mb-1"), {
+                          gap: "0.25rem",
+                        })}
+                      >
+                        <span
+                          style={tw("text-cyan-600 text-sm")}
+                          className="material-symbols-rounded"
+                        >
                           tag
                         </span>
-                        <span style={tw("text-[10px] text-cyan-700 font-semibold uppercase tracking-wide")}>
+                        <span
+                          style={tw(
+                            "text-[10px] text-cyan-700 font-semibold uppercase tracking-wide"
+                          )}
+                        >
                           ID
                         </span>
                       </div>
-                      <div style={tw("text-xs text-cyan-900 font-semibold truncate")}>
+                      <div
+                        style={tw(
+                          "text-xs text-cyan-900 font-semibold truncate"
+                        )}
+                      >
                         {currentFormula?.id || "-"}
                       </div>
                     </div>
 
                     {/* Status Tile */}
-                    <div style={tw("bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-3 border border-orange-200")}>
-                      <div style={mergeStyles(tw("flex items-center mb-1"), { gap: "0.25rem" })}>
-                        <span style={tw("text-orange-600 text-sm")} className="material-symbols-rounded">
+                    <div
+                      style={tw(
+                        "bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-3 border border-orange-200"
+                      )}
+                    >
+                      <div
+                        style={mergeStyles(tw("flex items-center mb-1"), {
+                          gap: "0.25rem",
+                        })}
+                      >
+                        <span
+                          style={tw("text-orange-600 text-sm")}
+                          className="material-symbols-rounded"
+                        >
                           check_circle
                         </span>
-                        <span style={tw("text-[10px] text-orange-700 font-semibold uppercase tracking-wide")}>
+                        <span
+                          style={tw(
+                            "text-[10px] text-orange-700 font-semibold uppercase tracking-wide"
+                          )}
+                        >
                           Status
                         </span>
                       </div>
                       <div
-                        style={tw(`px-2 py-0.5 rounded-full text-[9px] font-bold inline-block ${getStatusVariant(
-                          currentFormula?.status
-                        )}`)}
+                        style={tw(
+                          `px-2 py-0.5 rounded-full text-[9px] font-bold inline-block ${getStatusVariant(
+                            currentFormula?.status
+                          )}`
+                        )}
                       >
                         {currentFormula?.status?.toUpperCase() || "NEW"}
                       </div>
@@ -195,12 +272,27 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
 
               {/* Product Info Tile */}
               <div style={tw("px-3 py-2")}>
-                <div style={tw("bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-3 border border-purple-200")}>
-                  <div style={mergeStyles(tw("flex items-center mb-2"), { gap: "0.5rem" })}>
-                    <span style={tw("text-purple-600 text-base")} className="material-symbols-rounded">
+                <div
+                  style={tw(
+                    "bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-3 border border-purple-200"
+                  )}
+                >
+                  <div
+                    style={mergeStyles(tw("flex items-center mb-2"), {
+                      gap: "0.5rem",
+                    })}
+                  >
+                    <span
+                      style={tw("text-purple-600 text-base")}
+                      className="material-symbols-rounded"
+                    >
                       shopping_bag
                     </span>
-                    <span style={tw("text-[10px] text-purple-700 font-bold uppercase tracking-wider")}>
+                    <span
+                      style={tw(
+                        "text-[10px] text-purple-700 font-bold uppercase tracking-wider"
+                      )}
+                    >
                       Product
                     </span>
                   </div>
@@ -212,12 +304,27 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
 
               {/* Created By Tile */}
               <div style={tw("px-3 py-2")}>
-                <div style={tw("bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-3 border border-blue-200")}>
-                  <div style={mergeStyles(tw("flex items-center mb-2"), { gap: "0.5rem" })}>
-                    <span style={tw("text-blue-600 text-base")} className="material-symbols-rounded">
+                <div
+                  style={tw(
+                    "bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-3 border border-blue-200"
+                  )}
+                >
+                  <div
+                    style={mergeStyles(tw("flex items-center mb-2"), {
+                      gap: "0.5rem",
+                    })}
+                  >
+                    <span
+                      style={tw("text-blue-600 text-base")}
+                      className="material-symbols-rounded"
+                    >
                       person
                     </span>
-                    <span style={tw("text-[10px] text-blue-700 font-bold uppercase tracking-wider")}>
+                    <span
+                      style={tw(
+                        "text-[10px] text-blue-700 font-bold uppercase tracking-wider"
+                      )}
+                    >
                       Created By
                     </span>
                   </div>
@@ -229,12 +336,27 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
 
               {/* Last Updated Tile */}
               <div style={tw("px-3 py-2")}>
-                <div style={tw("bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-3 border border-green-200")}>
-                  <div style={mergeStyles(tw("flex items-center mb-2"), { gap: "0.5rem" })}>
-                    <span style={tw("text-green-600 text-base")} className="material-symbols-rounded">
+                <div
+                  style={tw(
+                    "bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-3 border border-green-200"
+                  )}
+                >
+                  <div
+                    style={mergeStyles(tw("flex items-center mb-2"), {
+                      gap: "0.5rem",
+                    })}
+                  >
+                    <span
+                      style={tw("text-green-600 text-base")}
+                      className="material-symbols-rounded"
+                    >
                       calendar_today
                     </span>
-                    <span style={tw("text-[10px] text-green-700 font-bold uppercase tracking-wider")}>
+                    <span
+                      style={tw(
+                        "text-[10px] text-green-700 font-bold uppercase tracking-wider"
+                      )}
+                    >
                       Last Updated
                     </span>
                   </div>
@@ -248,19 +370,38 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
         </div>
 
         {/* Vertical Divider */}
-        <div style={mergeStyles({ width: "1px", height: "2.5rem" }, tw("bg-purple-600/50"))}></div>
+        <div
+          style={mergeStyles(
+            { width: "1px", height: "2.5rem" },
+            tw("bg-purple-600/50")
+          )}
+        ></div>
 
         {/* Vertical Divider - Hidden on small screens */}
-        <div style={mergeStyles(tw("hidden xl:block bg-purple-600/50"), { width: "1px", height: "2.5rem" })}></div>
+        <div
+          style={mergeStyles(tw("hidden xl:block bg-purple-600/50"), {
+            width: "1px",
+            height: "2.5rem",
+          })}
+        ></div>
 
         {/* Formula Name - Hidden on small screens */}
         {headerFlags.showFormulaName && (
-          <div style={mergeStyles(tw("hidden xl:flex items-center group"), { gap: "0.5rem" })}>
-            <span style={tw("text-pink-300 text-xl")} className="material-symbols-rounded">
+          <div
+            style={mergeStyles(tw("hidden xl:flex items-center group"), {
+              gap: "0.5rem",
+            })}
+          >
+            <span
+              style={tw("text-pink-300 text-xl")}
+              className="material-symbols-rounded"
+            >
               experiment
             </span>
             <div style={tw("flex flex-col items-start")}>
-              <span style={tw("text-xs text-white/50 font-medium")}>Formula</span>
+              <span style={tw("text-xs text-white/50 font-medium")}>
+                Formula
+              </span>
               <span style={tw("text-sm font-semibold text-white")}>
                 {currentFormula?.name || "-"}
               </span>
@@ -270,13 +411,25 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
 
         {/* Vertical Divider - Hidden on small screens */}
         {headerFlags.showFormulaId && (
-          <div style={mergeStyles(tw("hidden xl:block bg-purple-600/50"), { width: "1px", height: "2.5rem" })}></div>
+          <div
+            style={mergeStyles(tw("hidden xl:block bg-purple-600/50"), {
+              width: "1px",
+              height: "2.5rem",
+            })}
+          ></div>
         )}
 
         {/* Formula ID - Hidden on small screens */}
         {headerFlags.showFormulaId && (
-          <div style={mergeStyles(tw("hidden xl:flex items-center group"), { gap: "0.5rem" })}>
-            <span style={tw("text-cyan-300 text-xl")} className="material-symbols-rounded">
+          <div
+            style={mergeStyles(tw("hidden xl:flex items-center group"), {
+              gap: "0.5rem",
+            })}
+          >
+            <span
+              style={tw("text-cyan-300 text-xl")}
+              className="material-symbols-rounded"
+            >
               tag
             </span>
             <div style={tw("flex flex-col items-start")}>
@@ -290,13 +443,25 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
 
         {/* Vertical Divider - Hidden on small screens */}
         {headerFlags.showFormulaStatus && (
-          <div style={mergeStyles(tw("hidden xl:block bg-purple-600/50"), { width: "1px", height: "2.5rem" })}></div>
+          <div
+            style={mergeStyles(tw("hidden xl:block bg-purple-600/50"), {
+              width: "1px",
+              height: "2.5rem",
+            })}
+          ></div>
         )}
 
         {/* Status - Hidden on small screens */}
         {headerFlags.showFormulaStatus && (
-          <div style={mergeStyles(tw("hidden xl:flex items-center group"), { gap: "0.5rem" })}>
-            <span style={tw("text-orange-300 text-xl")} className="material-symbols-rounded">
+          <div
+            style={mergeStyles(tw("hidden xl:flex items-center group"), {
+              gap: "0.5rem",
+            })}
+          >
+            <span
+              style={tw("text-orange-300 text-xl")}
+              className="material-symbols-rounded"
+            >
               check_circle
             </span>
             <div style={tw("flex flex-col items-start")}>
@@ -304,9 +469,11 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
                 Status
               </span>
               <div
-                style={tw(`px-2 py-0.5 rounded-full text-[10px] font-bold ${getStatusVariant(
-                  currentFormula?.status
-                )}`)}
+                style={tw(
+                  `px-2 py-0.5 rounded-full text-[10px] font-bold ${getStatusVariant(
+                    currentFormula?.status
+                  )}`
+                )}
               >
                 {currentFormula?.status?.toUpperCase() || "NEW"}
               </div>
@@ -316,17 +483,31 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
 
         {/* Vertical Divider */}
         {headerFlags.showLineCount && (
-          <div style={mergeStyles({ width: "1px", height: "2.5rem" }, tw("bg-purple-600/50"))}></div>
+          <div
+            style={mergeStyles(
+              { width: "1px", height: "2.5rem" },
+              tw("bg-purple-600/50")
+            )}
+          ></div>
         )}
 
         {/* Lines Count */}
         {headerFlags.showLineCount && (
-          <div style={mergeStyles(tw("flex items-center group"), { gap: "0.5rem" })}>
-            <span style={tw("text-yellow-300 text-xl")} className="material-symbols-rounded">
+          <div
+            style={mergeStyles(tw("flex items-center group"), {
+              gap: "0.5rem",
+            })}
+          >
+            <span
+              style={tw("text-yellow-300 text-xl")}
+              className="material-symbols-rounded"
+            >
               checklist
             </span>
             <div style={tw("flex flex-col items-start")}>
-              <span style={tw("text-xs text-white/50 font-medium hidden xl:inline")}>
+              <span
+                style={tw("text-xs text-white/50 font-medium hidden xl:inline")}
+              >
                 Lines
               </span>
               <span style={tw("text-sm font-semibold text-white")}>
@@ -338,17 +519,31 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
 
         {/* Vertical Divider */}
         {headerFlags.showFormulaCost && (
-          <div style={mergeStyles({ width: "1px", height: "2.5rem" }, tw("bg-purple-600/50"))}></div>
+          <div
+            style={mergeStyles(
+              { width: "1px", height: "2.5rem" },
+              tw("bg-purple-600/50")
+            )}
+          ></div>
         )}
 
         {/* Formula Cost */}
         {headerFlags.showFormulaCost && (
-          <div style={mergeStyles(tw("flex items-center group"), { gap: "0.5rem" })}>
-            <span style={tw("text-green-300 text-xl")} className="material-symbols-rounded">
+          <div
+            style={mergeStyles(tw("flex items-center group"), {
+              gap: "0.5rem",
+            })}
+          >
+            <span
+              style={tw("text-green-300 text-xl")}
+              className="material-symbols-rounded"
+            >
               local_offer
             </span>
             <div style={tw("flex flex-col items-start")}>
-              <span style={tw("text-xs text-white/50 font-medium hidden xl:inline")}>
+              <span
+                style={tw("text-xs text-white/50 font-medium hidden xl:inline")}
+              >
                 Formula Cost
               </span>
               <span style={tw("text-sm font-semibold text-white")}>
@@ -360,17 +555,31 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
 
         {/* Vertical Divider */}
         {headerFlags.showTargetCost && (
-          <div style={mergeStyles({ width: "1px", height: "2.5rem" }, tw("bg-purple-600/50"))}></div>
+          <div
+            style={mergeStyles(
+              { width: "1px", height: "2.5rem" },
+              tw("bg-purple-600/50")
+            )}
+          ></div>
         )}
 
         {/* Target Cost (RMC) */}
         {headerFlags.showTargetCost && (
-          <div style={mergeStyles(tw("flex items-center group"), { gap: "0.5rem" })}>
-            <span style={tw("text-blue-300 text-xl")} className="material-symbols-rounded">
+          <div
+            style={mergeStyles(tw("flex items-center group"), {
+              gap: "0.5rem",
+            })}
+          >
+            <span
+              style={tw("text-blue-300 text-xl")}
+              className="material-symbols-rounded"
+            >
               attach_money
             </span>
             <div style={tw("flex flex-col items-start")}>
-              <span style={tw("text-xs text-white/50 font-medium hidden xl:inline")}>
+              <span
+                style={tw("text-xs text-white/50 font-medium hidden xl:inline")}
+              >
                 Target Cost
               </span>
               <span style={tw("text-sm font-semibold text-white")}>
@@ -381,15 +590,27 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
         )}
 
         {/* Vertical Divider */}
-        <div style={mergeStyles({ width: "1px", height: "2.5rem" }, tw("bg-purple-600/50"))}></div>
+        <div
+          style={mergeStyles(
+            { width: "1px", height: "2.5rem" },
+            tw("bg-purple-600/50")
+          )}
+        ></div>
 
         {/* Lines Count */}
-        <div style={mergeStyles(tw("flex items-center group"), { gap: "0.5rem" })}>
-          <span style={tw("text-yellow-300 text-xl")} className="material-symbols-rounded">
+        <div
+          style={mergeStyles(tw("flex items-center group"), { gap: "0.5rem" })}
+        >
+          <span
+            style={tw("text-yellow-300 text-xl")}
+            className="material-symbols-rounded"
+          >
             checklist
           </span>
           <div style={tw("flex flex-col items-start")}>
-            <span style={tw("text-xs text-white/50 font-medium hidden xl:inline")}>
+            <span
+              style={tw("text-xs text-white/50 font-medium hidden xl:inline")}
+            >
               Lines
             </span>
             <span style={tw("text-sm font-semibold text-white")}>
@@ -399,15 +620,27 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
         </div>
 
         {/* Vertical Divider */}
-        <div style={mergeStyles({ width: "1px", height: "2.5rem" }, tw("bg-purple-600/50"))}></div>
+        <div
+          style={mergeStyles(
+            { width: "1px", height: "2.5rem" },
+            tw("bg-purple-600/50")
+          )}
+        ></div>
 
         {/* Formula Cost */}
-        <div style={mergeStyles(tw("flex items-center group"), { gap: "0.5rem" })}>
-          <span style={tw("text-green-300 text-xl")} className="material-symbols-rounded">
+        <div
+          style={mergeStyles(tw("flex items-center group"), { gap: "0.5rem" })}
+        >
+          <span
+            style={tw("text-green-300 text-xl")}
+            className="material-symbols-rounded"
+          >
             local_offer
           </span>
           <div style={tw("flex flex-col items-start")}>
-            <span style={tw("text-xs text-white/50 font-medium hidden xl:inline")}>
+            <span
+              style={tw("text-xs text-white/50 font-medium hidden xl:inline")}
+            >
               Formula Cost
             </span>
             <span style={tw("text-sm font-semibold text-white")}>
@@ -417,15 +650,27 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
         </div>
 
         {/* Vertical Divider */}
-        <div style={mergeStyles({ width: "1px", height: "2.5rem" }, tw("bg-purple-600/50"))}></div>
+        <div
+          style={mergeStyles(
+            { width: "1px", height: "2.5rem" },
+            tw("bg-purple-600/50")
+          )}
+        ></div>
 
         {/* Target Cost (RMC) */}
-        <div style={mergeStyles(tw("flex items-center group"), { gap: "0.5rem" })}>
-          <span style={tw("text-blue-300 text-xl")} className="material-symbols-rounded">
+        <div
+          style={mergeStyles(tw("flex items-center group"), { gap: "0.5rem" })}
+        >
+          <span
+            style={tw("text-blue-300 text-xl")}
+            className="material-symbols-rounded"
+          >
             attach_money
           </span>
           <div style={tw("flex flex-col items-start")}>
-            <span style={tw("text-xs text-white/50 font-medium hidden xl:inline")}>
+            <span
+              style={tw("text-xs text-white/50 font-medium hidden xl:inline")}
+            >
               Target Cost
             </span>
             <span style={tw("text-sm font-semibold text-white")}>
