@@ -40,9 +40,17 @@ const AttributeDataGrid = ({
   // Show empty state if no attributes
   if (!attributes || attributes.length === 0) {
     return (
-      <div style={mergeStyles(tw("flex items-center justify-center text-gray-500"), { height: "10rem" })}>
+      <div
+        style={mergeStyles(
+          tw("flex items-center justify-center text-gray-500"),
+          { height: "10rem" }
+        )}
+      >
         <div style={tw("text-center")}>
-          <i className="ri-list-check-line text-3xl" style={{ marginBottom: "0.5rem", display: "block" }}></i>
+          <i
+            className="ri-list-check-line text-3xl"
+            style={{ marginBottom: "0.5rem", display: "block" }}
+          ></i>
           <p>No attributes available</p>
         </div>
       </div>
@@ -53,7 +61,11 @@ const AttributeDataGrid = ({
     <div>
       {/* Header Section - Instruction and Search */}
       <div>
-        <p style={mergeStyles(tw("text-sm text-gray-600"), { marginBottom: "1rem" })}>
+        <p
+          style={mergeStyles(tw("text-sm text-gray-600"), {
+            marginBottom: "1rem",
+          })}
+        >
           Select up to {maxSelections} attributes to add as columns. You can
           select multiple attributes.
         </p>
@@ -67,7 +79,11 @@ const AttributeDataGrid = ({
         />
 
         {/* Selection Counter */}
-        <div style={mergeStyles(tw("flex items-center justify-between text-xs"), { marginBottom: "1rem" })}>
+        <div
+          style={mergeStyles(tw("flex items-center justify-between text-xs"), {
+            marginBottom: "1rem",
+          })}
+        >
           <span style={tw("text-gray-500")}>
             {filteredAttributes.length} attributes available
           </span>
@@ -78,7 +94,15 @@ const AttributeDataGrid = ({
       </div>
 
       {/* Attribute List - 3 Column Grid */}
-      <div style={mergeStyles(tw("overflow-y-auto"), { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.5rem", maxHeight: "400px", paddingRight: "0.5rem" })}>
+      <div
+        style={mergeStyles(tw("overflow-y-auto"), {
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: "0.5rem",
+          maxHeight: "400px",
+          paddingRight: "0.5rem",
+        })}
+      >
         {filteredAttributes.map((attribute) => {
           const isSelected = selectedAttributes.includes(attribute.id);
           const isDisabled =
@@ -93,7 +117,10 @@ const AttributeDataGrid = ({
                 isSelected
                   ? tw("bg-blue-50 border-blue-300")
                   : isDisabled
-                    ? mergeStyles(tw("bg-gray-50 border-gray-200"), { opacity: 0.5, cursor: "not-allowed" })
+                    ? mergeStyles(tw("bg-gray-50 border-gray-200"), {
+                        opacity: 0.5,
+                        cursor: "not-allowed",
+                      })
                     : tw("bg-white border-gray-200")
               )}
             >
@@ -105,19 +132,25 @@ const AttributeDataGrid = ({
                 }
                 disabled={isDisabled}
                 style={mergeStyles(
-                  tw("rounded border-gray-300 text-blue-600 flex-shrink-0 cursor-pointer"),
-                  { 
-                    marginTop: "0.125rem", 
-                    width: "1rem", 
+                  tw(
+                    "rounded border-gray-300 text-blue-600 flex-shrink-0 cursor-pointer"
+                  ),
+                  {
+                    marginTop: "0.125rem",
+                    width: "1rem",
                     height: "1rem",
-                    opacity: isDisabled ? 0.5 : 1
+                    opacity: isDisabled ? 0.5 : 1,
                   }
                 )}
               />
 
               <span
                 style={mergeStyles(
-                  tw(`text-sm ${isSelected ? "text-blue-900 font-medium" : "text-gray-700"}`),
+                  tw(
+                    `text-sm ${
+                      isSelected ? "text-blue-900 font-medium" : "text-gray-700"
+                    }`
+                  ),
                   { lineHeight: "1.25" }
                 )}
               >
@@ -130,8 +163,16 @@ const AttributeDataGrid = ({
 
       {/* No Results Message */}
       {filteredAttributes.length === 0 && searchQuery && (
-        <div style={mergeStyles(tw("text-center text-gray-500"), { paddingTop: "2rem", paddingBottom: "2rem" })}>
-          <i className="ri-search-line text-2xl" style={{ marginBottom: "0.5rem", display: "block" }}></i>
+        <div
+          style={mergeStyles(tw("text-center text-gray-500"), {
+            paddingTop: "2rem",
+            paddingBottom: "2rem",
+          })}
+        >
+          <i
+            className="ri-search-line text-2xl"
+            style={{ marginBottom: "0.5rem", display: "block" }}
+          ></i>
           <p style={tw("text-sm")}>No attributes found for "{searchQuery}"</p>
         </div>
       )}

@@ -1,6 +1,7 @@
 import { useState, lazy, Suspense } from "react";
 import type { Ingredient } from "../services/pega";
 import { eventBus } from "../utils/bus";
+import { tw, mergeStyles } from "../utils/tailwindToInline";
 import Button from "./Button";
 import Modal from "./Modal";
 
@@ -93,8 +94,20 @@ const IngredientQuickView = ({
     return (
       <Suspense
         fallback={
-          <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+          <div
+            style={mergeStyles(tw("flex items-center justify-center"), {
+              paddingTop: "2rem",
+              paddingBottom: "2rem",
+            })}
+          >
+            <div
+              style={mergeStyles(tw("rounded-full border-blue-600"), {
+                width: "1.5rem",
+                height: "1.5rem",
+                borderBottomWidth: "2px",
+                animation: "spin 1s linear infinite",
+              })}
+            ></div>
           </div>
         }
       >
@@ -114,52 +127,86 @@ const IngredientQuickView = ({
       noPadding={true}
       headerActions={
         <Button onClick={handleAddToFormula} size="sm">
-          <span className="material-symbols-rounded mr-2">add</span>
+          <span
+            className="material-symbols-rounded"
+            style={{ marginRight: "0.5rem" }}
+          >
+            add
+          </span>
           Add to Active Formula
         </Button>
       }
       footerActions={
-        <div className="flex justify-end">
+        <div style={tw("flex justify-end")}>
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+            style={tw(
+              "px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md cursor-pointer"
+            )}
           >
             Close
           </button>
         </div>
       }
     >
-      <div className="flex h-full">
+      <div style={mergeStyles(tw("flex"), { height: "100%" })}>
         {/* Vertical Sidebar Navigation */}
-        <div className="w-64 bg-gray-50 border-r border-gray-200 flex-shrink-0">
-          <nav className="p-4 space-y-1">
-            {sections.map((section) => (
-              <button
-                key={section.id}
-                onClick={() => setActiveSection(section.id)}
-                className={`
-                  w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-md transition-colors cursor-pointer text-left
-                  ${
-                    activeSection === section.id
-                      ? "bg-blue-100 text-blue-700 border-l-4 border-blue-600"
-                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                  }
-                `}
-              >
-                <span
-                  className={`material-symbols-rounded mr-3 text-base flex-shrink-0`}
+        <div
+          style={mergeStyles(
+            tw("bg-gray-50 border-r border-gray-200 flex-shrink-0"),
+            { width: "16rem" }
+          )}
+        >
+          <nav style={{ padding: "1rem" }}>
+            {sections.map((section) => {
+              const isActive = activeSection === section.id;
+              return (
+                <button
+                  key={section.id}
+                  onClick={() => setActiveSection(section.id)}
+                  style={mergeStyles(
+                    tw(
+                      "w-full flex items-center text-sm font-medium rounded-md cursor-pointer"
+                    ),
+                    {
+                      paddingLeft: "0.75rem",
+                      paddingRight: "0.75rem",
+                      paddingTop: "0.625rem",
+                      paddingBottom: "0.625rem",
+                      marginBottom: "0.25rem",
+                      textAlign: "left",
+                    },
+                    isActive
+                      ? mergeStyles(tw("bg-blue-100 text-blue-700"), {
+                          borderLeft: "4px solid #2563eb",
+                        })
+                      : tw("text-gray-600")
+                  )}
                 >
-                  {section.icon}
-                </span>
-                <span className="truncate">{section.label}</span>
-              </button>
-            ))}
+                  <span
+                    className="material-symbols-rounded"
+                    style={mergeStyles(tw("text-base flex-shrink-0"), {
+                      marginRight: "0.75rem",
+                    })}
+                  >
+                    {section.icon}
+                  </span>
+                  <span style={tw("truncate")}>{section.label}</span>
+                </button>
+              );
+            })}
           </nav>
         </div>
 
         {/* Content Area with consistent height and proper scrolling */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-1 overflow-y-auto p-6">{renderSection()}</div>
+        <div style={tw("flex-1 flex flex-col overflow-hidden")}>
+          <div
+            style={mergeStyles(tw("flex-1 overflow-y-auto"), {
+              padding: "1.5rem",
+            })}
+          >
+            {renderSection()}
+          </div>
         </div>
       </div>
     </Modal>

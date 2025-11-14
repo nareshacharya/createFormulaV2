@@ -139,8 +139,16 @@ const IngredientList = ({
                   {/* Status Dot */}
                   <div
                     style={mergeStyles(
-                      tw(`rounded-full flex-shrink-0 ${getStatusColor(ingredient)}`),
-                      { width: "0.375rem", height: "0.375rem", marginRight: "0.5rem" }
+                      tw(
+                        `rounded-full flex-shrink-0 ${getStatusColor(
+                          ingredient
+                        )}`
+                      ),
+                      {
+                        width: "0.375rem",
+                        height: "0.375rem",
+                        marginRight: "0.5rem",
+                      }
                     )}
                     title={`Status: ${ingredient.status}`}
                   />
@@ -189,8 +197,10 @@ const IngredientList = ({
                 {/* Info Icon - Only visible on hover, larger size */}
                 {hoveredRow === ingredient.id && (
                   <button
-                    style={mergeStyles(tw("p-1 rounded cursor-pointer flex-shrink-0"), 
-                      { marginLeft: "0.5rem" })}
+                    style={mergeStyles(
+                      tw("p-1 rounded cursor-pointer flex-shrink-0"),
+                      { marginLeft: "0.5rem" }
+                    )}
                     onClick={(e) => handleInfoClick(e, ingredient)}
                     aria-label={`View details for ${ingredient.name}`}
                   >
@@ -205,8 +215,16 @@ const IngredientList = ({
         })}
 
         {filteredIngredients.length === 0 && (
-          <div style={mergeStyles(tw("text-center text-gray-500"), { paddingTop: "1.5rem", paddingBottom: "1.5rem" })}>
-            <span className="material-symbols-rounded text-xl" style={{ marginBottom: "0.5rem", display: "block" }}>
+          <div
+            style={mergeStyles(tw("text-center text-gray-500"), {
+              paddingTop: "1.5rem",
+              paddingBottom: "1.5rem",
+            })}
+          >
+            <span
+              className="material-symbols-rounded text-xl"
+              style={{ marginBottom: "0.5rem", display: "block" }}
+            >
               search
             </span>
             <p style={tw("text-sm")}>No ingredients found</p>

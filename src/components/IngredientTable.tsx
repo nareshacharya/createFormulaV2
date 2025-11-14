@@ -146,7 +146,10 @@ const IngredientTable = ({
         return (
           <div style={tw("flex items-center")}>
             <div
-              style={mergeStyles(tw(`rounded-full ${getStatusDotColor(ingredient)}`), { width: "0.5rem", height: "0.5rem", marginRight: "0.5rem" })}
+              style={mergeStyles(
+                tw(`rounded-full ${getStatusDotColor(ingredient)}`),
+                { width: "0.5rem", height: "0.5rem", marginRight: "0.5rem" }
+              )}
             />
             <Badge variant={getStatusColor(value as string)} size="sm">
               {value as string}
@@ -183,8 +186,8 @@ const IngredientTable = ({
               value === "natural"
                 ? "success"
                 : value === "synthetic"
-                ? "info"
-                : "default"
+                  ? "info"
+                  : "default"
             }
             size="sm"
           >
@@ -218,10 +221,20 @@ const IngredientTable = ({
 
   if (ingredients.length === 0) {
     return (
-      <div style={mergeStyles(tw("text-center text-gray-500"), { paddingTop: "2rem", paddingBottom: "2rem" })}>
-        <i className="ri-search-line text-2xl" style={{ marginBottom: "0.5rem", display: "block" }}></i>
+      <div
+        style={mergeStyles(tw("text-center text-gray-500"), {
+          paddingTop: "2rem",
+          paddingBottom: "2rem",
+        })}
+      >
+        <i
+          className="ri-search-line text-2xl"
+          style={{ marginBottom: "0.5rem", display: "block" }}
+        ></i>
         <p>No ingredients match your filters</p>
-        <p style={mergeStyles(tw("text-sm"), { marginTop: "0.25rem" })}>Try adjusting your filter criteria</p>
+        <p style={mergeStyles(tw("text-sm"), { marginTop: "0.25rem" })}>
+          Try adjusting your filter criteria
+        </p>
       </div>
     );
   }
@@ -230,9 +243,22 @@ const IngredientTable = ({
     <div>
       {/* Actions Bar - Only show if enabled */}
       {showActionsBar && (
-        <div style={mergeStyles(tw("flex items-center justify-between bg-gray-50 px-4 rounded-lg"), { paddingTop: "0.5rem", paddingBottom: "0.5rem", marginBottom: "1rem" })}>
+        <div
+          style={mergeStyles(
+            tw("flex items-center justify-between bg-gray-50 px-4 rounded-lg"),
+            {
+              paddingTop: "0.5rem",
+              paddingBottom: "0.5rem",
+              marginBottom: "1rem",
+            }
+          )}
+        >
           <div style={tw("flex items-center")}>
-            <span style={mergeStyles(tw("text-sm text-gray-600"), { marginRight: "1rem" })}>
+            <span
+              style={mergeStyles(tw("text-sm text-gray-600"), {
+                marginRight: "1rem",
+              })}
+            >
               {selectedIngredients.length} of {ingredients.length} selected
             </span>
             {selectedIngredients.length > 0 && (
@@ -255,9 +281,20 @@ const IngredientTable = ({
       {/* Table */}
       <div style={tw("overflow-auto border border-gray-200 rounded-lg")}>
         <table style={tw("w-full")}>
-          <thead style={mergeStyles(tw("bg-gray-50"), { position: "sticky", top: 0 })}>
+          <thead
+            style={mergeStyles(tw("bg-gray-50"), {
+              position: "sticky",
+              top: 0,
+            })}
+          >
             <tr>
-              <th style={mergeStyles(tw("px-3 text-left"), { width: "3rem", paddingTop: "0.75rem", paddingBottom: "0.75rem" })}>
+              <th
+                style={mergeStyles(tw("px-3 text-left"), {
+                  width: "3rem",
+                  paddingTop: "0.75rem",
+                  paddingBottom: "0.75rem",
+                })}
+              >
                 <input
                   type="checkbox"
                   checked={
@@ -266,17 +303,30 @@ const IngredientTable = ({
                     paginatedIngredients.length > 0
                   }
                   onChange={handleSelectAll}
-                  style={tw("rounded border-gray-300 text-blue-600 cursor-pointer")}
+                  style={tw(
+                    "rounded border-gray-300 text-blue-600 cursor-pointer"
+                  )}
                 />
               </th>
               {displayColumns.map((column) => (
                 <th
                   key={column}
-                  style={mergeStyles(tw("px-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer"), { paddingTop: "0.75rem", paddingBottom: "0.75rem", letterSpacing: "0.05em" })}
+                  style={mergeStyles(
+                    tw(
+                      "px-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer"
+                    ),
+                    {
+                      paddingTop: "0.75rem",
+                      paddingBottom: "0.75rem",
+                      letterSpacing: "0.05em",
+                    }
+                  )}
                   onClick={() => handleSort(column)}
                 >
                   <div style={tw("flex items-center")}>
-                    <span style={{ marginRight: "0.25rem" }}>{getColumnLabel(column)}</span>
+                    <span style={{ marginRight: "0.25rem" }}>
+                      {getColumnLabel(column)}
+                    </span>
                     {sortConfig?.key === column ? (
                       <i
                         className={`ri-arrow-${
@@ -284,14 +334,21 @@ const IngredientTable = ({
                         }-line text-xs text-blue-600`}
                       ></i>
                     ) : (
-                      <i className="ri-expand-up-down-line text-xs text-gray-400" style={{ opacity: 0 }}></i>
+                      <i
+                        className="ri-expand-up-down-line text-xs text-gray-400"
+                        style={{ opacity: 0 }}
+                      ></i>
                     )}
                   </div>
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody style={mergeStyles(tw("bg-white"), { borderTop: "1px solid #e5e7eb" })}>
+          <tbody
+            style={mergeStyles(tw("bg-white"), {
+              borderTop: "1px solid #e5e7eb",
+            })}
+          >
             {paginatedIngredients.map((ingredient) => (
               <tr
                 key={ingredient.id}
@@ -305,20 +362,30 @@ const IngredientTable = ({
                 onClick={(e) => handleRowClick(e, ingredient.id)}
               >
                 <td
-                  style={mergeStyles(tw("px-3"), { width: "3rem", paddingTop: "0.75rem", paddingBottom: "0.75rem" })}
+                  style={mergeStyles(tw("px-3"), {
+                    width: "3rem",
+                    paddingTop: "0.75rem",
+                    paddingBottom: "0.75rem",
+                  })}
                   onClick={(e) => e.stopPropagation()}
                 >
                   <input
                     type="checkbox"
                     checked={selectedIngredients.includes(ingredient.id)}
                     onChange={(e) => handleRowSelect(e, ingredient.id)}
-                    style={tw("rounded border-gray-300 text-blue-600 cursor-pointer")}
+                    style={tw(
+                      "rounded border-gray-300 text-blue-600 cursor-pointer"
+                    )}
                   />
                 </td>
                 {displayColumns.map((column) => (
                   <td
                     key={column}
-                    style={mergeStyles(tw("px-3 text-sm text-gray-900"), { paddingTop: "0.75rem", paddingBottom: "0.75rem", fontFamily: "sans-serif" })}
+                    style={mergeStyles(tw("px-3 text-sm text-gray-900"), {
+                      paddingTop: "0.75rem",
+                      paddingBottom: "0.75rem",
+                      fontFamily: "sans-serif",
+                    })}
                   >
                     {renderCellValue(ingredient, column)}
                   </td>
@@ -331,9 +398,17 @@ const IngredientTable = ({
 
       {/* Enhanced Pagination */}
       {totalPages > 1 && (
-        <div style={mergeStyles(tw("flex items-center justify-between"), { marginTop: "1rem" })}>
+        <div
+          style={mergeStyles(tw("flex items-center justify-between"), {
+            marginTop: "1rem",
+          })}
+        >
           <div style={tw("flex items-center")}>
-            <div style={mergeStyles(tw("text-sm text-gray-500"), { marginRight: "1rem" })}>
+            <div
+              style={mergeStyles(tw("text-sm text-gray-500"), {
+                marginRight: "1rem",
+              })}
+            >
               Showing {startIndex + 1} to{" "}
               {Math.min(endIndex, sortedIngredients.length)} of{" "}
               {sortedIngredients.length} ingredients
@@ -345,14 +420,14 @@ const IngredientTable = ({
               disabled={currentPage === 1}
               style={mergeStyles(
                 tw("text-sm border border-gray-300 rounded-md cursor-pointer"),
-                { 
-                  paddingLeft: "0.5rem", 
-                  paddingRight: "0.5rem", 
-                  paddingTop: "0.25rem", 
+                {
+                  paddingLeft: "0.5rem",
+                  paddingRight: "0.5rem",
+                  paddingTop: "0.25rem",
                   paddingBottom: "0.25rem",
                   marginRight: "0.5rem",
                   opacity: currentPage === 1 ? 0.5 : 1,
-                  cursor: currentPage === 1 ? "not-allowed" : "pointer"
+                  cursor: currentPage === 1 ? "not-allowed" : "pointer",
                 }
               )}
             >
@@ -363,14 +438,14 @@ const IngredientTable = ({
               disabled={currentPage === 1}
               style={mergeStyles(
                 tw("text-sm border border-gray-300 rounded-md cursor-pointer"),
-                { 
-                  paddingLeft: "0.75rem", 
-                  paddingRight: "0.75rem", 
-                  paddingTop: "0.25rem", 
+                {
+                  paddingLeft: "0.75rem",
+                  paddingRight: "0.75rem",
+                  paddingTop: "0.25rem",
                   paddingBottom: "0.25rem",
                   marginRight: "0.5rem",
                   opacity: currentPage === 1 ? 0.5 : 1,
-                  cursor: currentPage === 1 ? "not-allowed" : "pointer"
+                  cursor: currentPage === 1 ? "not-allowed" : "pointer",
                 }
               )}
             >
@@ -398,15 +473,15 @@ const IngredientTable = ({
                     onClick={() => setCurrentPage(pageNum)}
                     style={mergeStyles(
                       tw("text-sm border rounded-md cursor-pointer"),
-                      isCurrentPage 
+                      isCurrentPage
                         ? tw("bg-blue-600 text-white border-blue-600")
                         : tw("border-gray-300"),
-                      { 
-                        paddingLeft: "0.75rem", 
-                        paddingRight: "0.75rem", 
-                        paddingTop: "0.25rem", 
+                      {
+                        paddingLeft: "0.75rem",
+                        paddingRight: "0.75rem",
+                        paddingTop: "0.25rem",
                         paddingBottom: "0.25rem",
-                        marginRight: "0.25rem"
+                        marginRight: "0.25rem",
                       }
                     )}
                   >
@@ -423,15 +498,16 @@ const IngredientTable = ({
               disabled={currentPage === totalPages}
               style={mergeStyles(
                 tw("text-sm border border-gray-300 rounded-md cursor-pointer"),
-                { 
-                  paddingLeft: "0.75rem", 
-                  paddingRight: "0.75rem", 
-                  paddingTop: "0.25rem", 
+                {
+                  paddingLeft: "0.75rem",
+                  paddingRight: "0.75rem",
+                  paddingTop: "0.25rem",
                   paddingBottom: "0.25rem",
                   marginLeft: "0.5rem",
                   marginRight: "0.5rem",
                   opacity: currentPage === totalPages ? 0.5 : 1,
-                  cursor: currentPage === totalPages ? "not-allowed" : "pointer"
+                  cursor:
+                    currentPage === totalPages ? "not-allowed" : "pointer",
                 }
               )}
             >
@@ -442,13 +518,14 @@ const IngredientTable = ({
               disabled={currentPage === totalPages}
               style={mergeStyles(
                 tw("text-sm border border-gray-300 rounded-md cursor-pointer"),
-                { 
-                  paddingLeft: "0.5rem", 
-                  paddingRight: "0.5rem", 
-                  paddingTop: "0.25rem", 
+                {
+                  paddingLeft: "0.5rem",
+                  paddingRight: "0.5rem",
+                  paddingTop: "0.25rem",
                   paddingBottom: "0.25rem",
                   opacity: currentPage === totalPages ? 0.5 : 1,
-                  cursor: currentPage === totalPages ? "not-allowed" : "pointer"
+                  cursor:
+                    currentPage === totalPages ? "not-allowed" : "pointer",
                 }
               )}
             >
