@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import type { Formula } from "../../services/pega";
 import { eventBus } from "../../utils/bus";
 import { headerTokens } from "../../utils/tokens";
+import { tw, mergeStyles } from "../../utils/tailwindToInline";
 import HeaderActions from "./Header.Actions";
 import HeaderBadges from "./Header.Badges";
 
@@ -21,10 +22,10 @@ const AppHeader = () => {
   }, []);
 
   return (
-    <div className="w-full bg-purple-800 border-b border-purple-700 relative z-1">
+    <div style={tw("w-full bg-purple-800 border-b border-purple-700 relative z-1")}>
       {/* Header content */}
       <header
-        className={`${headerTokens.height} ${headerTokens.padding} flex items-center justify-between w-full`}
+        style={tw(`${headerTokens.height} ${headerTokens.padding} flex items-center justify-between w-full`)}
       >
         <HeaderBadges activeFormula={activeFormula} />
         <HeaderActions />
