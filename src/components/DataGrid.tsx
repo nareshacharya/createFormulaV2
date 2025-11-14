@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import { useClickOutside } from "../hooks/useClickOutside";
 import { useDataGridFeatures } from "../hooks/useFeatureFlags";
 import { mockSolvents } from "../mocks/solvents";
+import { tw, mergeStyles } from "../utils/tailwindToInline";
 import type { Ingredient, Formula } from "../services/pega";
 import type { Dilution } from "../types/dilution";
 import { eventBus } from "../utils/bus";
@@ -575,7 +576,7 @@ const DataGrid = ({
   };
 
   return (
-    <div className={`flex flex-col h-full p-2 ${className}`} ref={tableRef}>
+    <div style={mergeStyles(tw("flex flex-col h-full p-2"), tw(className))} ref={tableRef}>
       {/* Bulk Actions Toolbar */}
       <BulkActionsToolbar
         selectedCount={selectedRows.size}
@@ -624,9 +625,9 @@ const DataGrid = ({
 
       <div
         ref={scrollContainerRef}
-        className="flex-1 overflow-auto border border-gray-200 rounded-lg shadow-sm"
+        style={tw("flex-1 overflow-auto border border-gray-200 rounded-lg shadow-sm")}
       >
-        <table className="w-full">
+        <table style={tw("w-full")}>
           <TableHeader
             columns={columns}
             formulas={formulas}
@@ -665,7 +666,7 @@ const DataGrid = ({
             setShowColumnActions={setShowColumnActions}
           />
 
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody style={tw("bg-white divide-y divide-gray-200")}>
             {getSortedData()
               .filter((row) => !row.isTotal)
               .map((row, _rowIndex) => {
@@ -689,29 +690,29 @@ const DataGrid = ({
                     onDragOver={(e) => handleRowDragOver(e, row.id)}
                     onDragEnd={handleRowDragEnd}
                     onDragLeave={handleRowDragLeave}
-                    className={`
-                    group relative
-                    ${
-                      row.isTotal
-                        ? "bg-gray-100 border-t-2 border-gray-300"
-                        : "hover:bg-gray-50"
-                    }
-                    ${row.isEmpty ? "bg-gray-50" : ""}
-                    ${row.parentFormulaId ? "bg-blue-25" : ""}
-                    ${isBeingDragged ? "opacity-50" : ""}
-                    ${isDraggedOver ? "border-t-2 border-blue-500" : ""}
-                  `}
+                    style={mergeStyles(
+                      tw("group relative"),
+                      tw(
+                        row.isTotal
+                          ? "bg-gray-100 border-t-2 border-gray-300"
+                          : "hover:bg-gray-50"
+                      ),
+                      tw(row.isEmpty ? "bg-gray-50" : ""),
+                      tw(row.parentFormulaId ? "bg-blue-25" : ""),
+                      tw(isBeingDragged ? "opacity-50" : ""),
+                      tw(isDraggedOver ? "border-t-2 border-blue-500" : "")
+                    )}
                   >
                     {/* Drag handle cell (if enabled) */}
                     {enableRowReordering && (
                       <td
-                        className="w-8 px-2 py-2 text-center"
+                        style={tw("w-8 px-2 py-2 text-center")}
                         onClick={(e) => e.stopPropagation()}
                       >
                         {isDraggable && (
                           <span
-                            className="material-symbols-rounded text-gray-400 cursor-move"
-                            style={{ fontSize: "16px" }}
+                            style={mergeStyles({ fontSize: "16px" }, tw("text-gray-400 cursor-move"))}
+                            className="material-symbols-rounded"
                           >
                             drag_handle
                           </span>
@@ -722,7 +723,7 @@ const DataGrid = ({
                     {/* Checkbox cell (if enabled) */}
                     {enableBulkSelection && (
                       <td
-                        className="w-10 px-3 py-2 text-center"
+                        style={tw("w-10 px-3 py-2 text-center")}
                         onClick={(e) => e.stopPropagation()}
                       >
                         {!row.isTotal && !row.isEmpty && (
@@ -730,7 +731,7 @@ const DataGrid = ({
                             type="checkbox"
                             checked={isRowSelected(row.id)}
                             onChange={() => toggleRowSelection(row.id)}
-                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                            style={tw("w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer")}
                           />
                         )}
                       </td>
@@ -881,36 +882,36 @@ const DataGrid = ({
                       return (
                         <td
                           key={`${row.id}-${column.id}`}
-                          className={`
-                          px-3 py-2 border-r border-gray-100 last:border-r-0 font-sans
-                          ${column.key === "description" ? "relative" : ""}
-                          ${
-                            isTargetTotalInActiveFormula
-                              ? "cursor-pointer hover:bg-blue-50"
-                              : ""
-                          }
-                          ${
-                            row.isTotal && !isTargetTotalInActiveFormula
-                              ? "font-medium bg-gray-100"
-                              : ""
-                          }
-                          ${column.fixed ? "bg-gray-25" : ""}
-                          ${
-                            column.id === editableFormula && !column.fixed
-                              ? "bg-green-50"
-                              : ""
-                          }
-                          ${
-                            row.isEmpty && column.key === "description"
-                              ? "text-center"
-                              : ""
-                          }
-                        `}
-                          style={{
-                            width: getColumnWidth(),
-                            minWidth: getColumnWidth(),
-                            maxWidth: getColumnWidth(),
-                          }}
+                          style={mergeStyles(
+                            tw("px-3 py-2 border-r border-gray-100 last:border-r-0 font-sans"),
+                            tw(column.key === "description" ? "relative" : ""),
+                            tw(
+                              isTargetTotalInActiveFormula
+                                ? "cursor-pointer hover:bg-blue-50"
+                                : ""
+                            ),
+                            tw(
+                              row.isTotal && !isTargetTotalInActiveFormula
+                                ? "font-medium bg-gray-100"
+                                : ""
+                            ),
+                            tw(column.fixed ? "bg-gray-25" : ""),
+                            tw(
+                              column.id === editableFormula && !column.fixed
+                                ? "bg-green-50"
+                                : ""
+                            ),
+                            tw(
+                              row.isEmpty && column.key === "description"
+                                ? "text-center"
+                                : ""
+                            ),
+                            {
+                              width: getColumnWidth(),
+                              minWidth: getColumnWidth(),
+                              maxWidth: getColumnWidth(),
+                            }
+                          )}
                           colSpan={
                             row.isEmpty && column.key === "description"
                               ? columns.length
@@ -933,7 +934,7 @@ const DataGrid = ({
                                       ? val.toFixed(5)
                                       : val || "100.00000";
                                   return (
-                                    <span className="text-sm font-semibold text-gray-900 text-right block">
+                                    <span style={tw("text-sm font-semibold text-gray-900 text-right block")}>
                                       {displayValue}
                                     </span>
                                   );
@@ -963,25 +964,28 @@ const DataGrid = ({
 
           {/* Sticky footer for total rows */}
           <tfoot
-            className={`bg-white sticky bottom-0 z-10 border-t-1 border-gray-100 ${
-              scrollState.canScrollDown
-                ? "shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]"
-                : ""
-            }`}
+            style={mergeStyles(
+              tw("bg-white sticky bottom-0 z-10 border-t-1 border-gray-100"),
+              tw(
+                scrollState.canScrollDown
+                  ? "shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]"
+                  : ""
+              )
+            )}
           >
             {getSortedData()
               .filter((row) => row.isTotal)
               .map((row) => {
                 return (
-                  <tr key={row.id} className="bg-gray-100">
+                  <tr key={row.id} style={tw("bg-gray-100")}>
                     {/* Drag handle cell (if enabled) */}
                     {enableRowReordering && (
-                      <td className="w-8 px-2 py-2 text-center" />
+                      <td style={tw("w-8 px-2 py-2 text-center")} />
                     )}
 
                     {/* Checkbox cell (if enabled) */}
                     {enableBulkSelection && (
-                      <td className="w-10 px-3 py-2 text-center" />
+                      <td style={tw("w-10 px-3 py-2 text-center")} />
                     )}
 
                     {columns.map((column) => {
@@ -1046,30 +1050,30 @@ const DataGrid = ({
                       return (
                         <td
                           key={`${row.id}-${column.id}`}
-                          className={`
-                            px-3 py-2 border-r border-gray-100 last:border-r-0 font-sans
-                            ${
+                          style={mergeStyles(
+                            tw("px-3 py-2 border-r border-gray-100 last:border-r-0 font-sans"),
+                            tw(
                               isTargetTotalInActiveFormula
                                 ? "cursor-pointer hover:bg-blue-50"
                                 : ""
-                            }
-                            ${
+                            ),
+                            tw(
                               row.isTotal && !isTargetTotalInActiveFormula
                                 ? "font-medium bg-gray-100"
                                 : ""
-                            }
-                            ${column.fixed ? "bg-gray-25" : ""}
-                            ${
+                            ),
+                            tw(column.fixed ? "bg-gray-25" : ""),
+                            tw(
                               column.id === editableFormula && !column.fixed
                                 ? "bg-green-50"
                                 : ""
+                            ),
+                            {
+                              width: getColumnWidth(),
+                              minWidth: getColumnWidth(),
+                              maxWidth: getColumnWidth(),
                             }
-                          `}
-                          style={{
-                            width: getColumnWidth(),
-                            minWidth: getColumnWidth(),
-                            maxWidth: getColumnWidth(),
-                          }}
+                          )}
                           onClick={() => {
                             // Make Target Total clickable to focus
                             if (isTargetTotalInActiveFormula) {
@@ -1087,7 +1091,7 @@ const DataGrid = ({
                                       ? val.toFixed(5)
                                       : val || "100.00000";
                                   return (
-                                    <span className="text-sm font-semibold text-gray-900 text-right block">
+                                    <span style={tw("text-sm font-semibold text-gray-900 text-right block")}>
                                       {displayValue}
                                     </span>
                                   );
