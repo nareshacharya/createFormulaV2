@@ -46,7 +46,7 @@ const IngredientQuickView = ({
     {
       id: "chemical-structure",
       label: "Chemical Structure",
-      icon: "beaker",
+      icon: "biotech",
     },
     {
       id: "physical-properties",
