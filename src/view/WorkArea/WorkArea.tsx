@@ -2299,7 +2299,9 @@ const WorkArea = () => {
             {availableFormulas.map((formula) => (
               <div
                 key={formula.id}
-                style={tw("flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer")}
+                style={tw(
+                  "flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+                )}
                 onClick={() => handleLoadFormulaFromModal(formula)}
               >
                 <div>
