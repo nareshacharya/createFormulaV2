@@ -38,7 +38,9 @@ const ChemicalStructureSection = ({
             <label style={tw("block text-sm font-medium text-gray-700 mb-1")}>
               Molecular Weight
             </label>
-            <p style={tw("text-sm text-gray-900")}>{mockData.molecularWeight}</p>
+            <p style={tw("text-sm text-gray-900")}>
+              {mockData.molecularWeight}
+            </p>
           </div>
           <div>
             <label style={tw("block text-sm font-medium text-gray-700 mb-1")}>
@@ -52,7 +54,9 @@ const ChemicalStructureSection = ({
             <label style={tw("block text-sm font-medium text-gray-700 mb-1")}>
               EINECS Number
             </label>
-            <p style={tw("text-sm text-gray-900 font-mono")}>{mockData.einecs}</p>
+            <p style={tw("text-sm text-gray-900 font-mono")}>
+              {mockData.einecs}
+            </p>
           </div>
         </div>
       </div>
@@ -64,7 +68,11 @@ const ChemicalStructureSection = ({
         </h3>
 
         {/* Placeholder for chemical structure diagram */}
-        <div style={tw("bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-4")}>
+        <div
+          style={tw(
+            "bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-4"
+          )}
+        >
           <i className="ri-flask-line text-4xl text-gray-400 mb-2"></i>
           <p style={tw("text-sm text-gray-500")}>Chemical structure diagram</p>
           <p style={tw("text-xs text-gray-400 mt-1")}>Would be rendered here</p>
@@ -75,7 +83,11 @@ const ChemicalStructureSection = ({
             <label style={tw("block text-sm font-medium text-gray-700 mb-1")}>
               SMILES
             </label>
-            <p style={tw("text-sm text-gray-900 font-mono bg-gray-50 p-2 rounded border break-all")}>
+            <p
+              style={tw(
+                "text-sm text-gray-900 font-mono bg-gray-50 p-2 rounded border break-all"
+              )}
+            >
               {mockData.smiles}
             </p>
           </div>
@@ -83,7 +95,11 @@ const ChemicalStructureSection = ({
             <label style={tw("block text-sm font-medium text-gray-700 mb-1")}>
               InChI
             </label>
-            <p style={tw("text-sm text-gray-900 font-mono bg-gray-50 p-2 rounded border break-all")}>
+            <p
+              style={tw(
+                "text-sm text-gray-900 font-mono bg-gray-50 p-2 rounded border break-all"
+              )}
+            >
               {mockData.inchi}
             </p>
           </div>

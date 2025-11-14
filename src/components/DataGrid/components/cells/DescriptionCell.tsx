@@ -36,9 +36,9 @@ export const DescriptionCell = ({
         </h3>
         <button
           onClick={onAddFormula}
-          className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 font-medium mx-auto shadow-sm"
+          className="px-4 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center gap-2 mx-auto shadow-sm"
         >
-          <span className="material-symbols-rounded text-xl">add</span>
+          <span className="material-symbols-rounded text-lg">add</span>
           Create/Add Formula
         </button>
       </div>
