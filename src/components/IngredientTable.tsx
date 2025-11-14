@@ -228,7 +228,10 @@ const IngredientTable = ({
         })}
       >
         <i
-          style={mergeStyles(tw("text-2xl"), { marginBottom: "0.5rem", display: "block" })}
+          style={mergeStyles(tw("text-2xl"), {
+            marginBottom: "0.5rem",
+            display: "block",
+          })}
           className="ri-search-line"
         ></i>
         <p>No ingredients match your filters</p>
@@ -336,7 +339,9 @@ const IngredientTable = ({
                       ></i>
                     ) : (
                       <i
-                        style={mergeStyles(tw("text-xs text-gray-400"), { opacity: 0 })}
+                        style={mergeStyles(tw("text-xs text-gray-400"), {
+                          opacity: 0,
+                        })}
                         className="ri-expand-up-down-line"
                       ></i>
                     )}

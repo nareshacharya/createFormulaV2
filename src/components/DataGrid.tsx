@@ -306,14 +306,17 @@ const DataGrid = ({
   );
 
   // Group columns by their group property
-  const groupedColumns = columns.reduce((acc, column, index) => {
-    const group = column.group || "default";
-    if (!acc[group]) {
-      acc[group] = [];
-    }
-    acc[group].push({ ...column, originalIndex: index });
-    return acc;
-  }, {} as Record<string, (Column & { originalIndex: number })[]>);
+  const groupedColumns = columns.reduce(
+    (acc, column, index) => {
+      const group = column.group || "default";
+      if (!acc[group]) {
+        acc[group] = [];
+      }
+      acc[group].push({ ...column, originalIndex: index });
+      return acc;
+    },
+    {} as Record<string, (Column & { originalIndex: number })[]>
+  );
 
   // Calculate column spans for group headers
   const getGroupSpan = (groupName: string) => {
@@ -576,7 +579,10 @@ const DataGrid = ({
   };
 
   return (
-    <div style={mergeStyles(tw("flex flex-col h-full p-2"), tw(className))} ref={tableRef}>
+    <div
+      style={mergeStyles(tw("flex flex-col h-full p-2"), tw(className))}
+      ref={tableRef}
+    >
       {/* Bulk Actions Toolbar */}
       <BulkActionsToolbar
         selectedCount={selectedRows.size}
@@ -625,7 +631,9 @@ const DataGrid = ({
 
       <div
         ref={scrollContainerRef}
-        style={tw("flex-1 overflow-auto border border-gray-200 rounded-lg shadow-sm")}
+        style={tw(
+          "flex-1 overflow-auto border border-gray-200 rounded-lg shadow-sm"
+        )}
       >
         <table style={tw("w-full")}>
           <TableHeader
@@ -711,7 +719,10 @@ const DataGrid = ({
                       >
                         {isDraggable && (
                           <span
-                            style={mergeStyles({ fontSize: "16px" }, tw("text-gray-400 cursor-move"))}
+                            style={mergeStyles(
+                              { fontSize: "16px" },
+                              tw("text-gray-400 cursor-move")
+                            )}
                             className="material-symbols-rounded"
                           >
                             drag_handle
@@ -731,7 +742,9 @@ const DataGrid = ({
                             type="checkbox"
                             checked={isRowSelected(row.id)}
                             onChange={() => toggleRowSelection(row.id)}
-                            style={tw("w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer")}
+                            style={tw(
+                              "w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                            )}
                           />
                         )}
                       </td>
@@ -883,7 +896,9 @@ const DataGrid = ({
                         <td
                           key={`${row.id}-${column.id}`}
                           style={mergeStyles(
-                            tw("px-3 py-2 border-r border-gray-100 last:border-r-0 font-sans"),
+                            tw(
+                              "px-3 py-2 border-r border-gray-100 last:border-r-0 font-sans"
+                            ),
                             tw(column.key === "description" ? "relative" : ""),
                             tw(
                               isTargetTotalInActiveFormula
@@ -934,7 +949,11 @@ const DataGrid = ({
                                       ? val.toFixed(5)
                                       : val || "100.00000";
                                   return (
-                                    <span style={tw("text-sm font-semibold text-gray-900 text-right block")}>
+                                    <span
+                                      style={tw(
+                                        "text-sm font-semibold text-gray-900 text-right block"
+                                      )}
+                                    >
                                       {displayValue}
                                     </span>
                                   );
@@ -1051,7 +1070,9 @@ const DataGrid = ({
                         <td
                           key={`${row.id}-${column.id}`}
                           style={mergeStyles(
-                            tw("px-3 py-2 border-r border-gray-100 last:border-r-0 font-sans"),
+                            tw(
+                              "px-3 py-2 border-r border-gray-100 last:border-r-0 font-sans"
+                            ),
                             tw(
                               isTargetTotalInActiveFormula
                                 ? "cursor-pointer hover:bg-blue-50"
@@ -1091,7 +1112,11 @@ const DataGrid = ({
                                       ? val.toFixed(5)
                                       : val || "100.00000";
                                   return (
-                                    <span style={tw("text-sm font-semibold text-gray-900 text-right block")}>
+                                    <span
+                                      style={tw(
+                                        "text-sm font-semibold text-gray-900 text-right block"
+                                      )}
+                                    >
                                       {displayValue}
                                     </span>
                                   );
