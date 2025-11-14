@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { Formula } from "../services/pega";
 import { eventBus } from "../utils/bus";
-import { tw } from "../utils/tailwindToInline";
+import { tw, mergeStyles } from "../utils/tailwindToInline";
 import FormulaQuickView from "./FormulaQuickView";
 import ListRow from "./ListRow";
 
@@ -69,10 +69,10 @@ const FormulaList = ({
   if (filteredFormulas.length === 0) {
     return (
       <div style={tw("text-center py-8 text-gray-500")}>
-        <span className="material-symbols-rounded text-2xl mb-2">science</span>
+        <span style={mergeStyles(tw("text-2xl"), { marginBottom: "0.5rem", display: "block" })} className="material-symbols-rounded">science</span>
         <p>No formulas found</p>
         {searchQuery && (
-          <p style={tw("text-sm mt-1")}>Try adjusting your search term</p>
+          <p style={mergeStyles(tw("text-sm"), { marginTop: "0.25rem" })}>Try adjusting your search term</p>
         )}
       </div>
     );
@@ -98,14 +98,17 @@ const FormulaList = ({
             }
           >
             <div style={tw("flex items-center justify-between w-full px-3")}>
-              <div style={tw("flex items-center space-x-2 flex-1")}>
+              <div style={tw("flex items-center flex-1")}>
                 {/* Status Dot */}
                 <div
-                  style={tw(
-                    `w-1.5 h-1.5 rounded-full ${getStatusColor(
-                      formula
-                    )} flex-shrink-0`
-                  )}
+                  style={{
+                    width: "0.375rem",
+                    height: "0.375rem",
+                    borderRadius: "9999px",
+                    flexShrink: 0,
+                    marginRight: "0.5rem",
+                    ...tw(getStatusColor(formula))
+                  }}
                   title={`Status: ${formula.status}`}
                 />
 
@@ -120,7 +123,7 @@ const FormulaList = ({
                   >
                     {formula.name}
                     {isSelected && (
-                      <span className="material-symbols-rounded text-blue-600 ml-1 text-xs">
+                      <span style={tw("text-blue-600 ml-1 text-xs")} className="material-symbols-rounded">
                         check
                       </span>
                     )}
@@ -159,7 +162,7 @@ const FormulaList = ({
                   onClick={(e) => handleViewClick(e, formula)}
                   aria-label={`View details for ${formula.name}`}
                 >
-                  <span className="material-symbols-rounded text-gray-400 text-lg">
+                  <span style={tw("text-gray-400 text-lg")} className="material-symbols-rounded">
                     visibility
                   </span>
                 </button>
