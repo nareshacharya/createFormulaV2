@@ -214,6 +214,41 @@ export function tw(...classNames: (string | undefined | null | false)[]): CSSPro
         .split(/\s+/)
         .filter(Boolean);
 
+    // Check for gradient classes
+    const gradientDirection = classes.find(c => c.startsWith('bg-gradient-to-'));
+    const fromColor = classes.find(c => c.startsWith('from-'));
+    const viaColor = classes.find(c => c.startsWith('via-'));
+    const toColor = classes.find(c => c.startsWith('to-'));
+
+    // Handle gradient if all required classes are present
+    if (gradientDirection && fromColor && toColor) {
+        const direction = gradientDirection.replace('bg-gradient-to-', '');
+        const directionMap: Record<string, string> = {
+            't': 'to top',
+            'tr': 'to top right',
+            'r': 'to right',
+            'br': 'to bottom right',
+            'b': 'to bottom',
+            'bl': 'to bottom left',
+            'l': 'to left',
+            'tl': 'to top left',
+        };
+
+        const from = colors[fromColor.replace('from-', '') as keyof typeof colors];
+        const to = colors[toColor.replace('to-', '') as keyof typeof colors];
+        
+        if (from && to && directionMap[direction]) {
+            if (viaColor) {
+                const via = colors[viaColor.replace('via-', '') as keyof typeof colors];
+                if (via) {
+                    styles.backgroundImage = `linear-gradient(${directionMap[direction]}, ${from}, ${via}, ${to})`;
+                }
+            } else {
+                styles.backgroundImage = `linear-gradient(${directionMap[direction]}, ${from}, ${to})`;
+            }
+        }
+    }
+
     classes.forEach(className => {
         const style = parseClassName(className);
         Object.assign(styles, style);
@@ -305,9 +340,14 @@ function parseClassName(className: string): CSSProperties {
     const plMatch = cleanClass.match(/^pl-(\d+\.?\d*)$/);
     if (plMatch) styles.paddingLeft = spacing[plMatch[1] as keyof typeof spacing] || `${plMatch[1]}px`;
 
-    // Margin
-    const mMatch = cleanClass.match(/^m-(\d+\.?\d*)$/);
-    if (mMatch) styles.margin = spacing[mMatch[1] as keyof typeof spacing] || `${mMatch[1]}px`;
+    // Margin (with arbitrary value support)
+    const mArbitraryMatch = cleanClass.match(/^m-\[(.+?)\]$/);
+    if (mArbitraryMatch) {
+        styles.margin = mArbitraryMatch[1];
+    } else {
+        const mMatch = cleanClass.match(/^m-(\d+\.?\d*)$/);
+        if (mMatch) styles.margin = spacing[mMatch[1] as keyof typeof spacing] || `${mMatch[1]}px`;
+    }
 
     const mxMatch = cleanClass.match(/^mx-(\d+\.?\d*)$/);
     if (mxMatch) {
@@ -323,32 +363,52 @@ function parseClassName(className: string): CSSProperties {
         styles.marginBottom = val;
     }
 
-    const mtMatch = cleanClass.match(/^mt-(\d+\.?\d*)$/);
-    if (mtMatch) styles.marginTop = spacing[mtMatch[1] as keyof typeof spacing] || `${mtMatch[1]}px`;
+    const mtArbitraryMatch = cleanClass.match(/^mt-\[(.+?)\]$/);
+    if (mtArbitraryMatch) {
+        styles.marginTop = mtArbitraryMatch[1];
+    } else {
+        const mtMatch = cleanClass.match(/^mt-(\d+\.?\d*)$/);
+        if (mtMatch) styles.marginTop = spacing[mtMatch[1] as keyof typeof spacing] || `${mtMatch[1]}px`;
+    }
 
     const mrMatch = cleanClass.match(/^mr-(\d+\.?\d*)$/);
     if (mrMatch) styles.marginRight = spacing[mrMatch[1] as keyof typeof spacing] || `${mrMatch[1]}px`;
 
-    const mbMatch = cleanClass.match(/^mb-(\d+\.?\d*)$/);
-    if (mbMatch) styles.marginBottom = spacing[mbMatch[1] as keyof typeof spacing] || `${mbMatch[1]}px`;
+    const mbArbitraryMatch = cleanClass.match(/^mb-\[(.+?)\]$/);
+    if (mbArbitraryMatch) {
+        styles.marginBottom = mbArbitraryMatch[1];
+    } else {
+        const mbMatch = cleanClass.match(/^mb-(\d+\.?\d*)$/);
+        if (mbMatch) styles.marginBottom = spacing[mbMatch[1] as keyof typeof spacing] || `${mbMatch[1]}px`;
+    }
 
     const mlMatch = cleanClass.match(/^ml-(\d+\.?\d*)$/);
     if (mlMatch) styles.marginLeft = spacing[mlMatch[1] as keyof typeof spacing] || `${mlMatch[1]}px`;
 
-    // Width
+    // Width (with arbitrary value support)
     if (cleanClass === 'w-full') styles.width = '100%';
     if (cleanClass === 'w-auto') styles.width = 'auto';
-    const wMatch = cleanClass.match(/^w-(\d+\.?\d*)$/);
-    if (wMatch) styles.width = spacing[wMatch[1] as keyof typeof spacing] || `${wMatch[1]}px`;
-    const wPercentMatch = cleanClass.match(/^w-(\d+)\/(\d+)$/);
-    if (wPercentMatch) styles.width = `${(parseInt(wPercentMatch[1]) / parseInt(wPercentMatch[2])) * 100}%`;
+    const wArbitraryMatch = cleanClass.match(/^w-\[(.+?)\]$/);
+    if (wArbitraryMatch) {
+        styles.width = wArbitraryMatch[1];
+    } else {
+        const wMatch = cleanClass.match(/^w-(\d+\.?\d*)$/);
+        if (wMatch) styles.width = spacing[wMatch[1] as keyof typeof spacing] || `${wMatch[1]}px`;
+        const wPercentMatch = cleanClass.match(/^w-(\d+)\/(\d+)$/);
+        if (wPercentMatch) styles.width = `${(parseInt(wPercentMatch[1]) / parseInt(wPercentMatch[2])) * 100}%`;
+    }
 
-    // Height
+    // Height (with arbitrary value support)
     if (cleanClass === 'h-full') styles.height = '100%';
     if (cleanClass === 'h-auto') styles.height = 'auto';
     if (cleanClass === 'h-screen') styles.height = '100vh';
-    const hMatch = cleanClass.match(/^h-(\d+\.?\d*)$/);
-    if (hMatch) styles.height = spacing[hMatch[1] as keyof typeof spacing] || `${hMatch[1]}px`;
+    const hArbitraryMatch = cleanClass.match(/^h-\[(.+?)\]$/);
+    if (hArbitraryMatch) {
+        styles.height = hArbitraryMatch[1];
+    } else {
+        const hMatch = cleanClass.match(/^h-(\d+\.?\d*)$/);
+        if (hMatch) styles.height = spacing[hMatch[1] as keyof typeof spacing] || `${hMatch[1]}px`;
+    }
 
     // Min/Max dimensions
     if (cleanClass === 'min-w-full') styles.minWidth = '100%';
@@ -423,6 +483,12 @@ function parseClassName(className: string): CSSProperties {
         }
     }
 
+    // Gradient backgrounds - we need to handle this in tw() function to combine all gradient classes
+    // For now, just mark gradient direction
+    if (cleanClass.startsWith('bg-gradient-to-')) {
+        // Will be processed after all classes are collected
+    }
+
     // Border color (with opacity support)
     const borderColorMatch = cleanClass.match(/^border-(.+)$/);
     if (borderColorMatch) {
@@ -483,10 +549,15 @@ function parseClassName(className: string): CSSProperties {
     if (cleanClass === 'border-dotted') styles.borderStyle = 'dotted';
     if (cleanClass === 'border-none') styles.borderStyle = 'none';
 
-    // Font size
-    const fontSizeMatch = cleanClass.match(/^text-(\w+)$/);
-    if (fontSizeMatch && fontSize[fontSizeMatch[1] as keyof typeof fontSize]) {
-        styles.fontSize = fontSize[fontSizeMatch[1] as keyof typeof fontSize];
+    // Font size (including arbitrary values like text-[10px])
+    const fontSizeArbitraryMatch = cleanClass.match(/^text-\[(.+?)\]$/);
+    if (fontSizeArbitraryMatch) {
+        styles.fontSize = fontSizeArbitraryMatch[1];
+    } else {
+        const fontSizeMatch = cleanClass.match(/^text-(\w+)$/);
+        if (fontSizeMatch && fontSize[fontSizeMatch[1] as keyof typeof fontSize]) {
+            styles.fontSize = fontSize[fontSizeMatch[1] as keyof typeof fontSize];
+        }
     }
 
     // Font weight
