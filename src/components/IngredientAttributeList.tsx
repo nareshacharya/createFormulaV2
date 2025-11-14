@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { eventBus } from "../utils/bus";
-import { tw } from "../utils/tailwindToInline";
+import { tw, mergeStyles } from "../utils/tailwindToInline";
 import ListRow from "./ListRow";
 
 interface IngredientAttribute {
@@ -118,8 +118,8 @@ const IngredientAttributeList = ({
                     {attribute.name}
                     {isSelected && (
                       <i
-                        style={tw("ml-1 text-xs")}
-                        className="ri-check-line text-blue-600"
+                        style={tw("ml-1 text-xs text-blue-600")}
+                        className="ri-check-line"
                       ></i>
                     )}
                   </h4>
@@ -142,10 +142,10 @@ const IngredientAttributeList = ({
 
       {filteredAttributes.length === 0 && (
         <div style={tw("text-center py-6 text-gray-500")}>
-          <i className="ri-list-check-line text-xl mb-2"></i>
+          <i style={mergeStyles(tw("text-xl"), { marginBottom: "0.5rem", display: "block" })} className="ri-list-check-line"></i>
           <p style={tw("text-sm")}>No attributes found</p>
           {(searchQuery || Object.keys(appliedFilters).length > 0) && (
-            <p style={tw("text-xs mt-1")}>
+            <p style={mergeStyles(tw("text-xs"), { marginTop: "0.25rem" })}>
               Try adjusting your search or filters
             </p>
           )}

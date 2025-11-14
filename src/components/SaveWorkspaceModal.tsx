@@ -75,9 +75,10 @@ const SaveWorkspaceModal = ({
             disabled={!workspaceName.trim()}
             style={mergeStyles(
               tw(
-                "px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg flex items-center gap-2"
+                "px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg flex items-center"
               ),
               {
+                gap: "0.5rem",
                 opacity: !workspaceName.trim() ? 0.5 : 1,
                 cursor: !workspaceName.trim() ? "not-allowed" : "pointer",
               }
