@@ -126,25 +126,35 @@ const SuppliersSection = ({
               {/* Supplier Details Grid */}
               <div style={tw("grid grid-cols-2 gap-4 mb-4")}>
                 <div>
-                  <label style={tw("block text-xs font-medium text-gray-500 mb-1")}>
+                  <label
+                    style={tw("block text-xs font-medium text-gray-500 mb-1")}
+                  >
                     Lead Time
                   </label>
                   <p style={tw("text-sm text-gray-900")}>{supplier.leadTime}</p>
                 </div>
                 <div>
-                  <label style={tw("block text-xs font-medium text-gray-500 mb-1")}>
+                  <label
+                    style={tw("block text-xs font-medium text-gray-500 mb-1")}
+                  >
                     Minimum Order
                   </label>
                   <p style={tw("text-sm text-gray-900")}>{supplier.minOrder}</p>
                 </div>
                 <div>
-                  <label style={tw("block text-xs font-medium text-gray-500 mb-1")}>
+                  <label
+                    style={tw("block text-xs font-medium text-gray-500 mb-1")}
+                  >
                     Last Order
                   </label>
-                  <p style={tw("text-sm text-gray-900")}>{supplier.lastOrder}</p>
+                  <p style={tw("text-sm text-gray-900")}>
+                    {supplier.lastOrder}
+                  </p>
                 </div>
                 <div>
-                  <label style={tw("block text-xs font-medium text-gray-500 mb-1")}>
+                  <label
+                    style={tw("block text-xs font-medium text-gray-500 mb-1")}
+                  >
                     Contact
                   </label>
                   <p style={tw("text-sm text-gray-900")}>
@@ -155,7 +165,9 @@ const SuppliersSection = ({
 
               {/* Certifications */}
               <div style={tw("mb-4")}>
-                <label style={tw("block text-xs font-medium text-gray-500 mb-2")}>
+                <label
+                  style={tw("block text-xs font-medium text-gray-500 mb-2")}
+                >
                   Certifications
                 </label>
                 <div style={tw("flex flex-wrap gap-2")}>
@@ -169,7 +181,9 @@ const SuppliersSection = ({
 
               {/* Contact Information */}
               <div style={tw("bg-gray-50 rounded-lg p-3")}>
-                <label style={tw("block text-xs font-medium text-gray-500 mb-2")}>
+                <label
+                  style={tw("block text-xs font-medium text-gray-500 mb-2")}
+                >
                   Contact Information
                 </label>
                 <div style={tw("space-y-1")}>
