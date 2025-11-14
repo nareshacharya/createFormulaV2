@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { tw } from "../utils/tailwindToInline";
+import { tw, mergeStyles } from "../utils/tailwindToInline";
 
 export interface FilterRule {
   id: string;
@@ -259,7 +259,7 @@ const QueryBuilder = ({
                     "inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 border border-blue-200 rounded hover:bg-blue-50 cursor-pointer"
                   )}
                 >
-                  <i style={tw("mr-1")} className="ri-add-line"></i>Rule
+                  <i style={mergeStyles(tw("mr-1"))} className="ri-add-line"></i>Rule
                 </button>
                 <button
                   onClick={() => addGroupToGroup(rule.id)}
@@ -267,7 +267,7 @@ const QueryBuilder = ({
                     "inline-flex items-center px-2 py-1 text-xs font-medium text-green-600 border border-green-200 rounded hover:bg-green-50 cursor-pointer"
                   )}
                 >
-                  <i style={tw("mr-1")} className="ri-folder-add-line"></i>Group
+                  <i style={mergeStyles(tw("mr-1"))} className="ri-folder-add-line"></i>Group
                 </button>
               </div>
             </div>
@@ -277,7 +277,7 @@ const QueryBuilder = ({
                 "p-1 text-red-600 hover:bg-red-50 rounded cursor-pointer"
               )}
             >
-              <i className="ri-close-line text-xs"></i>
+              <i style={tw("text-xs")} className="ri-close-line"></i>
             </button>
           </div>
           <div style={tw("space-y-2")}>
@@ -356,7 +356,7 @@ const QueryBuilder = ({
               "p-1 text-red-600 hover:bg-red-50 rounded cursor-pointer flex-shrink-0"
             )}
           >
-            <i className="ri-close-line text-xs"></i>
+            <i style={tw("text-xs")} className="ri-close-line"></i>
           </button>
         </div>
       );
@@ -403,7 +403,7 @@ const QueryBuilder = ({
               "inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 border border-blue-200 rounded hover:bg-blue-50 cursor-pointer"
             )}
           >
-            <i style={tw("mr-1")} className="ri-add-line"></i>Rule
+            <i style={mergeStyles(tw("mr-1"))} className="ri-add-line"></i>Rule
           </button>
           <button
             onClick={() => addGroupToGroup("root")}
@@ -411,7 +411,7 @@ const QueryBuilder = ({
               "inline-flex items-center px-2 py-1 text-xs font-medium text-green-600 border border-green-200 rounded hover:bg-green-50 cursor-pointer"
             )}
           >
-            <i style={tw("mr-1")} className="ri-folder-add-line"></i>Group
+            <i style={mergeStyles(tw("mr-1"))} className="ri-folder-add-line"></i>Group
           </button>
         </div>
 
