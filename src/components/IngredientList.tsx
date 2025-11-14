@@ -132,9 +132,7 @@ const IngredientList = ({
               }
               onClick={() => handleIngredientClick(ingredient)}
               compact={true}
-              className={
-                isSelected ? "bg-blue-50 border-l-2 border-blue-400" : ""
-              }
+              selected={isSelected}
             >
               <div style={tw("flex items-center justify-between w-full px-3")}>
                 <div style={tw("flex items-center flex-1")}>
