@@ -228,8 +228,8 @@ const IngredientTable = ({
         })}
       >
         <i
-          className="ri-search-line text-2xl"
-          style={{ marginBottom: "0.5rem", display: "block" }}
+          style={mergeStyles(tw("text-2xl"), { marginBottom: "0.5rem", display: "block" })}
+          className="ri-search-line"
         ></i>
         <p>No ingredients match your filters</p>
         <p style={mergeStyles(tw("text-sm"), { marginTop: "0.25rem" })}>
@@ -267,7 +267,7 @@ const IngredientTable = ({
                 size="sm"
                 style={tw("whitespace-nowrap")}
               >
-                <i className="ri-add-line mr-1"></i>
+                <i style={mergeStyles(tw("mr-1"))} className="ri-add-line"></i>
                 Add to Formula
               </Button>
             )}
@@ -329,14 +329,15 @@ const IngredientTable = ({
                     </span>
                     {sortConfig?.key === column ? (
                       <i
+                        style={tw("text-xs text-blue-600")}
                         className={`ri-arrow-${
                           sortConfig.direction === "asc" ? "up" : "down"
-                        }-line text-xs text-blue-600`}
+                        }-line`}
                       ></i>
                     ) : (
                       <i
-                        className="ri-expand-up-down-line text-xs text-gray-400"
-                        style={{ opacity: 0 }}
+                        style={mergeStyles(tw("text-xs text-gray-400"), { opacity: 0 })}
+                        className="ri-expand-up-down-line"
                       ></i>
                     )}
                   </div>
