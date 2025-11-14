@@ -125,19 +125,8 @@ const IngredientQuickView = ({
       title={ingredient.name}
       size="3xl"
       noPadding={true}
-      headerActions={
-        <Button onClick={handleAddToFormula} size="sm">
-          <span
-            className="material-symbols-rounded"
-            style={{ marginRight: "0.5rem" }}
-          >
-            add
-          </span>
-          Add to Active Formula
-        </Button>
-      }
       footerActions={
-        <div style={tw("flex justify-end")}>
+        <div style={tw("flex justify-end gap-2")}>
           <button
             onClick={onClose}
             style={tw(
@@ -146,6 +135,15 @@ const IngredientQuickView = ({
           >
             Close
           </button>
+          <Button onClick={handleAddToFormula} size="sm">
+            <span
+              className="material-symbols-rounded"
+              style={{ marginRight: "0.5rem" }}
+            >
+              add
+            </span>
+            Add to Active Formula
+          </Button>
         </div>
       }
     >

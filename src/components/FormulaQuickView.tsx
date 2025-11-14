@@ -20,7 +20,7 @@ const FormulaQuickView = ({
 
   const sections = [
     { id: "overview", label: "Overview", icon: "info" },
-    { id: "ingredients", label: "Ingredients", icon: "beaker" },
+    { id: "ingredients", label: "Ingredients", icon: "inventory_2" },
     { id: "notes", label: "Fragrance Notes", icon: "air_freshener" },
   ];
 
@@ -142,7 +142,7 @@ const FormulaQuickView = ({
     if (!formula || !formula.ingredients || formula.ingredients.length === 0) {
       return (
         <div style={mergeStyles(tw("text-center text-gray-500"), { paddingTop: "2rem", paddingBottom: "2rem" })}>
-          <span className="material-symbols-rounded" style={mergeStyles(tw("text-2xl"), { marginBottom: "0.5rem", display: "block" })}>beaker</span>
+          <span className="material-symbols-rounded" style={mergeStyles(tw("text-2xl"), { marginBottom: "0.5rem", display: "block" })}>inventory_2</span>
           <p>No ingredients in this formula</p>
         </div>
       );
@@ -334,20 +334,18 @@ const FormulaQuickView = ({
       title={formula.name}
       size="3xl"
       noPadding={true}
-      headerActions={
-        <Button onClick={handleAddToWorkArea} size="sm">
-          <span className="material-symbols-rounded" style={{ marginRight: "0.5rem" }}>add</span>
-          Add to Work Area
-        </Button>
-      }
       footerActions={
-        <div style={tw("flex justify-end")}>
+        <div style={tw("flex justify-end gap-2")}>
           <button
             onClick={onClose}
             style={tw("px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md cursor-pointer")}
           >
             Close
           </button>
+          <Button onClick={handleAddToWorkArea} size="sm">
+            <span className="material-symbols-rounded" style={{ marginRight: "0.5rem" }}>add</span>
+            Add to Work Area
+          </Button>
         </div>
       }
     >
