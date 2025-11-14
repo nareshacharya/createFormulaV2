@@ -69,10 +69,20 @@ const FormulaList = ({
   if (filteredFormulas.length === 0) {
     return (
       <div style={tw("text-center py-8 text-gray-500")}>
-        <span style={mergeStyles(tw("text-2xl"), { marginBottom: "0.5rem", display: "block" })} className="material-symbols-rounded">science</span>
+        <span
+          style={mergeStyles(tw("text-2xl"), {
+            marginBottom: "0.5rem",
+            display: "block",
+          })}
+          className="material-symbols-rounded"
+        >
+          science
+        </span>
         <p>No formulas found</p>
         {searchQuery && (
-          <p style={mergeStyles(tw("text-sm"), { marginTop: "0.25rem" })}>Try adjusting your search term</p>
+          <p style={mergeStyles(tw("text-sm"), { marginTop: "0.25rem" })}>
+            Try adjusting your search term
+          </p>
         )}
       </div>
     );
@@ -107,7 +117,7 @@ const FormulaList = ({
                     borderRadius: "9999px",
                     flexShrink: 0,
                     marginRight: "0.5rem",
-                    ...tw(getStatusColor(formula))
+                    ...tw(getStatusColor(formula)),
                   }}
                   title={`Status: ${formula.status}`}
                 />
@@ -123,7 +133,10 @@ const FormulaList = ({
                   >
                     {formula.name}
                     {isSelected && (
-                      <span style={tw("text-blue-600 ml-1 text-xs")} className="material-symbols-rounded">
+                      <span
+                        style={tw("text-blue-600 ml-1 text-xs")}
+                        className="material-symbols-rounded"
+                      >
                         check
                       </span>
                     )}
@@ -162,7 +175,10 @@ const FormulaList = ({
                   onClick={(e) => handleViewClick(e, formula)}
                   aria-label={`View details for ${formula.name}`}
                 >
-                  <span style={tw("text-gray-400 text-lg")} className="material-symbols-rounded">
+                  <span
+                    style={tw("text-gray-400 text-lg")}
+                    className="material-symbols-rounded"
+                  >
                     visibility
                   </span>
                 </button>

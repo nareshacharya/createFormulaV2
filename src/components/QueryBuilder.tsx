@@ -259,7 +259,11 @@ const QueryBuilder = ({
                     "inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 border border-blue-200 rounded hover:bg-blue-50 cursor-pointer"
                   )}
                 >
-                  <i style={mergeStyles(tw("mr-1"))} className="ri-add-line"></i>Rule
+                  <i
+                    style={mergeStyles(tw("mr-1"))}
+                    className="ri-add-line"
+                  ></i>
+                  Rule
                 </button>
                 <button
                   onClick={() => addGroupToGroup(rule.id)}
@@ -267,7 +271,11 @@ const QueryBuilder = ({
                     "inline-flex items-center px-2 py-1 text-xs font-medium text-green-600 border border-green-200 rounded hover:bg-green-50 cursor-pointer"
                   )}
                 >
-                  <i style={mergeStyles(tw("mr-1"))} className="ri-folder-add-line"></i>Group
+                  <i
+                    style={mergeStyles(tw("mr-1"))}
+                    className="ri-folder-add-line"
+                  ></i>
+                  Group
                 </button>
               </div>
             </div>
@@ -411,7 +419,11 @@ const QueryBuilder = ({
               "inline-flex items-center px-2 py-1 text-xs font-medium text-green-600 border border-green-200 rounded hover:bg-green-50 cursor-pointer"
             )}
           >
-            <i style={mergeStyles(tw("mr-1"))} className="ri-folder-add-line"></i>Group
+            <i
+              style={mergeStyles(tw("mr-1"))}
+              className="ri-folder-add-line"
+            ></i>
+            Group
           </button>
         </div>
 

@@ -57,29 +57,59 @@ const FormulaQuickView = ({
       <div style={{ marginBottom: "1.5rem" }}>
         {/* Basic Information */}
         <div>
-          <h3 style={mergeStyles(tw("text-lg font-semibold text-gray-900"), { marginBottom: "1rem" })}>
+          <h3
+            style={mergeStyles(tw("text-lg font-semibold text-gray-900"), {
+              marginBottom: "1rem",
+            })}
+          >
             Basic Information
           </h3>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "1rem" }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(2, 1fr)",
+              gap: "1rem",
+            }}
+          >
             <div>
               <label style={tw("text-sm font-medium text-gray-500")}>
                 Formula ID
               </label>
-              <p style={mergeStyles(tw("text-sm text-gray-900"), { marginTop: "0.25rem" })}>{formula.id}</p>
+              <p
+                style={mergeStyles(tw("text-sm text-gray-900"), {
+                  marginTop: "0.25rem",
+                })}
+              >
+                {formula.id}
+              </p>
             </div>
             <div>
               <label style={tw("text-sm font-medium text-gray-500")}>
                 Version
               </label>
-              <p style={mergeStyles(tw("text-sm text-gray-900"), { marginTop: "0.25rem" })}>{formula.version}</p>
+              <p
+                style={mergeStyles(tw("text-sm text-gray-900"), {
+                  marginTop: "0.25rem",
+                })}
+              >
+                {formula.version}
+              </p>
             </div>
             <div>
               <label style={tw("text-sm font-medium text-gray-500")}>
                 Status
               </label>
-              <div style={mergeStyles(tw("flex items-center"), { marginTop: "0.25rem" })}>
+              <div
+                style={mergeStyles(tw("flex items-center"), {
+                  marginTop: "0.25rem",
+                })}
+              >
                 <div
-                  style={mergeStyles(tw(`rounded-full ${getStatusColor()}`), { width: "0.5rem", height: "0.5rem", marginRight: "0.5rem" })}
+                  style={mergeStyles(tw(`rounded-full ${getStatusColor()}`), {
+                    width: "0.5rem",
+                    height: "0.5rem",
+                    marginRight: "0.5rem",
+                  })}
                 />
                 <p style={tw("text-sm text-gray-900")}>{getStatusLabel()}</p>
               </div>
@@ -88,19 +118,35 @@ const FormulaQuickView = ({
               <label style={tw("text-sm font-medium text-gray-500")}>
                 Category
               </label>
-              <p style={mergeStyles(tw("text-sm text-gray-900"), { marginTop: "0.25rem" })}>{formula.category}</p>
+              <p
+                style={mergeStyles(tw("text-sm text-gray-900"), {
+                  marginTop: "0.25rem",
+                })}
+              >
+                {formula.category}
+              </p>
             </div>
             <div>
               <label style={tw("text-sm font-medium text-gray-500")}>
                 Created By
               </label>
-              <p style={mergeStyles(tw("text-sm text-gray-900"), { marginTop: "0.25rem" })}>{formula.createdBy}</p>
+              <p
+                style={mergeStyles(tw("text-sm text-gray-900"), {
+                  marginTop: "0.25rem",
+                })}
+              >
+                {formula.createdBy}
+              </p>
             </div>
             <div>
               <label style={tw("text-sm font-medium text-gray-500")}>
                 Last Updated
               </label>
-              <p style={mergeStyles(tw("text-sm text-gray-900"), { marginTop: "0.25rem" })}>
+              <p
+                style={mergeStyles(tw("text-sm text-gray-900"), {
+                  marginTop: "0.25rem",
+                })}
+              >
                 {formula.lastUpdated}
               </p>
             </div>
@@ -108,7 +154,11 @@ const FormulaQuickView = ({
               <label style={tw("text-sm font-medium text-gray-500")}>
                 Cost per kg
               </label>
-              <p style={mergeStyles(tw("text-sm text-gray-900 font-semibold"), { marginTop: "0.25rem" })}>
+              <p
+                style={mergeStyles(tw("text-sm text-gray-900 font-semibold"), {
+                  marginTop: "0.25rem",
+                })}
+              >
                 ${formula.costPerKg?.toFixed(2) || "0.00"}
               </p>
             </div>
@@ -116,7 +166,11 @@ const FormulaQuickView = ({
               <label style={tw("text-sm font-medium text-gray-500")}>
                 Total Percentage
               </label>
-              <p style={mergeStyles(tw("text-sm text-gray-900"), { marginTop: "0.25rem" })}>
+              <p
+                style={mergeStyles(tw("text-sm text-gray-900"), {
+                  marginTop: "0.25rem",
+                })}
+              >
                 {formula.totalPercentage}%
               </p>
             </div>
@@ -126,7 +180,11 @@ const FormulaQuickView = ({
         {/* Description */}
         {formula.description && (
           <div style={{ marginTop: "1.5rem" }}>
-            <h3 style={mergeStyles(tw("text-lg font-semibold text-gray-900"), { marginBottom: "0.5rem" })}>
+            <h3
+              style={mergeStyles(tw("text-lg font-semibold text-gray-900"), {
+                marginBottom: "0.5rem",
+              })}
+            >
               Description
             </h3>
             <p style={tw("text-sm text-gray-600 leading-relaxed")}>
@@ -141,8 +199,21 @@ const FormulaQuickView = ({
   const renderIngredientsSection = () => {
     if (!formula || !formula.ingredients || formula.ingredients.length === 0) {
       return (
-        <div style={mergeStyles(tw("text-center text-gray-500"), { paddingTop: "2rem", paddingBottom: "2rem" })}>
-          <span className="material-symbols-rounded" style={mergeStyles(tw("text-2xl"), { marginBottom: "0.5rem", display: "block" })}>inventory_2</span>
+        <div
+          style={mergeStyles(tw("text-center text-gray-500"), {
+            paddingTop: "2rem",
+            paddingBottom: "2rem",
+          })}
+        >
+          <span
+            className="material-symbols-rounded"
+            style={mergeStyles(tw("text-2xl"), {
+              marginBottom: "0.5rem",
+              display: "block",
+            })}
+          >
+            inventory_2
+          </span>
           <p>No ingredients in this formula</p>
         </div>
       );
@@ -150,23 +221,43 @@ const FormulaQuickView = ({
 
     return (
       <div style={{ marginBottom: "1rem" }}>
-        <h3 style={mergeStyles(tw("text-lg font-semibold text-gray-900"), { marginBottom: "1rem" })}>
+        <h3
+          style={mergeStyles(tw("text-lg font-semibold text-gray-900"), {
+            marginBottom: "1rem",
+          })}
+        >
           Ingredient List
         </h3>
         <div style={tw("overflow-hidden border border-gray-200 rounded-lg")}>
           <table style={tw("min-w-full divide-y divide-gray-200")}>
             <thead style={tw("bg-gray-50")}>
               <tr>
-                <th style={tw("px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider")}>
+                <th
+                  style={tw(
+                    "px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  )}
+                >
                   Ingredient Name
                 </th>
-                <th style={tw("px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider")}>
+                <th
+                  style={tw(
+                    "px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  )}
+                >
                   ID
                 </th>
-                <th style={tw("px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider")}>
+                <th
+                  style={tw(
+                    "px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  )}
+                >
                   Type
                 </th>
-                <th style={tw("px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider")}>
+                <th
+                  style={tw(
+                    "px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  )}
+                >
                   Percentage
                 </th>
               </tr>
@@ -182,18 +273,24 @@ const FormulaQuickView = ({
                   </td>
                   <td style={tw("px-4 py-3 text-sm text-gray-500")}>
                     <span
-                      style={tw(`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                        ingredient.type === "natural"
-                          ? "bg-green-100 text-green-800"
-                          : ingredient.type === "synthetic"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-gray-100 text-gray-800"
-                      }`)}
+                      style={tw(
+                        `inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                          ingredient.type === "natural"
+                            ? "bg-green-100 text-green-800"
+                            : ingredient.type === "synthetic"
+                              ? "bg-blue-100 text-blue-800"
+                              : "bg-gray-100 text-gray-800"
+                        }`
+                      )}
                     >
                       {ingredient.type}
                     </span>
                   </td>
-                  <td style={tw("px-4 py-3 text-sm text-gray-900 text-right font-medium")}>
+                  <td
+                    style={tw(
+                      "px-4 py-3 text-sm text-gray-900 text-right font-medium"
+                    )}
+                  >
                     {ingredient.percentage}%
                   </td>
                 </tr>
@@ -207,7 +304,11 @@ const FormulaQuickView = ({
                 >
                   Total
                 </td>
-                <td style={tw("px-4 py-3 text-sm font-semibold text-gray-900 text-right")}>
+                <td
+                  style={tw(
+                    "px-4 py-3 text-sm font-semibold text-gray-900 text-right"
+                  )}
+                >
                   {formula.ingredients
                     .reduce((sum, ing) => sum + ing.percentage, 0)
                     .toFixed(2)}
@@ -224,8 +325,19 @@ const FormulaQuickView = ({
   const renderNotesSection = () => {
     if (!formula || !formula.notes) {
       return (
-        <div style={mergeStyles(tw("text-center text-gray-500"), { paddingTop: "2rem", paddingBottom: "2rem" })}>
-          <span className="material-symbols-rounded" style={mergeStyles(tw("text-2xl"), { marginBottom: "0.5rem", display: "block" })}>
+        <div
+          style={mergeStyles(tw("text-center text-gray-500"), {
+            paddingTop: "2rem",
+            paddingBottom: "2rem",
+          })}
+        >
+          <span
+            className="material-symbols-rounded"
+            style={mergeStyles(tw("text-2xl"), {
+              marginBottom: "0.5rem",
+              display: "block",
+            })}
+          >
             air_freshener
           </span>
           <p>No fragrance notes available</p>
@@ -237,14 +349,28 @@ const FormulaQuickView = ({
 
     return (
       <div>
-        <h3 style={mergeStyles(tw("text-lg font-semibold text-gray-900"), { marginBottom: "1rem" })}>
+        <h3
+          style={mergeStyles(tw("text-lg font-semibold text-gray-900"), {
+            marginBottom: "1rem",
+          })}
+        >
           Fragrance Notes
         </h3>
 
         {/* Top Notes */}
         <div style={{ marginBottom: "1.5rem" }}>
-          <div style={mergeStyles(tw("flex items-center"), { marginBottom: "0.75rem" })}>
-            <div style={mergeStyles(tw("bg-yellow-400 rounded-full"), { width: "0.75rem", height: "0.75rem", marginRight: "0.5rem" })}></div>
+          <div
+            style={mergeStyles(tw("flex items-center"), {
+              marginBottom: "0.75rem",
+            })}
+          >
+            <div
+              style={mergeStyles(tw("bg-yellow-400 rounded-full"), {
+                width: "0.75rem",
+                height: "0.75rem",
+                marginRight: "0.5rem",
+              })}
+            ></div>
             <h4 style={tw("text-sm font-semibold text-gray-900")}>Top Notes</h4>
           </div>
           {top && top.length > 0 ? (
@@ -252,7 +378,9 @@ const FormulaQuickView = ({
               {top.map((note, index) => (
                 <span
                   key={index}
-                  style={tw("inline-flex px-3 py-1 text-sm bg-yellow-50 text-yellow-800 rounded-full border border-yellow-200")}
+                  style={tw(
+                    "inline-flex px-3 py-1 text-sm bg-yellow-50 text-yellow-800 rounded-full border border-yellow-200"
+                  )}
                 >
                   {note}
                 </span>
@@ -265,8 +393,18 @@ const FormulaQuickView = ({
 
         {/* Middle Notes */}
         <div style={{ marginBottom: "1.5rem" }}>
-          <div style={mergeStyles(tw("flex items-center"), { marginBottom: "0.75rem" })}>
-            <div style={mergeStyles(tw("bg-pink-400 rounded-full"), { width: "0.75rem", height: "0.75rem", marginRight: "0.5rem" })}></div>
+          <div
+            style={mergeStyles(tw("flex items-center"), {
+              marginBottom: "0.75rem",
+            })}
+          >
+            <div
+              style={mergeStyles(tw("bg-pink-400 rounded-full"), {
+                width: "0.75rem",
+                height: "0.75rem",
+                marginRight: "0.5rem",
+              })}
+            ></div>
             <h4 style={tw("text-sm font-semibold text-gray-900")}>
               Middle Notes
             </h4>
@@ -276,7 +414,9 @@ const FormulaQuickView = ({
               {middle.map((note, index) => (
                 <span
                   key={index}
-                  style={tw("inline-flex px-3 py-1 text-sm bg-pink-50 text-pink-800 rounded-full border border-pink-200")}
+                  style={tw(
+                    "inline-flex px-3 py-1 text-sm bg-pink-50 text-pink-800 rounded-full border border-pink-200"
+                  )}
                 >
                   {note}
                 </span>
@@ -289,16 +429,30 @@ const FormulaQuickView = ({
 
         {/* Base Notes */}
         <div>
-          <div style={mergeStyles(tw("flex items-center"), { marginBottom: "0.75rem" })}>
-            <div style={mergeStyles(tw("bg-purple-400 rounded-full"), { width: "0.75rem", height: "0.75rem", marginRight: "0.5rem" })}></div>
-            <h4 style={tw("text-sm font-semibold text-gray-900")}>Base Notes</h4>
+          <div
+            style={mergeStyles(tw("flex items-center"), {
+              marginBottom: "0.75rem",
+            })}
+          >
+            <div
+              style={mergeStyles(tw("bg-purple-400 rounded-full"), {
+                width: "0.75rem",
+                height: "0.75rem",
+                marginRight: "0.5rem",
+              })}
+            ></div>
+            <h4 style={tw("text-sm font-semibold text-gray-900")}>
+              Base Notes
+            </h4>
           </div>
           {base && base.length > 0 ? (
             <div style={mergeStyles(tw("flex flex-wrap"), { gap: "0.5rem" })}>
               {base.map((note, index) => (
                 <span
                   key={index}
-                  style={tw("inline-flex px-3 py-1 text-sm bg-purple-50 text-purple-800 rounded-full border border-purple-200")}
+                  style={tw(
+                    "inline-flex px-3 py-1 text-sm bg-purple-50 text-purple-800 rounded-full border border-purple-200"
+                  )}
                 >
                   {note}
                 </span>
@@ -338,12 +492,19 @@ const FormulaQuickView = ({
         <div style={tw("flex justify-end gap-2")}>
           <button
             onClick={onClose}
-            style={tw("px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md cursor-pointer")}
+            style={tw(
+              "px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md cursor-pointer"
+            )}
           >
             Close
           </button>
           <Button onClick={handleAddToWorkArea} size="sm">
-            <span className="material-symbols-rounded" style={{ marginRight: "0.5rem" }}>add</span>
+            <span
+              className="material-symbols-rounded"
+              style={{ marginRight: "0.5rem" }}
+            >
+              add
+            </span>
             Add to Work Area
           </Button>
         </div>
@@ -351,7 +512,12 @@ const FormulaQuickView = ({
     >
       <div style={mergeStyles(tw("flex"), { height: "100%" })}>
         {/* Vertical Sidebar Navigation */}
-        <div style={mergeStyles(tw("bg-gray-50 border-r border-gray-200 flex-shrink-0"), { width: "16rem" })}>
+        <div
+          style={mergeStyles(
+            tw("bg-gray-50 border-r border-gray-200 flex-shrink-0"),
+            { width: "16rem" }
+          )}
+        >
           <nav style={{ padding: "1rem" }}>
             {sections.map((section) => {
               const isActive = activeSection === section.id;
@@ -360,23 +526,29 @@ const FormulaQuickView = ({
                   key={section.id}
                   onClick={() => setActiveSection(section.id)}
                   style={mergeStyles(
-                    tw("w-full flex items-center text-sm font-medium rounded-md cursor-pointer"),
+                    tw(
+                      "w-full flex items-center text-sm font-medium rounded-md cursor-pointer"
+                    ),
                     {
                       paddingLeft: "0.75rem",
                       paddingRight: "0.75rem",
                       paddingTop: "0.625rem",
                       paddingBottom: "0.625rem",
                       marginBottom: "0.25rem",
-                      textAlign: "left"
+                      textAlign: "left",
                     },
                     isActive
-                      ? mergeStyles(tw("bg-blue-100 text-blue-700"), { borderLeft: "4px solid #2563eb" })
+                      ? mergeStyles(tw("bg-blue-100 text-blue-700"), {
+                          borderLeft: "4px solid #2563eb",
+                        })
                       : tw("text-gray-600")
                   )}
                 >
                   <span
                     className="material-symbols-rounded"
-                    style={mergeStyles(tw("text-base flex-shrink-0"), { marginRight: "0.75rem" })}
+                    style={mergeStyles(tw("text-base flex-shrink-0"), {
+                      marginRight: "0.75rem",
+                    })}
                   >
                     {section.icon}
                   </span>
@@ -389,7 +561,13 @@ const FormulaQuickView = ({
 
         {/* Content Area with consistent height and proper scrolling */}
         <div style={tw("flex-1 flex flex-col overflow-hidden")}>
-          <div style={mergeStyles(tw("flex-1 overflow-y-auto"), { padding: "1.5rem" })}>{renderSection()}</div>
+          <div
+            style={mergeStyles(tw("flex-1 overflow-y-auto"), {
+              padding: "1.5rem",
+            })}
+          >
+            {renderSection()}
+          </div>
         </div>
       </div>
     </Modal>

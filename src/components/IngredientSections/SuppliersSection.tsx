@@ -5,7 +5,9 @@ interface SuppliersSectionProps {
   ingredient: Ingredient;
 }
 
-const SuppliersSection = ({ ingredient: _ingredient }: SuppliersSectionProps) => {
+const SuppliersSection = ({
+  ingredient: _ingredient,
+}: SuppliersSectionProps) => {
   // Mock suppliers data
   const mockSuppliers = [
     {

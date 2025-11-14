@@ -142,7 +142,13 @@ const IngredientAttributeList = ({
 
       {filteredAttributes.length === 0 && (
         <div style={tw("text-center py-6 text-gray-500")}>
-          <i style={mergeStyles(tw("text-xl"), { marginBottom: "0.5rem", display: "block" })} className="ri-list-check-line"></i>
+          <i
+            style={mergeStyles(tw("text-xl"), {
+              marginBottom: "0.5rem",
+              display: "block",
+            })}
+            className="ri-list-check-line"
+          ></i>
           <p style={tw("text-sm")}>No attributes found</p>
           {(searchQuery || Object.keys(appliedFilters).length > 0) && (
             <p style={mergeStyles(tw("text-xs"), { marginTop: "0.25rem" })}>

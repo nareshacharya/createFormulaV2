@@ -164,7 +164,10 @@ const IngredientList = ({
                     >
                       {ingredient.name}
                       {isSelected && (
-                        <span style={tw("text-blue-600 ml-1 text-xs")} className="material-symbols-rounded">
+                        <span
+                          style={tw("text-blue-600 ml-1 text-xs")}
+                          className="material-symbols-rounded"
+                        >
                           check
                         </span>
                       )}
@@ -204,7 +207,10 @@ const IngredientList = ({
                     onClick={(e) => handleInfoClick(e, ingredient)}
                     aria-label={`View details for ${ingredient.name}`}
                   >
-                    <span style={tw("text-gray-400 text-lg")} className="material-symbols-rounded">
+                    <span
+                      style={tw("text-gray-400 text-lg")}
+                      className="material-symbols-rounded"
+                    >
                       info
                     </span>
                   </button>
@@ -222,7 +228,10 @@ const IngredientList = ({
             })}
           >
             <span
-              style={mergeStyles(tw("text-xl"), { marginBottom: "0.5rem", display: "block" })}
+              style={mergeStyles(tw("text-xl"), {
+                marginBottom: "0.5rem",
+                display: "block",
+              })}
               className="material-symbols-rounded"
             >
               search

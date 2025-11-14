@@ -201,18 +201,36 @@ const ExcelUploadModal = ({
       size="xl"
       noPadding={true}
     >
-      <div style={mergeStyles(tw("p-6"), { display: "flex", flexDirection: "column", gap: "1.5rem" })}>
+      <div
+        style={mergeStyles(tw("p-6"), {
+          display: "flex",
+          flexDirection: "column",
+          gap: "1.5rem",
+        })}
+      >
         {/* Instructions */}
         <div style={tw("bg-blue-50 border border-blue-200 rounded-lg p-4")}>
           <div style={mergeStyles(tw("flex items-start"), { gap: "0.75rem" })}>
-            <span style={tw("text-blue-600 text-xl")} className="material-symbols-rounded">
+            <span
+              style={tw("text-blue-600 text-xl")}
+              className="material-symbols-rounded"
+            >
               info
             </span>
             <div style={tw("flex-1")}>
-              <h4 style={mergeStyles(tw("text-sm font-semibold text-blue-900"), { marginBottom: "0.25rem" })}>
+              <h4
+                style={mergeStyles(tw("text-sm font-semibold text-blue-900"), {
+                  marginBottom: "0.25rem",
+                })}
+              >
                 Excel Format Requirements
               </h4>
-              <ul style={mergeStyles(tw("text-xs text-blue-800 list-disc list-inside"), { display: "flex", flexDirection: "column", gap: "0.25rem" })}>
+              <ul
+                style={mergeStyles(
+                  tw("text-xs text-blue-800 list-disc list-inside"),
+                  { display: "flex", flexDirection: "column", gap: "0.25rem" }
+                )}
+              >
                 <li>Column 1: Ingredient Name</li>
                 <li>Column 2: Percentage (numeric value)</li>
                 <li>First row should contain headers</li>
@@ -223,7 +241,9 @@ const ExcelUploadModal = ({
         </div>
 
         {/* File Upload Section */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+        <div
+          style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}
+        >
           <label style={tw("block text-sm font-medium text-gray-700")}>
             Select Excel File
           </label>
@@ -233,21 +253,37 @@ const ExcelUploadModal = ({
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             style={mergeStyles(
-              tw("flex items-center justify-center px-4 py-8 border-2 border-dashed rounded-lg transition-colors cursor-pointer"),
+              tw(
+                "flex items-center justify-center px-4 py-8 border-2 border-dashed rounded-lg transition-colors cursor-pointer"
+              ),
               isDragging
                 ? tw("border-blue-500 bg-blue-50")
-                : tw("border-gray-300 hover:border-blue-400 bg-white hover:bg-blue-50")
+                : tw(
+                    "border-gray-300 hover:border-blue-400 bg-white hover:bg-blue-50"
+                  )
             )}
           >
-            <label style={tw("flex-1 flex flex-col items-center justify-center cursor-pointer")}>
+            <label
+              style={tw(
+                "flex-1 flex flex-col items-center justify-center cursor-pointer"
+              )}
+            >
               <input
                 type="file"
                 accept=".xlsx,.xls,.csv"
                 onChange={handleFileChange}
                 style={tw("hidden")}
               />
-              <div style={mergeStyles(tw("flex flex-col items-center text-gray-600"), { gap: "0.5rem" })}>
-                <span style={tw("text-3xl text-blue-500")} className="material-symbols-rounded">
+              <div
+                style={mergeStyles(
+                  tw("flex flex-col items-center text-gray-600"),
+                  { gap: "0.5rem" }
+                )}
+              >
+                <span
+                  style={tw("text-3xl text-blue-500")}
+                  className="material-symbols-rounded"
+                >
                   upload_file
                 </span>
                 <div style={tw("text-center")}>
@@ -255,7 +291,11 @@ const ExcelUploadModal = ({
                     {file ? file.name : "Drag and drop your file here"}
                   </p>
                   {!file && (
-                    <p style={mergeStyles(tw("text-xs text-gray-500"), { marginTop: "0.25rem" })}>
+                    <p
+                      style={mergeStyles(tw("text-xs text-gray-500"), {
+                        marginTop: "0.25rem",
+                      })}
+                    >
                       or click to select file
                     </p>
                   )}
@@ -278,8 +318,18 @@ const ExcelUploadModal = ({
 
         {/* Error Message */}
         {error && (
-          <div style={mergeStyles(tw("bg-red-50 border border-red-200 rounded-lg p-3 flex items-center"), { gap: "0.5rem" })}>
-            <span style={tw("text-red-500 text-base")} className="material-symbols-rounded">
+          <div
+            style={mergeStyles(
+              tw(
+                "bg-red-50 border border-red-200 rounded-lg p-3 flex items-center"
+              ),
+              { gap: "0.5rem" }
+            )}
+          >
+            <span
+              style={tw("text-red-500 text-base")}
+              className="material-symbols-rounded"
+            >
               error
             </span>
             <p style={tw("text-sm text-red-700")}>{error}</p>
@@ -288,26 +338,51 @@ const ExcelUploadModal = ({
 
         {/* Parsed Ingredients Table */}
         {parsedIngredients.length > 0 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}
+          >
             <h4 style={tw("text-sm font-semibold text-gray-900")}>
               Ingredient Mapping ({parsedIngredients.length} ingredients)
             </h4>
 
-            <div style={tw("border border-gray-200 rounded-lg overflow-hidden")}>
+            <div
+              style={tw("border border-gray-200 rounded-lg overflow-hidden")}
+            >
               <div style={{ maxHeight: "24rem", overflowY: "auto" }}>
                 <table style={tw("w-full")}>
-                  <thead style={mergeStyles(tw("bg-gray-50"), { position: "sticky", top: 0 })}>
+                  <thead
+                    style={mergeStyles(tw("bg-gray-50"), {
+                      position: "sticky",
+                      top: 0,
+                    })}
+                  >
                     <tr>
-                      <th style={tw("px-4 py-2 text-left text-xs font-medium text-gray-700")}>
+                      <th
+                        style={tw(
+                          "px-4 py-2 text-left text-xs font-medium text-gray-700"
+                        )}
+                      >
                         Excel Name
                       </th>
-                      <th style={tw("px-4 py-2 text-right text-xs font-medium text-gray-700")}>
+                      <th
+                        style={tw(
+                          "px-4 py-2 text-right text-xs font-medium text-gray-700"
+                        )}
+                      >
                         Percentage
                       </th>
-                      <th style={tw("px-4 py-2 text-left text-xs font-medium text-gray-700")}>
+                      <th
+                        style={tw(
+                          "px-4 py-2 text-left text-xs font-medium text-gray-700"
+                        )}
+                      >
                         Map to Ingredient
                       </th>
-                      <th style={tw("px-4 py-2 text-center text-xs font-medium text-gray-700")}>
+                      <th
+                        style={tw(
+                          "px-4 py-2 text-center text-xs font-medium text-gray-700"
+                        )}
+                      >
                         Status
                       </th>
                     </tr>
@@ -318,7 +393,11 @@ const ExcelUploadModal = ({
                         <td style={tw("px-4 py-3 text-sm text-gray-900")}>
                           {ingredient.name}
                         </td>
-                        <td style={tw("px-4 py-3 text-sm text-gray-900 text-right")}>
+                        <td
+                          style={tw(
+                            "px-4 py-3 text-sm text-gray-900 text-right"
+                          )}
+                        >
                           {ingredient.percentage}%
                         </td>
                         <td style={tw("px-4 py-3")}>
@@ -329,7 +408,10 @@ const ExcelUploadModal = ({
                             }
                             style={mergeStyles(
                               tw("w-full px-2 text-sm border rounded"),
-                              { paddingTop: "0.375rem", paddingBottom: "0.375rem" },
+                              {
+                                paddingTop: "0.375rem",
+                                paddingBottom: "0.375rem",
+                              },
                               ingredient.status === "matched"
                                 ? tw("border-green-300 bg-green-50")
                                 : tw("border-red-300 bg-red-50")
@@ -345,15 +427,49 @@ const ExcelUploadModal = ({
                         </td>
                         <td style={tw("px-4 py-3 text-center")}>
                           {ingredient.status === "matched" ? (
-                            <span style={mergeStyles(tw("inline-flex items-center rounded text-xs font-medium bg-green-100 text-green-800"), { paddingLeft: "0.5rem", paddingRight: "0.5rem", paddingTop: "0.125rem", paddingBottom: "0.125rem" })}>
-                              <span style={mergeStyles(tw("text-xs"), { marginRight: "0.25rem" })} className="material-symbols-rounded">
+                            <span
+                              style={mergeStyles(
+                                tw(
+                                  "inline-flex items-center rounded text-xs font-medium bg-green-100 text-green-800"
+                                ),
+                                {
+                                  paddingLeft: "0.5rem",
+                                  paddingRight: "0.5rem",
+                                  paddingTop: "0.125rem",
+                                  paddingBottom: "0.125rem",
+                                }
+                              )}
+                            >
+                              <span
+                                style={mergeStyles(tw("text-xs"), {
+                                  marginRight: "0.25rem",
+                                })}
+                                className="material-symbols-rounded"
+                              >
                                 check_circle
                               </span>
                               Mapped
                             </span>
                           ) : (
-                            <span style={mergeStyles(tw("inline-flex items-center rounded text-xs font-medium bg-yellow-100 text-yellow-800"), { paddingLeft: "0.5rem", paddingRight: "0.5rem", paddingTop: "0.125rem", paddingBottom: "0.125rem" })}>
-                              <span style={mergeStyles(tw("text-xs"), { marginRight: "0.25rem" })} className="material-symbols-rounded">
+                            <span
+                              style={mergeStyles(
+                                tw(
+                                  "inline-flex items-center rounded text-xs font-medium bg-yellow-100 text-yellow-800"
+                                ),
+                                {
+                                  paddingLeft: "0.5rem",
+                                  paddingRight: "0.5rem",
+                                  paddingTop: "0.125rem",
+                                  paddingBottom: "0.125rem",
+                                }
+                              )}
+                            >
+                              <span
+                                style={mergeStyles(tw("text-xs"), {
+                                  marginRight: "0.25rem",
+                                })}
+                                className="material-symbols-rounded"
+                              >
                                 warning
                               </span>
                               Unmapped
@@ -368,7 +484,11 @@ const ExcelUploadModal = ({
             </div>
 
             {/* Summary */}
-            <div style={tw("flex items-center justify-between text-sm text-gray-600 bg-gray-50 px-4 py-2 rounded")}>
+            <div
+              style={tw(
+                "flex items-center justify-between text-sm text-gray-600 bg-gray-50 px-4 py-2 rounded"
+              )}
+            >
               <span>Total: {parsedIngredients.length} ingredients</span>
               <span style={tw("text-green-600")}>
                 Mapped:{" "}
@@ -386,7 +506,12 @@ const ExcelUploadModal = ({
         )}
 
         {/* Action Buttons */}
-        <div style={mergeStyles(tw("flex justify-end pt-4 border-t border-gray-200"), { gap: "0.75rem" })}>
+        <div
+          style={mergeStyles(
+            tw("flex justify-end pt-4 border-t border-gray-200"),
+            { gap: "0.75rem" }
+          )}
+        >
           <Button variant="secondary" onClick={handleClose}>
             Cancel
           </Button>

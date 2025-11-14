@@ -142,13 +142,17 @@ const AdvancedFilterSheet = ({
           <div style={mergeStyles(tw("flex"), { gap: "0.75rem" })}>
             <button
               onClick={handleClearFilters}
-              style={tw("px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer")}
+              style={tw(
+                "px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+              )}
             >
               Clear All
             </button>
             <button
               onClick={handleApplyFilters}
-              style={tw("px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer")}
+              style={tw(
+                "px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+              )}
             >
               Apply to Library
             </button>
@@ -158,11 +162,20 @@ const AdvancedFilterSheet = ({
     >
       <div style={tw("flex h-full")}>
         {/* Left Side - Filter Criteria Panel */}
-        <div style={mergeStyles(tw("border-r border-gray-200 flex-shrink-0 bg-gray-50 flex flex-col"), { width: "20rem" })}>
+        <div
+          style={mergeStyles(
+            tw(
+              "border-r border-gray-200 flex-shrink-0 bg-gray-50 flex flex-col"
+            ),
+            { width: "20rem" }
+          )}
+        >
           {/* Filter Criteria Header */}
           <div style={tw("border-b border-gray-200 flex-shrink-0")}>
             <div
-              style={tw("flex items-center justify-between p-3 cursor-pointer hover:bg-gray-100")}
+              style={tw(
+                "flex items-center justify-between p-3 cursor-pointer hover:bg-gray-100"
+              )}
               onClick={() => setIsFilterExpanded(!isFilterExpanded)}
             >
               <h4 style={tw("text-sm font-medium text-gray-700")}>
@@ -196,9 +209,15 @@ const AdvancedFilterSheet = ({
         {/* Right Side - Search Results */}
         <div style={tw("flex-1 flex flex-col overflow-hidden")}>
           {/* Compact Results Header with Column Configuration */}
-          <div style={tw("px-4 py-3 border-b border-gray-200 bg-white flex-shrink-0")}>
+          <div
+            style={tw(
+              "px-4 py-3 border-b border-gray-200 bg-white flex-shrink-0"
+            )}
+          >
             <div style={tw("flex items-center justify-between")}>
-              <div style={mergeStyles(tw("flex items-center"), { gap: "1rem" })}>
+              <div
+                style={mergeStyles(tw("flex items-center"), { gap: "1rem" })}
+              >
                 <h4 style={tw("text-sm font-medium text-gray-700")}>
                   Search Results
                 </h4>
@@ -206,7 +225,9 @@ const AdvancedFilterSheet = ({
                   {localFilteredIngredients.length} ingredients found
                 </div>
               </div>
-              <div style={mergeStyles(tw("flex items-center"), { gap: "0.5rem" })}>
+              <div
+                style={mergeStyles(tw("flex items-center"), { gap: "0.5rem" })}
+              >
                 <span style={tw("text-xs text-gray-500")}>Columns:</span>
                 <div style={tw("w-48")}>
                   <MultiSelectDropdown

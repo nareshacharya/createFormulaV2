@@ -52,7 +52,12 @@ const AttributeSelector = ({
     return (
       <div style={tw("flex items-center justify-center py-12 text-gray-500")}>
         <div style={tw("text-center")}>
-          <i className="ri-inbox-line text-4xl mb-2 block"></i>
+          <i
+            style={mergeStyles(tw("text-4xl block"), {
+              marginBottom: "0.5rem",
+            })}
+            className="ri-inbox-line"
+          ></i>
           <p style={tw("text-sm")}>No attributes available</p>
         </div>
       </div>
@@ -140,7 +145,8 @@ const AttributeSelector = ({
                 </span>
                 {isHighlighted && (
                   <i
-                    className={`ri-check-line text-base ${selectionStyles.selected.icon}`}
+                    style={tw(`text-base ${selectionStyles.selected.icon}`)}
+                    className="ri-check-line"
                   ></i>
                 )}
               </div>
@@ -152,7 +158,7 @@ const AttributeSelector = ({
       {/* No results message */}
       {filteredAttributes.length === 0 && searchQuery && (
         <div style={tw("text-center py-8 text-gray-500")}>
-          <i className="ri-search-line text-3xl mb-2 block"></i>
+          <i style={mergeStyles(tw("text-3xl block"), { marginBottom: "0.5rem" })} className="ri-search-line"></i>
           <p style={tw("text-sm")}>No attributes found for "{searchQuery}"</p>
         </div>
       )}
