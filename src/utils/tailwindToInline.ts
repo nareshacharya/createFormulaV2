@@ -68,6 +68,42 @@ const colors = {
     'yellow-800': '#854d0e',
     'yellow-900': '#713f12',
 
+    // Orange
+    'orange-50': '#fff7ed',
+    'orange-100': '#ffedd5',
+    'orange-200': '#fed7aa',
+    'orange-300': '#fdba74',
+    'orange-400': '#fb923c',
+    'orange-500': '#f97316',
+    'orange-600': '#ea580c',
+    'orange-700': '#c2410c',
+    'orange-800': '#9a3412',
+    'orange-900': '#7c2d12',
+
+    // Pink
+    'pink-50': '#fdf2f8',
+    'pink-100': '#fce7f3',
+    'pink-200': '#fbcfe8',
+    'pink-300': '#f9a8d4',
+    'pink-400': '#f472b6',
+    'pink-500': '#ec4899',
+    'pink-600': '#db2777',
+    'pink-700': '#be185d',
+    'pink-800': '#9d174d',
+    'pink-900': '#831843',
+
+    // Cyan
+    'cyan-50': '#ecfeff',
+    'cyan-100': '#cffafe',
+    'cyan-200': '#a5f3fc',
+    'cyan-300': '#67e8f9',
+    'cyan-400': '#22d3ee',
+    'cyan-500': '#06b6d4',
+    'cyan-600': '#0891b2',
+    'cyan-700': '#0e7490',
+    'cyan-800': '#155e75',
+    'cyan-900': '#164e63',
+
     // Purple
     'purple-50': '#faf5ff',
     'purple-100': '#f3e8ff',
@@ -338,22 +374,77 @@ function parseClassName(className: string): CSSProperties {
         if (sizes[maxWMatch[1]]) styles.maxWidth = sizes[maxWMatch[1]];
     }
 
-    // Text color
+    // Text color (with opacity support)
     const textColorMatch = cleanClass.match(/^text-(.+)$/);
-    if (textColorMatch && colors[textColorMatch[1] as keyof typeof colors]) {
-        styles.color = colors[textColorMatch[1] as keyof typeof colors];
+    if (textColorMatch) {
+        const [colorName, opacity] = textColorMatch[1].split('/');
+        const color = colors[colorName as keyof typeof colors];
+        if (color) {
+            if (opacity) {
+                // Handle opacity modifier (e.g., text-white/50)
+                const opacityValue = parseInt(opacity) / 100;
+                if (color.startsWith('#')) {
+                    // Convert hex to rgba
+                    const r = parseInt(color.slice(1, 3), 16);
+                    const g = parseInt(color.slice(3, 5), 16);
+                    const b = parseInt(color.slice(5, 7), 16);
+                    styles.color = `rgba(${r}, ${g}, ${b}, ${opacityValue})`;
+                } else {
+                    styles.color = color;
+                    styles.opacity = opacityValue;
+                }
+            } else {
+                styles.color = color;
+            }
+        }
     }
 
-    // Background color
+    // Background color (with opacity support)
     const bgColorMatch = cleanClass.match(/^bg-(.+)$/);
-    if (bgColorMatch && colors[bgColorMatch[1] as keyof typeof colors]) {
-        styles.backgroundColor = colors[bgColorMatch[1] as keyof typeof colors];
+    if (bgColorMatch) {
+        const [colorName, opacity] = bgColorMatch[1].split('/');
+        const color = colors[colorName as keyof typeof colors];
+        if (color) {
+            if (opacity) {
+                // Handle opacity modifier (e.g., bg-purple-900/50)
+                const opacityValue = parseInt(opacity) / 100;
+                if (color.startsWith('#')) {
+                    // Convert hex to rgba
+                    const r = parseInt(color.slice(1, 3), 16);
+                    const g = parseInt(color.slice(3, 5), 16);
+                    const b = parseInt(color.slice(5, 7), 16);
+                    styles.backgroundColor = `rgba(${r}, ${g}, ${b}, ${opacityValue})`;
+                } else {
+                    styles.backgroundColor = color;
+                }
+            } else {
+                styles.backgroundColor = color;
+            }
+        }
     }
 
-    // Border color
+    // Border color (with opacity support)
     const borderColorMatch = cleanClass.match(/^border-(.+)$/);
-    if (borderColorMatch && colors[borderColorMatch[1] as keyof typeof colors]) {
-        styles.borderColor = colors[borderColorMatch[1] as keyof typeof colors];
+    if (borderColorMatch) {
+        const [colorName, opacity] = borderColorMatch[1].split('/');
+        const color = colors[colorName as keyof typeof colors];
+        if (color) {
+            if (opacity) {
+                // Handle opacity modifier
+                const opacityValue = parseInt(opacity) / 100;
+                if (color.startsWith('#')) {
+                    // Convert hex to rgba
+                    const r = parseInt(color.slice(1, 3), 16);
+                    const g = parseInt(color.slice(3, 5), 16);
+                    const b = parseInt(color.slice(5, 7), 16);
+                    styles.borderColor = `rgba(${r}, ${g}, ${b}, ${opacityValue})`;
+                } else {
+                    styles.borderColor = color;
+                }
+            } else {
+                styles.borderColor = color;
+            }
+        }
     }
 
     // Border width
