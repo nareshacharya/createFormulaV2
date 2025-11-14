@@ -48,8 +48,11 @@ const AttributeDataGrid = ({
       >
         <div style={tw("text-center")}>
           <i
-            className="ri-list-check-line text-3xl"
-            style={{ marginBottom: "0.5rem", display: "block" }}
+            style={mergeStyles(tw("text-3xl"), {
+              marginBottom: "0.5rem",
+              display: "block",
+            })}
+            className="ri-list-check-line"
           ></i>
           <p>No attributes available</p>
         </div>
@@ -170,8 +173,11 @@ const AttributeDataGrid = ({
           })}
         >
           <i
-            className="ri-search-line text-2xl"
-            style={{ marginBottom: "0.5rem", display: "block" }}
+            style={mergeStyles(tw("text-2xl"), {
+              marginBottom: "0.5rem",
+              display: "block",
+            })}
+            className="ri-search-line"
           ></i>
           <p style={tw("text-sm")}>No attributes found for "{searchQuery}"</p>
         </div>

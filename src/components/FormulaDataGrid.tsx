@@ -149,7 +149,7 @@ const FormulaDataGrid = ({
         )}
       >
         <div style={tw("text-center")}>
-          <i className="ri-test-tube-line" style={tw("text-3xl")}></i>
+          <i style={tw("text-3xl")} className="ri-test-tube-line"></i>
           <p style={{ marginTop: "8px" }}>No formulas available</p>
         </div>
       </div>
@@ -244,9 +244,9 @@ const FormulaDataGrid = ({
             <div
               style={{
                 position: "absolute",
-                top: 0,
-                bottom: 0,
                 left: 0,
+                top: 0,
+                height: "100%",
                 paddingLeft: "12px",
                 display: "flex",
                 alignItems: "center",
@@ -254,8 +254,8 @@ const FormulaDataGrid = ({
               }}
             >
               <i
-                className="ri-search-line"
                 style={tw("text-gray-400 text-sm")}
+                className="ri-search-line"
               ></i>
             </div>
             <input
@@ -333,15 +333,15 @@ const FormulaDataGrid = ({
                     <span>{column.title}</span>
                     {sortConfig?.key === column.key ? (
                       <i
+                        style={tw("text-xs text-blue-600")}
                         className={`ri-arrow-${
                           sortConfig.direction === "asc" ? "up" : "down"
                         }-line`}
-                        style={tw("text-xs text-blue-600")}
                       />
                     ) : (
                       <i
-                        className="ri-expand-up-down-line"
                         style={tw("text-xs text-gray-400")}
+                        className="ri-expand-up-down-line"
                       />
                     )}
                   </div>
@@ -369,8 +369,7 @@ const FormulaDataGrid = ({
               return (
                 <tr
                   key={formula.id}
-                  className={rowClasses}
-                  style={tw("cursor-pointer")}
+                  style={mergeStyles(tw(rowClasses), tw("cursor-pointer"))}
                   onClick={() => !isDisabled && handleRowClick(formula.id)}
                 >
                   <td style={tw("px-3 py-2")}>
@@ -399,8 +398,10 @@ const FormulaDataGrid = ({
                           {renderCellValue(formula, col)}
                           {isHighlighted && (
                             <i
-                              className={`ri-check-line ${selectionStyles.selected.icon}`}
-                              style={tw("text-base")}
+                              style={tw(
+                                `text-base ${selectionStyles.selected.icon}`
+                              )}
+                              className="ri-check-line"
                             ></i>
                           )}
                         </span>

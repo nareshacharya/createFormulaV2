@@ -244,7 +244,12 @@ const FormulaModal = ({
       <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
         {/* Formula Type Selection */}
         <div>
-          <div style={mergeStyles(tw("flex items-center"), { gap: "0.5rem", marginBottom: "0.75rem" })}>
+          <div
+            style={mergeStyles(tw("flex items-center"), {
+              gap: "0.5rem",
+              marginBottom: "0.75rem",
+            })}
+          >
             <label style={tw("block text-sm font-medium text-gray-700")}>
               Formula Type *
             </label>
@@ -264,7 +269,9 @@ const FormulaModal = ({
                   </span>
                 </div>
                 <div style={{ marginBottom: "0.75rem" }}>
-                  <strong style={tw("text-blue-300")}>Analytical Formula:</strong>{" "}
+                  <strong style={tw("text-blue-300")}>
+                    Analytical Formula:
+                  </strong>{" "}
                   <span style={tw("text-gray-300")}>
                     {getFormulaTypeDescription(FORMULA_TYPES.ANALYTICAL)}
                   </span>

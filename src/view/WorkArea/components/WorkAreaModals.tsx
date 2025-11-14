@@ -79,7 +79,12 @@ export const WorkAreaModals = ({
             }}
             maxSelections={maxAttributeSelections}
           />
-          <div style={mergeStyles(tw("flex justify-end border-t"), { gap: "0.5rem", paddingTop: "1rem" })}>
+          <div
+            style={mergeStyles(tw("flex justify-end border-t"), {
+              gap: "0.5rem",
+              paddingTop: "1rem",
+            })}
+          >
             <Button
               variant="secondary"
               onClick={() => setShowAttributeDialog(false)}

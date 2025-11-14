@@ -158,7 +158,12 @@ const AttributeSelector = ({
       {/* No results message */}
       {filteredAttributes.length === 0 && searchQuery && (
         <div style={tw("text-center py-8 text-gray-500")}>
-          <i style={mergeStyles(tw("text-3xl block"), { marginBottom: "0.5rem" })} className="ri-search-line"></i>
+          <i
+            style={mergeStyles(tw("text-3xl block"), {
+              marginBottom: "0.5rem",
+            })}
+            className="ri-search-line"
+          ></i>
           <p style={tw("text-sm")}>No attributes found for "{searchQuery}"</p>
         </div>
       )}
