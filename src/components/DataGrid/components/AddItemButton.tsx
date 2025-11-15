@@ -49,7 +49,7 @@ export const AddItemButton = ({
 
   return (
     <div
-      className="absolute left-0 top-full mt-1 z-20 flex justify-center w-full pointer-events-none"
+      className="absolute left-0 top-full mt-1 z-20 flex justify-center w-full pointer-events-none group"
       style={{ transform: "translateY(-16px)" }}
     >
       <button

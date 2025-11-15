@@ -25,31 +25,28 @@ export const DescriptionCell = ({
   // Empty state handling
   if (row.isEmpty) {
     return (
-      <div style={tw("text-center pt-16 pb-[30vh]")}>
+      <div style={tw("w-full h-full flex flex-col items-center justify-center")}>
         <div
           style={tw(
-            "w-24 h-24 mx-auto mb-3 bg-gray-200 rounded-full flex items-center justify-center"
+            "w-24 h-24 mb-3 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0"
           )}
         >
           <span className="material-symbols-rounded text-5xl text-gray-400">
             science
           </span>
         </div>
-        <h3 style={tw("text-lg font-medium text-gray-400 mb-2")}>
-          Start building by adding a formula to begin <br />
-          <br />
+        <h3 style={tw("text-lg font-medium text-gray-400 mb-4")}>
+          Start building by adding a formula to begin
         </h3>
-        <div style={tw("flex justify-center")}>
-          <button
-            onClick={onAddFormula}
-            style={tw(
-              "px-4 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center gap-2 shadow-sm"
-            )}
-          >
-            <span className="material-symbols-rounded text-lg">add</span>
-            Create/Add Formula
-          </button>
-        </div>
+        <button
+          onClick={onAddFormula}
+          style={tw(
+            "px-4 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center gap-2 shadow-sm"
+          )}
+        >
+          <span className="material-symbols-rounded text-lg">add</span>
+          Create/Add Formula
+        </button>
       </div>
     );
   }

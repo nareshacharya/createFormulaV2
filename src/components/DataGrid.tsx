@@ -698,17 +698,18 @@ const DataGrid = ({
                     onDragOver={(e) => handleRowDragOver(e, row.id)}
                     onDragEnd={handleRowDragEnd}
                     onDragLeave={handleRowDragLeave}
+                    className={`group relative ${
+                      row.isTotal ? "" : "hover:bg-gray-50"
+                    } ${isDraggedOver ? "border-t-2 border-blue-500" : ""}`}
                     style={mergeStyles(
-                      tw("group relative"),
                       tw(
                         row.isTotal
                           ? "bg-gray-100 border-t-2 border-gray-300"
-                          : "hover:bg-gray-50"
+                          : ""
                       ),
                       tw(row.isEmpty ? "bg-gray-50" : ""),
                       tw(row.parentFormulaId ? "bg-blue-25" : ""),
-                      tw(isBeingDragged ? "opacity-50" : ""),
-                      tw(isDraggedOver ? "border-t-2 border-blue-500" : "")
+                      tw(isBeingDragged ? "opacity-50" : "")
                     )}
                   >
                     {/* Drag handle cell (if enabled) */}
