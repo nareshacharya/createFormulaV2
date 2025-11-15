@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import { useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { useModal } from "../../App";

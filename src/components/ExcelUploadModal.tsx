@@ -1,4 +1,4 @@
-/* eslint-disable jsx-a11y/label-has-associated-control */
+/* eslint-disable jsx-a11y/label-has-associated-control, @typescript-eslint/no-use-before-define */
 import { useState } from "react";
 import type { Ingredient } from "../services/pega";
 import { tw, mergeStyles } from "../utils/tailwindToInline";

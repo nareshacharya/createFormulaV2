@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 
 // Lightweight types for Pega data structures
 export interface Ingredient {

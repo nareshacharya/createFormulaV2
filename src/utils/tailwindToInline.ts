@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 /**
  * Tailwind to Inline Styles Converter
  * Converts Tailwind class names to React inline style objects

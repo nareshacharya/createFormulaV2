@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 
 import type { FilterGroup, FilterRule } from '../components/QueryBuilder';
 import type { Ingredient } from '../services/pega';

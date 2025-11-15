@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import { useState, useEffect } from "react";
 import { getListItemClasses, selectionStyles } from "../config/theme";
 import type { Formula } from "../services/pega";
