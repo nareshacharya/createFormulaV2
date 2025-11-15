@@ -476,8 +476,7 @@ const IngredientTable = ({
 
                 return (
                   <button
-                  type="button"
-                type="button"
+                    type="button"
                     key={pageNum}
                     onClick={() => setCurrentPage(pageNum)}
                     style={mergeStyles(

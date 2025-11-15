@@ -41,8 +41,7 @@ export const DescriptionCell = ({
           Start building by adding a formula to begin
         </h3>
         <button
-                  type="button"
-                type="button"
+          type="button"
           onClick={onAddFormula}
           style={tw(
             "px-4 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center gap-2 shadow-sm"

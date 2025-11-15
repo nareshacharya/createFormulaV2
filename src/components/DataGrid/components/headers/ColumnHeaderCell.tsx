@@ -235,7 +235,6 @@ export const ColumnHeaderCell = ({
             {column.sortable && (
               <button
                 type="button"
-                type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   onSort(column.id);
@@ -273,7 +272,6 @@ export const ColumnHeaderCell = ({
                   column.id !== "description")) && (
                 <button
                 type="button"
-                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDeleteColumn?.(column.id);
@@ -292,7 +290,6 @@ export const ColumnHeaderCell = ({
               <div className="relative">
                 <button
                 type="button"
-                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowColumnActions(

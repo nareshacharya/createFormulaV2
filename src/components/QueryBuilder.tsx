@@ -435,8 +435,7 @@ const QueryBuilder = ({
 
         <div style={tw("flex space-x-1")}>
           <button
-                  type="button"
-                type="button"
+            type="button"
             onClick={handleClear}
             style={tw(
               "px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded hover:bg-gray-200 cursor-pointer"
