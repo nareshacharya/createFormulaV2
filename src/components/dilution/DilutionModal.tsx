@@ -116,8 +116,13 @@ export const DilutionModal = ({
 
     // Show success toast
     const solvent = solvents.find((s) => s.id === selectedSolvent);
+    const getPrecision = (conc: number): number => {
+      if (conc >= 0.0001) return 4;
+      if (conc >= 0.000001) return 6;
+      return 7;
+    };
     const concentrationPercent = (concentration * 100)
-      .toFixed(concentration >= 0.0001 ? 4 : concentration >= 0.000001 ? 6 : 7)
+      .toFixed(getPrecision(concentration))
       .replace(/\.?0+$/, "");
     toast.success(
       `Dilution applied: ${ingredientName} in ${concentrationPercent}% ${

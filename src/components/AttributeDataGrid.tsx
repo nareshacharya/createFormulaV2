@@ -111,20 +111,24 @@ const AttributeDataGrid = ({
           const isDisabled =
             !isSelected && selectedAttributes.length >= maxSelections;
 
+          const getItemStyle = () => {
+            if (isSelected) return tw("bg-blue-50 border-blue-300");
+            if (isDisabled) {
+              return mergeStyles(tw("bg-gray-50 border-gray-200"), {
+                opacity: 0.5,
+                cursor: "not-allowed",
+              });
+            }
+            return tw("bg-white border-gray-200");
+          };
+
           return (
             <label
               key={attribute.id}
               style={mergeStyles(
                 tw("flex items-start rounded-md border cursor-pointer"),
                 { padding: "0.75rem", gap: "0.5rem" },
-                isSelected
-                  ? tw("bg-blue-50 border-blue-300")
-                  : isDisabled
-                    ? mergeStyles(tw("bg-gray-50 border-gray-200"), {
-                        opacity: 0.5,
-                        cursor: "not-allowed",
-                      })
-                    : tw("bg-white border-gray-200")
+                getItemStyle()
               )}
             >
               <input
