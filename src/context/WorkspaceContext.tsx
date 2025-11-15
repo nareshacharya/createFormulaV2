@@ -1,4 +1,4 @@
-import React, { createContext, useState, useCallback } from "react";
+import React, { createContext, useState, useCallback, useMemo } from "react";
 import { toast } from "react-hot-toast";
 import type { Column } from "../components/DataGrid";
 import type {
@@ -367,28 +367,52 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
     return activeWorkspace.history;
   }, [activeWorkspace.history]);
 
-  const value: WorkspaceContextType = {
-    tabs,
-    activeTabId,
-    activeWorkspace,
-    addTab,
-    closeTab,
-    switchTab,
-    renameTab,
-    resetWorkspace,
-    updateWorkspaceData,
-    getActiveWorkspaceHistory,
-    isFormulaLocked,
-    getFormulaLockedInWorkspace,
-    lockFormula,
-    unlockFormula,
-    availableFormulas,
-    ingredients,
-    attributes,
-    setAvailableFormulas,
-    setIngredients,
-    setAttributes,
-  };
+  const value: WorkspaceContextType = useMemo(
+    () => ({
+      tabs,
+      activeTabId,
+      activeWorkspace,
+      addTab,
+      closeTab,
+      switchTab,
+      renameTab,
+      resetWorkspace,
+      updateWorkspaceData,
+      getActiveWorkspaceHistory,
+      isFormulaLocked,
+      getFormulaLockedInWorkspace,
+      lockFormula,
+      unlockFormula,
+      availableFormulas,
+      ingredients,
+      attributes,
+      setAvailableFormulas,
+      setIngredients,
+      setAttributes,
+    }),
+    [
+      tabs,
+      activeTabId,
+      activeWorkspace,
+      addTab,
+      closeTab,
+      switchTab,
+      renameTab,
+      resetWorkspace,
+      updateWorkspaceData,
+      getActiveWorkspaceHistory,
+      isFormulaLocked,
+      getFormulaLockedInWorkspace,
+      lockFormula,
+      unlockFormula,
+      availableFormulas,
+      ingredients,
+      attributes,
+      setAvailableFormulas,
+      setIngredients,
+      setAttributes,
+    ]
+  );
 
   return (
     <WorkspaceContext.Provider value={value}>

@@ -22,7 +22,7 @@ interface ParsedIngredient {
  */
 export const useExcelUpload = (
   formulas: Formula[],
-  ingredients: Ingredient[],
+  allIngredients: Ingredient[],
   onAddIngredientsToFormula: (formulaId: string, ingredients: ParsedIngredient[]) => void
 ) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -93,7 +93,7 @@ export const useExcelUpload = (
     // State
     isExcelUploadModalOpen: isModalOpen,
     selectedFormulaId,
-    availableIngredients: ingredients,
+    availableIngredients: allIngredients,
 
     // Handlers
     handleUploadExcel,

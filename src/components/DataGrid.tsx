@@ -425,7 +425,6 @@ const DataGrid = ({
       onSetActiveFormula
     ) {
       onSetActiveFormula(columnId);
-      return;
     }
   };
 

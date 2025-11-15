@@ -185,6 +185,8 @@ export const useKeyboardNavigation = ({
                         nextIndex = editableCells.length - 1; // Wrap to last cell
                     }
                     break;
+                default:
+                    break;
             }
 
             const nextCell = editableCells[nextIndex];
@@ -228,6 +230,7 @@ export const useKeyboardNavigation = ({
             if (editingCell) {
                 switch (e.key) {
                     case "Enter":
+                    case "ArrowDown":
                         e.preventDefault();
                         saveCell();
                         navigateToCell("down");
@@ -236,11 +239,6 @@ export const useKeyboardNavigation = ({
                         e.preventDefault();
                         setEditingCell(null);
                         setEditValue("");
-                        break;
-                    case "ArrowDown":
-                        e.preventDefault();
-                        saveCell();
-                        navigateToCell("down");
                         break;
                     case "ArrowUp":
                         e.preventDefault();
@@ -273,6 +271,8 @@ export const useKeyboardNavigation = ({
                         e.preventDefault();
                         saveCell();
                         navigateToCell(e.shiftKey ? "left" : "right");
+                        break;
+                    default:
                         break;
                 }
             } else {

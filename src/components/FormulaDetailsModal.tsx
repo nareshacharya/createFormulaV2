@@ -61,7 +61,7 @@ const FormulaDetailsModal = ({
         // Ensure formulaVersion is set from version if not already set
         formulaVersion:
           formula.formulaVersion ||
-          parseInt(formula.version?.replace("v", "") || "1"),
+          parseInt(formula.version?.replace("v", "") || "1", 10),
       };
       setFormData(mappedData);
     }

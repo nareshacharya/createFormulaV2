@@ -430,7 +430,7 @@ const WorkArea = () => {
       // Use getDisplayColumns directly without adding to dependencies
       // This is safe because getDisplayColumns is defined in the component
       const exportColumns = getDisplayColumns();
-      const exportData_impl = getEmptyStateData(tableData, false); // Get all data, not empty state
+      const exportDataImpl = getEmptyStateData(tableData, false); // Get all data, not empty state
 
       const fileName = editableFormula
         ? `formula-${editableFormula.replace(/\s+/g, "_")}-${
@@ -441,7 +441,7 @@ const WorkArea = () => {
       exportData(
         {
           columns: exportColumns,
-          data: exportData_impl,
+          data: exportDataImpl,
           filename: fileName,
         },
         "excel"
@@ -497,6 +497,7 @@ const WorkArea = () => {
     };
 
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Sync workspace data when active workspace changes (tab switch)
@@ -514,7 +515,7 @@ const WorkArea = () => {
     const formulaIds = wsData.selectedFormulas.map((f) => f.id);
     setSelectedFormulas(formulaIds);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [workspace.activeTabId]);
+  }, [workspace.activeTabId, setAttributes, setAvailableFormulas, setIngredients]);
 
   // Save workspace data whenever it changes
   useEffect(() => {
@@ -1060,7 +1061,7 @@ const WorkArea = () => {
             case "boolean":
               sampleValue = Math.random() > 0.5 ? "Yes" : "No";
               break;
-            case "select":
+            case "select": {
               const options = data.attribute.values || [
                 "Option A",
                 "Option B",
@@ -1068,6 +1069,7 @@ const WorkArea = () => {
               ];
               sampleValue = options[Math.floor(Math.random() * options.length)];
               break;
+            }
             default:
               sampleValue = `Sample ${data.attribute.name}`;
           }
@@ -2082,20 +2084,10 @@ const WorkArea = () => {
       }
 
       // Also remove child ingredients of deleted formula groups
-      const newData = prev.filter((row) => {
-        // Keep rows that are not in the delete list
-        if (!rowIds.includes(row.id)) {
-          // But also remove child ingredients if their parent formula is being deleted
-          if (
-            row.parentFormulaId &&
-            deletedFormulaIds.includes(row.parentFormulaId)
-          ) {
-            return false;
-          }
-          return true;
-        }
-        return false;
-      });
+      const newData = prev.filter((row) => 
+        !rowIds.includes(row.id) && 
+        !(row.parentFormulaId && deletedFormulaIds.includes(row.parentFormulaId))
+      );
 
       return newData;
     });

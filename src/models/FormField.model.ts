@@ -285,6 +285,8 @@ export const isFieldVisibleForType = (field: FormField, formulaType: FormulaType
                 case 'lessThan':
                     if (!(dependentValue < value)) return false;
                     break;
+                default:
+                    break;
             }
         }
     }

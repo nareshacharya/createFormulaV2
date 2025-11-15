@@ -1,4 +1,10 @@
-import { useState, createContext, useContext } from "react";
+import {
+  useState,
+  createContext,
+  useContext,
+  useMemo,
+  useCallback,
+} from "react";
 import { BrowserRouter, HashRouter } from "react-router-dom";
 import Toast from "./components/Toast";
 import { FeatureFlagsProvider } from "./context/FeatureFlagsContext";
@@ -170,19 +176,24 @@ function App() {
     null
   );
 
-  const showModal = (content: React.ReactNode) => {
+  const showModal = useCallback((content: React.ReactNode) => {
     setModalContent(content);
-  };
+  }, []);
 
-  const hideModal = () => {
+  const hideModal = useCallback(() => {
     setModalContent(null);
-  };
+  }, []);
+
+  const contextValue = useMemo(
+    () => ({ showModal, hideModal }),
+    [showModal, hideModal]
+  );
 
   return (
     <Router basename={isStorybook ? undefined : BASE_PATH}>
       <FeatureFlagsProvider>
         <WorkspaceProvider>
-          <ModalContext.Provider value={{ showModal, hideModal }}>
+          <ModalContext.Provider value={contextValue}>
             <Toast />
             <AppRoutes />
 

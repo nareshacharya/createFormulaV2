@@ -321,6 +321,7 @@ export class DxApiService {
                     console.log('[DX API] Retrying request:', { endpoint, error });
                 }
 
+                // eslint-disable-next-line no-promise-executor-return
                 await new Promise(resolve => setTimeout(resolve, retry.retryDelay));
                 return this.makeRequest<T>(endpoint, options);
             }

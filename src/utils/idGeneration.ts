@@ -142,10 +142,8 @@ export const getNextSequenceNumber = (
 
     existingFormulas.forEach((formula) => {
         const parsed = parseFormulaId(formula.id);
-        if (parsed && parsed.prefix === prefix) {
-            if (parsed.sequenceNumber > maxNumber) {
-                maxNumber = parsed.sequenceNumber;
-            }
+        if (parsed && parsed.prefix === prefix && parsed.sequenceNumber > maxNumber) {
+            maxNumber = parsed.sequenceNumber;
         }
     });
 
@@ -167,10 +165,9 @@ export const getNextVersionNumber = (
         const parsed = parseFormulaId(formula.id);
         if (parsed &&
             parsed.prefix === prefix &&
-            parsed.sequenceNumber === sequenceNumber) {
-            if (parsed.version > maxVersion) {
-                maxVersion = parsed.version;
-            }
+            parsed.sequenceNumber === sequenceNumber &&
+            parsed.version > maxVersion) {
+            maxVersion = parsed.version;
         }
     });
 

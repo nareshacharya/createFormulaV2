@@ -90,6 +90,7 @@ export const useFormulaColumnHandlers = (config: FormulaHandlersConfig) => {
       // const response = await PegaService.createFormulaVersion(formula.id);
 
       // Simulate API call
+      // eslint-disable-next-line no-promise-executor-return
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       // Get current user initials

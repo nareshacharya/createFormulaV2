@@ -24,7 +24,6 @@ interface IngredientAttributeListProps {
   appliedFilters?: Record<string, unknown>;
   selectedAttributes?: string[];
   maxSelections?: number;
-  onAttributeSelect?: (attribute: IngredientAttribute) => void;
 }
 
 const IngredientAttributeList = ({
