@@ -175,6 +175,7 @@ const WorkspaceTabs = () => {
             </div>
           ) : (
             <button
+                  type="button"
               onClick={() => setActiveTabId(tab.id)}
               onDoubleClick={() => handleRenameTab(tab.id)}
               style={mergeStyles(
@@ -214,6 +215,7 @@ const WorkspaceTabs = () => {
                 </div>
                 {!tab.isDefault && (
                   <button
+                  type="button"
                     onClick={(e) => handleCloseTab(tab.id, e)}
                     style={tw(
                       "opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-red-500"
@@ -232,6 +234,7 @@ const WorkspaceTabs = () => {
       {/* More Options Button */}
       <div style={tw("relative")} ref={menuRef}>
         <button
+                  type="button"
           onClick={() => setShowMenu(!showMenu)}
           style={mergeStyles(
             tw(
@@ -260,6 +263,7 @@ const WorkspaceTabs = () => {
             )}
           >
             <button
+                  type="button"
               onClick={() => {
                 handleAddTab();
                 setShowMenu(false);
@@ -276,6 +280,7 @@ const WorkspaceTabs = () => {
               Add Workspace ({tabs.length}/{MAX_TABS})
             </button>
             <button
+                  type="button"
               onClick={() => {
                 const tab = tabs.find((t) => t.id === activeTabId);
                 if (tab) {

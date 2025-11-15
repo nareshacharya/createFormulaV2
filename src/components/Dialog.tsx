@@ -131,6 +131,7 @@ const Dialog = ({
                 {title}
               </h3>
               <button
+                type="button"
                 onClick={onClose}
                 style={tw(
                   "text-gray-400 transition p-1 rounded-md cursor-pointer"

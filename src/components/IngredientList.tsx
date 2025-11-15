@@ -198,6 +198,7 @@ const IngredientList = ({
                 {/* Info Icon - Only visible on hover, larger size */}
                 {hoveredRow === ingredient.id && (
                   <button
+                type="button"
                     style={mergeStyles(
                       tw("p-1 rounded cursor-pointer flex-shrink-0"),
                       { marginLeft: "0.5rem" }

@@ -75,6 +75,7 @@ const SearchBar = ({
       />
       {showFilterButton && (
         <button
+                type="button"
           onClick={onFilterClick}
           style={{
             position: "absolute",

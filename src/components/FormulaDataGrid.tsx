@@ -427,6 +427,7 @@ const FormulaDataGrid = ({
           </div>
           <div style={mergeStyles(tw("flex items-center"), { gap: "8px" })}>
             <button
+                  type="button"
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               disabled={currentPage === 1}
               style={mergeStyles(
@@ -457,6 +458,8 @@ const FormulaDataGrid = ({
                 const isCurrentPage = currentPage === pageNum;
                 return (
                   <button
+                  type="button"
+                type="button"
                     key={pageNum}
                     onClick={() => setCurrentPage(pageNum)}
                     style={mergeStyles(
@@ -473,6 +476,7 @@ const FormulaDataGrid = ({
             </div>
 
             <button
+                  type="button"
               onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
               disabled={currentPage === totalPages}
               style={mergeStyles(

@@ -169,6 +169,7 @@ const FormulaList = ({
               {/* Eye Icon - Only visible on hover */}
               {hoveredFormula === formula.id && (
                 <button
+                type="button"
                   style={tw(
                     "ml-2 p-1 rounded hover:bg-gray-100 cursor-pointer flex-shrink-0"
                   )}

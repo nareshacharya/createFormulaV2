@@ -112,6 +112,7 @@ const Modal = ({
             </div>
             <div style={tw("flex items-center gap-2")}>{headerActions}</div>
             <button
+                type="button"
               onClick={onClose}
               style={tw(
                 "text-gray-400 hover:text-gray-600 transition cursor-pointer"

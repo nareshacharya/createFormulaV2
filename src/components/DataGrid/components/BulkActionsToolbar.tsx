@@ -45,6 +45,7 @@ const ToolbarButton = ({
 
   return (
     <button
+                type="button"
       onClick={onClick}
       disabled={disabled}
       className={`${baseClasses} ${colorClasses}`}
@@ -84,6 +85,7 @@ export const BulkActionsToolbar = ({
         {selectedCount > 0 && (
           <>
             <button
+                type="button"
               onClick={onClearSelection}
               className="bg-gray-150 text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition-all duration-200 hover:shadow-sm flex items-center gap-1 px-2 py-1 rounded-lg"
               title="Clear selection"
@@ -96,6 +98,7 @@ export const BulkActionsToolbar = ({
 
             {onBulkDelete && (
               <button
+                type="button"
                 onClick={onBulkDelete}
                 className="bg-red-100 text-red-700 hover:bg-red-200 hover:text-red-900 transition-all duration-200 hover:shadow-sm flex items-center gap-1 px-2 py-1 rounded-lg"
                 title="Delete selected items"
@@ -112,6 +115,7 @@ export const BulkActionsToolbar = ({
             {/* Yield button - only show when exactly 1 ingredient is selected */}
             {selectedCount === 1 && onYield && (
               <button
+                type="button"
                 onClick={onYield}
                 className="bg-green-100 text-green-700 hover:bg-green-200 hover:text-green-900 transition-all duration-200 hover:shadow-sm flex items-center gap-1 px-2 py-1 rounded-lg"
                 title="Adjust ingredient amount to match target total"

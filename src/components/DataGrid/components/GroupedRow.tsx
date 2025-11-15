@@ -24,6 +24,7 @@ export const GroupedRow = ({
       <td colSpan={colspan} className="px-4 py-3">
         <div className="flex items-center justify-between">
           <button
+                type="button"
             onClick={onToggle}
             className="flex items-center space-x-3 text-sm font-medium text-blue-900 hover:text-blue-700 transition-colors"
           >

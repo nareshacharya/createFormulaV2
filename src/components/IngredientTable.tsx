@@ -421,6 +421,7 @@ const IngredientTable = ({
           </div>
           <div style={tw("flex items-center")}>
             <button
+                  type="button"
               onClick={() => setCurrentPage(1)}
               disabled={currentPage === 1}
               style={mergeStyles(
@@ -439,6 +440,7 @@ const IngredientTable = ({
               <i className="ri-skip-back-line"></i>
             </button>
             <button
+                  type="button"
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
               style={mergeStyles(
@@ -474,6 +476,8 @@ const IngredientTable = ({
 
                 return (
                   <button
+                  type="button"
+                type="button"
                     key={pageNum}
                     onClick={() => setCurrentPage(pageNum)}
                     style={mergeStyles(
@@ -497,6 +501,7 @@ const IngredientTable = ({
             </div>
 
             <button
+                  type="button"
               onClick={() =>
                 setCurrentPage((prev) => Math.min(prev + 1, totalPages))
               }
@@ -519,6 +524,7 @@ const IngredientTable = ({
               <i className="ri-arrow-right-line"></i>
             </button>
             <button
+                  type="button"
               onClick={() => setCurrentPage(totalPages)}
               disabled={currentPage === totalPages}
               style={mergeStyles(

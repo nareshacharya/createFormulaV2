@@ -19,6 +19,7 @@ export function BasicExample() {
     <div style={tw("flex items-center gap-4 p-4 bg-gray-100 rounded-lg")}>
       <span style={tw("text-lg font-semibold text-gray-900")}>Hello World</span>
       <button
+                type="button"
         style={tw("px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600")}
       >
         Click Me
@@ -61,7 +62,7 @@ export function HookExample() {
   return (
     <div style={containerStyles}>
       <h2 style={titleStyles}>Hook Example</h2>
-      <button style={buttonStyles}>Action</button>
+      <button type="button" style={buttonStyles}>Action</button>
     </div>
   );
 }
@@ -78,7 +79,7 @@ export function InteractiveExample() {
 
   return (
     <div style={tw("flex items-center justify-center p-8")}>
-      <button style={buttonStyles} {...buttonHandlers}>
+      <button type="button" style={buttonStyles} {...buttonHandlers}>
         Hover or Focus Me
       </button>
     </div>
@@ -105,7 +106,7 @@ export function VariantExample({
 
   return (
     <div style={tw("flex gap-4 p-4")}>
-      <button style={buttonStyles}>
+      <button type="button" style={buttonStyles}>
         {variant.charAt(0).toUpperCase() + variant.slice(1)} Button
       </button>
     </div>

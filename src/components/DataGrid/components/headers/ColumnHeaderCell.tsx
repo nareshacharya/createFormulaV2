@@ -234,6 +234,8 @@ export const ColumnHeaderCell = ({
               )}
             {column.sortable && (
               <button
+                type="button"
+                type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   onSort(column.id);
@@ -270,6 +272,8 @@ export const ColumnHeaderCell = ({
                 (column.group === "Attributes" &&
                   column.id !== "description")) && (
                 <button
+                type="button"
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDeleteColumn?.(column.id);
@@ -287,6 +291,8 @@ export const ColumnHeaderCell = ({
             {column.id.startsWith("formula") && !column.fixed && (
               <div className="relative">
                 <button
+                type="button"
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowColumnActions(
@@ -337,7 +343,7 @@ export const ColumnHeaderCell = ({
                           {/* Set Active - only show for owned or draft formulas */}
                           {isOwned && (
                             <button
-                              onClick={(e) => {
+                              type="button" onClick={(e) => {
                                 e.stopPropagation();
                                 onSetActiveFormula?.(column.id);
                                 setShowColumnActions(null);
@@ -355,7 +361,7 @@ export const ColumnHeaderCell = ({
                           {(() => {
                             return isOwned ? (
                               <button
-                                onClick={(e) => {
+                                type="button" onClick={(e) => {
                                   e.stopPropagation();
                                   if (column.formulaId) {
                                     onEditFormulaDetails?.(column.formulaId);
@@ -371,7 +377,7 @@ export const ColumnHeaderCell = ({
                               </button>
                             ) : (
                               <button
-                                onClick={(e) => {
+                                type="button" onClick={(e) => {
                                   e.stopPropagation();
                                   if (column.formulaId) {
                                     onViewFormulaDetails?.(column.formulaId);
@@ -399,7 +405,7 @@ export const ColumnHeaderCell = ({
                               return formula?.formulaType === "ANALYTICAL";
                             })() && (
                               <button
-                                onClick={(e) => {
+                                type="button" onClick={(e) => {
                                   e.stopPropagation();
                                   onUploadExcel?.(column.formulaId);
                                   setShowColumnActions(null);
@@ -415,7 +421,7 @@ export const ColumnHeaderCell = ({
 
                           {/* Create Version - always available */}
                           <button
-                            onClick={(e) => {
+                            type="button" onClick={(e) => {
                               e.stopPropagation();
                               onCreateVersion?.(column.id);
                               setShowColumnActions(null);
@@ -443,7 +449,7 @@ export const ColumnHeaderCell = ({
                             <>
                               <div className="border-t border-gray-200 my-1"></div>
                               <button
-                                onClick={(e) => {
+                                type="button" onClick={(e) => {
                                   e.stopPropagation();
                                   onNormalizeFormula?.(column.id);
                                   setShowColumnActions(null);
@@ -456,7 +462,7 @@ export const ColumnHeaderCell = ({
                                 <span>Normalize</span>
                               </button>
                               <button
-                                onClick={(e) => {
+                                type="button" onClick={(e) => {
                                   e.stopPropagation();
                                   onSendForCompounding?.(column.id);
                                   setShowColumnActions(null);
@@ -473,7 +479,7 @@ export const ColumnHeaderCell = ({
 
                           <div className="border-t border-gray-200 my-1"></div>
                           <button
-                            onClick={(e) => {
+                            type="button" onClick={(e) => {
                               e.stopPropagation();
                               onDeleteColumn?.(column.id);
                               setShowColumnActions(null);

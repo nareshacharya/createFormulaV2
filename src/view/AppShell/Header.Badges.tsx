@@ -109,6 +109,7 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
         {/* Project Name with Dropdown */}
         <div style={tw("relative group")}>
           <button
+                  type="button"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             style={mergeStyles(
               tw("flex items-center hover:opacity-80 transition-opacity"),

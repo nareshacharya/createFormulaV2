@@ -53,6 +53,7 @@ export const AddItemButton = ({
       style={{ transform: "translateY(-16px)" }}
     >
       <button
+                type="button"
         onClick={handleClick}
         className="
           w-6 h-6 rounded-full flex items-center justify-center

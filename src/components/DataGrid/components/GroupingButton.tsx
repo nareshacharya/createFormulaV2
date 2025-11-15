@@ -44,6 +44,7 @@ export const GroupingButton = ({
   return (
     <div className="relative inline-block">
       <button
+                  type="button"
         onClick={() => onToggleGrouping(columnId)}
         onMouseEnter={() => setShowPreview(true)}
         onMouseLeave={() => setShowPreview(false)}

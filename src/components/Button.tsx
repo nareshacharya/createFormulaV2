@@ -51,7 +51,7 @@ const Button = ({
 
   return (
     <button
-      type={type}
+      type={type === "submit" ? "submit" : "button"}
       onClick={onClick}
       disabled={disabled}
       title={title}

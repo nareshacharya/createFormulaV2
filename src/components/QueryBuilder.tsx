@@ -254,6 +254,8 @@ const QueryBuilder = ({
               </select>
               <div style={tw("flex space-x-1")}>
                 <button
+                  type="button"
+                  type="button"
                   onClick={() => addRuleToGroup(rule.id)}
                   style={tw(
                     "inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 border border-blue-200 rounded hover:bg-blue-50 cursor-pointer"
@@ -266,6 +268,8 @@ const QueryBuilder = ({
                   Rule
                 </button>
                 <button
+                  type="button"
+                  type="button"
                   onClick={() => addGroupToGroup(rule.id)}
                   style={tw(
                     "inline-flex items-center px-2 py-1 text-xs font-medium text-green-600 border border-green-200 rounded hover:bg-green-50 cursor-pointer"
@@ -280,6 +284,7 @@ const QueryBuilder = ({
               </div>
             </div>
             <button
+                  type="button"
               onClick={() => removeRule(rule.id)}
               style={tw(
                 "p-1 text-red-600 hover:bg-red-50 rounded cursor-pointer"
@@ -359,6 +364,7 @@ const QueryBuilder = ({
           )}
 
           <button
+                  type="button"
             onClick={() => removeRule(rule.id)}
             style={tw(
               "p-1 text-red-600 hover:bg-red-50 rounded cursor-pointer flex-shrink-0"
@@ -406,6 +412,7 @@ const QueryBuilder = ({
       >
         <div style={tw("flex space-x-1")}>
           <button
+                  type="button"
             onClick={() => addRuleToGroup("root")}
             style={tw(
               "inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 border border-blue-200 rounded hover:bg-blue-50 cursor-pointer"
@@ -414,6 +421,7 @@ const QueryBuilder = ({
             <i style={mergeStyles(tw("mr-1"))} className="ri-add-line"></i>Rule
           </button>
           <button
+                  type="button"
             onClick={() => addGroupToGroup("root")}
             style={tw(
               "inline-flex items-center px-2 py-1 text-xs font-medium text-green-600 border border-green-200 rounded hover:bg-green-50 cursor-pointer"
@@ -429,6 +437,8 @@ const QueryBuilder = ({
 
         <div style={tw("flex space-x-1")}>
           <button
+                  type="button"
+                type="button"
             onClick={handleClear}
             style={tw(
               "px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded hover:bg-gray-200 cursor-pointer"
