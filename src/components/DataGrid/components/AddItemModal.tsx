@@ -172,7 +172,7 @@ export const AddItemModal = ({
                       </div>
                     </div>
                     <button
-                  type="button"
+                      type="button"
                       onClick={() => handleIngredientSelect(ingredient)}
                       className="ml-3 px-3 py-1.5 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition-colors opacity-0 group-hover:opacity-100"
                     >
@@ -206,7 +206,7 @@ export const AddItemModal = ({
                       </div>
                     </div>
                     <button
-                  type="button"
+                      type="button"
                       onClick={() => handleFormulaSelect(formula)}
                       className="ml-3 px-3 py-1.5 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition-colors opacity-0 group-hover:opacity-100"
                     >

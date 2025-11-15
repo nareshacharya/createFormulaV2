@@ -1692,17 +1692,23 @@ const WorkArea = () => {
     };
 
     // Handler to restore workspace state
-    const handleWorkspaceStateLoad = ({ state: workspaceState }: { state: WorkspaceState }) => {
+    const handleWorkspaceStateLoad = ({
+      state: workspaceState,
+    }: {
+      state: WorkspaceState;
+    }) => {
       console.log("📥 Loading workspace state:", workspaceState);
 
       try {
         // Restore DataGrid Core State
-        if (workspaceState.columns) setColumns(workspaceState.columns as Column[]);
+        if (workspaceState.columns)
+          setColumns(workspaceState.columns as Column[]);
         if (workspaceState.tableData)
           setTableData(workspaceState.tableData as Record<string, unknown>[]);
 
         // Restore Formula State
-        if (workspaceState.formulas) setFormulas(workspaceState.formulas as Formula[]);
+        if (workspaceState.formulas)
+          setFormulas(workspaceState.formulas as Formula[]);
         if (workspaceState.availableFormulas)
           setAvailableFormulas(workspaceState.availableFormulas as Formula[]);
         if (workspaceState.selectedFormulaIds)

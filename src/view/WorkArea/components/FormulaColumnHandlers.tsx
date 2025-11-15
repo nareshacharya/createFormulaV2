@@ -7,9 +7,7 @@ import toast from "react-hot-toast";
 import type { Column } from "../../../components/DataGrid";
 import type { Formula } from "../../../services/pega";
 import { eventBus } from "../../../utils/bus";
-import {
-  getCurrentUserInitials,
-} from "../../../utils/idGeneration";
+import { getCurrentUserInitials } from "../../../utils/idGeneration";
 import { appStateHistory } from "../../../utils/stateHistory";
 
 export interface FormulaHandlersConfig {

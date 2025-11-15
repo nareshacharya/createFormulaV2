@@ -158,7 +158,10 @@ const ExcelUploadModal = ({
     }
   };
 
-  const handleIngredientMapping = (ingredientName: string, ingredientId: string) => {
+  const handleIngredientMapping = (
+    ingredientName: string,
+    ingredientId: string
+  ) => {
     setParsedIngredients((prev) =>
       prev.map((ing) =>
         ing.name === ingredientName
@@ -404,7 +407,10 @@ const ExcelUploadModal = ({
                           <select
                             value={ingredient.mappedIngredientId || ""}
                             onChange={(e) =>
-                              handleIngredientMapping(ingredient.name, e.target.value)
+                              handleIngredientMapping(
+                                ingredient.name,
+                                e.target.value
+                              )
                             }
                             style={mergeStyles(
                               tw("w-full px-2 text-sm border rounded"),

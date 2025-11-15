@@ -93,7 +93,7 @@ export const DescriptionCell = ({
         {row.isFormula && (
           <div style={tw("flex items-center space-x-1 mr-2")}>
             <button
-                  type="button"
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onToggleFormulaExpansion?.(row.formulaId);
@@ -143,7 +143,7 @@ export const DescriptionCell = ({
       {/* Explode button for formulas */}
       {row.isFormula && (
         <button
-                  type="button"
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
             onExplodeFormula?.(row.formulaId);
@@ -168,7 +168,7 @@ export const DescriptionCell = ({
         dilution &&
         dilution.solventIds.length > 0 && (
           <button
-                  type="button"
+            type="button"
             onClick={() => {
               onDilutionClick?.(row.id, value || "");
             }}

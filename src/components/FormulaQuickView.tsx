@@ -271,7 +271,10 @@ const FormulaQuickView = ({
             </thead>
             <tbody style={tw("bg-white divide-y divide-gray-200")}>
               {formula.ingredients.map((ingredient) => (
-                <tr key={ingredient.ingredientId} style={tw("hover:bg-gray-50")}>
+                <tr
+                  key={ingredient.ingredientId}
+                  style={tw("hover:bg-gray-50")}
+                >
                   <td style={tw("px-4 py-3 text-sm text-gray-900")}>
                     {ingredient.name}
                   </td>
@@ -494,7 +497,7 @@ const FormulaQuickView = ({
       footerActions={
         <div style={tw("flex justify-end gap-2")}>
           <button
-                type="button"
+            type="button"
             onClick={onClose}
             style={tw(
               "px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md cursor-pointer"
@@ -527,7 +530,7 @@ const FormulaQuickView = ({
               const isActive = activeSection === section.id;
               return (
                 <button
-                type="button"
+                  type="button"
                   key={section.id}
                   onClick={() => setActiveSection(section.id)}
                   style={mergeStyles(
