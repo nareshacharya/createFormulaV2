@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import { useState } from "react";
 import type { IngredientAttribute } from "../services/pega";
 import { tw, mergeStyles } from "../utils/tailwindToInline";

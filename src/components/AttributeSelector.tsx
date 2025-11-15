@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import { useState } from "react";
 import { getListItemClasses, selectionStyles } from "../config/theme";
 import type { IngredientAttribute } from "../services/pega";
