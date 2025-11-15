@@ -454,6 +454,20 @@ const WorkArea = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tableData, editableFormula]);
 
+  // Helper to get badge variant for formula status
+  const getStatusBadgeVariant = (status: string): "success" | "warning" | "default" => {
+    if (status === "active") return "success";
+    if (status === "draft") return "warning";
+    return "default";
+  };
+
+  // Helper to determine attribute column type
+  const getAttributeColumnType = (attrType: string | undefined): "text" | "number" | "select" => {
+    if (attrType === "number") return "number";
+    if (attrType === "select") return "select";
+    return "text";
+  };
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -1868,12 +1882,7 @@ const WorkArea = () => {
         key: newColumnId,
         title: attribute.name,
         attributeId: attribute.id,
-        type:
-          attribute.type === "number"
-            ? "number"
-            : attribute.type === "select"
-              ? "select"
-              : "text",
+        type: getAttributeColumnType(attribute.type),
         sortable: true,
         editable: false,
         group: "Attributes",
@@ -2313,13 +2322,7 @@ const WorkArea = () => {
                   </div>
                 </div>
                 <Badge
-                  variant={
-                    formula.status === "active"
-                      ? "success"
-                      : formula.status === "draft"
-                        ? "warning"
-                        : "default"
-                  }
+                  variant={getStatusBadgeVariant(formula.status)}
                   size="sm"
                 >
                   {formula.status}
