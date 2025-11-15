@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { useModal } from "../../App";
 import SaveWorkspaceModal from "../../components/SaveWorkspaceModal";
 import { eventBus } from "../../utils/bus";

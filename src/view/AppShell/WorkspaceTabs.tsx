@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { tw, mergeStyles } from "../../utils/tailwindToInline";
 
 interface WorkspaceTab {

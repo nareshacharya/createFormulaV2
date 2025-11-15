@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import type { Column } from "../../../components/DataGrid";
 import type { Formula } from "../../../services/pega";
 import { eventBus } from "../../../utils/bus";

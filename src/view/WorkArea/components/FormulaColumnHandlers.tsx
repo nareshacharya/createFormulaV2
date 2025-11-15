@@ -3,7 +3,7 @@
  * Extracted from WorkArea to keep file size manageable
  */
 
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import type { Column } from "../../../components/DataGrid";
 import type { Formula } from "../../../services/pega";
 import { eventBus } from "../../../utils/bus";

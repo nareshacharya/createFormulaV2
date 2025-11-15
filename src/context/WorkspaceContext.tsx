@@ -1,5 +1,5 @@
 import React, { createContext, useState, useCallback } from "react";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import type { Column } from "../components/DataGrid";
 import type {
   Formula,

@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import AttributeSelector from "../../components/AttributeSelector";
 import Badge from "../../components/Badge";
 import Button from "../../components/Button";
