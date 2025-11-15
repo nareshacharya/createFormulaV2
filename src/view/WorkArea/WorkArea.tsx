@@ -1692,53 +1692,53 @@ const WorkArea = () => {
     };
 
     // Handler to restore workspace state
-    const handleWorkspaceStateLoad = ({ state }: { state: WorkspaceState }) => {
-      console.log("📥 Loading workspace state:", state);
+    const handleWorkspaceStateLoad = ({ state: workspaceState }: { state: WorkspaceState }) => {
+      console.log("📥 Loading workspace state:", workspaceState);
 
       try {
         // Restore DataGrid Core State
-        if (state.columns) setColumns(state.columns as Column[]);
-        if (state.tableData)
-          setTableData(state.tableData as Record<string, unknown>[]);
+        if (workspaceState.columns) setColumns(workspaceState.columns as Column[]);
+        if (workspaceState.tableData)
+          setTableData(workspaceState.tableData as Record<string, unknown>[]);
 
         // Restore Formula State
-        if (state.formulas) setFormulas(state.formulas as Formula[]);
-        if (state.availableFormulas)
-          setAvailableFormulas(state.availableFormulas as Formula[]);
-        if (state.selectedFormulaIds)
-          setSelectedFormulaIds(state.selectedFormulaIds);
-        if (state.editableFormula !== undefined)
-          setEditableFormula(state.editableFormula);
+        if (workspaceState.formulas) setFormulas(workspaceState.formulas as Formula[]);
+        if (workspaceState.availableFormulas)
+          setAvailableFormulas(workspaceState.availableFormulas as Formula[]);
+        if (workspaceState.selectedFormulaIds)
+          setSelectedFormulaIds(workspaceState.selectedFormulaIds);
+        if (workspaceState.editableFormula !== undefined)
+          setEditableFormula(workspaceState.editableFormula);
 
         // Restore Ingredient State
-        if (state.ingredients)
-          setIngredients(state.ingredients as Ingredient[]);
+        if (workspaceState.ingredients)
+          setIngredients(workspaceState.ingredients as Ingredient[]);
 
         // Restore Attribute State
-        if (state.attributes)
-          setAttributes(state.attributes as IngredientAttribute[]);
-        if (state.selectedAttributes)
-          setSelectedAttributes(state.selectedAttributes);
+        if (workspaceState.attributes)
+          setAttributes(workspaceState.attributes as IngredientAttribute[]);
+        if (workspaceState.selectedAttributes)
+          setSelectedAttributes(workspaceState.selectedAttributes);
 
         // Restore UI State
-        if (state.groupedByColumn !== undefined)
-          setGroupedByColumn(state.groupedByColumn);
+        if (workspaceState.groupedByColumn !== undefined)
+          setGroupedByColumn(workspaceState.groupedByColumn);
 
         // Emit events to sync with other components
-        const ingredientsList = state.ingredients as Ingredient[];
+        const ingredientsList = workspaceState.ingredients as Ingredient[];
         eventBus.emit("work-area-updated", {
           ingredients: ingredientsList?.map((ing) => ing.name) || [],
         });
 
-        if (state.selectedAttributes) {
+        if (workspaceState.selectedAttributes) {
           eventBus.emit("work-area-attributes-updated", {
-            selectedAttributes: state.selectedAttributes,
+            selectedAttributes: workspaceState.selectedAttributes,
           });
         }
 
-        if (state.selectedFormulaIds) {
+        if (workspaceState.selectedFormulaIds) {
           eventBus.emit("formula-selections-updated", {
-            selectedFormulas: state.selectedFormulaIds,
+            selectedFormulas: workspaceState.selectedFormulaIds,
           });
         }
 
