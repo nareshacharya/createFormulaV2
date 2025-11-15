@@ -44,7 +44,7 @@ export const GroupingButton = ({
   return (
     <div className="relative inline-block">
       <button
-                  type="button"
+        type="button"
         onClick={() => onToggleGrouping(columnId)}
         onMouseEnter={() => setShowPreview(true)}
         onMouseLeave={() => setShowPreview(false)}
@@ -57,6 +57,7 @@ export const GroupingButton = ({
           }
         `}
         title={isGrouped ? "Remove grouping" : "Group by this attribute"}
+        aria-label={isGrouped ? "Remove grouping" : "Group by this attribute"}
       >
         <i
           className={`ri-${isGrouped ? "subtract" : "add"}-box-line text-sm`}
