@@ -122,6 +122,14 @@ export const ColumnHeaderCell = ({
     return "auto";
   };
 
+  // Helper to get sort arrow icon
+  const getSortArrowIcon = (): string => {
+    if (!sortConfig || sortConfig.key !== column.id) {
+      return "unfold_more";
+    }
+    return sortConfig.direction === "asc" ? "arrow_upward" : "arrow_downward";
+  };
+
   return (
     <th
       key={column.id}
@@ -232,21 +240,9 @@ export const ColumnHeaderCell = ({
                 }}
                 className="text-gray-400 hover:text-gray-600"
               >
-                {sortConfig?.key === column.id ? (
-                  sortConfig.direction === "asc" ? (
-                    <span className="material-symbols-rounded text-xs">
-                      arrow_upward
-                    </span>
-                  ) : (
-                    <span className="material-symbols-rounded text-xs">
-                      arrow_downward
-                    </span>
-                  )
-                ) : (
-                  <span className="material-symbols-rounded text-xs">
-                    unfold_more
-                  </span>
-                )}
+                <span className="material-symbols-rounded text-xs">
+                  {getSortArrowIcon()}
+                </span>
               </button>
             )}
           </div>

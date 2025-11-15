@@ -218,19 +218,27 @@ export function ConditionalExample({
   isActive?: boolean;
   isError?: boolean;
 }) {
+  // Helper to get status classes
+  const getStatusClasses = (): string => {
+    if (isError) return "bg-red-100 text-red-800 border border-red-300";
+    if (isActive) return "bg-green-100 text-green-800 border border-green-300";
+    return "bg-gray-100 text-gray-800 border border-gray-300";
+  };
+
+  // Helper to get status label
+  const getStatusLabel = (): string => {
+    if (isError) return "Error";
+    if (isActive) return "Active";
+    return "Inactive";
+  };
+
   // Method 1: Using template literals
-  const statusClasses = `px-4 py-2 rounded ${
-    isError
-      ? "bg-red-100 text-red-800 border border-red-300"
-      : isActive
-        ? "bg-green-100 text-green-800 border border-green-300"
-        : "bg-gray-100 text-gray-800 border border-gray-300"
-  }`;
+  const statusClasses = `px-4 py-2 rounded ${getStatusClasses()}`;
 
   return (
     <div style={tw("flex gap-4 p-4")}>
       <div style={tw(statusClasses)}>
-        Status: {isError ? "Error" : isActive ? "Active" : "Inactive"}
+        Status: {getStatusLabel()}
       </div>
     </div>
   );

@@ -50,6 +50,13 @@ const FormulaQuickView = ({
     return formula.status.charAt(0).toUpperCase() + formula.status.slice(1);
   };
 
+  // Helper to get ingredient type badge styling
+  const getIngredientTypeBadgeClass = (type: string | undefined): string => {
+    if (type === "natural") return "bg-green-100 text-green-800";
+    if (type === "synthetic") return "bg-blue-100 text-blue-800";
+    return "bg-gray-100 text-gray-800";
+  };
+
   const renderOverviewSection = () => {
     if (!formula) return null;
 
@@ -274,13 +281,9 @@ const FormulaQuickView = ({
                   <td style={tw("px-4 py-3 text-sm text-gray-500")}>
                     <span
                       style={tw(
-                        `inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                          ingredient.type === "natural"
-                            ? "bg-green-100 text-green-800"
-                            : ingredient.type === "synthetic"
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-gray-100 text-gray-800"
-                        }`
+                        `inline-flex px-2 py-1 text-xs font-medium rounded-full ${getIngredientTypeBadgeClass(
+                          ingredient.type
+                        )}`
                       )}
                     >
                       {ingredient.type}
