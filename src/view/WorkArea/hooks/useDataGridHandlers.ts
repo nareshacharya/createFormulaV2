@@ -63,8 +63,8 @@ export const useDataGridHandlers = ({
 
                 // Remove from tracking sets and update state
                 pendingFormulaIds.current?.delete(rowToDelete.formulaId);
-                setSelectedFormulaIds((prev) =>
-                    prev.filter((id) => id !== rowToDelete.formulaId)
+                setSelectedFormulaIds((prevSelected) =>
+                    prevSelected.filter((id) => id !== rowToDelete.formulaId)
                 );
 
                 // The useEffect in WorkArea will emit the formula-selections-updated event
@@ -88,8 +88,8 @@ export const useDataGridHandlers = ({
                 if (remainingIngredientsForFormula.length === 0 && !formulaGroupRow) {
                     console.log("✅ Last ingredient deleted, removing formula from tracking:", rowToDelete.parentFormulaId);
                     pendingFormulaIds.current?.delete(rowToDelete.parentFormulaId);
-                    setSelectedFormulaIds((prev) =>
-                        prev.filter((id) => id !== rowToDelete.parentFormulaId)
+                    setSelectedFormulaIds((prevSelected) =>
+                        prevSelected.filter((id) => id !== rowToDelete.parentFormulaId)
                     );
                 }
             }

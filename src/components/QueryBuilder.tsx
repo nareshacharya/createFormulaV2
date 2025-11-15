@@ -255,7 +255,6 @@ const QueryBuilder = ({
               <div style={tw("flex space-x-1")}>
                 <button
                   type="button"
-                  type="button"
                   onClick={() => addRuleToGroup(rule.id)}
                   style={tw(
                     "inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 border border-blue-200 rounded hover:bg-blue-50 cursor-pointer"
@@ -268,7 +267,6 @@ const QueryBuilder = ({
                   Rule
                 </button>
                 <button
-                  type="button"
                   type="button"
                   onClick={() => addGroupToGroup(rule.id)}
                   style={tw(

@@ -1656,7 +1656,7 @@ const WorkArea = () => {
   useEffect(() => {
     // Handler to capture current workspace state
     const handleWorkspaceStateRequest = () => {
-      const state = {
+      const workspaceSnapshot = {
         // DataGrid Core State
         columns,
         tableData,
@@ -1687,8 +1687,8 @@ const WorkArea = () => {
       };
 
       // Emit the captured state
-      eventBus.emit("workspace-state-ready", { state });
-      console.log("📦 Workspace state captured:", state);
+      eventBus.emit("workspace-state-ready", { state: workspaceSnapshot });
+      console.log("📦 Workspace state captured:", workspaceSnapshot);
     };
 
     // Handler to restore workspace state
@@ -2036,8 +2036,8 @@ const WorkArea = () => {
         deletedFormulaIds.forEach((id) => {
           pendingFormulaIds.current?.delete(id);
         });
-        setSelectedFormulaIds((prev) =>
-          prev.filter((id) => !deletedFormulaIds.includes(id))
+        setSelectedFormulaIds((prevSelected) =>
+          prevSelected.filter((id) => !deletedFormulaIds.includes(id))
         );
         console.log("✅ Removed formulas from tracking:", deletedFormulaIds);
       }
@@ -2076,8 +2076,8 @@ const WorkArea = () => {
           formulasToRemove.forEach((id) => {
             pendingFormulaIds.current?.delete(id);
           });
-          setSelectedFormulaIds((prev) =>
-            prev.filter((id) => !formulasToRemove.includes(id))
+          setSelectedFormulaIds((prevSelected) =>
+            prevSelected.filter((id) => !formulasToRemove.includes(id))
           );
         }
       }
