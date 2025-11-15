@@ -58,6 +58,12 @@ const IngredientTable = ({
     return "bg-green-500"; // Default to active
   };
 
+  const getTypeBadgeVariant = (type: string): "success" | "info" | "default" => {
+    if (type === "natural") return "success";
+    if (type === "synthetic") return "info";
+    return "default";
+  };
+
   const handleSort = (key: string) => {
     let direction: "asc" | "desc" = "asc";
     if (
@@ -182,13 +188,7 @@ const IngredientTable = ({
       case "type":
         return (
           <Badge
-            variant={
-              value === "natural"
-                ? "success"
-                : value === "synthetic"
-                  ? "info"
-                  : "default"
-            }
+            variant={getTypeBadgeVariant(value as string)}
             size="sm"
           >
             {value as string}

@@ -334,6 +334,26 @@ const DataGrid = ({
     return colors[groupName as keyof typeof colors] || colors.default;
   };
 
+  // Render cell content for Target Total rows
+  const renderTargetTotalCell = (
+    row: Record<string, any>,
+    column: Column
+  ): React.ReactNode => {
+    if (column.type === "number") {
+      const val = row[column.key];
+      const displayValue =
+        typeof val === "number" ? val.toFixed(5) : val || "100.00000";
+      return (
+        <span
+          style={tw("text-sm font-semibold text-gray-900 text-right block")}
+        >
+          {displayValue}
+        </span>
+      );
+    }
+    return row[column.key];
+  };
+
   // Get comparison glyph for non-active formula columns
   const handleSort = (columnId: string) => {
     const column = columns.find((col) => col.id === columnId);
@@ -941,25 +961,7 @@ const DataGrid = ({
                           }}
                         >
                           {isTargetTotalInActiveFormula
-                            ? // For Target Total in active formula (not focused), display value directly
-                              column.type === "number"
-                              ? (() => {
-                                  const val = row[column.key];
-                                  const displayValue =
-                                    typeof val === "number"
-                                      ? val.toFixed(5)
-                                      : val || "100.00000";
-                                  return (
-                                    <span
-                                      style={tw(
-                                        "text-sm font-semibold text-gray-900 text-right block"
-                                      )}
-                                    >
-                                      {displayValue}
-                                    </span>
-                                  );
-                                })()
-                              : row[column.key]
+                            ? renderTargetTotalCell(row, column)
                             : // For all other cells, use normal renderCell
                               renderCell(row, column)}
 
@@ -1104,25 +1106,7 @@ const DataGrid = ({
                           }}
                         >
                           {isTargetTotalInActiveFormula
-                            ? // For Target Total in active formula (not focused), display value directly
-                              column.type === "number"
-                              ? (() => {
-                                  const val = row[column.key];
-                                  const displayValue =
-                                    typeof val === "number"
-                                      ? val.toFixed(5)
-                                      : val || "100.00000";
-                                  return (
-                                    <span
-                                      style={tw(
-                                        "text-sm font-semibold text-gray-900 text-right block"
-                                      )}
-                                    >
-                                      {displayValue}
-                                    </span>
-                                  );
-                                })()
-                              : row[column.key]
+                            ? renderTargetTotalCell(row, column)
                             : // For all other cells, use normal renderCell
                               renderCell(row, column)}
                         </td>

@@ -72,11 +72,12 @@ export const EditableCell = ({
   // Render focused/editing state
   if (isFocused || isEditing) {
     // Show editValue when editing, actual value when just focused
-    const displayValue = isEditing
-      ? editValue
-      : typeof value === "number"
-      ? value.toFixed(5)
-      : String(value || "");
+    const getDisplayValue = (): string => {
+      if (isEditing) return editValue;
+      if (typeof value === "number") return value.toFixed(5);
+      return String(value || "");
+    };
+    const displayValue = getDisplayValue();
 
     return (
       <td

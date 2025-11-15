@@ -54,6 +54,12 @@ const ComplianceSection = ({
     return { variant: "success" as const, text: "Compliant" };
   };
 
+  const getMacProgressBarColor = (mac: number): string => {
+    if (mac < 0) return "h-2 rounded-full bg-red-500";
+    if (mac < 0.5) return "h-2 rounded-full bg-yellow-500";
+    return "h-2 rounded-full bg-green-500";
+  };
+
   const macStatus = getMacStatus(mockData.mac);
 
   return (
@@ -121,15 +127,7 @@ const ComplianceSection = ({
             <div style={tw("flex-1 bg-gray-200 rounded-full h-2")}>
               <div
                 style={{
-                  ...tw(
-                    `h-2 rounded-full ${
-                      mockData.mac < 0
-                        ? "bg-red-500"
-                        : mockData.mac < 0.5
-                          ? "bg-yellow-500"
-                          : "bg-green-500"
-                    }`
-                  ),
+                  ...tw(getMacProgressBarColor(mockData.mac)),
                   width: `${Math.max(0, Math.min(100, mockData.mac * 100))}%`,
                 }}
               ></div>
