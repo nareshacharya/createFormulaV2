@@ -140,7 +140,7 @@ export const useKeyboardNavigation = ({
             // Save the current editing cell before moving to new cell
             if (editingCell && (editingCell.rowId !== rowId || editingCell.columnId !== columnId)) {
                 const numericValue = parseFloat(editValue);
-                const finalValue = isNaN(numericValue) ? editValue : numericValue;
+                const finalValue = Number.isNaN(numericValue) ? editValue : numericValue;
                 onCellEdit?.(editingCell.rowId, editingCell.columnId, finalValue);
             }
 
@@ -212,7 +212,7 @@ export const useKeyboardNavigation = ({
 
         // Parse numeric value
         const numericValue = parseFloat(editValue);
-        const finalValue = isNaN(numericValue) ? editValue : numericValue;
+        const finalValue = Number.isNaN(numericValue) ? editValue : numericValue;
 
         onCellEdit?.(editingCell.rowId, editingCell.columnId, finalValue);
         setEditingCell(null);

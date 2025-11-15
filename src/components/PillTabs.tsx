@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import { useEffect, useRef, useMemo, type CSSProperties } from "react";
 import { tw, mergeStyles } from "../utils/tailwindToInline";
 

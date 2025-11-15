@@ -436,7 +436,7 @@ const FormulaModal = ({
               onChange={(e) =>
                 setNewFormulaData((prev) => ({
                   ...prev,
-                  version: parseInt(e.target.value),
+                  version: parseInt(e.target.value, 10),
                 }))
               }
               style={tw(

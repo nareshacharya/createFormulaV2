@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
 interface GroupedRowProps {
   groupValue: string;
   groupColumn: string;

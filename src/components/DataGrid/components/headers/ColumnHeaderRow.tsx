@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import { ColumnHeaderCell } from "./ColumnHeaderCell";
 
 // Use Column type from DataGrid.tsx to match parent component

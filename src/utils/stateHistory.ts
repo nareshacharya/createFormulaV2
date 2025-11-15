@@ -38,7 +38,7 @@ export class StateHistoryManager<T = any> {
         if (this.history.length > this.maxHistorySize) {
             this.history.shift();
         } else {
-            this.currentIndex++;
+            this.currentIndex += 1;
         }
     }
 
@@ -50,7 +50,7 @@ export class StateHistoryManager<T = any> {
         if (!this.canUndo()) {
             return null;
         }
-        this.currentIndex--;
+        this.currentIndex -= 1;
         return this.getCurrentState();
     }
 
@@ -62,7 +62,7 @@ export class StateHistoryManager<T = any> {
         if (!this.canRedo()) {
             return null;
         }
-        this.currentIndex++;
+        this.currentIndex += 1;
         return this.getCurrentState();
     }
 

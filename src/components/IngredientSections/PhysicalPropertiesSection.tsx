@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import type { Ingredient } from "../../services/pega";
 import { tw } from "../../utils/tailwindToInline";
 

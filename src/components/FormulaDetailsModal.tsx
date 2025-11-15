@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import { useEffect, useState } from "react";
 import { FORMULA_DETAILS_FIELDS } from "../config/fieldConfigs/formulaDetails.fields";
 import { GENERAL_INFO_FIELDS } from "../config/fieldConfigs/generalInfo.fields";

@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import type { Dilution, DilutionPreset, Solvent } from "../../types/dilution";

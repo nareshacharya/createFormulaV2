@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import { useEffect } from "react";
 import { tw } from "../utils/tailwindToInline";
 

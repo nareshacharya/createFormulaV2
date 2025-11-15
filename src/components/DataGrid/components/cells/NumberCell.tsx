@@ -73,7 +73,7 @@ export const NumberCell = ({
           value={typeof value === "number" ? value.toFixed(5) : value || 100}
           onChange={(e) => {
             const newValue = parseFloat(e.target.value);
-            if (!isNaN(newValue)) {
+            if (!Number.isNaN(newValue)) {
               onCellEdit?.(row.id, column.id, newValue);
             }
           }}
