@@ -86,7 +86,7 @@ export const NumberCell = ({
           }}
         />
         <button
-                  type="button"
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
             onExplodeFormula?.(row.formulaId);

@@ -73,7 +73,7 @@ const PillTabs = ({ tabs, activeTab, onTabChange, style }: PillTabsProps) => {
     <div ref={tabsRef} style={containerStyle} role="tablist">
       {tabs.map((tab) => (
         <button
-                type="button"
+          type="button"
           key={tab.id}
           role="tab"
           aria-selected={activeTab === tab.id}

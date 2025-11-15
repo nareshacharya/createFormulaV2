@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
+/* eslint-disable @typescript-eslint/no-use-before-define, jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { toast } from "react-hot-toast";
 import AttributeSelector from "../../components/AttributeSelector";

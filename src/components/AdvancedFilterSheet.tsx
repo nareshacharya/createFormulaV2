@@ -142,7 +142,7 @@ const AdvancedFilterSheet = ({
           </div>
           <div style={mergeStyles(tw("flex"), { gap: "0.75rem" })}>
             <button
-                type="button"
+              type="button"
               onClick={handleClearFilters}
               style={tw(
                 "px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
@@ -151,7 +151,7 @@ const AdvancedFilterSheet = ({
               Clear All
             </button>
             <button
-                type="button"
+              type="button"
               onClick={handleApplyFilters}
               style={tw(
                 "px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"

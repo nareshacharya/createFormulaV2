@@ -336,7 +336,7 @@ export const useKeyboardNavigation = ({
         const cleaned = value.replace(/[^0-9.]/g, '');
         // Ensure only one dot
         const parts = cleaned.split('.');
-        const sanitized = parts.length > 2 ? `${parts[0]  }.${  parts.slice(1).join('')}` : cleaned;
+        const sanitized = parts.length > 2 ? `${parts[0]}.${parts.slice(1).join('')}` : cleaned;
         setEditValue(sanitized);
     }, []);
 

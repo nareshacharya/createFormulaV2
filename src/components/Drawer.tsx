@@ -144,7 +144,7 @@ const Drawer = ({
           <div style={tw("flex items-center space-x-2")}>
             {headerActions}
             <button
-                type="button"
+              type="button"
               onClick={onClose}
               style={tw("p-2 rounded-md transition-colors cursor-pointer")}
               aria-label="Close drawer"
