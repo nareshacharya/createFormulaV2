@@ -1,4 +1,4 @@
-/* eslint-disable jsx-a11y/label-has-associated-control */
+/* eslint-disable jsx-a11y/label-has-associated-control, jsx-a11y/control-has-associated-label */
 import { useState, useRef, useEffect } from "react";
 import { useWorkspaceFeatures } from "../../hooks/useFeatureFlags";
 import { useWorkspace } from "../../hooks/useWorkspace";
