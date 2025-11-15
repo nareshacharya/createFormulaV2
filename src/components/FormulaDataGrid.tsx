@@ -300,6 +300,7 @@ const FormulaDataGrid = ({
                   type="checkbox"
                   checked={isAllCurrentPageSelected}
                   onChange={handleSelectAll}
+                  aria-label="Select all formulas"
                   disabled={
                     maxSelections
                       ? selectedFormulas.length >= maxSelections &&
@@ -378,6 +379,7 @@ const FormulaDataGrid = ({
                       checked={isSelected}
                       onChange={() => handleCheckboxChange(formula.id)}
                       disabled={isDisabled}
+                      aria-label={`Select ${formula.name || "formula"}`}
                       style={mergeStyles(
                         tw("rounded border-gray-300 cursor-pointer"),
                         {
@@ -427,9 +429,10 @@ const FormulaDataGrid = ({
           </div>
           <div style={mergeStyles(tw("flex items-center"), { gap: "8px" })}>
             <button
-                  type="button"
+              type="button"
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               disabled={currentPage === 1}
+              aria-label="Go to previous page"
               style={mergeStyles(
                 tw(
                   "px-3 py-1 text-sm border border-gray-300 rounded-md cursor-pointer"
@@ -475,9 +478,10 @@ const FormulaDataGrid = ({
             </div>
 
             <button
-                  type="button"
+              type="button"
               onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
               disabled={currentPage === totalPages}
+              aria-label="Go to next page"
               style={mergeStyles(
                 tw(
                   "px-3 py-1 text-sm border border-gray-300 rounded-md cursor-pointer"
