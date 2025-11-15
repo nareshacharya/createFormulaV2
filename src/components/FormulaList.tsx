@@ -102,7 +102,7 @@ const FormulaList = ({
               setHoveredFormula(isHovered ? formula.id : null)
             }
             onClick={() => handleFormulaClick(formula)}
-            compact={true}
+            compact
             className={
               isSelected ? "bg-blue-50 border-l-2 border-blue-400" : ""
             }

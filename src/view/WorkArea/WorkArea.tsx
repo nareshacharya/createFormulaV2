@@ -2238,8 +2238,8 @@ const WorkArea = () => {
           editableFormula={editableFormula}
           className="h-full"
           showEmptyState={!hasIngredients}
-          enableRowReordering={true}
-          enableBulkSelection={true}
+          enableRowReordering
+          enableBulkSelection
           dilutionState={dilutionState}
           // Toolbar actions
           onToolbarAddFormula={handleAddFormulaColumn}
@@ -2292,7 +2292,7 @@ const WorkArea = () => {
         onClose={() => setShowFormulaSelector(false)}
         title="Load Formula"
         size="lg"
-        noPadding={true}
+        noPadding
       >
         <div style={tw("p-4 max-h-80 overflow-y-auto")}>
           <div style={mergeStyles({ gap: "0.5rem" }, tw("flex flex-col"))}>

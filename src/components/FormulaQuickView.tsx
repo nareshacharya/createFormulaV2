@@ -487,7 +487,7 @@ const FormulaQuickView = ({
       onClose={onClose}
       title={formula.name}
       size="3xl"
-      noPadding={true}
+      noPadding
       footerActions={
         <div style={tw("flex justify-end gap-2")}>
           <button

@@ -131,7 +131,7 @@ const IngredientList = ({
                 setHoveredRow(isHovered ? ingredient.id : null)
               }
               onClick={() => handleIngredientClick(ingredient)}
-              compact={true}
+              compact
               selected={isSelected}
             >
               <div style={tw("flex items-center justify-between w-full px-3")}>

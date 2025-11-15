@@ -364,7 +364,7 @@ const FormulaDetailsModal = ({
       onClose={handleCancel}
       title={isReadOnly ? "View Formula Details" : "Edit Formula Details"}
       size="xl"
-      noPadding={true}
+      noPadding
     >
       <div
         style={mergeStyles(tw("px-6 py-4"), {

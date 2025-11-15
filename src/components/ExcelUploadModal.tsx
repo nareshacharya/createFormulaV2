@@ -199,7 +199,7 @@ const ExcelUploadModal = ({
       onClose={handleClose}
       title="Upload Composition from Excel"
       size="xl"
-      noPadding={true}
+      noPadding
     >
       <div
         style={mergeStyles(tw("p-6"), {

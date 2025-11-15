@@ -124,7 +124,7 @@ const IngredientQuickView = ({
       onClose={onClose}
       title={ingredient.name}
       size="3xl"
-      noPadding={true}
+      noPadding
       footerActions={
         <div style={tw("flex justify-end gap-2")}>
           <button

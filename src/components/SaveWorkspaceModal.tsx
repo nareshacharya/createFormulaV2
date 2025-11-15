@@ -37,7 +37,7 @@ const SaveWorkspaceModal = ({
       isOpen={isOpen}
       onClose={onClose}
       title="Save Workspace"
-      noPadding={true}
+      noPadding
     >
       <div style={tw("p-6")}>
         <div style={{ marginBottom: "16px" }}>

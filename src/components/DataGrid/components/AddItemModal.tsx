@@ -112,7 +112,7 @@ export const AddItemModal = ({
       onClose={onClose}
       title="Add Item"
       size="md"
-      noPadding={true}
+      noPadding
       footerActions={footerActions}
     >
       <div className="flex flex-col h-full p-6">

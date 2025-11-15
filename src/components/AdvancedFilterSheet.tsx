@@ -115,7 +115,7 @@ const AdvancedFilterSheet = ({
       onClose={onClose}
       title="Advanced Ingredient Filters"
       size="3xl"
-      noPadding={true}
+      noPadding
       headerActions={
         <div style={mergeStyles(tw("flex items-center"), { gap: "1rem" })}>
           <div style={tw("text-sm text-gray-500")}>

@@ -98,7 +98,7 @@ const IngredientAttributeList = ({
                 handleAttributeClick(attribute);
               }
             }}
-            compact={true}
+            compact
             className={`
               ${isSelected ? "bg-blue-50 border-l-2 border-blue-400" : ""}
               ${isDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}

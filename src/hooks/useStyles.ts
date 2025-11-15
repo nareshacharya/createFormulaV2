@@ -213,7 +213,7 @@ export function useDisabledStyles(
 export function useTransitionStyles(
     baseClasses: string,
     transitionProperty: 'all' | 'colors' | 'opacity' | 'transform' = 'all',
-    duration: number = 150
+    duration = 150
 ): CSSProperties {
     return useMemo(() => {
         const styles = tw(baseClasses);
