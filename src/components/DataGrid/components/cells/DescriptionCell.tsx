@@ -25,7 +25,9 @@ export const DescriptionCell = ({
   // Empty state handling
   if (row.isEmpty) {
     return (
-      <div style={tw("w-full h-full flex flex-col items-center justify-center")}>
+      <div
+        style={tw("w-full h-full flex flex-col items-center justify-center")}
+      >
         <div
           style={tw(
             "w-24 h-24 mb-3 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0"

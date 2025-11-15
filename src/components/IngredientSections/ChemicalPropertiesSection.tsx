@@ -1,5 +1,6 @@
 import type { Ingredient } from "../../services/pega";
 import Badge from "../Badge";
+import { tw } from "../../utils/tailwindToInline";
 
 interface ChemicalPropertiesSectionProps {
   ingredient: Ingredient;
@@ -28,62 +29,62 @@ const ChemicalPropertiesSection = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div style={tw("space-y-6")}>
       {/* Purity & Composition */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <h3 style={tw("text-lg font-semibold text-gray-900 mb-4")}>
           Purity & Composition
         </h3>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+        <div style={tw("grid grid-cols-2 gap-4")}>
+          <div style={tw("p-3 bg-gray-50 rounded-lg")}>
+            <label style={tw("block text-sm font-medium text-gray-700 mb-1")}>
               Purity
             </label>
-            <p className="text-sm text-gray-900 font-medium">
+            <p style={tw("text-sm text-gray-900 font-medium")}>
               {mockData.purity}
             </p>
           </div>
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+          <div style={tw("p-3 bg-gray-50 rounded-lg")}>
+            <label style={tw("block text-sm font-medium text-gray-700 mb-1")}>
               Water Content
             </label>
-            <p className="text-sm text-gray-900">{mockData.waterContent}</p>
+            <p style={tw("text-sm text-gray-900")}>{mockData.waterContent}</p>
           </div>
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+          <div style={tw("p-3 bg-gray-50 rounded-lg")}>
+            <label style={tw("block text-sm font-medium text-gray-700 mb-1")}>
               Acid Value
             </label>
-            <p className="text-sm text-gray-900">{mockData.acidValue}</p>
+            <p style={tw("text-sm text-gray-900")}>{mockData.acidValue}</p>
           </div>
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+          <div style={tw("p-3 bg-gray-50 rounded-lg")}>
+            <label style={tw("block text-sm font-medium text-gray-700 mb-1")}>
               Ester Value
             </label>
-            <p className="text-sm text-gray-900">{mockData.esterValue}</p>
+            <p style={tw("text-sm text-gray-900")}>{mockData.esterValue}</p>
           </div>
         </div>
       </div>
 
       {/* Quality Parameters */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <h3 style={tw("text-lg font-semibold text-gray-900 mb-4")}>
           Quality Parameters
         </h3>
-        <div className="space-y-3">
-          <div className="flex justify-between items-center p-3 border border-gray-200 rounded-lg">
-            <span className="text-sm font-medium text-gray-700">
+        <div style={tw("space-y-3")}>
+          <div style={tw("flex justify-between items-center p-3 border border-gray-200 rounded-lg")}>
+            <span style={tw("text-sm font-medium text-gray-700")}>
               Peroxide Value
             </span>
             <Badge variant="success">{mockData.peroxideValue}</Badge>
           </div>
-          <div className="flex justify-between items-center p-3 border border-gray-200 rounded-lg">
-            <span className="text-sm font-medium text-gray-700">
+          <div style={tw("flex justify-between items-center p-3 border border-gray-200 rounded-lg")}>
+            <span style={tw("text-sm font-medium text-gray-700")}>
               Heavy Metals
             </span>
             <Badge variant="success">{mockData.heavyMetals}</Badge>
           </div>
-          <div className="flex justify-between items-center p-3 border border-gray-200 rounded-lg">
-            <span className="text-sm font-medium text-gray-700">
+          <div style={tw("flex justify-between items-center p-3 border border-gray-200 rounded-lg")}>
+            <span style={tw("text-sm font-medium text-gray-700")}>
               Residual Solvents
             </span>
             <Badge variant="success">{mockData.residualSolvents}</Badge>
@@ -93,16 +94,16 @@ const ChemicalPropertiesSection = ({
 
       {/* Stability & Storage */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <h3 style={tw("text-lg font-semibold text-gray-900 mb-4")}>
           Stability & Storage
         </h3>
-        <div className="space-y-4">
-          <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-            <div className="flex items-start">
+        <div style={tw("space-y-4")}>
+          <div style={tw("p-4 bg-green-50 border border-green-200 rounded-lg")}>
+            <div style={tw("flex items-start")}>
               <i className="ri-shield-check-line text-green-600 mt-0.5 mr-2"></i>
               <div>
-                <p className="text-sm text-green-800 font-medium">Stability</p>
-                <p className="text-sm text-green-700 mt-1">
+                <p style={tw("text-sm text-green-800 font-medium")}>Stability</p>
+                <p style={tw("text-sm text-green-700 mt-1")}>
                   {mockData.stability}
                 </p>
               </div>
@@ -110,27 +111,27 @@ const ChemicalPropertiesSection = ({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label style={tw("block text-sm font-medium text-gray-700 mb-2")}>
               Shelf Life
             </label>
-            <p className="text-sm text-gray-900">{mockData.shelfLife}</p>
+            <p style={tw("text-sm text-gray-900")}>{mockData.shelfLife}</p>
           </div>
         </div>
       </div>
 
       {/* Incompatibilities */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <h3 style={tw("text-lg font-semibold text-gray-900 mb-4")}>
           Chemical Incompatibilities
         </h3>
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div className="flex items-start">
+        <div style={tw("bg-red-50 border border-red-200 rounded-lg p-4")}>
+          <div style={tw("flex items-start")}>
             <i className="ri-alert-line text-red-600 mt-0.5 mr-2"></i>
             <div>
-              <p className="text-sm text-red-800 font-medium">
+              <p style={tw("text-sm text-red-800 font-medium")}>
                 Avoid contact with:
               </p>
-              <ul className="text-sm text-red-700 mt-2 space-y-1">
+              <ul style={tw("text-sm text-red-700 mt-2 space-y-1")}>
                 {mockData.incompatibilities.map((item, index) => (
                   <li key={index}>• {item}</li>
                 ))}
@@ -142,17 +143,17 @@ const ChemicalPropertiesSection = ({
 
       {/* Degradation Products */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <h3 style={tw("text-lg font-semibold text-gray-900 mb-4")}>
           Degradation Products
         </h3>
-        <div className="space-y-2">
+        <div style={tw("space-y-2")}>
           {mockData.degradationProducts.map((product, index) => (
             <div
               key={index}
-              className="flex items-center space-x-2 p-2 bg-gray-50 rounded"
+              style={tw("flex items-center space-x-2 p-2 bg-gray-50 rounded")}
             >
               <i className="ri-arrow-right-s-line text-gray-400"></i>
-              <span className="text-sm text-gray-700">{product}</span>
+              <span style={tw("text-sm text-gray-700")}>{product}</span>
             </div>
           ))}
         </div>
