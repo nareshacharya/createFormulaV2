@@ -26,15 +26,17 @@ const Portal = ({ children, containerId = "portal-root" }: PortalProps) => {
       document.body.appendChild(portalRoot);
     }
 
-    const el = elRef.current!;
-    portalRoot.appendChild(el);
+    if (elRef.current) {
+      const el = elRef.current;
+      portalRoot.appendChild(el);
 
-    return () => {
-      portalRoot?.removeChild(el);
-      if (portalRoot?.childNodes.length === 0) {
-        document.body.removeChild(portalRoot);
-      }
-    };
+      return () => {
+        portalRoot?.removeChild(el);
+        if (portalRoot?.childNodes.length === 0) {
+          document.body.removeChild(portalRoot);
+        }
+      };
+    }
   }, [containerId]);
 
   return createPortal(children, elRef.current);
