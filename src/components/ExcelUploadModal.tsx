@@ -158,10 +158,10 @@ const ExcelUploadModal = ({
     }
   };
 
-  const handleIngredientMapping = (index: number, ingredientId: string) => {
+  const handleIngredientMapping = (ingredientName: string, ingredientId: string) => {
     setParsedIngredients((prev) =>
-      prev.map((ing, i) =>
-        i === index
+      prev.map((ing) =>
+        ing.name === ingredientName
           ? { ...ing, mappedIngredientId: ingredientId, status: "matched" }
           : ing
       )
@@ -388,8 +388,8 @@ const ExcelUploadModal = ({
                     </tr>
                   </thead>
                   <tbody style={tw("divide-y divide-gray-200")}>
-                    {parsedIngredients.map((ingredient, index) => (
-                      <tr key={index} style={tw("hover:bg-gray-50")}>
+                    {parsedIngredients.map((ingredient) => (
+                      <tr key={ingredient.name} style={tw("hover:bg-gray-50")}>
                         <td style={tw("px-4 py-3 text-sm text-gray-900")}>
                           {ingredient.name}
                         </td>
@@ -404,7 +404,7 @@ const ExcelUploadModal = ({
                           <select
                             value={ingredient.mappedIngredientId || ""}
                             onChange={(e) =>
-                              handleIngredientMapping(index, e.target.value)
+                              handleIngredientMapping(ingredient.name, e.target.value)
                             }
                             style={mergeStyles(
                               tw("w-full px-2 text-sm border rounded"),

@@ -190,9 +190,9 @@ const ComplianceSection = ({
           Recent Regulatory Updates
         </h3>
         <div style={tw("space-y-3")}>
-          {mockData.regulatoryUpdates.map((update, index) => (
+          {mockData.regulatoryUpdates.map((update) => (
             <div
-              key={index}
+              key={`${update.date}-${update.authority}`}
               style={tw("p-3 border border-gray-200 rounded-lg")}
             >
               <div style={tw("flex items-start justify-between")}>

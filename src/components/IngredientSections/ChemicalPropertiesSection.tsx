@@ -146,8 +146,8 @@ const ChemicalPropertiesSection = ({
                 Avoid contact with:
               </p>
               <ul style={tw("text-sm text-red-700 mt-2 space-y-1")}>
-                {mockData.incompatibilities.map((item, index) => (
-                  <li key={index}>• {item}</li>
+                {mockData.incompatibilities.map((item) => (
+                  <li key={`incompat-${item}`}>• {item}</li>
                 ))}
               </ul>
             </div>
@@ -161,9 +161,9 @@ const ChemicalPropertiesSection = ({
           Degradation Products
         </h3>
         <div style={tw("space-y-2")}>
-          {mockData.degradationProducts.map((product, index) => (
+          {mockData.degradationProducts.map((product) => (
             <div
-              key={index}
+              key={`product-${product}`}
               style={tw("flex items-center space-x-2 p-2 bg-gray-50 rounded")}
             >
               <i className="ri-arrow-right-s-line text-gray-400"></i>

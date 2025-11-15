@@ -74,9 +74,9 @@ export const GroupingButton = ({
             {isGrouped ? "Grouped by:" : "Group by:"} {columnLabel}
           </div>
           <div className="space-y-1 max-h-[200px] overflow-y-auto">
-            {availableValues.slice(0, 10).map((value, idx) => (
+            {availableValues.slice(0, 10).map((value) => (
               <div
-                key={idx}
+                key={`value-${value}`}
                 className="text-xs text-gray-600 px-2 py-1 bg-gray-50 rounded"
               >
                 {value}

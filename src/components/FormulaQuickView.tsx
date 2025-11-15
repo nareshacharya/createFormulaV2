@@ -270,8 +270,8 @@ const FormulaQuickView = ({
               </tr>
             </thead>
             <tbody style={tw("bg-white divide-y divide-gray-200")}>
-              {formula.ingredients.map((ingredient, index) => (
-                <tr key={index} style={tw("hover:bg-gray-50")}>
+              {formula.ingredients.map((ingredient) => (
+                <tr key={ingredient.ingredientId} style={tw("hover:bg-gray-50")}>
                   <td style={tw("px-4 py-3 text-sm text-gray-900")}>
                     {ingredient.name}
                   </td>
@@ -378,9 +378,9 @@ const FormulaQuickView = ({
           </div>
           {top && top.length > 0 ? (
             <div style={mergeStyles(tw("flex flex-wrap"), { gap: "0.5rem" })}>
-              {top.map((note, index) => (
+              {top.map((note) => (
                 <span
-                  key={index}
+                  key={`top-${note}`}
                   style={tw(
                     "inline-flex px-3 py-1 text-sm bg-yellow-50 text-yellow-800 rounded-full border border-yellow-200"
                   )}
@@ -414,9 +414,9 @@ const FormulaQuickView = ({
           </div>
           {middle && middle.length > 0 ? (
             <div style={mergeStyles(tw("flex flex-wrap"), { gap: "0.5rem" })}>
-              {middle.map((note, index) => (
+              {middle.map((note) => (
                 <span
-                  key={index}
+                  key={`middle-${note}`}
                   style={tw(
                     "inline-flex px-3 py-1 text-sm bg-pink-50 text-pink-800 rounded-full border border-pink-200"
                   )}
@@ -450,9 +450,9 @@ const FormulaQuickView = ({
           </div>
           {base && base.length > 0 ? (
             <div style={mergeStyles(tw("flex flex-wrap"), { gap: "0.5rem" })}>
-              {base.map((note, index) => (
+              {base.map((note) => (
                 <span
-                  key={index}
+                  key={`base-${note}`}
                   style={tw(
                     "inline-flex px-3 py-1 text-sm bg-purple-50 text-purple-800 rounded-full border border-purple-200"
                   )}
