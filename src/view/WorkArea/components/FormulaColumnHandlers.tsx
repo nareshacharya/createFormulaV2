@@ -41,6 +41,15 @@ export const useFormulaColumnHandlers = (config: FormulaHandlersConfig) => {
     handleNormalize,
   } = config;
 
+  // Helper to determine which type-specific ID field exists
+  const getTypeSpecificIdField = (formula: Formula): "perfumerFormulaId" | "baseFormulaId" | "dilutionFormulaId" | "analyticalFormulaId" | null => {
+    if (formula.perfumerFormulaId) return "perfumerFormulaId";
+    if (formula.baseFormulaId) return "baseFormulaId";
+    if (formula.dilutionFormulaId) return "dilutionFormulaId";
+    if (formula.analyticalFormulaId) return "analyticalFormulaId";
+    return null;
+  };
+
   const handleCreateVersion = async (columnId: string) => {
     // Check formula limit first
     const currentFormulaColumns = columns.filter(
@@ -161,15 +170,7 @@ export const useFormulaColumnHandlers = (config: FormulaHandlersConfig) => {
       const newUniversalId = `F${nextFSequence.toString().padStart(5, "0")}v1`;
 
       // Determine which type-specific ID field to update
-      const typeSpecificIdField = formula.perfumerFormulaId
-        ? "perfumerFormulaId"
-        : formula.baseFormulaId
-        ? "baseFormulaId"
-        : formula.dilutionFormulaId
-        ? "dilutionFormulaId"
-        : formula.analyticalFormulaId
-        ? "analyticalFormulaId"
-        : null;
+      const typeSpecificIdField = getTypeSpecificIdField(formula);
 
       // Create new formula with updated IDs and version
       const newFormula: Formula = {
