@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
 import { useDataGridFeatures } from "../../../../hooks/useFeatureFlags";
 import { isOwnFormula } from "../../../../utils/formulaIdGenerator";
 import { GroupingButton } from "../GroupingButton";

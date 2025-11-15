@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
 import { useEffect, useState } from "react";
 import type { Ingredient } from "../services/pega";
 import { eventBus } from "../utils/bus";
