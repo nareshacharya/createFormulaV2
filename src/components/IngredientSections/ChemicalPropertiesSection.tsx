@@ -1,6 +1,6 @@
 import type { Ingredient } from "../../services/pega";
-import Badge from "../Badge";
 import { tw } from "../../utils/tailwindToInline";
+import Badge from "../Badge";
 
 interface ChemicalPropertiesSectionProps {
   ingredient: Ingredient;
@@ -71,19 +71,31 @@ const ChemicalPropertiesSection = ({
           Quality Parameters
         </h3>
         <div style={tw("space-y-3")}>
-          <div style={tw("flex justify-between items-center p-3 border border-gray-200 rounded-lg")}>
+          <div
+            style={tw(
+              "flex justify-between items-center p-3 border border-gray-200 rounded-lg"
+            )}
+          >
             <span style={tw("text-sm font-medium text-gray-700")}>
               Peroxide Value
             </span>
             <Badge variant="success">{mockData.peroxideValue}</Badge>
           </div>
-          <div style={tw("flex justify-between items-center p-3 border border-gray-200 rounded-lg")}>
+          <div
+            style={tw(
+              "flex justify-between items-center p-3 border border-gray-200 rounded-lg"
+            )}
+          >
             <span style={tw("text-sm font-medium text-gray-700")}>
               Heavy Metals
             </span>
             <Badge variant="success">{mockData.heavyMetals}</Badge>
           </div>
-          <div style={tw("flex justify-between items-center p-3 border border-gray-200 rounded-lg")}>
+          <div
+            style={tw(
+              "flex justify-between items-center p-3 border border-gray-200 rounded-lg"
+            )}
+          >
             <span style={tw("text-sm font-medium text-gray-700")}>
               Residual Solvents
             </span>
@@ -102,7 +114,9 @@ const ChemicalPropertiesSection = ({
             <div style={tw("flex items-start")}>
               <i className="ri-shield-check-line text-green-600 mt-0.5 mr-2"></i>
               <div>
-                <p style={tw("text-sm text-green-800 font-medium")}>Stability</p>
+                <p style={tw("text-sm text-green-800 font-medium")}>
+                  Stability
+                </p>
                 <p style={tw("text-sm text-green-700 mt-1")}>
                   {mockData.stability}
                 </p>

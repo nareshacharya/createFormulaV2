@@ -16,8 +16,15 @@ export const DilutionIcon = ({
 }: DilutionIconProps) => {
   const [isHovered, setIsHovered] = useState(false);
 
+  const getColorClass = (): string => {
+    if (hasDilution) return "text-blue-600";
+    if (isHovered) return "text-blue-500";
+    return "text-gray-400";
+  };
+
   return (
     <button
+      type="button"
       onClick={(e) => {
         e.stopPropagation();
         onClick();
@@ -29,13 +36,7 @@ export const DilutionIcon = ({
       aria-label={hasDilution ? "Edit dilution" : "Add dilution"}
     >
       <span
-        className={`material-symbols-rounded text-sm transition-colors duration-200 ${
-          hasDilution
-            ? "text-blue-600"
-            : isHovered
-              ? "text-blue-500"
-              : "text-gray-400"
-        }`}
+        className={`material-symbols-rounded text-sm transition-colors duration-200 ${getColorClass()}`}
         style={{ fontVariationSettings: "'FILL' 1" }}
       >
         water_drop

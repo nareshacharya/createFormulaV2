@@ -1,7 +1,7 @@
 import { mockSolvents } from "../../../../mocks/solvents";
+import { tw } from "../../../../utils/tailwindToInline";
 import { DilutionIcon } from "../../../dilution";
 import type { UseDilutionReturn } from "../../../dilution";
-import { tw } from "../../../../utils/tailwindToInline";
 
 interface DescriptionCellProps {
   row: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any

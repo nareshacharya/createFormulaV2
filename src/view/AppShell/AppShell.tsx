@@ -1,10 +1,10 @@
 import { useState } from "react";
 import WorkspaceTabs from "../../components/workspace/WorkspaceTabs";
 import { useWorkspaceFeatures } from "../../hooks/useFeatureFlags";
+import { tw, mergeStyles } from "../../utils/tailwindToInline";
 import LibraryPanel from "../Library/LibraryPanel";
 import WorkArea from "../WorkArea/WorkArea";
 import AppHeader from "./AppHeader";
-import { tw, mergeStyles } from "../../utils/tailwindToInline";
 
 const AppShell = () => {
   const [isLibraryCollapsed, setIsLibraryCollapsed] = useState(false);
@@ -42,6 +42,7 @@ const AppShell = () => {
         >
           {/* Collapse Toggle */}
           <button
+            type="button"
             onClick={() => setIsLibraryCollapsed(!isLibraryCollapsed)}
             style={tw(
               "absolute top-4 -right-4 z-[99] w-8 h-8 bg-white border border-gray-300 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-50 shadow-md transition-colors"

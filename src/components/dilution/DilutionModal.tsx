@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import type { Dilution, DilutionPreset, Solvent } from "../../types/dilution";
 import { DILUTION_PRESETS } from "../../types/dilution";
-import Modal from "../Modal";
 import { tw } from "../../utils/tailwindToInline";
+import Modal from "../Modal";
 
 interface DilutionModalProps {
   isOpen: boolean;
@@ -90,7 +90,7 @@ export const DilutionModal = ({
 
     if (showCustomInput) {
       const customValue = parseFloat(customConcentration);
-      if (isNaN(customValue) || customValue <= 0 || customValue > 100) {
+      if (Number.isNaN(customValue) || customValue <= 0 || customValue > 100) {
         toast.error("Please enter a valid concentration between 0 and 100%");
         return;
       }
@@ -152,7 +152,7 @@ export const DilutionModal = ({
       isOpen={isOpen}
       onClose={onClose}
       title={`Dilute ${ingredientName}`}
-      noPadding={true}
+      noPadding
       footerActions={
         <div style={tw("flex items-center justify-between w-full gap-4")}>
           <div>

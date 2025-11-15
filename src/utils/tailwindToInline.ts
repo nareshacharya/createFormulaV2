@@ -395,7 +395,7 @@ function parseClassName(className: string): CSSProperties {
         const wMatch = cleanClass.match(/^w-(\d+\.?\d*)$/);
         if (wMatch) styles.width = spacing[wMatch[1] as keyof typeof spacing] || `${wMatch[1]}px`;
         const wPercentMatch = cleanClass.match(/^w-(\d+)\/(\d+)$/);
-        if (wPercentMatch) styles.width = `${(parseInt(wPercentMatch[1]) / parseInt(wPercentMatch[2])) * 100}%`;
+        if (wPercentMatch) styles.width = `${(parseInt(wPercentMatch[1], 10) / parseInt(wPercentMatch[2], 10)) * 100}%`;
     }
 
     // Height (with arbitrary value support)
@@ -442,7 +442,7 @@ function parseClassName(className: string): CSSProperties {
         if (color) {
             if (opacity) {
                 // Handle opacity modifier (e.g., text-white/50)
-                const opacityValue = parseInt(opacity) / 100;
+                const opacityValue = parseInt(opacity, 10) / 100;
                 if (color.startsWith('#')) {
                     // Convert hex to rgba
                     const r = parseInt(color.slice(1, 3), 16);
@@ -467,7 +467,7 @@ function parseClassName(className: string): CSSProperties {
         if (color) {
             if (opacity) {
                 // Handle opacity modifier (e.g., bg-purple-900/50)
-                const opacityValue = parseInt(opacity) / 100;
+                const opacityValue = parseInt(opacity, 10) / 100;
                 if (color.startsWith('#')) {
                     // Convert hex to rgba
                     const r = parseInt(color.slice(1, 3), 16);
@@ -497,7 +497,7 @@ function parseClassName(className: string): CSSProperties {
         if (color) {
             if (opacity) {
                 // Handle opacity modifier
-                const opacityValue = parseInt(opacity) / 100;
+                const opacityValue = parseInt(opacity, 10) / 100;
                 if (color.startsWith('#')) {
                     // Convert hex to rgba
                     const r = parseInt(color.slice(1, 3), 16);
@@ -621,7 +621,7 @@ function parseClassName(className: string): CSSProperties {
 
     // Z-index
     const zMatch = cleanClass.match(/^z-(\d+)$/);
-    if (zMatch) styles.zIndex = parseInt(zMatch[1]);
+    if (zMatch) styles.zIndex = parseInt(zMatch[1], 10);
 
     // Transform & Rotate
     if (cleanClass === 'transform') {
@@ -645,7 +645,7 @@ function parseClassName(className: string): CSSProperties {
 
     // Opacity
     const opacityMatch = cleanClass.match(/^opacity-(\d+)$/);
-    if (opacityMatch) styles.opacity = parseInt(opacityMatch[1]) / 100;
+    if (opacityMatch) styles.opacity = parseInt(opacityMatch[1], 10) / 100;
 
     // Cursor
     if (cleanClass === 'cursor-pointer') styles.cursor = 'pointer';

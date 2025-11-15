@@ -1,6 +1,6 @@
 import type { Ingredient } from "../../services/pega";
-import Badge from "../Badge";
 import { tw } from "../../utils/tailwindToInline";
+import Badge from "../Badge";
 
 interface DocumentsSectionProps {
   ingredient: Ingredient;

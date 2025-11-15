@@ -7,7 +7,6 @@ import PillTabs from "../../components/PillTabs";
 import type { FilterGroup } from "../../components/QueryBuilder";
 import SearchBar from "../../components/SearchBar";
 import { PegaService } from "../../services/pega";
-import { tw, mergeStyles } from "../../utils/tailwindToInline";
 import type {
   Ingredient,
   Formula,
@@ -15,6 +14,7 @@ import type {
 } from "../../services/pega";
 import { eventBus } from "../../utils/bus";
 import { evaluateQuery } from "../../utils/queryEvaluator";
+import { tw, mergeStyles } from "../../utils/tailwindToInline";
 
 const LibraryPanel = () => {
   const [activeTab, setActiveTab] = useState("ingredients");
@@ -263,6 +263,7 @@ const LibraryPanel = () => {
           >
             {ingredientFilters.map((filter) => (
               <button
+                type="button"
                 key={filter.id}
                 onClick={() => setActiveFilter(filter.id)}
                 style={tw(`

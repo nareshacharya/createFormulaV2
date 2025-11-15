@@ -4,7 +4,6 @@ import AttributeSelector from "../../components/AttributeSelector";
 import Badge from "../../components/Badge";
 import Button from "../../components/Button";
 import DataGrid from "../../components/DataGrid";
-import { tw, mergeStyles } from "../../utils/tailwindToInline";
 import type { Column } from "../../components/DataGrid";
 import Dialog from "../../components/Dialog";
 import { useDilution } from "../../components/dilution";
@@ -32,6 +31,7 @@ import {
   generateNewFormulaId,
   isOwnFormula,
 } from "../../utils/formulaIdGenerator";
+import { tw, mergeStyles } from "../../utils/tailwindToInline";
 import type { WorkspaceState } from "../../utils/workspaceManager";
 import { useFormulaColumnHandlers } from "./components/FormulaColumnHandlers";
 import { useDataGridHandlers } from "./hooks/useDataGridHandlers";

@@ -3,12 +3,12 @@ import toast from "react-hot-toast";
 import { useModal } from "../../App";
 import SaveWorkspaceModal from "../../components/SaveWorkspaceModal";
 import { eventBus } from "../../utils/bus";
+import { tw, mergeStyles } from "../../utils/tailwindToInline";
 import {
   saveWorkspace,
   canCreateWorkspace,
   type WorkspaceState,
 } from "../../utils/workspaceManager";
-import { tw, mergeStyles } from "../../utils/tailwindToInline";
 
 const HeaderActions = () => {
   const { showModal, hideModal } = useModal();
@@ -27,7 +27,7 @@ const HeaderActions = () => {
 
     showModal(
       <SaveWorkspaceModal
-        isOpen={true}
+        isOpen
         onClose={hideModal}
         onSave={handleSaveWorkspaceWithName}
       />
@@ -78,6 +78,7 @@ const HeaderActions = () => {
     <div style={mergeStyles(tw("flex items-center"), { gap: "0.75rem" })}>
       {/* Save Workspace Button Only */}
       <button
+        type="button"
         onClick={handleSaveWorkspace}
         style={mergeStyles(
           tw(

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import type { Formula } from "../../services/pega";
 import { eventBus } from "../../utils/bus";
+import { tw } from "../../utils/tailwindToInline";
 import { headerTokens } from "../../utils/tokens";
-import { tw, mergeStyles } from "../../utils/tailwindToInline";
 import HeaderActions from "./Header.Actions";
 import HeaderBadges from "./Header.Badges";
 
