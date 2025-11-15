@@ -100,6 +100,7 @@ export const EditableCell = ({
             value={displayValue}
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={onKeyDown}
+            aria-label="Cell value editor"
             onInput={(e) => {
               // Only allow numbers, dot, and backspace
               const input = e.target as HTMLInputElement;
