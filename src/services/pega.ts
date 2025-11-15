@@ -105,12 +105,12 @@ export interface IngredientAttribute {
 // Stubbed service functions that mirror DX API read/write and Data Page fetches
 export class PegaService {
   // TODO: Implement actual DX API calls
-  static async getIngredients(filters?: any): Promise<Ingredient[]> {
+  static async getIngredients(_filters?: any): Promise<Ingredient[]> {
     // TODO: Replace with actual API call
     return mockIngredients;
   }
 
-  static async getFormulas(filters?: any): Promise<Formula[]> {
+  static async getFormulas(_filters?: any): Promise<Formula[]> {
     // TODO: Replace with actual API call
     const { mockFormulas } = await import('../mocks/formulas');
     return mockFormulas as any;
@@ -130,7 +130,7 @@ export class PegaService {
     );
   }
 
-  static async searchFormulas(query: string, filters?: any): Promise<Formula[]> {
+  static async searchFormulas(query: string, _filters?: any): Promise<Formula[]> {
     // TODO: Replace with actual API call
     const { mockFormulas } = await import('../mocks/formulas');
     return mockFormulas.filter(formula =>
@@ -139,7 +139,7 @@ export class PegaService {
     ) as any;
   }
 
-  static async searchAttributes(query: string, filters?: any): Promise<IngredientAttribute[]> {
+  static async searchAttributes(query: string, _filters?: any): Promise<IngredientAttribute[]> {
     // TODO: Replace with actual API call
     const { mockIngredientAttributes } = await import('../mocks/ingredientAttributes');
     return mockIngredientAttributes.filter(attribute =>
@@ -496,7 +496,7 @@ const mockIngredients: Ingredient[] = [
 ];
 
 // Mock data for development
-const mockFormulas: Formula[] = [
+const _mockFormulas: Formula[] = [
   {
     id: 'FORM001',
     name: 'Fresh Citrus Blend',
@@ -515,7 +515,7 @@ const mockFormulas: Formula[] = [
   }
 ];
 
-const mockAttributes: IngredientAttribute[] = [
+const _mockAttributes: IngredientAttribute[] = [
   {
     id: 'ATTR001',
     name: 'Odor Profile',

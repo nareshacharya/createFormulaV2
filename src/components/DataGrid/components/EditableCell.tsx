@@ -110,7 +110,7 @@ export const EditableCell = ({
               const parts = cleaned.split(".");
               const sanitized =
                 parts.length > 2
-                  ? `${parts[0]  }.${  parts.slice(1).join("")}`
+                  ? `${parts[0]}.${parts.slice(1).join("")}`
                   : cleaned;
               if (value !== sanitized) {
                 input.value = sanitized;

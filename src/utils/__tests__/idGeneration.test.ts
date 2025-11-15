@@ -6,7 +6,6 @@
 import { FORMULA_TYPES } from '../../config/formulaTypes.config';
 import {
     generateFormulaId,
-    generatePerfumerFormulaId,
     generateUCode,
     parseFormulaId,
     getNextSequenceNumber,

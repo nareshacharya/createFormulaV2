@@ -6,7 +6,6 @@ interface MultiSelectDropdownProps {
   selectedOptions: string[];
   onSelectionChange: (selected: string[]) => void;
   placeholder?: string;
-  maxHeight?: string;
 }
 
 const MultiSelectDropdown = ({
@@ -14,7 +13,6 @@ const MultiSelectDropdown = ({
   selectedOptions,
   onSelectionChange,
   placeholder = "Select columns...",
-  maxHeight = "200px",
 }: MultiSelectDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");

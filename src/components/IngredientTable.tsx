@@ -58,7 +58,9 @@ const IngredientTable = ({
     return "bg-green-500"; // Default to active
   };
 
-  const getTypeBadgeVariant = (type: string): "success" | "info" | "default" => {
+  const getTypeBadgeVariant = (
+    type: string
+  ): "success" | "info" | "default" => {
     if (type === "natural") return "success";
     if (type === "synthetic") return "info";
     return "default";
@@ -187,10 +189,7 @@ const IngredientTable = ({
       }
       case "type":
         return (
-          <Badge
-            variant={getTypeBadgeVariant(value as string)}
-            size="sm"
-          >
+          <Badge variant={getTypeBadgeVariant(value as string)} size="sm">
             {value as string}
           </Badge>
         );

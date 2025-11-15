@@ -364,7 +364,6 @@ const WorkArea = () => {
   // Use Excel upload hook
   const {
     isExcelUploadModalOpen,
-    selectedFormulaId,
     availableIngredients,
     handleUploadExcel,
     handleUploadIngredients,
@@ -455,14 +454,18 @@ const WorkArea = () => {
   }, [tableData, editableFormula]);
 
   // Helper to get badge variant for formula status
-  const getStatusBadgeVariant = (status: string): "success" | "warning" | "default" => {
+  const getStatusBadgeVariant = (
+    status: string
+  ): "success" | "warning" | "default" => {
     if (status === "active") return "success";
     if (status === "draft") return "warning";
     return "default";
   };
 
   // Helper to determine attribute column type
-  const getAttributeColumnType = (attrType: string | undefined): "text" | "number" | "select" => {
+  const getAttributeColumnType = (
+    attrType: string | undefined
+  ): "text" | "number" | "select" => {
     if (attrType === "number") return "number";
     if (attrType === "select") return "select";
     return "text";
@@ -938,10 +941,10 @@ const WorkArea = () => {
     };
 
     // Add handler for expand/collapse toggle
-    const handleToggleFormulaExpansion = (formulaId: string) => {
+    const _handleToggleFormulaExpansion = (_formulaId: string) => {
       setTableData((prev) =>
         prev.map((row) =>
-          row.formulaId === formulaId && row.isFormula
+          row.formulaId === _formulaId && row.isFormula
             ? { ...row, isExpanded: !row.isExpanded }
             : row
         )

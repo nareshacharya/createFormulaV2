@@ -5,12 +5,10 @@
 
 import toast from "react-hot-toast";
 import type { Column } from "../../../components/DataGrid";
-import { FORMULA_TYPES } from "../../../config/formulaTypes.config";
 import type { Formula } from "../../../services/pega";
 import { eventBus } from "../../../utils/bus";
 import {
   getCurrentUserInitials,
-  parseFormulaId as parseOldFormulaId,
 } from "../../../utils/idGeneration";
 import { appStateHistory } from "../../../utils/stateHistory";
 
@@ -42,7 +40,14 @@ export const useFormulaColumnHandlers = (config: FormulaHandlersConfig) => {
   } = config;
 
   // Helper to determine which type-specific ID field exists
-  const getTypeSpecificIdField = (formula: Formula): "perfumerFormulaId" | "baseFormulaId" | "dilutionFormulaId" | "analyticalFormulaId" | null => {
+  const getTypeSpecificIdField = (
+    formula: Formula
+  ):
+    | "perfumerFormulaId"
+    | "baseFormulaId"
+    | "dilutionFormulaId"
+    | "analyticalFormulaId"
+    | null => {
     if (formula.perfumerFormulaId) return "perfumerFormulaId";
     if (formula.baseFormulaId) return "baseFormulaId";
     if (formula.dilutionFormulaId) return "dilutionFormulaId";

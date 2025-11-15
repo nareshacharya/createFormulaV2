@@ -237,9 +237,7 @@ export function ConditionalExample({
 
   return (
     <div style={tw("flex gap-4 p-4")}>
-      <div style={tw(statusClasses)}>
-        Status: {getStatusLabel()}
-      </div>
+      <div style={tw(statusClasses)}>Status: {getStatusLabel()}</div>
     </div>
   );
 }

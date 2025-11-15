@@ -10,14 +10,12 @@ interface IngredientListProps {
   searchQuery?: string;
   activeFilter?: string;
   appliedFilters?: any;
-  onIngredientSelect?: (ingredient: Ingredient) => void;
   selectedIngredients?: string[];
 }
 
 const IngredientList = ({
   ingredients,
   searchQuery = "",
-  onIngredientSelect,
   selectedIngredients = [],
   activeFilter = "",
   appliedFilters = {},
@@ -25,7 +23,7 @@ const IngredientList = ({
   const [selectedIngredient, setSelectedIngredient] =
     useState<Ingredient | null>(null);
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
-  const [localSelectedIngredients, setLocalSelectedIngredients] = useState<
+  const [_localSelectedIngredients, setLocalSelectedIngredients] = useState<
     string[]
   >([]);
 
