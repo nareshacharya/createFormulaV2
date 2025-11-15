@@ -500,11 +500,6 @@ const WorkArea = () => {
 
   // Sync workspace data when active workspace changes (tab switch)
   useEffect(() => {
-    console.log(
-      "🔄 Workspace changed - restoring data for:",
-      workspace.activeTabId
-    );
-
     // Restore workspace data
     const wsData = workspace.activeWorkspace;
     setColumns(wsData.columns);
@@ -522,8 +517,6 @@ const WorkArea = () => {
 
   // Save workspace data whenever it changes
   useEffect(() => {
-    console.log("💾 Saving workspace data...");
-
     // Convert string[] to Formula[] for workspace context
     const selectedFormulaObjects = formulas.filter((f) =>
       selectedFormulas.includes(f.id)
@@ -551,7 +544,6 @@ const WorkArea = () => {
 
   // Sync selected formula IDs with LibraryPanel whenever they change
   useEffect(() => {
-    console.log("🔄 selectedFormulaIds changed:", selectedFormulaIds);
     eventBus.emit("formula-selections-updated", {
       count: selectedFormulaIds.length,
       selectedIds: selectedFormulaIds,
