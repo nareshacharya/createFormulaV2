@@ -51,7 +51,8 @@
     "src/components/Areteans_Extensions_createFormula/App.tsx",
     "src/components/Areteans_Extensions_createFormula/config/**",
     "src/components/Areteans_Extensions_createFormula/utils/tailwindCSS.ts",
-    "src/components/Areteans_Extensions_createFormula/utils/__tests__/**"
+    "src/components/Areteans_Extensions_createFormula/utils/__tests__/**",
+    "scripts/**/*.js"
   ],
   "rules": {
     // Prettier recommends running separately from a linter.
