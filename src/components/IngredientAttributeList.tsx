@@ -33,7 +33,7 @@ const IngredientAttributeList = ({
   selectedAttributes = [],
   maxSelections = 5,
 }: IngredientAttributeListProps) => {
-  const [_hoveredRow, setHoveredRow] = useState<string | null>(null);
+  const [, setHoveredRow] = useState<string | null>(null);
 
   const filteredAttributes = attributes.filter((attribute) => {
     const matchesSearch =

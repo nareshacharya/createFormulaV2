@@ -8,7 +8,7 @@ interface DocumentsSectionProps {
 }
 
 const DocumentsSection = ({
-  ingredient: _ingredient,
+  ingredient, // eslint-disable-line @typescript-eslint/no-unused-vars
 }: DocumentsSectionProps) => {
   // Mock documents data
   const mockDocuments = [

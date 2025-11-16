@@ -14,8 +14,8 @@ interface FormulaMetrics {
  */
 export const useFormulaMetrics = (
   tableData: any[],
-  editableFormula: string | null,
-  _formulas: Formula[]
+  editableFormula: string | null
+  // formulas - Reserved for future use
 ) => {
   const [currentMetrics, setCurrentMetrics] = useState<FormulaMetrics>({
     lineCount: 0,

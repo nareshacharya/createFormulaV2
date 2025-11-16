@@ -106,12 +106,12 @@ export interface IngredientAttribute {
 // Stubbed service functions that mirror DX API read/write and Data Page fetches
 export class PegaService {
   // TODO: Implement actual DX API calls
-  static async getIngredients(_filters?: any): Promise<Ingredient[]> {
+  static async getIngredients(/* filters - Reserved for future use */): Promise<Ingredient[]> {
     // TODO: Replace with actual API call
     return mockIngredients;
   }
 
-  static async getFormulas(_filters?: any): Promise<Formula[]> {
+  static async getFormulas(/* filters - Reserved for future use */): Promise<Formula[]> {
     // TODO: Replace with actual API call
     const { mockFormulas } = await import('../mocks/formulas');
     return mockFormulas as any;
@@ -131,7 +131,7 @@ export class PegaService {
     );
   }
 
-  static async searchFormulas(query: string, _filters?: any): Promise<Formula[]> {
+  static async searchFormulas(query: string /* filters - Reserved for future use */): Promise<Formula[]> {
     // TODO: Replace with actual API call
     const { mockFormulas } = await import('../mocks/formulas');
     return mockFormulas.filter(formula =>
@@ -140,7 +140,7 @@ export class PegaService {
     ) as any;
   }
 
-  static async searchAttributes(query: string, _filters?: any): Promise<IngredientAttribute[]> {
+  static async searchAttributes(query: string /* filters - Reserved for future use */): Promise<IngredientAttribute[]> {
     // TODO: Replace with actual API call
     const { mockIngredientAttributes } = await import('../mocks/ingredientAttributes');
     return mockIngredientAttributes.filter(attribute =>
@@ -496,43 +496,9 @@ const mockIngredients: Ingredient[] = [
   }
 ];
 
-// Mock data for development
-const _mockFormulas: Formula[] = [
-  {
-    id: 'FORM001',
-    name: 'Fresh Citrus Blend',
-    version: '1.0',
-    status: 'active',
-    createdBy: 'John Doe',
-    lastUpdated: '2024-01-15',
-    category: '',
-    totalPercentage: 0,
-    ingredients: [
-      { ingredientId: 'INGR8007758', name: '', percentage: 15.5, type: '' },
-      { ingredientId: 'INGR8007759', name: '', percentage: 8.2, type: '' }
-    ],
-    notes: { top: [], middle: [], base: [] },
-    description: ''
-  }
-];
+// Mock data for development - removed unused _mockFormulas and _mockAttributes
 
-const _mockAttributes: IngredientAttribute[] = [
-  {
-    id: 'ATTR001',
-    name: 'Odor Profile',
-    type: 'select',
-    description: '',
-    category: '',
-    isRequired: false,
-    values: ['Fresh', 'Floral', 'Woody', 'Citrus', 'Spicy']
-  },
-  {
-    id: 'ATTR002',
-    name: 'Volatility',
-    type: 'select',
-    description: '',
-    category: '',
-    isRequired: false,
-    values: ['Top Note', 'Middle Note', 'Base Note']
-  }
-];
+/* Removed unused mock data:
+const _mockFormulas: Formula[] = [...];
+const _mockAttributes: IngredientAttribute[] = [...];
+*/

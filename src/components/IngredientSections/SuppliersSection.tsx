@@ -8,7 +8,7 @@ interface SuppliersSectionProps {
 }
 
 const SuppliersSection = ({
-  ingredient: _ingredient,
+  ingredient, // eslint-disable-line @typescript-eslint/no-unused-vars
 }: SuppliersSectionProps) => {
   // Mock suppliers data
   const mockSuppliers = [

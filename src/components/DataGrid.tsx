@@ -52,7 +52,7 @@ interface DataGridProps {
   libraryFormulas?: Formula[];
   onAddColumn?: (columnType: "formula" | "attribute") => void;
   onAddFormula?: () => void;
-  onRowDelete?: (rowId: string) => void;
+  // onRowDelete?: (rowId: string) => void; // Reserved for future use
   onBulkDelete?: (rowIds: string[]) => void;
   onCellEdit?: (rowId: string, columnId: string, value: any) => void;
   onDeleteColumn?: (columnId: string) => void;
@@ -71,7 +71,7 @@ interface DataGridProps {
   groupedByColumn?: string | null;
   editableFormula?: string;
   className?: string;
-  showEmptyState?: boolean;
+  // showEmptyState?: boolean; // Reserved for future use
   enableRowReordering?: boolean;
   enableBulkSelection?: boolean;
   dilutionState?: UseDilutionReturn;
@@ -96,7 +96,7 @@ const DataGrid = ({
   libraryFormulas = [],
   onAddColumn,
   onAddFormula,
-  onRowDelete: _onRowDelete,
+  // onRowDelete, // Reserved for future use
   onBulkDelete,
   onCellEdit,
   onDeleteColumn,
@@ -115,7 +115,7 @@ const DataGrid = ({
   groupedByColumn,
   editableFormula,
   className = "",
-  showEmptyState: _showEmptyState = false,
+  // showEmptyState, // Reserved for future use
   enableRowReordering: enableRowReorderingProp,
   enableBulkSelection: enableBulkSelectionProp,
   dilutionState,
@@ -697,7 +697,7 @@ const DataGrid = ({
           <tbody style={tw("bg-white divide-y divide-gray-200")}>
             {getSortedData()
               .filter((row) => !row.isTotal)
-              .map((row, _rowIndex) => {
+              .map((row) => {
                 // Hide child ingredients if parent formula is collapsed
                 const shouldHide =
                   row.parentFormulaId &&

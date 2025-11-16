@@ -161,7 +161,11 @@ export const NumberCell = ({
         // RMC: always 2 decimals
         decimals = 2;
         displayValue = typeof value === "number" ? value.toFixed(2) : value;
-      } else if (row.totalType === "running" || row.totalType === "target" || !row.totalType) {
+      } else if (
+        row.totalType === "running" ||
+        row.totalType === "target" ||
+        !row.totalType
+      ) {
         // Running Total, Target Total, and Default: 5 decimals for active formula, 2 for others
         decimals = isActiveFormula ? 5 : 2;
         displayValue =

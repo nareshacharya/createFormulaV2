@@ -515,7 +515,12 @@ const WorkArea = () => {
     const formulaIds = wsData.selectedFormulas.map((f) => f.id);
     setSelectedFormulas(formulaIds);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [workspace.activeTabId, setAttributes, setAvailableFormulas, setIngredients]);
+  }, [
+    workspace.activeTabId,
+    setAttributes,
+    setAvailableFormulas,
+    setIngredients,
+  ]);
 
   // Save workspace data whenever it changes
   useEffect(() => {
@@ -934,16 +939,7 @@ const WorkArea = () => {
       );
     };
 
-    // Add handler for expand/collapse toggle
-    const _handleToggleFormulaExpansion = (_formulaId: string) => {
-      setTableData((prev) =>
-        prev.map((row) =>
-          row.formulaId === _formulaId && row.isFormula
-            ? { ...row, isExpanded: !row.isExpanded }
-            : row
-        )
-      );
-    };
+    // Removed unused _handleToggleFormulaExpansion (duplicate exists at line 1982)
 
     const handleAttributeSelected = (data: {
       attribute: IngredientAttribute;
@@ -2084,9 +2080,13 @@ const WorkArea = () => {
       }
 
       // Also remove child ingredients of deleted formula groups
-      const newData = prev.filter((row) => 
-        !rowIds.includes(row.id) && 
-        !(row.parentFormulaId && deletedFormulaIds.includes(row.parentFormulaId))
+      const newData = prev.filter(
+        (row) =>
+          !rowIds.includes(row.id) &&
+          !(
+            row.parentFormulaId &&
+            deletedFormulaIds.includes(row.parentFormulaId)
+          )
       );
 
       return newData;

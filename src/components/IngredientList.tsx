@@ -23,9 +23,7 @@ const IngredientList = ({
   const [selectedIngredient, setSelectedIngredient] =
     useState<Ingredient | null>(null);
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
-  const [_localSelectedIngredients, setLocalSelectedIngredients] = useState<
-    string[]
-  >([]);
+  const [, setLocalSelectedIngredients] = useState<string[]>([]);
 
   // Listen for work area updates to track selected ingredients
   useEffect(() => {

@@ -8,7 +8,7 @@ interface ComplianceSectionProps {
 }
 
 const ComplianceSection = ({
-  ingredient: _ingredient,
+  ingredient, // eslint-disable-line @typescript-eslint/no-unused-vars
 }: ComplianceSectionProps) => {
   // Mock compliance data
   const mockData = {

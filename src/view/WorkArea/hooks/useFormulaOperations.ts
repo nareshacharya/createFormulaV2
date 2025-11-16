@@ -14,7 +14,7 @@ interface UseFormulaOperationsProps {
     tableData: any[];
     ingredients: Ingredient[];
     setTableData: Dispatch<SetStateAction<any[]>>;
-    _selectedFormulaIds: string[];
+    // selectedFormulaIds - Reserved for future use
     setSelectedFormulaIds: Dispatch<SetStateAction<string[]>>;
     pendingFormulaIds: React.RefObject<Set<string>>;
 }
@@ -27,7 +27,7 @@ export const useFormulaOperations = ({
     tableData,
     ingredients,
     setTableData,
-    _selectedFormulaIds,
+    // selectedFormulaIds - Reserved for future use
     setSelectedFormulaIds,
     pendingFormulaIds,
 }: UseFormulaOperationsProps) => {

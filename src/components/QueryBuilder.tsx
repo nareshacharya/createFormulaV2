@@ -17,13 +17,13 @@ export interface FilterGroup {
 
 interface QueryBuilderProps {
   onQueryChange: (query: FilterGroup) => void;
-  onApply: () => void;
+  // onApply: () => void; // Reserved for future use
   onClear: () => void;
 }
 
 const QueryBuilder = ({
   onQueryChange,
-  onApply: _onApply,
+  // onApply, // Reserved for future use
   onClear,
 }: QueryBuilderProps) => {
   const [query, setQuery] = useState<FilterGroup>({
@@ -229,8 +229,8 @@ const QueryBuilder = ({
     rule: FilterRule | FilterGroup,
     index: number,
     parentRules: (FilterRule | FilterGroup)[],
-    parentCombinator: "and" | "or",
-    _parentGroupId: string
+    parentCombinator: "and" | "or"
+    // parentGroupId - Reserved for future use
   ) => {
     if ("rules" in rule) {
       // This is a group
@@ -303,8 +303,7 @@ const QueryBuilder = ({
                 subRule,
                 subIndex,
                 rule.rules,
-                rule.combinator,
-                rule.id
+                rule.combinator
               )
             )}
           </div>
@@ -394,7 +393,7 @@ const QueryBuilder = ({
     <div style={tw("space-y-3")}>
       <div style={tw("space-y-2 max-h-48 overflow-y-auto")}>
         {query.rules.map((rule, index) =>
-          renderRule(rule, index, query.rules, query.combinator, "root")
+          renderRule(rule, index, query.rules, query.combinator)
         )}
 
         {query.rules.length === 0 && (

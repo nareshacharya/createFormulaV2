@@ -8,7 +8,7 @@ interface ChemicalPropertiesSectionProps {
 }
 
 const ChemicalPropertiesSection = ({
-  ingredient: _ingredient,
+  ingredient, // eslint-disable-line @typescript-eslint/no-unused-vars
 }: ChemicalPropertiesSectionProps) => {
   // Mock chemical properties data
   const mockData = {

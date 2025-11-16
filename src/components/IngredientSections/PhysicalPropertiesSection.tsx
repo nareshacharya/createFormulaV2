@@ -7,7 +7,7 @@ interface PhysicalPropertiesSectionProps {
 }
 
 const PhysicalPropertiesSection = ({
-  ingredient: _ingredient,
+  ingredient, // eslint-disable-line @typescript-eslint/no-unused-vars
 }: PhysicalPropertiesSectionProps) => {
   // Mock physical properties data
   const mockData = {
