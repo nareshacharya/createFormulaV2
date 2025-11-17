@@ -187,7 +187,9 @@ export const NumberCell = ({
 
   // Currency formatting for cost columns
   if (column.id === "costKg" || column.id === "contCost") {
-    if (value === null || value === undefined) return "-";
+    if (value === null || value === undefined) {
+      return <span className="text-sm text-gray-400 text-right block">-</span>;
+    }
     const displayValue = typeof value === "number" ? value.toFixed(2) : value;
     return <span className="text-sm text-right block">${displayValue}</span>;
   }

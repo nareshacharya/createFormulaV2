@@ -280,10 +280,10 @@ export const isFieldVisibleForType = (field: FormField, formulaType: FormulaType
                     if (Array.isArray(value) && value.includes(dependentValue)) return false;
                     break;
                 case 'greaterThan':
-                    if (!(dependentValue > value)) return false;
+                    if (!(Number(dependentValue) > Number(value))) return false;
                     break;
                 case 'lessThan':
-                    if (!(dependentValue < value)) return false;
+                    if (!(Number(dependentValue) < Number(value))) return false;
                     break;
                 default:
                     break;

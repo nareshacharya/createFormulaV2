@@ -324,13 +324,16 @@ export const useFormulaColumnHandlers = (config: FormulaHandlersConfig) => {
     // TODO: Replace with actual Pega DX API call
     // await PegaService.sendForCompounding(formula.id);
 
+    // Type narrowing for TypeScript strictness
+    const selectedFormula = formula;
+
     toast.loading("Sending formula for compounding...", {
       id: "send-compounding",
     });
 
     // Simulate API call
     setTimeout(() => {
-      toast.success(`Formula "${formula.name}" sent for compounding`, {
+      toast.success(`Formula "${selectedFormula.name}" sent for compounding`, {
         id: "send-compounding",
         duration: 4000,
       });
@@ -339,7 +342,7 @@ export const useFormulaColumnHandlers = (config: FormulaHandlersConfig) => {
       appStateHistory.push(
         { columns, tableData, formulas },
         "send_for_compounding",
-        `Sent formula ${formula.name} for compounding`
+        `Sent formula ${selectedFormula.name} for compounding`
       );
 
       // Emit event to update undo state

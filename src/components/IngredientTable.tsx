@@ -465,7 +465,7 @@ const IngredientTable = ({
 
             <div style={tw("flex items-center")}>
               {Array.from({ length: Math.min(7, totalPages) }, (_, i) => {
-                let pageNum;
+                let pageNum: number;
                 if (totalPages <= 7) {
                   pageNum = i + 1;
                 } else if (currentPage <= 4) {
