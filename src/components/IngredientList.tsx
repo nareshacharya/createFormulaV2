@@ -11,6 +11,7 @@ interface IngredientListProps {
   activeFilter?: string;
   appliedFilters?: any;
   selectedIngredients?: string[];
+  onIngredientSelect?: (ingredient: Ingredient) => void; // Reserved for future use
 }
 
 const IngredientList = ({
@@ -19,6 +20,7 @@ const IngredientList = ({
   selectedIngredients = [],
   activeFilter = "",
   appliedFilters = {},
+  onIngredientSelect: _onIngredientSelect, // Reserved for future use
 }: IngredientListProps) => {
   const [selectedIngredient, setSelectedIngredient] =
     useState<Ingredient | null>(null);

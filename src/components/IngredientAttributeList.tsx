@@ -24,6 +24,7 @@ interface IngredientAttributeListProps {
   appliedFilters?: Record<string, unknown>;
   selectedAttributes?: string[];
   maxSelections?: number;
+  onAttributeSelect?: (attribute: IngredientAttribute) => void; // Reserved for future use
 }
 
 const IngredientAttributeList = ({
@@ -32,6 +33,7 @@ const IngredientAttributeList = ({
   appliedFilters = {},
   selectedAttributes = [],
   maxSelections = 5,
+  onAttributeSelect: _onAttributeSelect, // Reserved for future use
 }: IngredientAttributeListProps) => {
   const [, setHoveredRow] = useState<string | null>(null);
 

@@ -52,7 +52,7 @@ interface DataGridProps {
   libraryFormulas?: Formula[];
   onAddColumn?: (columnType: "formula" | "attribute") => void;
   onAddFormula?: () => void;
-  // onRowDelete?: (rowId: string) => void; // Reserved for future use
+  onRowDelete?: (rowId: string) => void; // Reserved for future use
   onBulkDelete?: (rowIds: string[]) => void;
   onCellEdit?: (rowId: string, columnId: string, value: any) => void;
   onDeleteColumn?: (columnId: string) => void;
@@ -96,7 +96,7 @@ const DataGrid = ({
   libraryFormulas = [],
   onAddColumn,
   onAddFormula,
-  // onRowDelete, // Reserved for future use
+  onRowDelete: _onRowDelete, // Reserved for future use
   onBulkDelete,
   onCellEdit,
   onDeleteColumn,

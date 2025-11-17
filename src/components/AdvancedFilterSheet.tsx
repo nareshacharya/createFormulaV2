@@ -16,6 +16,7 @@ interface AdvancedFilterSheetProps {
   onClose: () => void;
   onApplyFilters: (query: FilterGroup) => void;
   ingredients: Ingredient[];
+  filteredIngredients?: Ingredient[]; // Reserved for future use
 }
 
 const AdvancedFilterSheet = ({
@@ -23,6 +24,7 @@ const AdvancedFilterSheet = ({
   onClose,
   onApplyFilters,
   ingredients,
+  filteredIngredients: _filteredIngredients, // Reserved for future use
 }: AdvancedFilterSheetProps) => {
   const [currentQuery, setCurrentQuery] = useState<FilterGroup>({
     id: "root",

@@ -9,12 +9,14 @@ interface FormulaListProps {
   formulas: Formula[];
   searchQuery?: string;
   selectedFormulas: string[];
+  onFormulaSelect?: (formula: Formula) => void; // Reserved for future use
 }
 
 const FormulaList = ({
   formulas,
   searchQuery = "",
   selectedFormulas,
+  onFormulaSelect: _onFormulaSelect, // Reserved for future use
 }: FormulaListProps) => {
   const [hoveredFormula, setHoveredFormula] = useState<string | null>(null);
   const [selectedFormulaForView, setSelectedFormulaForView] =

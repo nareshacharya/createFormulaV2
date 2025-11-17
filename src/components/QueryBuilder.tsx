@@ -17,13 +17,13 @@ export interface FilterGroup {
 
 interface QueryBuilderProps {
   onQueryChange: (query: FilterGroup) => void;
-  // onApply: () => void; // Reserved for future use
+  onApply: () => void;
   onClear: () => void;
 }
 
 const QueryBuilder = ({
   onQueryChange,
-  // onApply, // Reserved for future use
+  onApply: _onApply, // Reserved for future use
   onClear,
 }: QueryBuilderProps) => {
   const [query, setQuery] = useState<FilterGroup>({

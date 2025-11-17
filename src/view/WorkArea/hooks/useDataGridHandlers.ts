@@ -8,7 +8,7 @@ import { appStateHistory } from "../../../utils/stateHistory";
 
 interface UseDataGridHandlersProps {
     columns: Column[];
-    // selectedFormulaIds - Reserved for future use
+    selectedFormulaIds: string[]; // Reserved for future use
     editableFormula: string;
     formulas: Formula[];
     availableFormulas: Formula[];
@@ -22,7 +22,7 @@ interface UseDataGridHandlersProps {
 
 export const useDataGridHandlers = ({
     columns,
-    // selectedFormulaIds - Reserved for future use
+    selectedFormulaIds: _selectedFormulaIds, // Reserved for future use
     editableFormula,
     formulas,
     availableFormulas,
