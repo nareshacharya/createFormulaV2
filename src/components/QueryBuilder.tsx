@@ -299,12 +299,7 @@ const QueryBuilder = ({
               </div>
             )}
             {rule.rules.map((subRule, subIndex) =>
-              renderRule(
-                subRule,
-                subIndex,
-                rule.rules,
-                rule.combinator
-              )
+              renderRule(subRule, subIndex, rule.rules, rule.combinator)
             )}
           </div>
         </div>
