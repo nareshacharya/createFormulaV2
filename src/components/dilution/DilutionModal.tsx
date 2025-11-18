@@ -158,6 +158,7 @@ export const DilutionModal = ({
       isOpen={isOpen}
       onClose={onClose}
       title={`Dilute ${ingredientName}`}
+      size="lg"
       noPadding
       footerActions={
         <div style={tw("flex items-center justify-between w-full gap-4")}>
@@ -199,33 +200,51 @@ export const DilutionModal = ({
       }
     >
       <div style={tw("p-6")}>
-        <div style={tw("grid grid-cols-2 gap-6")}>
+        <div style={tw("space-y-6")}>
           {/* Section 1: Solvents */}
           <div>
             <h3 style={tw("text-sm font-semibold text-gray-900 mb-3")}>
               Select Solvent
             </h3>
-            <div style={tw("space-y-2")}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                gap: "8px",
+              }}
+            >
               {solvents.map((solvent) => (
                 <button
                   key={solvent.id}
                   type="button"
                   onClick={() => handleSolventSelect(solvent.id)}
                   style={tw(
-                    `w-full px-3 py-2 text-left rounded-md transition-colors ${
+                    `px-3 py-2 text-left rounded-md transition-colors text-xs ${
                       selectedSolvent === solvent.id
                         ? "bg-blue-600 text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        : "bg-gray-100 text-gray-700"
                     }`
                   )}
+                  onMouseEnter={(e) => {
+                    if (selectedSolvent !== solvent.id) {
+                      (
+                        e.currentTarget as HTMLButtonElement
+                      ).style.backgroundColor = "#d1d5db";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedSolvent !== solvent.id) {
+                      (
+                        e.currentTarget as HTMLButtonElement
+                      ).style.backgroundColor = "#f3f4f6";
+                    }
+                  }}
                 >
-                  <div style={tw("flex items-center justify-between gap-2")}>
-                    <span style={tw("text-sm font-medium truncate")}>
+                  <div style={tw("flex flex-col gap-1")}>
+                    <span style={tw("font-medium truncate")}>
                       {solvent.name}
                     </span>
-                    <span style={tw("text-xs flex-shrink-0 opacity-75")}>
-                      {solvent.code}
-                    </span>
+                    <span style={tw("opacity-75 text-xs")}>{solvent.code}</span>
                   </div>
                 </button>
               ))}
@@ -234,24 +253,45 @@ export const DilutionModal = ({
 
           {/* Section 2: Concentration */}
           <div>
-            <h3 style={tw("text-sm font-semibold text-gray-900 mb-3")}>
+            <h3 style={tw("text-sm font-semibold text-gray-900 mb-3 mt-3")}>
               Select Concentration
             </h3>
 
             {/* Preset Buttons */}
-            <div style={tw("grid grid-cols-2 gap-2 mb-3")}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                gap: "8px",
+                marginBottom: "12px",
+              }}
+            >
               {DILUTION_PRESETS.map((preset) => (
                 <button
                   key={preset.label}
                   type="button"
                   onClick={() => handlePresetSelect(preset)}
                   style={tw(
-                    `px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                    `px-3 py-2 text-xs font-medium rounded-md transition-colors ${
                       selectedPreset === preset.value && !showCustomInput
                         ? "bg-blue-600 text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        : "bg-gray-100 text-gray-700"
                     }`
                   )}
+                  onMouseEnter={(e) => {
+                    if (selectedPreset !== preset.value || showCustomInput) {
+                      (
+                        e.currentTarget as HTMLButtonElement
+                      ).style.backgroundColor = "#d1d5db";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedPreset !== preset.value || showCustomInput) {
+                      (
+                        e.currentTarget as HTMLButtonElement
+                      ).style.backgroundColor = "#f3f4f6";
+                    }
+                  }}
                 >
                   {preset.display}
                 </button>
@@ -267,9 +307,23 @@ export const DilutionModal = ({
                   `w-full px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                     showCustomInput
                       ? "bg-blue-600 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      : "bg-gray-100 text-gray-700"
                   }`
                 )}
+                onMouseEnter={(e) => {
+                  if (!showCustomInput) {
+                    (
+                      e.currentTarget as HTMLButtonElement
+                    ).style.backgroundColor = "#d1d5db";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!showCustomInput) {
+                    (
+                      e.currentTarget as HTMLButtonElement
+                    ).style.backgroundColor = "#f3f4f6";
+                  }
+                }}
               >
                 Custom Concentration
               </button>

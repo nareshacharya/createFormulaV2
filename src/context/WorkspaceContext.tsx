@@ -53,7 +53,11 @@ interface WorkspaceContextType {
   unlockFormula: (formulaId: string) => void;
 
   // Project Mapping (Formula → Project)
-  setProjectMapping: (formulaId: string, projectId: string, projectName: string) => void;
+  setProjectMapping: (
+    formulaId: string,
+    projectId: string,
+    projectName: string
+  ) => void;
   getProjectMapping: (formulaId: string) => { id: string; name: string } | null;
   clearProjectMapping: (formulaId: string) => void;
 

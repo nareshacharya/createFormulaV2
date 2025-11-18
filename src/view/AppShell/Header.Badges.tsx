@@ -114,12 +114,16 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
 
   const handleProjectSelect = (project: Project) => {
     if (!workspaceContext || !currentFormula) return;
-    
+
     // Write project mapping to workspace context
-    workspaceContext.setProjectMapping(currentFormula.id, project.id, project.name);
+    workspaceContext.setProjectMapping(
+      currentFormula.id,
+      project.id,
+      project.name
+    );
     setIsProjectSearchOpen(false);
     setProjectSearchQuery("");
-    
+
     // Emit event for any listeners (backward compatibility)
     eventBus.emit("project-mapped-to-formula", {
       formulaId: currentFormula?.id,
@@ -129,7 +133,7 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
   };
 
   // Get mapped project from workspace context
-  const mappedProject = 
+  const mappedProject =
     workspaceContext && currentFormula
       ? workspaceContext.getProjectMapping(currentFormula.id)
       : null;
@@ -252,227 +256,223 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
 
         {/* Dropdown Menu - Keep for backward compatibility if needed */}
         {isDropdownOpen && (
-            <div
-              style={mergeStyles(
-                tw(
-                  "absolute top-full left-0 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-50"
-                ),
-                { marginTop: "0.5rem", minWidth: "320px" }
-              )}
-            >
-              {/* Formula Info - Only visible on small screens */}
-              <div style={tw("lg:hidden")}>
-                <div style={tw("px-3 py-2 mb-2")}>
+          <div
+            style={mergeStyles(
+              tw(
+                "absolute top-full left-0 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-50"
+              ),
+              { marginTop: "0.5rem", minWidth: "320px" }
+            )}
+          >
+            {/* Formula Info - Only visible on small screens */}
+            <div style={tw("lg:hidden")}>
+              <div style={tw("px-3 py-2 mb-2")}>
+                <div
+                  style={mergeStyles(tw("grid grid-cols-3"), {
+                    gap: "0.5rem",
+                  })}
+                >
+                  {/* Formula Name Tile */}
                   <div
-                    style={mergeStyles(tw("grid grid-cols-3"), {
-                      gap: "0.5rem",
-                    })}
+                    style={tw(
+                      "bg-gradient-to-br from-pink-50 to-pink-100 rounded-lg p-3 border border-pink-200"
+                    )}
                   >
-                    {/* Formula Name Tile */}
                     <div
-                      style={tw(
-                        "bg-gradient-to-br from-pink-50 to-pink-100 rounded-lg p-3 border border-pink-200"
-                      )}
+                      style={mergeStyles(tw("flex items-center mb-1"), {
+                        gap: "0.25rem",
+                      })}
                     >
-                      <div
-                        style={mergeStyles(tw("flex items-center mb-1"), {
-                          gap: "0.25rem",
-                        })}
+                      <span
+                        style={tw("text-pink-600 text-sm")}
+                        className="material-symbols-rounded"
                       >
-                        <span
-                          style={tw("text-pink-600 text-sm")}
-                          className="material-symbols-rounded"
-                        >
-                          experiment
-                        </span>
-                        <span
-                          style={tw(
-                            "text-[10px] text-pink-700 font-semibold uppercase tracking-wide"
-                          )}
-                        >
-                          Formula
-                        </span>
-                      </div>
-                      <div
+                        experiment
+                      </span>
+                      <span
                         style={tw(
-                          "text-xs text-pink-900 font-semibold truncate"
+                          "text-[10px] text-pink-700 font-semibold uppercase tracking-wide"
                         )}
                       >
-                        {currentFormula?.name || "-"}
-                      </div>
+                        Formula
+                      </span>
                     </div>
-
-                    {/* Formula ID Tile */}
                     <div
-                      style={tw(
-                        "bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-lg p-3 border border-cyan-200"
-                      )}
+                      style={tw("text-xs text-pink-900 font-semibold truncate")}
                     >
-                      <div
-                        style={mergeStyles(tw("flex items-center mb-1"), {
-                          gap: "0.25rem",
-                        })}
-                      >
-                        <span
-                          style={tw("text-cyan-600 text-sm")}
-                          className="material-symbols-rounded"
-                        >
-                          tag
-                        </span>
-                        <span
-                          style={tw(
-                            "text-[10px] text-cyan-700 font-semibold uppercase tracking-wide"
-                          )}
-                        >
-                          ID
-                        </span>
-                      </div>
-                      <div
-                        style={tw(
-                          "text-xs text-cyan-900 font-semibold truncate"
-                        )}
-                      >
-                        {currentFormula?.id || "-"}
-                      </div>
+                      {currentFormula?.name || "-"}
                     </div>
+                  </div>
 
-                    {/* Status Tile */}
+                  {/* Formula ID Tile */}
+                  <div
+                    style={tw(
+                      "bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-lg p-3 border border-cyan-200"
+                    )}
+                  >
                     <div
-                      style={tw(
-                        "bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-3 border border-orange-200"
-                      )}
+                      style={mergeStyles(tw("flex items-center mb-1"), {
+                        gap: "0.25rem",
+                      })}
                     >
-                      <div
-                        style={mergeStyles(tw("flex items-center mb-1"), {
-                          gap: "0.25rem",
-                        })}
+                      <span
+                        style={tw("text-cyan-600 text-sm")}
+                        className="material-symbols-rounded"
                       >
-                        <span
-                          style={tw("text-orange-600 text-sm")}
-                          className="material-symbols-rounded"
-                        >
-                          check_circle
-                        </span>
-                        <span
-                          style={tw(
-                            "text-[10px] text-orange-700 font-semibold uppercase tracking-wide"
-                          )}
-                        >
-                          Status
-                        </span>
-                      </div>
-                      <div
+                        tag
+                      </span>
+                      <span
                         style={tw(
-                          `px-2 py-0.5 rounded-full text-[9px] font-bold inline-block ${getStatusVariant(
-                            currentFormula?.status
-                          )}`
+                          "text-[10px] text-cyan-700 font-semibold uppercase tracking-wide"
                         )}
                       >
-                        {currentFormula?.status?.toUpperCase() || "NEW"}
-                      </div>
+                        ID
+                      </span>
+                    </div>
+                    <div
+                      style={tw("text-xs text-cyan-900 font-semibold truncate")}
+                    >
+                      {currentFormula?.id || "-"}
+                    </div>
+                  </div>
+
+                  {/* Status Tile */}
+                  <div
+                    style={tw(
+                      "bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-3 border border-orange-200"
+                    )}
+                  >
+                    <div
+                      style={mergeStyles(tw("flex items-center mb-1"), {
+                        gap: "0.25rem",
+                      })}
+                    >
+                      <span
+                        style={tw("text-orange-600 text-sm")}
+                        className="material-symbols-rounded"
+                      >
+                        check_circle
+                      </span>
+                      <span
+                        style={tw(
+                          "text-[10px] text-orange-700 font-semibold uppercase tracking-wide"
+                        )}
+                      >
+                        Status
+                      </span>
+                    </div>
+                    <div
+                      style={tw(
+                        `px-2 py-0.5 rounded-full text-[9px] font-bold inline-block ${getStatusVariant(
+                          currentFormula?.status
+                        )}`
+                      )}
+                    >
+                      {currentFormula?.status?.toUpperCase() || "NEW"}
                     </div>
                   </div>
                 </div>
-                <div style={tw("border-t border-gray-200 my-2")}></div>
               </div>
+              <div style={tw("border-t border-gray-200 my-2")}></div>
+            </div>
 
-              {/* Product Info Tile */}
-              <div style={tw("px-3 py-2")}>
+            {/* Product Info Tile */}
+            <div style={tw("px-3 py-2")}>
+              <div
+                style={tw(
+                  "bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-3 border border-purple-200"
+                )}
+              >
                 <div
-                  style={tw(
-                    "bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-3 border border-purple-200"
-                  )}
+                  style={mergeStyles(tw("flex items-center mb-2"), {
+                    gap: "0.5rem",
+                  })}
                 >
-                  <div
-                    style={mergeStyles(tw("flex items-center mb-2"), {
-                      gap: "0.5rem",
-                    })}
+                  <span
+                    style={tw("text-purple-600 text-base")}
+                    className="material-symbols-rounded"
                   >
-                    <span
-                      style={tw("text-purple-600 text-base")}
-                      className="material-symbols-rounded"
-                    >
-                      shopping_bag
-                    </span>
-                    <span
-                      style={tw(
-                        "text-[10px] text-purple-700 font-bold uppercase tracking-wider"
-                      )}
-                    >
-                      Product
-                    </span>
-                  </div>
-                  <div style={tw("text-sm text-purple-900 font-semibold")}>
-                    {currentFormula?.name || "-"}
-                  </div>
+                    shopping_bag
+                  </span>
+                  <span
+                    style={tw(
+                      "text-[10px] text-purple-700 font-bold uppercase tracking-wider"
+                    )}
+                  >
+                    Product
+                  </span>
                 </div>
-              </div>
-
-              {/* Created By Tile */}
-              <div style={tw("px-3 py-2")}>
-                <div
-                  style={tw(
-                    "bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-3 border border-blue-200"
-                  )}
-                >
-                  <div
-                    style={mergeStyles(tw("flex items-center mb-2"), {
-                      gap: "0.5rem",
-                    })}
-                  >
-                    <span
-                      style={tw("text-blue-600 text-base")}
-                      className="material-symbols-rounded"
-                    >
-                      person
-                    </span>
-                    <span
-                      style={tw(
-                        "text-[10px] text-blue-700 font-bold uppercase tracking-wider"
-                      )}
-                    >
-                      Created By
-                    </span>
-                  </div>
-                  <div style={tw("text-sm text-blue-900 font-semibold")}>
-                    {currentFormula?.createdBy || "-"}
-                  </div>
-                </div>
-              </div>
-
-              {/* Last Updated Tile */}
-              <div style={tw("px-3 py-2")}>
-                <div
-                  style={tw(
-                    "bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-3 border border-green-200"
-                  )}
-                >
-                  <div
-                    style={mergeStyles(tw("flex items-center mb-2"), {
-                      gap: "0.5rem",
-                    })}
-                  >
-                    <span
-                      style={tw("text-green-600 text-base")}
-                      className="material-symbols-rounded"
-                    >
-                      calendar_today
-                    </span>
-                    <span
-                      style={tw(
-                        "text-[10px] text-green-700 font-bold uppercase tracking-wider"
-                      )}
-                    >
-                      Last Updated
-                    </span>
-                  </div>
-                  <div style={tw("text-sm text-green-900 font-semibold")}>
-                    {formatDate(currentFormula?.lastUpdated)}
-                  </div>
+                <div style={tw("text-sm text-purple-900 font-semibold")}>
+                  {currentFormula?.name || "-"}
                 </div>
               </div>
             </div>
-          )}
+
+            {/* Created By Tile */}
+            <div style={tw("px-3 py-2")}>
+              <div
+                style={tw(
+                  "bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-3 border border-blue-200"
+                )}
+              >
+                <div
+                  style={mergeStyles(tw("flex items-center mb-2"), {
+                    gap: "0.5rem",
+                  })}
+                >
+                  <span
+                    style={tw("text-blue-600 text-base")}
+                    className="material-symbols-rounded"
+                  >
+                    person
+                  </span>
+                  <span
+                    style={tw(
+                      "text-[10px] text-blue-700 font-bold uppercase tracking-wider"
+                    )}
+                  >
+                    Created By
+                  </span>
+                </div>
+                <div style={tw("text-sm text-blue-900 font-semibold")}>
+                  {currentFormula?.createdBy || "-"}
+                </div>
+              </div>
+            </div>
+
+            {/* Last Updated Tile */}
+            <div style={tw("px-3 py-2")}>
+              <div
+                style={tw(
+                  "bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-3 border border-green-200"
+                )}
+              >
+                <div
+                  style={mergeStyles(tw("flex items-center mb-2"), {
+                    gap: "0.5rem",
+                  })}
+                >
+                  <span
+                    style={tw("text-green-600 text-base")}
+                    className="material-symbols-rounded"
+                  >
+                    calendar_today
+                  </span>
+                  <span
+                    style={tw(
+                      "text-[10px] text-green-700 font-bold uppercase tracking-wider"
+                    )}
+                  >
+                    Last Updated
+                  </span>
+                </div>
+                <div style={tw("text-sm text-green-900 font-semibold")}>
+                  {formatDate(currentFormula?.lastUpdated)}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Formula Name - Hidden on small screens */}
         {headerFlags.showFormulaName && (

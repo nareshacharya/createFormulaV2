@@ -3,7 +3,13 @@
  * 
  * Project-related fields (all optional):
  * - Project ID (lookup/search)
- * - Project Details (display only, from US-1048)
+ * - Project Name (display only, from selected project)
+ * - Project Region (display only)
+ * - Project Country (display only)
+ * - Project Manager (display only)
+ * - Project Status (display only)
+ * - Project Currencies (display only)
+ * - Project Default Currency (display only)
  * - Brief CPT Target
  * - Brief Fragrance Dosage Target
  */
@@ -16,10 +22,10 @@ export const PROJECT_REFERENCE_FIELDS: FormField[] = [
   {
     name: 'projectId',
     label: 'Project ID',
-    type: 'search',
+    type: 'select',
     required: false,
-    placeholder: 'Search for a project (optional)',
-    helpText: 'Link this formula to an existing project',
+    placeholder: 'Select a project (optional)',
+    helpText: 'Link this formula to an existing project. The project mapping will be stored in workspace context.',
     visibility: {
       showForTypes: [
         FORMULA_TYPES.BASE,
@@ -32,16 +38,17 @@ export const PROJECT_REFERENCE_FIELDS: FormField[] = [
       type: 'API',
       endpoint: '/api/projects/search',
       valueField: 'id',
-      labelField: 'name'
+      labelField: 'displayId'
     },
     group: 'project-ref'
   },
   {
-    name: 'projectDetails',
-    label: 'Project Details',
-    type: 'display',
+    name: 'projectName',
+    label: 'Project Name',
+    type: 'text',
     required: false,
-    helpText: 'Project information from US-1048',
+    helpText: 'Project name (display only, populated from project selection)',
+    disabled: true,
     visibility: {
       showForTypes: [
         FORMULA_TYPES.BASE,
@@ -53,11 +60,160 @@ export const PROJECT_REFERENCE_FIELDS: FormField[] = [
       showWhen: (formData: Record<string, unknown>) => !!formData.projectId
     },
     dataSource: {
-      type: 'API',
-      endpoint: '/api/projects/{projectId}',
+      type: 'COMPUTED',
       compute: (formData: Record<string, unknown>) => {
-        const projectId = formData.projectId as string;
-        return projectId ? `/api/projects/${projectId}` : '';
+        return (formData as any)?.projectName || '';
+      }
+    },
+    group: 'project-ref'
+  },
+  {
+    name: 'projectRegion',
+    label: 'Project Region',
+    type: 'text',
+    required: false,
+    helpText: 'Geographic region where the project operates',
+    disabled: true,
+    visibility: {
+      showForTypes: [
+        FORMULA_TYPES.BASE,
+        FORMULA_TYPES.DILUTION,
+        FORMULA_TYPES.ANALYTICAL,
+        FORMULA_TYPES.PERFUMER
+      ],
+      dependsOn: ['projectId'],
+      showWhen: (formData: Record<string, unknown>) => !!formData.projectId
+    },
+    dataSource: {
+      type: 'COMPUTED',
+      compute: (formData: Record<string, unknown>) => {
+        return (formData as any)?.projectRegion || '';
+      }
+    },
+    group: 'project-ref'
+  },
+  {
+    name: 'projectCountry',
+    label: 'Project Country',
+    type: 'text',
+    required: false,
+    helpText: 'Country where the project is based',
+    disabled: true,
+    visibility: {
+      showForTypes: [
+        FORMULA_TYPES.BASE,
+        FORMULA_TYPES.DILUTION,
+        FORMULA_TYPES.ANALYTICAL,
+        FORMULA_TYPES.PERFUMER
+      ],
+      dependsOn: ['projectId'],
+      showWhen: (formData: Record<string, unknown>) => !!formData.projectId
+    },
+    dataSource: {
+      type: 'COMPUTED',
+      compute: (formData: Record<string, unknown>) => {
+        return (formData as any)?.projectCountry || '';
+      }
+    },
+    group: 'project-ref'
+  },
+  {
+    name: 'projectManager',
+    label: 'Project Manager',
+    type: 'text',
+    required: false,
+    helpText: 'The project manager responsible for this project',
+    disabled: true,
+    visibility: {
+      showForTypes: [
+        FORMULA_TYPES.BASE,
+        FORMULA_TYPES.DILUTION,
+        FORMULA_TYPES.ANALYTICAL,
+        FORMULA_TYPES.PERFUMER
+      ],
+      dependsOn: ['projectId'],
+      showWhen: (formData: Record<string, unknown>) => !!formData.projectId
+    },
+    dataSource: {
+      type: 'COMPUTED',
+      compute: (formData: Record<string, unknown>) => {
+        return (formData as any)?.projectManager || '';
+      }
+    },
+    group: 'project-ref'
+  },
+  {
+    name: 'projectStatus',
+    label: 'Project Status',
+    type: 'text',
+    required: false,
+    helpText: 'Current status of the project (active, in-progress, planning, archived)',
+    disabled: true,
+    visibility: {
+      showForTypes: [
+        FORMULA_TYPES.BASE,
+        FORMULA_TYPES.DILUTION,
+        FORMULA_TYPES.ANALYTICAL,
+        FORMULA_TYPES.PERFUMER
+      ],
+      dependsOn: ['projectId'],
+      showWhen: (formData: Record<string, unknown>) => !!formData.projectId
+    },
+    dataSource: {
+      type: 'COMPUTED',
+      compute: (formData: Record<string, unknown>) => {
+        return (formData as any)?.projectStatus || '';
+      }
+    },
+    group: 'project-ref'
+  },
+  {
+    name: 'projectCurrencies',
+    label: 'Project Currencies',
+    type: 'text',
+    required: false,
+    helpText: 'Currencies supported by this project (comma-separated)',
+    disabled: true,
+    visibility: {
+      showForTypes: [
+        FORMULA_TYPES.BASE,
+        FORMULA_TYPES.DILUTION,
+        FORMULA_TYPES.ANALYTICAL,
+        FORMULA_TYPES.PERFUMER
+      ],
+      dependsOn: ['projectId'],
+      showWhen: (formData: Record<string, unknown>) => !!formData.projectId
+    },
+    dataSource: {
+      type: 'COMPUTED',
+      compute: (formData: Record<string, unknown>) => {
+        const currencies = (formData as any)?.projectCurrencies;
+        return Array.isArray(currencies) ? currencies.join(', ') : '';
+      }
+    },
+    group: 'project-ref'
+  },
+  {
+    name: 'projectDefaultCurrency',
+    label: 'Project Default Currency',
+    type: 'text',
+    required: false,
+    helpText: 'Default currency for project budgeting and cost calculations',
+    disabled: true,
+    visibility: {
+      showForTypes: [
+        FORMULA_TYPES.BASE,
+        FORMULA_TYPES.DILUTION,
+        FORMULA_TYPES.ANALYTICAL,
+        FORMULA_TYPES.PERFUMER
+      ],
+      dependsOn: ['projectId'],
+      showWhen: (formData: Record<string, unknown>) => !!formData.projectId
+    },
+    dataSource: {
+      type: 'COMPUTED',
+      compute: (formData: Record<string, unknown>) => {
+        return (formData as any)?.projectDefaultCurrency || '';
       }
     },
     group: 'project-ref'

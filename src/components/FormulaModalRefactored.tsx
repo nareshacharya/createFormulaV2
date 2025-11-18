@@ -1,7 +1,11 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import { useState } from "react";
 import { isFieldVisible } from "../config/formulaCreation.config";
-import { FORMULA_TYPES } from "../config/formulaTypes.config";
+import {
+  FORMULA_TYPES,
+  getFormulaTypeLabel,
+  getFormulaTypeDescription,
+} from "../config/formulaTypes.config";
 import type { FormulaType } from "../config/formulaTypes.config";
 import type { Formula } from "../services/pega";
 import {
@@ -10,9 +14,9 @@ import {
 } from "../utils/idGeneration";
 import { tw, mergeStyles } from "../utils/tailwindToInline";
 import Button from "./Button";
+import FormulaDataGrid from "./FormulaDataGrid";
 import Modal from "./Modal";
 import PillTabs from "./PillTabs";
-import SelectFormulaForm from "./SelectFormulaForm";
 
 // Lazy load section components
 import FormulaTypeSelection from "./FormulaSections/FormulaTypeSelection";
@@ -210,6 +214,20 @@ const FormulaModal = ({
       existingFormulas: availableFormulas,
     });
 
+    // Generate universal formula ID (F00001v1) - not displayed on screen
+    // Find highest F-sequence number across all formulas
+    const fSequenceNumbers = availableFormulas
+      .map((f) => {
+        const match = f.id?.match(/F(\d+)/);
+        return match ? parseInt(match[1], 10) : 0;
+      })
+      .filter((n) => n > 0);
+    const nextFSequence =
+      (fSequenceNumbers.length > 0 ? Math.max(...fSequenceNumbers) : 0) + 1;
+    const universalFormulaId = `F${nextFSequence
+      .toString()
+      .padStart(5, "0")}v${newFormulaData.version}`;
+
     // Generate formula name based on type
     const formulaName =
       newFormulaData.formulaType === FORMULA_TYPES.ANALYTICAL
@@ -291,12 +309,9 @@ const FormulaModal = ({
       case "identification":
         return (
           <FormulaTypeSelection
-            formulaData={newFormulaData as any}
+            formulaData={newFormulaData}
             onDataChange={(updates) =>
-              setNewFormulaData((prev) => {
-                const result = { ...prev, ...updates };
-                return result as NewFormulaData;
-              })
+              setNewFormulaData((prev) => ({ ...prev, ...updates }))
             }
           />
         );
@@ -304,12 +319,9 @@ const FormulaModal = ({
       case "general":
         return (
           <FormulaGeneralInformation
-            formulaData={newFormulaData as any}
+            formulaData={newFormulaData}
             onDataChange={(updates) =>
-              setNewFormulaData((prev) => {
-                const result = { ...prev, ...updates };
-                return result as NewFormulaData;
-              })
+              setNewFormulaData((prev) => ({ ...prev, ...updates }))
             }
           />
         );
@@ -317,12 +329,9 @@ const FormulaModal = ({
       case "project":
         return (
           <FormulaProjectInformation
-            formulaData={newFormulaData as any}
+            formulaData={newFormulaData}
             onDataChange={(updates) =>
-              setNewFormulaData((prev) => {
-                const result = { ...prev, ...updates };
-                return result as NewFormulaData;
-              })
+              setNewFormulaData((prev) => ({ ...prev, ...updates }))
             }
           />
         );
@@ -330,12 +339,9 @@ const FormulaModal = ({
       case "product":
         return (
           <FormulaProductInformation
-            formulaData={newFormulaData as any}
+            formulaData={newFormulaData}
             onDataChange={(updates) =>
-              setNewFormulaData((prev) => {
-                const result = { ...prev, ...updates };
-                return result as NewFormulaData;
-              })
+              setNewFormulaData((prev) => ({ ...prev, ...updates }))
             }
           />
         );
@@ -343,12 +349,9 @@ const FormulaModal = ({
       case "codes":
         return (
           <FormulaSystemCodes
-            formulaData={newFormulaData as any}
+            formulaData={newFormulaData}
             onDataChange={(updates) =>
-              setNewFormulaData((prev) => {
-                const result = { ...prev, ...updates };
-                return result as NewFormulaData;
-              })
+              setNewFormulaData((prev) => ({ ...prev, ...updates }))
             }
           />
         );
@@ -356,12 +359,9 @@ const FormulaModal = ({
       case "production":
         return (
           <FormulaProductionInformation
-            formulaData={newFormulaData as any}
+            formulaData={newFormulaData}
             onDataChange={(updates) =>
-              setNewFormulaData((prev) => {
-                const result = { ...prev, ...updates };
-                return result as NewFormulaData;
-              })
+              setNewFormulaData((prev) => ({ ...prev, ...updates }))
             }
           />
         );
@@ -369,12 +369,9 @@ const FormulaModal = ({
       case "additional":
         return (
           <FormulaAdditionalInformation
-            formulaData={newFormulaData as any}
+            formulaData={newFormulaData}
             onDataChange={(updates) =>
-              setNewFormulaData((prev) => {
-                const result = { ...prev, ...updates };
-                return result as NewFormulaData;
-              })
+              setNewFormulaData((prev) => ({ ...prev, ...updates }))
             }
           />
         );
@@ -389,7 +386,30 @@ const FormulaModal = ({
     { id: "create", label: "Create New" },
   ];
 
-
+  const SelectFormulaForm = () => (
+    <div style={tw("px-6 pt-3 pb-6")}>
+      <div style={tw("space-y-4")}>
+        {remainingSelections > 0 ? (
+          <FormulaDataGrid
+            formulas={availableFormulas}
+            selectedFormulas={selectedFormulas}
+            onSelectionChange={setSelectedFormulas}
+            maxSelections={remainingSelections}
+            highlightedFormulas={selectedFormulaIds}
+          />
+        ) : (
+          <div style={tw("text-center py-8")}>
+            <div style={tw("text-gray-500 mb-2")}>
+              No more formulas can be added.
+            </div>
+            <div style={tw("text-sm text-gray-600")}>
+              Maximum number of formula columns (4) reached.
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 
   const getFooterActions = () => {
     if (activeTab === "create") {
@@ -542,13 +562,7 @@ const FormulaModal = ({
               minHeight: "400px",
             }}
           >
-            <SelectFormulaForm
-              availableFormulas={availableFormulas}
-              selectedFormulas={selectedFormulas}
-              onSelectionChange={setSelectedFormulas}
-              remainingSelections={remainingSelections}
-              selectedFormulaIds={selectedFormulaIds}
-            />
+            <SelectFormulaForm />
           </div>
         )}
       </div>
