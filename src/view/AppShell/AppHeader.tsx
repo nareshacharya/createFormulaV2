@@ -23,7 +23,7 @@ const AppHeader = () => {
 
   return (
     <div
-      style={tw("w-full bg-purple-800 border-b border-purple-700 relative z-1")}
+      style={tw("w-full bg-purple-700 border-b border-purple-700 relative z-1")}
     >
       {/* Header content */}
       <header

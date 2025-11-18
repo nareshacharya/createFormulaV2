@@ -18,6 +18,7 @@ interface WorkspaceData {
   formulas: Formula[];
   lockedFormulas: Set<string>; // Formulas used in this workspace
   history: StateHistoryManager; // Per-workspace undo/redo history
+  projectMappings: Record<string, { id: string; name: string }>; // Map of formulaId -> { projectId, projectName }
 }
 
 interface WorkspaceTab {
@@ -50,6 +51,11 @@ interface WorkspaceContextType {
   getFormulaLockedInWorkspace: (formulaId: string) => string | null;
   lockFormula: (formulaId: string) => void;
   unlockFormula: (formulaId: string) => void;
+
+  // Project Mapping (Formula → Project)
+  setProjectMapping: (formulaId: string, projectId: string, projectName: string) => void;
+  getProjectMapping: (formulaId: string) => { id: string; name: string } | null;
+  clearProjectMapping: (formulaId: string) => void;
 
   // Global Data
   availableFormulas: Formula[];
@@ -137,6 +143,7 @@ const createEmptyWorkspaceData = (): WorkspaceData => ({
   formulas: [],
   lockedFormulas: new Set<string>(),
   history: new StateHistoryManager(), // Create new history manager for this workspace
+  projectMappings: {}, // Initialize empty project mappings
 });
 
 export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -362,6 +369,61 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
     [activeTabId]
   );
 
+  // Project Mapping Methods
+  const setProjectMapping = useCallback(
+    (formulaId: string, projectId: string, projectName: string) => {
+      setTabs((prev) =>
+        prev.map((tab) => {
+          if (tab.id === activeTabId) {
+            return {
+              ...tab,
+              data: {
+                ...tab.data,
+                projectMappings: {
+                  ...tab.data.projectMappings,
+                  [formulaId]: { id: projectId, name: projectName },
+                },
+              },
+              lastModified: new Date(),
+            };
+          }
+          return tab;
+        })
+      );
+    },
+    [activeTabId]
+  );
+
+  const getProjectMapping = useCallback(
+    (formulaId: string) => {
+      return activeWorkspace.projectMappings[formulaId] || null;
+    },
+    [activeWorkspace.projectMappings]
+  );
+
+  const clearProjectMapping = useCallback(
+    (formulaId: string) => {
+      setTabs((prev) =>
+        prev.map((tab) => {
+          if (tab.id === activeTabId) {
+            const newProjectMappings = { ...tab.data.projectMappings };
+            delete newProjectMappings[formulaId];
+            return {
+              ...tab,
+              data: {
+                ...tab.data,
+                projectMappings: newProjectMappings,
+              },
+              lastModified: new Date(),
+            };
+          }
+          return tab;
+        })
+      );
+    },
+    [activeTabId]
+  );
+
   // Get the active workspace's history manager
   const getActiveWorkspaceHistory = useCallback(() => {
     return activeWorkspace.history;
@@ -383,6 +445,9 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
       getFormulaLockedInWorkspace,
       lockFormula,
       unlockFormula,
+      setProjectMapping,
+      getProjectMapping,
+      clearProjectMapping,
       availableFormulas,
       ingredients,
       attributes,
@@ -405,6 +470,9 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
       getFormulaLockedInWorkspace,
       lockFormula,
       unlockFormula,
+      setProjectMapping,
+      getProjectMapping,
+      clearProjectMapping,
       availableFormulas,
       ingredients,
       attributes,

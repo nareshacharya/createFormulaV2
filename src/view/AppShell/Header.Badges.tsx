@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import { useHeaderFeatures } from "../../hooks/useFeatureFlags";
+import { WorkspaceContext } from "../../context/WorkspaceContext";
 import type { Formula } from "../../services/pega";
 import { eventBus } from "../../utils/bus";
 import { tw, mergeStyles } from "../../utils/tailwindToInline";
@@ -14,8 +15,14 @@ interface FormulaMetrics {
   formulaCost: number;
 }
 
+interface Project {
+  id: string;
+  name: string;
+}
+
 const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
   const headerFlags = useHeaderFeatures();
+  const workspaceContext = useContext(WorkspaceContext);
   const [currentFormula, setCurrentFormula] = useState<Formula | null>(
     activeFormula || null
   );
@@ -25,7 +32,11 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
     formulaCost: 0,
   });
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isProjectSearchOpen, setIsProjectSearchOpen] = useState(false);
+  const [projectSearchQuery, setProjectSearchQuery] = useState("");
+  const [_availableProjects, _setAvailableProjects] = useState<Project[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const projectSearchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleActiveFormulaChange = (data: { formula: Formula | null }) => {
@@ -57,16 +68,23 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
       ) {
         setIsDropdownOpen(false);
       }
+
+      if (
+        projectSearchRef.current &&
+        !projectSearchRef.current.contains(event.target as Node)
+      ) {
+        setIsProjectSearchOpen(false);
+      }
     };
 
-    if (isDropdownOpen) {
+    if (isDropdownOpen || isProjectSearchOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isDropdownOpen]);
+  }, [isDropdownOpen, isProjectSearchOpen]);
 
   const getStatusVariant = (status?: string) => {
     switch (status) {
@@ -94,6 +112,31 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
     return date.toLocaleDateString();
   };
 
+  const handleProjectSelect = (project: Project) => {
+    if (!workspaceContext || !currentFormula) return;
+    
+    // Write project mapping to workspace context
+    workspaceContext.setProjectMapping(currentFormula.id, project.id, project.name);
+    setIsProjectSearchOpen(false);
+    setProjectSearchQuery("");
+    
+    // Emit event for any listeners (backward compatibility)
+    eventBus.emit("project-mapped-to-formula", {
+      formulaId: currentFormula?.id,
+      projectId: project.id,
+      projectName: project.name,
+    });
+  };
+
+  // Get mapped project from workspace context
+  const mappedProject = 
+    workspaceContext && currentFormula
+      ? workspaceContext.getProjectMapping(currentFormula.id)
+      : null;
+
+  // Show project section if there's a formula (always show, empty state if no mapping)
+  const shouldShowProject = currentFormula !== null;
+
   return (
     <div style={mergeStyles(tw("flex items-center"), { gap: "1.5rem" })}>
       {/* Formula Metrics Container - Project Name, Formula Info, Status, Lines, and Costs */}
@@ -106,47 +149,109 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
         )}
         ref={dropdownRef}
       >
-        {/* Project Name with Dropdown */}
-        <div style={tw("relative group")}>
-          <button
-                  type="button"
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            style={mergeStyles(
-              tw("flex items-center hover:opacity-80 transition-opacity"),
-              { gap: "0.5rem" }
-            )}
-          >
-            <span
-              style={tw("text-purple-300 text-xl")}
-              className="material-symbols-rounded"
-            >
-              folder
-            </span>
-            <div
-              style={mergeStyles(tw("flex flex-col items-start"), {
-                gap: "0.125rem",
-              })}
-            >
-              <span style={tw("text-xs text-white/50 font-medium")}>
-                Project
-              </span>
-              <span style={tw("text-sm font-semibold text-white")}>
-                {currentFormula?.projectName || "Fragrance Lab Pro"}
-              </span>
-            </div>
-            <span
-              style={mergeStyles(
-                tw("text-white text-base transition-transform"),
-                tw(isDropdownOpen ? "rotate-180" : "")
-              )}
-              className="material-symbols-rounded"
-            >
-              expand_more
-            </span>
-          </button>
+        {/* Project Name with Dropdown - Only shown if project is mapped */}
+        {shouldShowProject && (
+          <>
+            <div style={tw("relative group")} ref={projectSearchRef}>
+              <button
+                type="button"
+                onClick={() => setIsProjectSearchOpen(!isProjectSearchOpen)}
+                style={mergeStyles(
+                  tw("flex items-center hover:opacity-80 transition-opacity"),
+                  { gap: "0.5rem" }
+                )}
+              >
+                <span
+                  style={tw("text-purple-300 text-xl")}
+                  className="material-symbols-rounded"
+                >
+                  folder
+                </span>
+                <div
+                  style={mergeStyles(tw("flex flex-col items-start"), {
+                    gap: "0.125rem",
+                  })}
+                >
+                  <span style={tw("text-xs text-white/50 font-medium")}>
+                    Project
+                  </span>
+                  <span style={tw("text-sm font-semibold text-white")}>
+                    {mappedProject?.name || "Select..."}
+                  </span>
+                </div>
+                <span
+                  style={mergeStyles(
+                    tw("text-white text-base transition-transform"),
+                    tw(isProjectSearchOpen ? "rotate-180" : "")
+                  )}
+                  className="material-symbols-rounded"
+                >
+                  expand_more
+                </span>
+              </button>
 
-          {/* Dropdown Menu */}
-          {isDropdownOpen && (
+              {/* Project Combobox Dropdown - Searchable */}
+              {isProjectSearchOpen && (
+                <div
+                  style={mergeStyles(
+                    tw(
+                      "absolute top-full left-0 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
+                    ),
+                    { marginTop: "0.5rem", minWidth: "280px" }
+                  )}
+                >
+                  {/* Search Input */}
+                  <div style={tw("px-3 py-2 border-b border-gray-100")}>
+                    <input
+                      type="text"
+                      placeholder="Search projects..."
+                      value={projectSearchQuery}
+                      onChange={(e) => setProjectSearchQuery(e.target.value)}
+                      style={tw(
+                        "w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500"
+                      )}
+                    />
+                  </div>
+
+                  {/* Project List - Mock data for now */}
+                  <div style={tw("max-h-48 overflow-y-auto")}>
+                    {[
+                      { id: "p1", name: "Fragrance Lab Pro" },
+                      { id: "p2", name: "Beauty Formulations" },
+                      { id: "p3", name: "Essential Oils Collection" },
+                    ].map((project) => (
+                      <button
+                        key={project.id}
+                        type="button"
+                        onClick={() => handleProjectSelect(project)}
+                        style={tw(
+                          `w-full text-left px-3 py-2 hover:bg-blue-50 transition-colors text-sm ${
+                            mappedProject?.id === project.id
+                              ? "bg-blue-100 font-semibold text-blue-900"
+                              : "text-gray-700"
+                          }`
+                        )}
+                      >
+                        {project.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Vertical Divider - Only shown if project is displayed */}
+            <div
+              style={mergeStyles(
+                { width: "1px", height: "2.5rem" },
+                tw("bg-purple-600/50")
+              )}
+            ></div>
+          </>
+        )}
+
+        {/* Dropdown Menu - Keep for backward compatibility if needed */}
+        {isDropdownOpen && (
             <div
               style={mergeStyles(
                 tw(
@@ -368,23 +473,6 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
               </div>
             </div>
           )}
-        </div>
-
-        {/* Vertical Divider */}
-        <div
-          style={mergeStyles(
-            { width: "1px", height: "2.5rem" },
-            tw("bg-purple-600/50")
-          )}
-        ></div>
-
-        {/* Vertical Divider - Hidden on small screens */}
-        <div
-          style={mergeStyles(tw("hidden xl:block bg-purple-600/50"), {
-            width: "1px",
-            height: "2.5rem",
-          })}
-        ></div>
 
         {/* Formula Name - Hidden on small screens */}
         {headerFlags.showFormulaName && (
@@ -589,96 +677,6 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
             </div>
           </div>
         )}
-
-        {/* Vertical Divider */}
-        <div
-          style={mergeStyles(
-            { width: "1px", height: "2.5rem" },
-            tw("bg-purple-600/50")
-          )}
-        ></div>
-
-        {/* Lines Count */}
-        <div
-          style={mergeStyles(tw("flex items-center group"), { gap: "0.5rem" })}
-        >
-          <span
-            style={tw("text-yellow-300 text-xl")}
-            className="material-symbols-rounded"
-          >
-            checklist
-          </span>
-          <div style={tw("flex flex-col items-start")}>
-            <span
-              style={tw("text-xs text-white/50 font-medium hidden xl:inline")}
-            >
-              Lines
-            </span>
-            <span style={tw("text-sm font-semibold text-white")}>
-              {metrics.lineCount}
-            </span>
-          </div>
-        </div>
-
-        {/* Vertical Divider */}
-        <div
-          style={mergeStyles(
-            { width: "1px", height: "2.5rem" },
-            tw("bg-purple-600/50")
-          )}
-        ></div>
-
-        {/* Formula Cost */}
-        <div
-          style={mergeStyles(tw("flex items-center group"), { gap: "0.5rem" })}
-        >
-          <span
-            style={tw("text-green-300 text-xl")}
-            className="material-symbols-rounded"
-          >
-            local_offer
-          </span>
-          <div style={tw("flex flex-col items-start")}>
-            <span
-              style={tw("text-xs text-white/50 font-medium hidden xl:inline")}
-            >
-              Formula Cost
-            </span>
-            <span style={tw("text-sm font-semibold text-white")}>
-              ${metrics.formulaCost.toFixed(2)}
-            </span>
-          </div>
-        </div>
-
-        {/* Vertical Divider */}
-        <div
-          style={mergeStyles(
-            { width: "1px", height: "2.5rem" },
-            tw("bg-purple-600/50")
-          )}
-        ></div>
-
-        {/* Target Cost (RMC) */}
-        <div
-          style={mergeStyles(tw("flex items-center group"), { gap: "0.5rem" })}
-        >
-          <span
-            style={tw("text-blue-300 text-xl")}
-            className="material-symbols-rounded"
-          >
-            attach_money
-          </span>
-          <div style={tw("flex flex-col items-start")}>
-            <span
-              style={tw("text-xs text-white/50 font-medium hidden xl:inline")}
-            >
-              Target Cost
-            </span>
-            <span style={tw("text-sm font-semibold text-white")}>
-              ${metrics.targetCost.toFixed(2)}
-            </span>
-          </div>
-        </div>
       </div>
     </div>
   );

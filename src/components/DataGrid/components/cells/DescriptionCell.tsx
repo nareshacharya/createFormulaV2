@@ -26,7 +26,9 @@ export const DescriptionCell = ({
   if (row.isEmpty) {
     return (
       <div
-        style={tw("w-full h-full flex flex-col items-center justify-center")}
+        style={tw(
+          "w-full h-full flex flex-col items-center justify-center py-24"
+        )}
       >
         <div
           style={tw(

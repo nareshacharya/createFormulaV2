@@ -103,6 +103,39 @@ export interface IngredientAttribute {
   examples?: string[];
 }
 
+// Project types
+export interface Project {
+  id: string;
+  name: string;
+  projectId: string;
+  displayId: string;
+  description: string;
+  category: string;
+  status: 'active' | 'in-progress' | 'planning' | 'archived';
+  createdBy: string;
+  createdDate: string;
+  lastModified: string;
+  lastModifiedBy: string;
+  region: string;
+  country: string;
+  currencies: string[];
+  defaultCurrency: string;
+  numberOfFormulas: number;
+  numberOfCategories: number;
+  budget?: number;
+  budgetCurrency?: string;
+  startDate: string;
+  endDate: string;
+  manager: string;
+  team: string[];
+  tags: string[];
+  notes?: string;
+  progress: number; // 0-100 percentage
+  priority: 'critical' | 'high' | 'medium' | 'low';
+  visibility: 'public' | 'private';
+  archived: boolean;
+}
+
 // Stubbed service functions that mirror DX API read/write and Data Page fetches
 export class PegaService {
   // TODO: Implement actual DX API calls
@@ -147,6 +180,68 @@ export class PegaService {
       attribute.name.toLowerCase().includes(query.toLowerCase()) ||
       attribute.description.toLowerCase().includes(query.toLowerCase())
     );
+  }
+
+  // Project-related methods
+  static async getProjects(_filters?: Record<string, unknown>): Promise<Project[]> {
+    // TODO: Replace with actual API call
+    const { mockProjects } = await import('../mocks/projects');
+    return mockProjects as any;
+  }
+
+  static async getProject(id: string): Promise<Project | null> {
+    // TODO: Replace with actual API call
+    const { mockProjects } = await import('../mocks/projects');
+    return mockProjects.find(p => p.id === id || p.projectId === id) as any || null;
+  }
+
+  static async searchProjects(query: string, _filters?: Record<string, unknown>): Promise<Project[]> {
+    // TODO: Replace with actual API call
+    const { mockProjects } = await import('../mocks/projects');
+    return mockProjects.filter(project =>
+      project.name.toLowerCase().includes(query.toLowerCase()) ||
+      project.description.toLowerCase().includes(query.toLowerCase()) ||
+      project.displayId.toLowerCase().includes(query.toLowerCase()) ||
+      project.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
+    ) as any;
+  }
+
+  static async getProjectsByManager(manager: string): Promise<Project[]> {
+    // TODO: Replace with actual API call
+    const { mockProjects } = await import('../mocks/projects');
+    return mockProjects.filter(p => p.manager === manager || p.team.includes(manager)) as any;
+  }
+
+  static async getProjectsByRegion(region: string): Promise<Project[]> {
+    // TODO: Replace with actual API call
+    const { mockProjects } = await import('../mocks/projects');
+    return mockProjects.filter(p => p.region === region) as any;
+  }
+
+  static async getProjectsByStatus(status: string): Promise<Project[]> {
+    // TODO: Replace with actual API call
+    const { mockProjects } = await import('../mocks/projects');
+    return mockProjects.filter(p => p.status === status) as any;
+  }
+
+  static async createProject(project: Omit<Project, 'id'>): Promise<Project> {
+    // TODO: Replace with actual API call
+    return {
+      ...project,
+      id: `PROJ-${Date.now()}`,
+    } as any;
+  }
+
+  static async updateProject(id: string, updates: Partial<Project>): Promise<Project> {
+    // TODO: Replace with actual API call
+    const { mockProjects } = await import('../mocks/projects');
+    const existing = mockProjects.find(p => p.id === id || p.projectId === id);
+    return { ...existing!, ...updates } as any;
+  }
+
+  static async deleteProject(id: string): Promise<boolean> {
+    // TODO: Replace with actual API call
+    return true;
   }
 
   static async createFormula(formula: Omit<Formula, 'id'>): Promise<Formula> {
