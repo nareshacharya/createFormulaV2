@@ -2253,7 +2253,7 @@ const WorkArea = () => {
           onToolbarExport={handleExportToExcel}
           onToolbarComplianceCheck={() => {
             // Handle compliance check action
-            console.log('Compliance check initiated');
+            console.log("Compliance check initiated");
           }}
           toolbarCanUndo={undoState.canUndo}
           toolbarUndoCount={undoState.undoCount}

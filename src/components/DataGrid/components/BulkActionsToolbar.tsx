@@ -91,7 +91,7 @@ export const BulkActionsToolbar = ({
         {selectedCount > 0 && (
           <>
             <button
-                type="button"
+              type="button"
               onClick={onClearSelection}
               className="bg-gray-150 text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition-all duration-200 hover:shadow-sm flex items-center gap-1 px-2 py-1 rounded-lg"
               title="Clear selection"
@@ -212,7 +212,7 @@ export const BulkActionsToolbar = ({
             }
           >
             {undoCount > 0 && (
-              <span className="absolute -top-0.5 -right-2 bg-blue-500 text-white text-[9px] px-1 rounded-full font-semibold">
+              <span className="absolute top-0.25 right-0.35 bg-blue-500 text-white text-[9px] px-1 rounded-full font-semibold">
                 {undoCount}
               </span>
             )}

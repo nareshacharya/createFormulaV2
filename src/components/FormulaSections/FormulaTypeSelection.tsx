@@ -61,9 +61,7 @@ const FormulaTypeSelection = ({
                 </span>
               </div>
               <div style={{ marginBottom: "0.75rem" }}>
-                <strong style={tw("text-blue-300")}>
-                  Analytical Formula:
-                </strong>{" "}
+                <strong style={tw("text-blue-300")}>Analytical Formula:</strong>{" "}
                 <span style={tw("text-gray-300")}>
                   {getFormulaTypeDescription(FORMULA_TYPES.ANALYTICAL)}
                 </span>
@@ -160,9 +158,7 @@ const FormulaTypeSelection = ({
           }}
         >
           <div>
-            <label
-              style={tw("block text-sm font-medium text-gray-700 mb-2")}
-            >
+            <label style={tw("block text-sm font-medium text-gray-700 mb-2")}>
               Base Formula *
             </label>
             <input
@@ -176,9 +172,7 @@ const FormulaTypeSelection = ({
             />
           </div>
           <div>
-            <label
-              style={tw("block text-sm font-medium text-gray-700 mb-2")}
-            >
+            <label style={tw("block text-sm font-medium text-gray-700 mb-2")}>
               Dilution Percentage *
             </label>
             <div style={tw("relative")}>
@@ -186,7 +180,9 @@ const FormulaTypeSelection = ({
                 type="number"
                 value={formulaData.dilutionPercentage || ""}
                 onChange={(e) =>
-                  onDataChange({ dilutionPercentage: parseFloat(e.target.value) })
+                  onDataChange({
+                    dilutionPercentage: parseFloat(e.target.value),
+                  })
                 }
                 style={tw(
                   "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -236,7 +232,9 @@ const FormulaTypeSelection = ({
           <input
             type="number"
             value={formulaData.version || 1}
-            onChange={(e) => onDataChange({ version: parseInt(e.target.value, 10) })}
+            onChange={(e) =>
+              onDataChange({ version: parseInt(e.target.value, 10) })
+            }
             style={tw(
               "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             )}

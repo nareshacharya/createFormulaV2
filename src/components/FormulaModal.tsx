@@ -389,8 +389,6 @@ const FormulaModal = ({
     { id: "create", label: "Create New" },
   ];
 
-
-
   const getFooterActions = () => {
     if (activeTab === "create") {
       return (
@@ -474,7 +472,12 @@ const FormulaModal = ({
         </div>
 
         {activeTab === "create" && (
-          <div style={mergeStyles(tw("flex"), { height: "100%", maxHeight: "calc(90vh - 200px)" })}>
+          <div
+            style={mergeStyles(tw("flex"), {
+              height: "100%",
+              maxHeight: "calc(90vh - 200px)",
+            })}
+          >
             {/* Vertical Navigation Sidebar */}
             <div
               style={mergeStyles(
@@ -526,10 +529,9 @@ const FormulaModal = ({
 
             {/* Form Content Area */}
             <div
-              style={mergeStyles(
-                tw("flex-1 overflow-y-auto p-6"),
-                { backgroundColor: "#ffffff" }
-              )}
+              style={mergeStyles(tw("flex-1 overflow-y-auto p-6"), {
+                backgroundColor: "#ffffff",
+              })}
             >
               {renderFormSection()}
             </div>

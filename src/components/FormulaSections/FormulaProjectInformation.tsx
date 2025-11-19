@@ -27,66 +27,68 @@ const FormulaProjectInformation = ({ formulaData, onDataChange }: Props) => {
             gap: "16px",
           }}
         >
-      {/* Project ID */}
-      <div>
-        <label style={tw("block text-sm font-medium text-gray-700 mb-2")}>
-          Project ID
-        </label>
-        <input
-          type="text"
-          value={formulaData.projectId || ""}
-          onChange={(e) => onDataChange({ projectId: e.target.value })}
-          style={tw(
-            "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          )}
-          placeholder="Enter or search for project..."
-        />
-      </div>
+          {/* Project ID */}
+          <div>
+            <label style={tw("block text-sm font-medium text-gray-700 mb-2")}>
+              Project ID
+            </label>
+            <input
+              type="text"
+              value={formulaData.projectId || ""}
+              onChange={(e) => onDataChange({ projectId: e.target.value })}
+              style={tw(
+                "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              )}
+              placeholder="Enter or search for project..."
+            />
+          </div>
 
-      {/* Project Currencies */}
-      <div>
-        <label style={tw("block text-sm font-medium text-gray-700 mb-2")}>
-          Project Currencies
-        </label>
-        <input
-          type="text"
-          value={
-            Array.isArray(formulaData.projectCurrencies)
-              ? formulaData.projectCurrencies.join(", ")
-              : ""
-          }
-          onChange={(e) =>
-            onDataChange({
-              projectCurrencies: e.target.value
-                .split(",")
-                .map((c) => c.trim())
-                .filter((c) => c),
-            })
-          }
-          style={tw(
-            "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
-          )}
-          placeholder="Comma-separated currencies"
-          disabled
-        />
-      </div>
+          {/* Project Currencies */}
+          <div>
+            <label style={tw("block text-sm font-medium text-gray-700 mb-2")}>
+              Project Currencies
+            </label>
+            <input
+              type="text"
+              value={
+                Array.isArray(formulaData.projectCurrencies)
+                  ? formulaData.projectCurrencies.join(", ")
+                  : ""
+              }
+              onChange={(e) =>
+                onDataChange({
+                  projectCurrencies: e.target.value
+                    .split(",")
+                    .map((c) => c.trim())
+                    .filter((c) => c),
+                })
+              }
+              style={tw(
+                "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
+              )}
+              placeholder="Comma-separated currencies"
+              disabled
+            />
+          </div>
 
-      {/* Project Default Currency */}
-      <div>
-        <label style={tw("block text-sm font-medium text-gray-700 mb-2")}>
-          Default Currency
-        </label>
-        <input
-          type="text"
-          value={formulaData.projectDefaultCurrency || ""}
-          onChange={(e) => onDataChange({ projectDefaultCurrency: e.target.value })}
-          style={tw(
-            "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
-          )}
-          placeholder="Default currency"
-          disabled
-        />
-      </div>
+          {/* Project Default Currency */}
+          <div>
+            <label style={tw("block text-sm font-medium text-gray-700 mb-2")}>
+              Default Currency
+            </label>
+            <input
+              type="text"
+              value={formulaData.projectDefaultCurrency || ""}
+              onChange={(e) =>
+                onDataChange({ projectDefaultCurrency: e.target.value })
+              }
+              style={tw(
+                "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
+              )}
+              placeholder="Default currency"
+              disabled
+            />
+          </div>
         </div>
       </div>
     </div>
