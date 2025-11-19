@@ -258,13 +258,19 @@ export const useFormulaOperations = ({
                     isTotal: false,
                     isFormula: false,
                     level: 0,
+                    ingredientId: ing.ingredientId,
+                    status: ingredient?.status,
+                    mac: ingredient?.mac,
+                    percentage: ing.percentage,
                 };
 
                 formulaColumns.forEach((col) => {
                     if (col.id === editableFormula) {
-                        rowData[col.key] = parseFloat((ing.percentage * multiplier).toFixed(2));
+                        const scaledValue = parseFloat((ing.percentage * multiplier).toFixed(2));
+                        rowData[col.id] = scaledValue;
+                        rowData.contCost = parseFloat(((scaledValue * (ingredient?.price || 0)) / 1000).toFixed(4));
                     } else {
-                        rowData[col.key] = 0;
+                        rowData[col.id] = 0;
                     }
                 });
 
