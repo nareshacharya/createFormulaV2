@@ -215,18 +215,25 @@ export const useFormulaOperations = ({
         );
 
         setTableData((prev) => {
-            const formula = formulas.find((f) => f.id === formulaId);
-            if (!formula) {
-                console.log("❌ Formula not found:", formulaId);
-                return prev;
-            }
-
             const formulaGroupRow = prev.find(
                 (row) => row.isFormula && row.formulaId === formulaId
             );
 
             if (!formulaGroupRow) {
                 console.log("❌ Formula group row not found for:", formulaId);
+                return prev;
+            }
+
+            // Get formula from either formulas or availableFormulas array
+            let formula = formulas.find((f) => f.id === formulaId);
+            if (!formula) {
+                formula = availableFormulas.find((f) => f.id === formulaId);
+            }
+
+            if (!formula) {
+                console.log("❌ Formula not found in formulas or availableFormulas:", formulaId);
+                console.log("Available formulas:", availableFormulas.map(f => f.id));
+                console.log("Workspace formulas:", formulas.map(f => f.id));
                 return prev;
             }
 

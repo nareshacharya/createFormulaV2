@@ -144,24 +144,32 @@ export const DescriptionCell = ({
 
       {/* Explode button for formulas */}
       {row.isFormula && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onExplodeFormula?.(row.formulaId);
-          }}
-          style={tw(
-            "flex-shrink-0 ml-2 text-orange-600 hover:text-orange-700 transition-colors"
-          )}
-          title="Explode Formula"
-        >
-          <span
-            className="material-symbols-rounded text-lg"
-            style={{ fontVariationSettings: "'FILL' 1" }}
+        <>
+          {console.log("🔍 Rendering explode button for formula:", row.formulaId, "has callback:", !!onExplodeFormula)}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log("🧨 Explode button clicked for formula:", row.formulaId, "callback exists:", !!onExplodeFormula);
+              if (onExplodeFormula) {
+                onExplodeFormula(row.formulaId);
+              } else {
+                console.error("❌ onExplodeFormula callback is undefined!");
+              }
+            }}
+            style={tw(
+              "flex-shrink-0 ml-2 text-orange-600 hover:text-orange-700 transition-colors"
+            )}
+            title="Explode Formula"
           >
-            bomb
-          </span>
-        </button>
+            <span
+              className="material-symbols-rounded text-lg"
+              style={{ fontVariationSettings: "'FILL' 1" }}
+            >
+              bomb
+            </span>
+          </button>
+        </>
       )}
 
       {/* Dilution Display - show percentage and solvent when dilution exists */}
