@@ -81,7 +81,7 @@ export const BulkActionsToolbar = ({
   canComplianceCheck = false,
 }: BulkActionsToolbarProps) => {
   return (
-    <div className="flex items-center justify-between mb-3 px-3 xl:px-6 py-2.5 bg-gray-50/50 gap-3">
+    <div className="flex items-center justify-between mb-1 px-1 xl:px-6 py-1.5 bg-gray-50/50 gap-2">
       {/* Left side - Selection count and bulk actions */}
       <div className="flex items-center space-x-2 xl:space-x-3 text-xs">
         <span className="text-gray-600 font-medium hidden lg:inline">
@@ -139,7 +139,7 @@ export const BulkActionsToolbar = ({
       </div>
 
       {/* Right side - Data Grid Actions (Add Formula, Merge, Normalize, Send, Compliance, Undo, Export) */}
-      <div className="flex items-center gap-1 xl:gap-2 overflow-x-auto">
+      <div className="flex items-center gap-2 overflow-x-auto">
         {/* Add Formula Button */}
         {onAddFormula && (
           <ToolbarButton
@@ -167,6 +167,16 @@ export const BulkActionsToolbar = ({
             icon="balance"
             label="Normalize"
             title="Normalize Formula"
+          />
+        )}
+
+        {/* Export Button */}
+        {onExport && (
+          <ToolbarButton
+            onClick={onExport}
+            icon="download"
+            label="Export"
+            title="Export as Excel"
           />
         )}
 
@@ -212,21 +222,14 @@ export const BulkActionsToolbar = ({
             }
           >
             {undoCount > 0 && (
-              <span className="absolute bg-blue-500 text-white text-[9px] px-1 rounded-full font-semibold" style={{ top: "2px", right: "3px" }}>
+              <span
+                className="absolute bg-blue-500 text-white text-[9px] px-1 rounded-full font-semibold"
+                style={{ top: "2px", right: "3px" }}
+              >
                 {undoCount}
               </span>
             )}
           </ToolbarButton>
-        )}
-
-        {/* Export Button */}
-        {onExport && (
-          <ToolbarButton
-            onClick={onExport}
-            icon="download"
-            label="Export"
-            title="Export as Excel"
-          />
         )}
       </div>
     </div>
