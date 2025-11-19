@@ -21,6 +21,14 @@ export const exportToCSV = ({
     filename,
 }: ExportData): void => {
     try {
+        // Debug logging
+        console.log("Export CSV - Columns:", columns.map(c => ({ id: c.id, title: c.title })));
+        console.log("Export CSV - Data samples:", data.slice(0, 3).map(d => ({ 
+          description: d.description, 
+          ingredientId: d.ingredientId,
+          formulaId: d.formulaId 
+        })));
+
         // Create header row from columns
         const headers = columns
             .filter((col) => col.id !== "selection") // Skip selection column
@@ -143,7 +151,7 @@ export const exportToExcel = ({
         const url = URL.createObjectURL(blob);
 
         link.setAttribute("href", url);
-        link.setAttribute("download", `${filename}.xls`);
+        link.setAttribute("download", `${filename}.xlsx`);
         link.style.visibility = "hidden";
 
         document.body.appendChild(link);

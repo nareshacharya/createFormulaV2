@@ -429,24 +429,88 @@ const WorkArea = () => {
     try {
       // Use getDisplayColumns directly without adding to dependencies
       // This is safe because getDisplayColumns is defined in the component
-      const exportColumns = getDisplayColumns();
-      const exportDataImpl = getEmptyStateData(tableData, false); // Get all data, not empty state
+      let exportColumns = getDisplayColumns();
 
-      const fileName = editableFormula
-        ? `formula-${editableFormula.replace(/\s+/g, "_")}-${
-            new Date().toISOString().split("T")[0]
-          }`
-        : `formulation-${new Date().toISOString().split("T")[0]}`;
+      // Enhance formula columns with their IDs
+      exportColumns = exportColumns.map((col) => {
+        // If it's a formula column with a formulaDisplayId, append the ID to the title
+        if (col.group === "Formulas" && col.formulaDisplayId) {
+          return {
+            ...col,
+            title: `${col.title} (${col.formulaDisplayId})`,
+          };
+        }
+        return col;
+      });
 
+      // Insert FormulaID and IngredientID columns after Description
+      const descriptionColIndex = exportColumns.findIndex(
+        (col) => col.id === "description"
+      );
+      if (descriptionColIndex !== -1) {
+        exportColumns.splice(descriptionColIndex + 1, 0, {
+          id: "formulaId",
+          key: "formulaId",
+          title: "FormulaID",
+          type: "text",
+          editable: false,
+          sortable: false,
+          group: "Metadata",
+        } as any);
+        
+        exportColumns.splice(descriptionColIndex + 2, 0, {
+          id: "ingredientId",
+          key: "ingredientId",
+          title: "IngredientID",
+          type: "text",
+          editable: false,
+          sortable: false,
+          group: "Metadata",
+        } as any);
+      }
+
+      // Use tableData directly - it has ingredientId and formulaId
+
+      // Ensure ingredientId and formulaId are set for export
+      // Also ensure we preserve ALL fields from the original row
+      const enrichedData = tableData.map((row) => {
+        const enrichedRow: Record<string, any> = { ...row };
+        
+        // Explicitly set or preserve ingredientId
+        if (!enrichedRow.ingredientId && row.ingredientId) {
+          enrichedRow.ingredientId = row.ingredientId;
+        }
+        enrichedRow.ingredientId = enrichedRow.ingredientId || "-";
+        
+        // Explicitly set or preserve formulaId
+        if (!enrichedRow.formulaId && row.formulaId) {
+          enrichedRow.formulaId = row.formulaId;
+        }
+        enrichedRow.formulaId = enrichedRow.formulaId || "-";
+        
+        return enrichedRow;
+      });
+
+
+
+      // Create readable filename based on active formula or generic name
+      const timestamp = new Date().toISOString().split("T")[0];
+      const formulaName = editableFormula
+        ? editableFormula.replace(/\s+/g, "_")
+        : "Formulation";
+
+      const fileName = `${formulaName}_${timestamp}`;
+
+      // Use CSV format for better compatibility and complete data capture
       exportData(
         {
           columns: exportColumns,
-          data: exportDataImpl,
+          data: enrichedData,
           filename: fileName,
         },
-        "excel"
+        "csv"
       );
-      toast.success("Data exported successfully");
+      toast.success("Data exported successfully as CSV");
     } catch (error) {
       console.error("Export failed:", error);
       toast.error("Failed to export data");
@@ -504,8 +568,21 @@ const WorkArea = () => {
   useEffect(() => {
     // Restore workspace data
     const wsData = workspace.activeWorkspace;
+    
+    // Ensure all ingredient rows have ingredientId field for export
+    const migratedTableData = wsData.tableData.map((row) => {
+      // For ingredient rows, ensure ingredientId field exists even if it wasn't set before
+      if (!row.isTotal && !row.isFormula && !("ingredientId" in row)) {
+        return {
+          ...row,
+          ingredientId: undefined,
+        };
+      }
+      return row;
+    });
+    
     setColumns(wsData.columns);
-    setTableData(wsData.tableData);
+    setTableData(migratedTableData);
     setFormulas(wsData.formulas);
     setSelectedFormulaIds(wsData.selectedFormulaIds);
     setEditableFormula(wsData.editableFormula || "");
@@ -590,7 +667,9 @@ const WorkArea = () => {
       });
 
       // Recalculate totals after updating contribution costs
-      return calculateTotals(updatedData, columns);
+      const totalsResult = calculateTotals(updatedData, columns);
+
+      return totalsResult;
     });
   }, [editableFormula, setTableData, columns]);
 
@@ -702,7 +781,8 @@ const WorkArea = () => {
             isTotal: true,
             totalType: "running",
           };
-          return [newRow, totalRow];
+          const result = [newRow, totalRow];
+          return result;
         }
 
         // If insertAfterRowId is provided, insert after that specific row
@@ -711,24 +791,27 @@ const WorkArea = () => {
             (row) => row.id === data.insertAfterRowId
           );
           if (insertIndex !== -1) {
-            return [
+            const result = [
               ...prev.slice(0, insertIndex + 1),
               newRow,
               ...prev.slice(insertIndex + 1),
             ];
+            return result;
           }
         }
 
         // Default behavior: insert before the total row
         const totalIndex = prev.findIndex((row) => row.isTotal);
         if (totalIndex !== -1) {
-          return [
+          const result = [
             ...prev.slice(0, totalIndex),
             newRow,
             ...prev.slice(totalIndex),
           ];
+          return result;
         }
-        return [...prev, newRow];
+        const result = [...prev, newRow];
+        return result;
       });
 
       // Emit event to update selected ingredients in library
@@ -753,6 +836,7 @@ const WorkArea = () => {
       formula: Formula;
       insertAfterRowId?: string;
     }) => {
+      // DEBUG: Log what we're working with at the start
       // REQUIREMENT 1: Check if there are any formula columns
       // Formulas can only be added if at least one formula column exists
       const hasFormulaColumns = columns.some(
@@ -834,7 +918,18 @@ const WorkArea = () => {
       // Create ingredient rows for the formula
       const formulaIngredientRows = data.formula.ingredients.map(
         (ing, index) => {
-          const ingredient = ingredients.find((i) => i.id === ing.ingredientId);
+          // IMPORTANT: If ingredientId is missing from formula data, lookup by name in global ingredients
+          let finalIngredientId = ing.ingredientId;
+          let ingredient = ingredients.find((i) => i.id === ing.ingredientId);
+          
+          // If not found by ID, try lookup by name (for API responses that don't include ingredientId)
+          if (!ingredient && ing.name) {
+            ingredient = ingredients.find((i) => i.name === ing.name);
+            if (ingredient) {
+              finalIngredientId = ingredient.id;
+            }
+          }
+          
           const ingredientCostPerKg = ingredient?.price || 0;
 
           const rowData: any = {
@@ -849,7 +944,7 @@ const WorkArea = () => {
             percentage: ing.percentage,
             status: ingredient?.status,
             mac: ingredient?.mac,
-            ingredientId: ingredient?.id,
+            ingredientId: finalIngredientId, // Use ingredientId or lookup by name
           };
 
           // Set ingredient values in formula columns
@@ -1259,6 +1354,38 @@ const WorkArea = () => {
     };
 
     const handleFormulaSelectedForColumn = (data: { formula: Formula }) => {
+      // HELPER: Create ingredient row with proper ID lookup
+      const createIngredientRow = (ing: any, formulaId: string, columnId: string, rowIndex: number): any => {
+        // Try to find ingredient by ID first, then by name
+        let ingredient = ingredients.find((i) => i.id === ing.ingredientId);
+        let finalIngredientId = ing.ingredientId;
+        
+        if (!ingredient && ing.name) {
+          ingredient = ingredients.find((i) => i.name === ing.name);
+          if (ingredient) {
+            finalIngredientId = ingredient.id;
+          }
+        }
+        
+        const ingredientCostPerKg = ingredient?.price || 0;
+
+        const rowData: any = {
+          id: `formula_ing_${formulaId}_${rowIndex}`,
+          description: ing.name,
+          costKg: ingredientCostPerKg,
+          contCost: (ing.percentage * ingredientCostPerKg) / 1000,
+          isTotal: false,
+          isFormula: false,
+          percentage: ing.percentage,
+          status: ingredient?.status,
+          mac: ingredient?.mac,
+          ingredientId: finalIngredientId,  // ✅ NOW SET!
+          [columnId]: ing.percentage,
+        };
+        
+        return rowData;
+      };
+
       // Check if we've reached the maximum number of formula columns
       const currentFormulaColumns = columns.filter(
         (col) => col.group === "Formulas" && col.formulaId
@@ -1328,25 +1455,9 @@ const WorkArea = () => {
         // If this is the first formula and we don't have ingredients yet, add them
         if (isFirstColumn && !hasExistingData && data.formula.ingredients) {
           // Create ingredient rows from the formula
-          const ingredientRows = data.formula.ingredients.map((ing, index) => {
-            const ingredient = ingredients.find(
-              (i) => i.id === ing.ingredientId
-            );
-            const ingredientCostPerKg = ingredient?.price || 0;
-
-            const rowData: any = {
-              id: `formula_ing_${data.formula.id}_${index}`,
-              description: ing.name,
-              costKg: ingredientCostPerKg,
-              contCost: (ing.percentage * ingredientCostPerKg) / 1000,
-              isTotal: false,
-              isFormula: false,
-              percentage: ing.percentage,
-              [newColumnId]: ing.percentage,
-            };
-
-            return rowData;
-          });
+          const ingredientRows = data.formula.ingredients.map((ing, index) =>
+            createIngredientRow(ing, data.formula.id, newColumnId, index)
+          );
 
           // Create total row
           const totalRow = {
@@ -1364,30 +1475,14 @@ const WorkArea = () => {
         } else if (!hasExistingData && data.formula.ingredients) {
           // If we have other columns but no data yet, still add ingredients
           const ingredientRows = data.formula.ingredients.map((ing, index) => {
-            const ingredient = ingredients.find(
-              (i) => i.id === ing.ingredientId
-            );
-            const ingredientCostPerKg = ingredient?.price || 0;
-
-            const rowData: any = {
-              id: `formula_ing_${data.formula.id}_${index}`,
-              description: ing.name,
-              costKg: ingredientCostPerKg,
-              contCost: (ing.percentage * ingredientCostPerKg) / 1000,
-              isTotal: false,
-              isFormula: false,
-              percentage: ing.percentage,
-            };
+            const row = createIngredientRow(ing, data.formula.id, newColumnId, index);
 
             // Add 0 for other formula columns
             currentFormulaColumns.forEach((col) => {
-              rowData[col.id] = 0;
+              row[col.id] = 0;
             });
 
-            // Set the percentage for the new column
-            rowData[newColumnId] = ing.percentage;
-
-            return rowData;
+            return row;
           });
 
           // Add the new column data to existing rows
@@ -1415,33 +1510,8 @@ const WorkArea = () => {
           );
         } else if (data.formula.ingredients) {
           // We have existing data - add new formula's ingredients and merge with existing rows
-          const newIngredientRows = data.formula.ingredients.map(
-            (ing, index) => {
-              const ingredient = ingredients.find(
-                (i) => i.id === ing.ingredientId
-              );
-              const ingredientCostPerKg = ingredient?.price || 0;
-
-              const rowData: any = {
-                id: `formula_ing_${data.formula.id}_${index}`,
-                description: ing.name,
-                costKg: ingredientCostPerKg,
-                contCost: (ing.percentage * ingredientCostPerKg) / 1000,
-                isTotal: false,
-                isFormula: false,
-                percentage: ing.percentage,
-              };
-
-              // Add 0 for all existing formula columns
-              currentFormulaColumns.forEach((col) => {
-                rowData[col.id] = 0;
-              });
-
-              // Set the percentage for the new column
-              rowData[newColumnId] = ing.percentage;
-
-              return rowData;
-            }
+          const newIngredientRows = data.formula.ingredients.map((ing, index) =>
+            createIngredientRow(ing, data.formula.id, newColumnId, index)
           );
 
           // Separate existing rows into ingredients and totals
@@ -1679,7 +1749,6 @@ const WorkArea = () => {
 
       // Emit the captured state
       eventBus.emit("workspace-state-ready", { state: workspaceSnapshot });
-      console.log("📦 Workspace state captured:", workspaceSnapshot);
     };
 
     // Handler to restore workspace state
@@ -1688,8 +1757,6 @@ const WorkArea = () => {
     }: {
       state: WorkspaceState;
     }) => {
-      console.log("📥 Loading workspace state:", workspaceState);
-
       try {
         // Restore DataGrid Core State
         if (workspaceState.columns)
@@ -1740,9 +1807,8 @@ const WorkArea = () => {
         }
 
         toast.success("Workspace loaded successfully!");
-        console.log("✅ Workspace state restored");
       } catch (error) {
-        console.error("❌ Error loading workspace state:", error);
+        console.error("Error loading workspace state:", error);
         toast.error("Failed to load workspace state");
       }
     };
@@ -2012,21 +2078,17 @@ const WorkArea = () => {
 
   // Bulk delete handler
   const handleBulkDelete = (rowIds: string[]) => {
-    console.log("🗑️ handleBulkDelete called with rowIds:", rowIds);
 
     // Ensure initial state is saved before first action
     ensureInitialStateSaved();
 
     setTableData((prev) => {
       const rowsToDelete = prev.filter((row) => rowIds.includes(row.id));
-      console.log("📋 Rows being deleted:", rowsToDelete);
 
       // Check if any formula group rows are being deleted
       const deletedFormulaIds = rowsToDelete
         .filter((row) => row.isFormula && row.formulaId)
         .map((row) => row.formulaId);
-
-      console.log("🔍 Deleted formula IDs:", deletedFormulaIds);
 
       // Remove deleted formulas from tracking
       if (deletedFormulaIds.length > 0) {
