@@ -81,10 +81,12 @@ interface DataGridProps {
   onToolbarNormalize?: () => void;
   onToolbarSend?: () => void;
   onToolbarUndo?: () => void;
+  onToolbarComplianceCheck?: () => void;
   onToolbarExport?: () => void;
   toolbarCanUndo?: boolean;
   toolbarUndoCount?: number;
   toolbarCanSend?: boolean;
+  toolbarCanComplianceCheck?: boolean;
 }
 
 const DataGrid = ({
@@ -125,10 +127,12 @@ const DataGrid = ({
   onToolbarNormalize,
   onToolbarSend,
   onToolbarUndo,
+  onToolbarComplianceCheck,
   onToolbarExport,
   toolbarCanUndo = false,
   toolbarUndoCount = 0,
   toolbarCanSend = false,
+  toolbarCanComplianceCheck = false,
 }: DataGridProps) => {
   // Get feature flags
   const dataGridFlags = useDataGridFeatures();
@@ -643,10 +647,12 @@ const DataGrid = ({
         onNormalize={onToolbarNormalize}
         onSend={onToolbarSend}
         onUndo={onToolbarUndo}
+        onComplianceCheck={onToolbarComplianceCheck}
         onExport={onToolbarExport}
         canUndo={toolbarCanUndo}
         undoCount={toolbarUndoCount}
         canSend={toolbarCanSend}
+        canComplianceCheck={toolbarCanComplianceCheck}
       />
 
       <div

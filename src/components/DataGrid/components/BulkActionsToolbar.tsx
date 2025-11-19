@@ -5,19 +5,21 @@ interface BulkActionsToolbarProps {
   onBulkDelete: () => void;
   onClearSelection: () => void;
   onYield?: () => void; // New yield function
-  // Action buttons (Add Formula, Merge, Normalize, Send, Undo)
+  // Action buttons (Add Formula, Merge, Normalize, Send, Undo, Compliance Check, Export)
   onAddFormula?: () => void;
   onMergeDuplicates?: () => void;
   onNormalize?: () => void;
   onSend?: () => void;
   onUndo?: () => void;
+  onComplianceCheck?: () => void;
   onExport?: () => void;
   canUndo?: boolean;
   undoCount?: number;
   canSend?: boolean;
+  canComplianceCheck?: boolean;
 }
 
-// Helper function to render toolbar buttons with responsive text
+// Helper function to render toolbar buttons with vertical layout (icon on top, text below)
 const ToolbarButton = ({
   onClick,
   disabled,
@@ -35,7 +37,7 @@ const ToolbarButton = ({
   children?: React.ReactNode;
   className?: string;
 }) => {
-  const baseClasses = `group relative flex items-center justify-center px-2 py-1 rounded-lg transition-all duration-200 
+  const baseClasses = `group relative flex flex-col items-center justify-center px-1.5 py-1 rounded-lg transition-all duration-200 
     ${!disabled ? "hover:bg-blue-600 hover:shadow-sm" : ""} 
     ${className}`;
 
@@ -45,7 +47,7 @@ const ToolbarButton = ({
 
   return (
     <button
-                type="button"
+      type="button"
       onClick={onClick}
       disabled={disabled}
       className={`${baseClasses} ${colorClasses}`}
@@ -53,7 +55,9 @@ const ToolbarButton = ({
     >
       <span className="material-symbols-rounded text-base">{icon}</span>
       {/* Show label only on xl screens and up (1280px+) */}
-      <span className="hidden xl:inline text-xs font-medium ml-1">{label}</span>
+      <span className="hidden xl:inline text-[10px] font-medium mt-0.5 text-center leading-tight max-w-[50px]">
+        {label}
+      </span>
       {children}
     </button>
   );
@@ -69,10 +73,12 @@ export const BulkActionsToolbar = ({
   onNormalize,
   onSend,
   onUndo,
+  onComplianceCheck,
   onExport,
   canUndo = false,
   undoCount = 0,
   canSend = false,
+  canComplianceCheck = false,
 }: BulkActionsToolbarProps) => {
   return (
     <div className="flex items-center justify-between mb-3 px-3 xl:px-6 py-2.5 bg-gray-50/50 gap-3">
@@ -132,7 +138,7 @@ export const BulkActionsToolbar = ({
         )}
       </div>
 
-      {/* Right side - Data Grid Actions (Add Formula, Merge, Normalize, Send, Undo, Export) */}
+      {/* Right side - Data Grid Actions (Add Formula, Merge, Normalize, Send, Compliance, Undo, Export) */}
       <div className="flex items-center gap-1 xl:gap-2 overflow-x-auto">
         {/* Add Formula Button */}
         {onAddFormula && (
@@ -174,6 +180,21 @@ export const BulkActionsToolbar = ({
             title={
               canSend
                 ? "Send Active Formula for Compounding"
+                : "Select an active formula"
+            }
+          />
+        )}
+
+        {/* Compliance Check Button */}
+        {onComplianceCheck && (
+          <ToolbarButton
+            onClick={onComplianceCheck}
+            disabled={!canComplianceCheck}
+            icon="verified_user"
+            label="Compliance"
+            title={
+              canComplianceCheck
+                ? "Check Formula Compliance"
                 : "Select an active formula"
             }
           />
