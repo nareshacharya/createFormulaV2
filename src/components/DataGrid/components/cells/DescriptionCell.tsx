@@ -91,32 +91,31 @@ export const DescriptionCell = ({
         paddingLeft: `${indent}px`,
       }}
     >
-      <div style={tw("flex items-center space-x-2 flex-1 min-w-0")}>
+      <div style={tw("flex items-center flex-1 min-w-0")}>
         {row.isFormula && (
-          <div style={tw("flex items-center space-x-1 mr-2")}>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleFormulaExpansion?.(row.formulaId);
-              }}
-              className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-blue-600 cursor-pointer"
-              title={row.isExpanded ? "Collapse Formula" : "Expand Formula"}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleFormulaExpansion?.(row.formulaId);
+            }}
+            className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-blue-600 cursor-pointer"
+            title={row.isExpanded ? "Collapse Formula" : "Expand Formula"}
+            style={tw("-ml-1")}
+          >
+            <span
+              className={`material-symbols-rounded text-sm ${
+                row.isExpanded
+                  ? "content: 'expand_less'"
+                  : "content: 'expand_more'"
+              }`}
             >
-              <span
-                className={`material-symbols-rounded text-sm ${
-                  row.isExpanded
-                    ? "content: 'expand_less'"
-                    : "content: 'expand_more'"
-                }`}
-              >
-                {row.isExpanded ? "expand_less" : "expand_more"}
-              </span>
-            </button>
-          </div>
+              {row.isExpanded ? "expand_less" : "expand_more"}
+            </span>
+          </button>
         )}
         {row.isFormula && (
-          <span className="material-symbols-rounded text-blue-600 text-sm">
+          <span className="material-symbols-rounded text-blue-600 text-sm" style={tw("mr-3")}>
             folder
           </span>
         )}
@@ -124,7 +123,7 @@ export const DescriptionCell = ({
         {statusColor && (
           <div
             style={tw(
-              `w-1.5 h-1.5 rounded-full ${statusColor} flex-shrink-0 mr-2`
+              `w-1.5 h-1.5 rounded-full ${statusColor} flex-shrink-0 ${row.isFormula ? "" : "mr-2"}`
             )}
             title={`Status: ${row.status || "active"}${
               row.mac !== undefined && row.mac < 0 ? " (non-compliant)" : ""
@@ -137,6 +136,7 @@ export const DescriptionCell = ({
           } ${row.isTotal ? "font-semibold" : ""} ${
             row.parentFormulaId && !row.isExpanded ? "text-gray-600" : ""
           }`}
+          style={tw(row.isFormula && statusColor ? "ml-2" : "")}
         >
           {value || ""}
         </span>
