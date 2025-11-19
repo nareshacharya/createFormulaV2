@@ -128,39 +128,53 @@ const WorkArea = () => {
     workspaceHistory,
   ]);
 
-  // Helper function to save state after an action completes
+  // Track pending state save to avoid duplicate saves
+  const pendingStateSaveRef = useRef<{
+    action: string;
+    description: string;
+  } | null>(null);
+
+  // Helper function to queue a state save after an action completes
   const saveStateAfterAction = useCallback(
     (action: string, description: string) => {
-      // Use setTimeout to ensure state updates have completed
-      setTimeout(() => {
-        // Access dilutionState directly to get current value
-        const currentDilutions = dilutionState.dilutions;
-        workspaceHistory.push(
-          {
-            columns,
-            tableData,
-            formulas,
-            availableFormulas,
-            dilutions: currentDilutions,
-          },
-          action,
-          description
-        );
-        eventBus.emit("undo-state-updated", {
-          canUndo: workspaceHistory.canUndo(),
-          count: workspaceHistory.getUndoCount(),
-        });
-      }, 0);
+      // Queue the state save to be executed in the next effect
+      pendingStateSaveRef.current = { action, description };
     },
-    [
-      columns,
-      tableData,
-      formulas,
-      availableFormulas,
-      dilutionState,
-      workspaceHistory,
-    ]
+    []
   );
+
+  // Effect to handle pending state saves when state changes
+  useEffect(() => {
+    if (pendingStateSaveRef.current) {
+      const { action, description } = pendingStateSaveRef.current;
+      pendingStateSaveRef.current = null; // Clear the pending save
+
+      // Access current state values
+      const currentDilutions = dilutionState.dilutions;
+      workspaceHistory.push(
+        {
+          columns,
+          tableData,
+          formulas,
+          availableFormulas,
+          dilutions: currentDilutions,
+        },
+        action,
+        description
+      );
+      eventBus.emit("undo-state-updated", {
+        canUndo: workspaceHistory.canUndo(),
+        count: workspaceHistory.getUndoCount(),
+      });
+    }
+  }, [
+    columns,
+    tableData,
+    formulas,
+    availableFormulas,
+    dilutionState,
+    workspaceHistory,
+  ]);
 
   // Listen to workspace switches and reset undo state for the new workspace
   useEffect(() => {
