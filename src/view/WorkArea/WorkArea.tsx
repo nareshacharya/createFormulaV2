@@ -1,5 +1,13 @@
 /* eslint-disable @typescript-eslint/no-use-before-define, jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
-import { useEffect, useState, useRef, useCallback, useMemo, lazy, Suspense } from "react";
+import {
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+  lazy,
+  Suspense,
+} from "react";
 import { toast } from "react-hot-toast";
 import AttributeSelector from "../../components/AttributeSelector";
 import Badge from "../../components/Badge";
@@ -41,8 +49,12 @@ import { useWorkAreaColumnDisplay } from "./hooks/useWorkAreaColumnDisplay";
 
 // Lazy load modals for better initial bundle performance
 const FormulaModal = lazy(() => import("../../components/FormulaModal"));
-const FormulaDetailsModal = lazy(() => import("../../components/FormulaDetailsModal"));
-const ExcelUploadModal = lazy(() => import("../../components/ExcelUploadModal"));
+const FormulaDetailsModal = lazy(
+  () => import("../../components/FormulaDetailsModal")
+);
+const ExcelUploadModal = lazy(
+  () => import("../../components/ExcelUploadModal")
+);
 
 const WorkArea = () => {
   // Workspace context - manages data isolation between tabs
