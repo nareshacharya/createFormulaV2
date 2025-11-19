@@ -1,21 +1,22 @@
 import { useState } from "react";
 import type { Formula } from "../services/pega";
-import ListRow from "./ListRow";
-import FormulaQuickView from "./FormulaQuickView";
 import { eventBus } from "../utils/bus";
+import { tw, mergeStyles } from "../utils/tailwindToInline";
+import FormulaQuickView from "./FormulaQuickView";
+import ListRow from "./ListRow";
 
 interface FormulaListProps {
   formulas: Formula[];
   searchQuery?: string;
   selectedFormulas: string[];
-  onSelectionChange?: (selectedIds: string[]) => void;
-  onFormulaSelect?: (formula: Formula) => void;
+  onFormulaSelect?: (formula: Formula) => void; // Reserved for future use
 }
 
 const FormulaList = ({
   formulas,
   searchQuery = "",
   selectedFormulas,
+  onFormulaSelect: _onFormulaSelect, // Reserved for future use
 }: FormulaListProps) => {
   const [hoveredFormula, setHoveredFormula] = useState<string | null>(null);
   const [selectedFormulaForView, setSelectedFormulaForView] =
@@ -67,18 +68,28 @@ const FormulaList = ({
 
   if (filteredFormulas.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
-        <span className="material-symbols-rounded text-2xl mb-2">science</span>
+      <div style={tw("text-center py-8 text-gray-500")}>
+        <span
+          style={mergeStyles(tw("text-2xl"), {
+            marginBottom: "0.5rem",
+            display: "block",
+          })}
+          className="material-symbols-rounded"
+        >
+          science
+        </span>
         <p>No formulas found</p>
         {searchQuery && (
-          <p className="text-sm mt-1">Try adjusting your search term</p>
+          <p style={mergeStyles(tw("text-sm"), { marginTop: "0.25rem" })}>
+            Try adjusting your search term
+          </p>
         )}
       </div>
     );
   }
 
   return (
-    <div className="space-y-0">
+    <div style={tw("space-y-0")}>
       {filteredFormulas.map((formula) => {
         if (!formula || !formula.id) return null;
 
@@ -91,50 +102,64 @@ const FormulaList = ({
               setHoveredFormula(isHovered ? formula.id : null)
             }
             onClick={() => handleFormulaClick(formula)}
-            compact={true}
+            compact
             className={
               isSelected ? "bg-blue-50 border-l-2 border-blue-400" : ""
             }
           >
-            <div className="flex items-center justify-between w-full px-3">
-              <div className="flex items-center space-x-2 flex-1">
+            <div style={tw("flex items-center justify-between w-full px-3")}>
+              <div style={tw("flex items-center flex-1")}>
                 {/* Status Dot */}
                 <div
-                  className={`w-1.5 h-1.5 rounded-full ${getStatusColor(
-                    formula
-                  )} flex-shrink-0`}
+                  style={{
+                    width: "0.375rem",
+                    height: "0.375rem",
+                    borderRadius: "9999px",
+                    flexShrink: 0,
+                    marginRight: "0.5rem",
+                    ...tw(getStatusColor(formula)),
+                  }}
                   title={`Status: ${formula.status}`}
                 />
 
                 {/* Formula Info */}
-                <div className="flex-1 min-w-0">
+                <div style={tw("flex-1 min-w-0")}>
                   <h4
-                    className={`font-medium text-sm truncate ${
-                      isSelected ? "text-blue-900" : "text-gray-900"
-                    }`}
+                    style={tw(
+                      `font-medium text-sm truncate ${
+                        isSelected ? "text-blue-900" : "text-gray-900"
+                      }`
+                    )}
                   >
                     {formula.name}
                     {isSelected && (
-                      <span className="material-symbols-rounded text-blue-600 ml-1 text-xs">
+                      <span
+                        style={tw("text-blue-600 ml-1 text-xs")}
+                        className="material-symbols-rounded"
+                      >
                         check
                       </span>
                     )}
                   </h4>
                   <p
-                    className={`text-xs truncate font-normal ${
-                      isSelected ? "text-blue-600" : "text-gray-500"
-                    }`}
+                    style={tw(
+                      `text-xs truncate font-normal ${
+                        isSelected ? "text-blue-600" : "text-gray-500"
+                      }`
+                    )}
                   >
                     {formula.id}
                   </p>
                 </div>
 
                 {/* Cost */}
-                <div className="text-right flex-shrink-0">
+                <div style={tw("text-right flex-shrink-0")}>
                   <p
-                    className={`text-xs font-normal ${
-                      isSelected ? "text-blue-600" : "text-gray-500"
-                    }`}
+                    style={tw(
+                      `text-xs font-normal ${
+                        isSelected ? "text-blue-600" : "text-gray-500"
+                      }`
+                    )}
                   >
                     ${formula.costPerKg?.toFixed(2) || "0.00"}/kg
                   </p>
@@ -144,11 +169,17 @@ const FormulaList = ({
               {/* Eye Icon - Only visible on hover */}
               {hoveredFormula === formula.id && (
                 <button
-                  className="ml-2 p-1 rounded hover:bg-gray-100 cursor-pointer flex-shrink-0"
+                  type="button"
+                  style={tw(
+                    "ml-2 p-1 rounded hover:bg-gray-100 cursor-pointer flex-shrink-0"
+                  )}
                   onClick={(e) => handleViewClick(e, formula)}
                   aria-label={`View details for ${formula.name}`}
                 >
-                  <span className="material-symbols-rounded text-gray-400 text-lg">
+                  <span
+                    style={tw("text-gray-400 text-lg")}
+                    className="material-symbols-rounded"
+                  >
                     visibility
                   </span>
                 </button>

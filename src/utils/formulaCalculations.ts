@@ -35,7 +35,7 @@ export const calculateTotals = (
         const columnValues = ingredientRows
             .filter((row) => !row.isFormula) // Only count individual ingredients, not formula groups
             .map((row) => parseFloat(row[col.key]) || 0)
-            .filter((val) => !isNaN(val));
+            .filter((val) => !Number.isNaN(val));
 
         updatedRunningTotal[col.key] = parseFloat(
             columnValues.reduce((sum, val) => sum + val, 0).toFixed(5)
@@ -46,7 +46,7 @@ export const calculateTotals = (
     const costKgValues = ingredientRows
         .filter((row) => !row.isFormula)
         .map((row) => parseFloat(row.costKg) || 0)
-        .filter((val) => !isNaN(val));
+        .filter((val) => !Number.isNaN(val));
 
     updatedRunningTotal.costKg = parseFloat(
         costKgValues.reduce((sum, val) => sum + val, 0).toFixed(2)
@@ -56,7 +56,7 @@ export const calculateTotals = (
     const contCostValues = ingredientRows
         .filter((row) => !row.isFormula)
         .map((row) => parseFloat(row.contCost) || 0)
-        .filter((val) => !isNaN(val));
+        .filter((val) => !Number.isNaN(val));
 
     updatedRunningTotal.contCost = parseFloat(
         contCostValues.reduce((sum, val) => sum + val, 0).toFixed(2)

@@ -1,5 +1,5 @@
-import { GroupHeaderRow } from "./GroupHeaderRow";
 import { ColumnHeaderRow } from "./ColumnHeaderRow";
+import { GroupHeaderRow } from "./GroupHeaderRow";
 
 // Use Column type from DataGrid.tsx to match parent component
 interface Column {

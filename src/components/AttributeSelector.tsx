@@ -1,8 +1,10 @@
+/* eslint-disable react/no-unescaped-entities */
 import { useState } from "react";
-import SearchBar from "./SearchBar";
-import Alert from "./Alert";
 import { getListItemClasses, selectionStyles } from "../config/theme";
 import type { IngredientAttribute } from "../services/pega";
+import { tw, mergeStyles } from "../utils/tailwindToInline";
+import Alert from "./Alert";
+import SearchBar from "./SearchBar";
 
 interface AttributeSelectorProps {
   attributes: IngredientAttribute[];
@@ -26,8 +28,8 @@ const AttributeSelector = ({
   const [searchQuery, setSearchQuery] = useState("");
 
   // Filter attributes based on search
-  const filteredAttributes = attributes.filter((attr) =>
-    attr.name?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredAttributes = attributes.filter(
+    (attr) => attr.name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleToggle = (id: string) => {
@@ -49,44 +51,64 @@ const AttributeSelector = ({
 
   if (attributes.length === 0) {
     return (
-      <div className="flex items-center justify-center py-12 text-gray-500">
-        <div className="text-center">
-          <i className="ri-inbox-line text-4xl mb-2 block"></i>
-          <p className="text-sm">No attributes available</p>
+      <div style={tw("flex items-center justify-center py-12 text-gray-500")}>
+        <div style={tw("text-center")}>
+          <i
+            style={mergeStyles(tw("text-4xl block"), {
+              marginBottom: "0.5rem",
+            })}
+            className="ri-inbox-line"
+          ></i>
+          <p style={tw("text-sm")}>No attributes available</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
+    <div>
       {/* Alert info */}
-      <Alert variant="info">
-        Select up to <strong>{maxSelections}</strong> attributes to add as
-        columns.
-      </Alert>
+      <div style={{ marginBottom: "16px" }}>
+        <Alert variant="info">
+          Select up to <strong>{maxSelections}</strong> attributes to add as
+          columns.
+        </Alert>
+      </div>
 
       {/* Compact Search and Counter Row */}
-      <div className="flex items-center gap-3">
-        <div className="flex-1">
+      <div
+        style={mergeStyles(tw("flex items-center gap-3"), {
+          marginBottom: "16px",
+        })}
+      >
+        <div style={tw("flex-1")}>
           <SearchBar
             value={searchQuery}
             onChange={setSearchQuery}
             placeholder="Search attributes..."
           />
         </div>
-        <div className="flex items-center gap-4 text-xs whitespace-nowrap">
-          <span className="text-gray-500">
+        <div style={tw("flex items-center gap-4 text-xs whitespace-nowrap")}>
+          <span style={tw("text-gray-500")}>
             {filteredAttributes.length} available
           </span>
-          <span className="font-medium text-blue-600">
+          <span style={tw("font-medium text-blue-600")}>
             {selectedIds.length} / {maxSelections} selected
           </span>
         </div>
       </div>
 
       {/* Attribute grid - 3 columns */}
-      <div className="grid grid-cols-3 gap-2 max-h-[400px] overflow-y-auto pr-1">
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+          gap: "12px",
+          maxHeight: "400px",
+          overflowY: "auto",
+          paddingRight: "4px",
+        }}
+      >
         {filteredAttributes.map((attr) => {
           const isSelected = selectedIds.includes(attr.id);
           const isHighlighted = highlightedIds.includes(attr.id);
@@ -100,25 +122,32 @@ const AttributeSelector = ({
             isDisabled,
           });
 
+          const labelStyles = mergeStyles(
+            tw(
+              "flex items-start gap-2 p-3 rounded-md border transition-all cursor-pointer"
+            ),
+            tw(itemClasses)
+          );
+
           return (
-            <label
-              key={attr.id}
-              className={`flex items-start gap-2 p-3 rounded-md border transition-all cursor-pointer ${itemClasses}`}
-            >
+            <label key={attr.id} style={labelStyles}>
               <input
                 type="checkbox"
                 checked={isSelected || isHighlighted}
                 onChange={() => !isDisabled && handleToggle(attr.id)}
                 disabled={isDisabled}
-                className="mt-0.5 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 disabled:opacity-50 flex-shrink-0 cursor-pointer disabled:cursor-not-allowed"
+                style={tw(
+                  "mt-0.5 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 disabled:opacity-50 flex-shrink-0 cursor-pointer disabled:cursor-not-allowed"
+                )}
               />
-              <div className="flex-1 min-w-0 flex items-center gap-1.5">
-                <span className={`text-sm leading-tight block flex-1`}>
+              <div style={tw("flex-1 min-w-0 flex items-center gap-1.5")}>
+                <span style={tw("text-sm leading-tight block flex-1")}>
                   {attr.name}
                 </span>
                 {isHighlighted && (
                   <i
-                    className={`ri-check-line text-base ${selectionStyles.selected.icon}`}
+                    style={tw(`text-base ${selectionStyles.selected.icon}`)}
+                    className="ri-check-line"
                   ></i>
                 )}
               </div>
@@ -129,9 +158,14 @@ const AttributeSelector = ({
 
       {/* No results message */}
       {filteredAttributes.length === 0 && searchQuery && (
-        <div className="text-center py-8 text-gray-500">
-          <i className="ri-search-line text-3xl mb-2 block"></i>
-          <p className="text-sm">No attributes found for "{searchQuery}"</p>
+        <div style={tw("text-center py-8 text-gray-500")}>
+          <i
+            style={mergeStyles(tw("text-3xl block"), {
+              marginBottom: "0.5rem",
+            })}
+            className="ri-search-line"
+          ></i>
+          <p style={tw("text-sm")}>No attributes found for "{searchQuery}"</p>
         </div>
       )}
     </div>

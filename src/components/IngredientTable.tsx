@@ -1,8 +1,9 @@
 import { useState } from "react";
 import type { Ingredient } from "../services/pega";
+import { eventBus } from "../utils/bus";
+import { tw, mergeStyles } from "../utils/tailwindToInline";
 import Badge from "./Badge";
 import Button from "./Button";
-import { eventBus } from "../utils/bus";
 
 interface IngredientTableProps {
   ingredients: Ingredient[];
@@ -55,6 +56,14 @@ const IngredientTable = ({
     if (status === "sers_review") return "bg-blue-500"; // SERS Review
 
     return "bg-green-500"; // Default to active
+  };
+
+  const getTypeBadgeVariant = (
+    type: string
+  ): "success" | "info" | "default" => {
+    if (type === "natural") return "success";
+    if (type === "synthetic") return "info";
+    return "default";
   };
 
   const handleSort = (key: string) => {
@@ -143,11 +152,12 @@ const IngredientTable = ({
     switch (column) {
       case "status":
         return (
-          <div className="flex items-center space-x-2">
+          <div style={tw("flex items-center")}>
             <div
-              className={`w-2 h-2 rounded-full ${getStatusDotColor(
-                ingredient
-              )}`}
+              style={mergeStyles(
+                tw(`rounded-full ${getStatusDotColor(ingredient)}`),
+                { width: "0.5rem", height: "0.5rem", marginRight: "0.5rem" }
+              )}
             />
             <Badge variant={getStatusColor(value as string)} size="sm">
               {value as string}
@@ -161,7 +171,7 @@ const IngredientTable = ({
       case "allergens": {
         const allergens = value as string[];
         return allergens && allergens.length > 0 ? (
-          <div className="flex flex-wrap gap-1">
+          <div style={mergeStyles(tw("flex flex-wrap"), { gap: "0.25rem" })}>
             {allergens.slice(0, 2).map((allergen) => (
               <Badge key={allergen} variant="warning" size="xs">
                 {allergen}
@@ -179,16 +189,7 @@ const IngredientTable = ({
       }
       case "type":
         return (
-          <Badge
-            variant={
-              value === "natural"
-                ? "success"
-                : value === "synthetic"
-                ? "info"
-                : "default"
-            }
-            size="sm"
-          >
+          <Badge variant={getTypeBadgeVariant(value as string)} size="sm">
             {value as string}
           </Badge>
         );
@@ -219,46 +220,83 @@ const IngredientTable = ({
 
   if (ingredients.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
-        <i className="ri-search-line text-2xl mb-2"></i>
+      <div
+        style={mergeStyles(tw("text-center text-gray-500"), {
+          paddingTop: "2rem",
+          paddingBottom: "2rem",
+        })}
+      >
+        <i
+          style={mergeStyles(tw("text-2xl"), {
+            marginBottom: "0.5rem",
+            display: "block",
+          })}
+          className="ri-search-line"
+        ></i>
         <p>No ingredients match your filters</p>
-        <p className="text-sm mt-1">Try adjusting your filter criteria</p>
+        <p style={mergeStyles(tw("text-sm"), { marginTop: "0.25rem" })}>
+          Try adjusting your filter criteria
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div>
       {/* Actions Bar - Only show if enabled */}
       {showActionsBar && (
-        <div className="flex items-center justify-between bg-gray-50 px-4 py-2 rounded-lg">
-          <div className="flex items-center space-x-4">
-            <span className="text-sm text-gray-600">
+        <div
+          style={mergeStyles(
+            tw("flex items-center justify-between bg-gray-50 px-4 rounded-lg"),
+            {
+              paddingTop: "0.5rem",
+              paddingBottom: "0.5rem",
+              marginBottom: "1rem",
+            }
+          )}
+        >
+          <div style={tw("flex items-center")}>
+            <span
+              style={mergeStyles(tw("text-sm text-gray-600"), {
+                marginRight: "1rem",
+              })}
+            >
               {selectedIngredients.length} of {ingredients.length} selected
             </span>
             {selectedIngredients.length > 0 && (
               <Button
                 onClick={handleAddToFormula}
                 size="sm"
-                className="whitespace-nowrap"
+                style={tw("whitespace-nowrap")}
               >
-                <i className="ri-add-line mr-1"></i>
+                <i style={mergeStyles(tw("mr-1"))} className="ri-add-line"></i>
                 Add to Formula
               </Button>
             )}
           </div>
-          <div className="text-sm text-gray-500">
+          <div style={tw("text-sm text-gray-500")}>
             {ingredients.length} ingredients found
           </div>
         </div>
       )}
 
       {/* Table */}
-      <div className="overflow-auto border border-gray-200 rounded-lg">
-        <table className="w-full">
-          <thead className="bg-gray-50 sticky top-0">
+      <div style={tw("overflow-auto border border-gray-200 rounded-lg")}>
+        <table style={tw("w-full")}>
+          <thead
+            style={mergeStyles(tw("bg-gray-50"), {
+              position: "sticky",
+              top: 0,
+            })}
+          >
             <tr>
-              <th className="w-12 px-3 py-3 text-left">
+              <th
+                style={mergeStyles(tw("px-3 text-left"), {
+                  width: "3rem",
+                  paddingTop: "0.75rem",
+                  paddingBottom: "0.75rem",
+                })}
+              >
                 <input
                   type="checkbox"
                   checked={
@@ -267,57 +305,94 @@ const IngredientTable = ({
                     paginatedIngredients.length > 0
                   }
                   onChange={handleSelectAll}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  aria-label="Select all ingredients"
+                  style={tw(
+                    "rounded border-gray-300 text-blue-600 cursor-pointer"
+                  )}
                 />
               </th>
               {displayColumns.map((column) => (
                 <th
                   key={column}
-                  className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  style={mergeStyles(
+                    tw(
+                      "px-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer"
+                    ),
+                    {
+                      paddingTop: "0.75rem",
+                      paddingBottom: "0.75rem",
+                      letterSpacing: "0.05em",
+                    }
+                  )}
                   onClick={() => handleSort(column)}
                 >
-                  <div className="flex items-center space-x-1">
-                    <span>{getColumnLabel(column)}</span>
+                  <div style={tw("flex items-center")}>
+                    <span style={{ marginRight: "0.25rem" }}>
+                      {getColumnLabel(column)}
+                    </span>
                     {sortConfig?.key === column ? (
                       <i
+                        style={tw("text-xs text-blue-600")}
                         className={`ri-arrow-${
                           sortConfig.direction === "asc" ? "up" : "down"
-                        }-line text-xs text-blue-600`}
+                        }-line`}
                       ></i>
                     ) : (
-                      <i className="ri-expand-up-down-line text-xs text-gray-400 opacity-0 group-hover:opacity-100"></i>
+                      <i
+                        style={mergeStyles(tw("text-xs text-gray-400"), {
+                          opacity: 0,
+                        })}
+                        className="ri-expand-up-down-line"
+                      ></i>
                     )}
                   </div>
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody
+            style={mergeStyles(tw("bg-white"), {
+              borderTop: "1px solid #e5e7eb",
+            })}
+          >
             {paginatedIngredients.map((ingredient) => (
               <tr
                 key={ingredient.id}
-                className={`hover:bg-gray-50 cursor-pointer ${
+                style={mergeStyles(
+                  tw("cursor-pointer"),
                   selectedIngredients.includes(ingredient.id)
-                    ? "bg-blue-50 border-blue-200"
-                    : ""
-                }`}
+                    ? tw("bg-blue-50")
+                    : {},
+                  { borderBottom: "1px solid #e5e7eb" }
+                )}
                 onClick={(e) => handleRowClick(e, ingredient.id)}
               >
                 <td
-                  className="w-12 px-3 py-3"
+                  style={mergeStyles(tw("px-3"), {
+                    width: "3rem",
+                    paddingTop: "0.75rem",
+                    paddingBottom: "0.75rem",
+                  })}
                   onClick={(e) => e.stopPropagation()}
                 >
                   <input
                     type="checkbox"
                     checked={selectedIngredients.includes(ingredient.id)}
                     onChange={(e) => handleRowSelect(e, ingredient.id)}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    aria-label={`Select ${ingredient.name || "ingredient"}`}
+                    style={tw(
+                      "rounded border-gray-300 text-blue-600 cursor-pointer"
+                    )}
                   />
                 </td>
                 {displayColumns.map((column) => (
                   <td
                     key={column}
-                    className="px-3 py-3 text-sm text-gray-900 font-sans"
+                    style={mergeStyles(tw("px-3 text-sm text-gray-900"), {
+                      paddingTop: "0.75rem",
+                      paddingBottom: "0.75rem",
+                      fontFamily: "sans-serif",
+                    })}
                   >
                     {renderCellValue(ingredient, column)}
                   </td>
@@ -330,33 +405,67 @@ const IngredientTable = ({
 
       {/* Enhanced Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="text-sm text-gray-500">
+        <div
+          style={mergeStyles(tw("flex items-center justify-between"), {
+            marginTop: "1rem",
+          })}
+        >
+          <div style={tw("flex items-center")}>
+            <div
+              style={mergeStyles(tw("text-sm text-gray-500"), {
+                marginRight: "1rem",
+              })}
+            >
               Showing {startIndex + 1} to{" "}
               {Math.min(endIndex, sortedIngredients.length)} of{" "}
               {sortedIngredients.length} ingredients
             </div>
           </div>
-          <div className="flex items-center space-x-2">
+          <div style={tw("flex items-center")}>
             <button
+              type="button"
               onClick={() => setCurrentPage(1)}
               disabled={currentPage === 1}
-              className="px-2 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              aria-label="Go to first page"
+              style={mergeStyles(
+                tw("text-sm border border-gray-300 rounded-md cursor-pointer"),
+                {
+                  paddingLeft: "0.5rem",
+                  paddingRight: "0.5rem",
+                  paddingTop: "0.25rem",
+                  paddingBottom: "0.25rem",
+                  marginRight: "0.5rem",
+                  opacity: currentPage === 1 ? 0.5 : 1,
+                  cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                }
+              )}
             >
               <i className="ri-skip-back-line"></i>
             </button>
             <button
+              type="button"
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              aria-label="Go to previous page"
+              style={mergeStyles(
+                tw("text-sm border border-gray-300 rounded-md cursor-pointer"),
+                {
+                  paddingLeft: "0.75rem",
+                  paddingRight: "0.75rem",
+                  paddingTop: "0.25rem",
+                  paddingBottom: "0.25rem",
+                  marginRight: "0.5rem",
+                  opacity: currentPage === 1 ? 0.5 : 1,
+                  cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                }
+              )}
             >
               <i className="ri-arrow-left-line"></i>
             </button>
 
-            <div className="flex items-center space-x-1">
+            <div style={tw("flex items-center")}>
               {Array.from({ length: Math.min(7, totalPages) }, (_, i) => {
-                let pageNum;
+                let pageNum: number;
                 if (totalPages <= 7) {
                   pageNum = i + 1;
                 } else if (currentPage <= 4) {
@@ -367,15 +476,26 @@ const IngredientTable = ({
                   pageNum = currentPage - 3 + i;
                 }
 
+                const isCurrentPage = currentPage === pageNum;
+
                 return (
                   <button
+                    type="button"
                     key={pageNum}
                     onClick={() => setCurrentPage(pageNum)}
-                    className={`px-3 py-1 text-sm border rounded-md cursor-pointer ${
-                      currentPage === pageNum
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "border-gray-300 hover:bg-gray-50"
-                    }`}
+                    style={mergeStyles(
+                      tw("text-sm border rounded-md cursor-pointer"),
+                      isCurrentPage
+                        ? tw("bg-blue-600 text-white border-blue-600")
+                        : tw("border-gray-300"),
+                      {
+                        paddingLeft: "0.75rem",
+                        paddingRight: "0.75rem",
+                        paddingTop: "0.25rem",
+                        paddingBottom: "0.25rem",
+                        marginRight: "0.25rem",
+                      }
+                    )}
                   >
                     {pageNum}
                   </button>
@@ -384,18 +504,46 @@ const IngredientTable = ({
             </div>
 
             <button
+              type="button"
               onClick={() =>
                 setCurrentPage((prev) => Math.min(prev + 1, totalPages))
               }
               disabled={currentPage === totalPages}
-              className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              aria-label="Go to next page"
+              style={mergeStyles(
+                tw("text-sm border border-gray-300 rounded-md cursor-pointer"),
+                {
+                  paddingLeft: "0.75rem",
+                  paddingRight: "0.75rem",
+                  paddingTop: "0.25rem",
+                  paddingBottom: "0.25rem",
+                  marginLeft: "0.5rem",
+                  marginRight: "0.5rem",
+                  opacity: currentPage === totalPages ? 0.5 : 1,
+                  cursor:
+                    currentPage === totalPages ? "not-allowed" : "pointer",
+                }
+              )}
             >
               <i className="ri-arrow-right-line"></i>
             </button>
             <button
+              type="button"
               onClick={() => setCurrentPage(totalPages)}
               disabled={currentPage === totalPages}
-              className="px-2 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              aria-label="Go to last page"
+              style={mergeStyles(
+                tw("text-sm border border-gray-300 rounded-md cursor-pointer"),
+                {
+                  paddingLeft: "0.5rem",
+                  paddingRight: "0.5rem",
+                  paddingTop: "0.25rem",
+                  paddingBottom: "0.25rem",
+                  opacity: currentPage === totalPages ? 0.5 : 1,
+                  cursor:
+                    currentPage === totalPages ? "not-allowed" : "pointer",
+                }
+              )}
             >
               <i className="ri-skip-forward-line"></i>
             </button>

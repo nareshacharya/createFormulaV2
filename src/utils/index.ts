@@ -1,3 +1,5 @@
 
 // Utility functions - placeholder for future utilities
-export {};
+
+// Export Tailwind to inline styles converter
+export { tw, useTw, mergeStyles, colors, spacing, fontSize, fontWeight } from './tailwindToInline';

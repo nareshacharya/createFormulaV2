@@ -20,8 +20,8 @@
  */
 
 import { featureFlags } from '../config/featureFlags';
-import { PegaService } from './pega';
 import { DxApiService, type DxApiResponse } from './dxApi';
+import { PegaService } from './pega';
 import type { Ingredient, Formula, IngredientAttribute } from './pega';
 
 // ============================================================================

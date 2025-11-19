@@ -3,11 +3,12 @@
  * Extracted to keep WorkArea.tsx under 1000 lines
  */
 
-import FormulaModal from "../../../components/FormulaModal";
-import Dialog from "../../../components/Dialog";
 import AttributeSelector from "../../../components/AttributeSelector";
 import Button from "../../../components/Button";
+import Dialog from "../../../components/Dialog";
+import FormulaModal from "../../../components/FormulaModal";
 import type { Formula, IngredientAttribute } from "../../../services/pega";
+import { tw, mergeStyles } from "../../../utils/tailwindToInline";
 
 interface ModalsProps {
   // Formula Modal
@@ -66,7 +67,7 @@ export const WorkAreaModals = ({
         title="Select Attributes"
         size="lg"
       >
-        <div className="space-y-4">
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
           <AttributeSelector
             attributes={attributes}
             selectedIds={selectedAttributes.map((attr) => attr.id)}
@@ -78,7 +79,12 @@ export const WorkAreaModals = ({
             }}
             maxSelections={maxAttributeSelections}
           />
-          <div className="flex justify-end space-x-2 pt-4 border-t">
+          <div
+            style={mergeStyles(tw("flex justify-end border-t"), {
+              gap: "0.5rem",
+              paddingTop: "1rem",
+            })}
+          >
             <Button
               variant="secondary"
               onClick={() => setShowAttributeDialog(false)}

@@ -1,7 +1,7 @@
 import type { UseDilutionReturn } from "../../../dilution";
+import { DefaultCell } from "./DefaultCell";
 import { DescriptionCell } from "./DescriptionCell";
 import { NumberCell } from "./NumberCell";
-import { DefaultCell } from "./DefaultCell";
 
 // Use Column type from DataGrid.tsx to match parent component
 interface Column {

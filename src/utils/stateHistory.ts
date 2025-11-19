@@ -13,8 +13,8 @@ export interface HistoryEntry<T = any> {
 
 export class StateHistoryManager<T = any> {
     private history: HistoryEntry<T>[] = [];
-    private currentIndex: number = -1;
-    private maxHistorySize: number = 6; // Current state + 5 undos
+    private currentIndex = -1;
+    private maxHistorySize = 6; // Current state + 5 undos
 
     /**
      * Push a new state to history
@@ -38,7 +38,7 @@ export class StateHistoryManager<T = any> {
         if (this.history.length > this.maxHistorySize) {
             this.history.shift();
         } else {
-            this.currentIndex++;
+            this.currentIndex += 1;
         }
     }
 
@@ -50,7 +50,7 @@ export class StateHistoryManager<T = any> {
         if (!this.canUndo()) {
             return null;
         }
-        this.currentIndex--;
+        this.currentIndex -= 1;
         return this.getCurrentState();
     }
 
@@ -62,7 +62,7 @@ export class StateHistoryManager<T = any> {
         if (!this.canRedo()) {
             return null;
         }
-        this.currentIndex++;
+        this.currentIndex += 1;
         return this.getCurrentState();
     }
 

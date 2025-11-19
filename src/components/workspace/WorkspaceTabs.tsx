@@ -1,6 +1,7 @@
+/* eslint-disable jsx-a11y/label-has-associated-control, jsx-a11y/control-has-associated-label */
 import { useState, useRef, useEffect } from "react";
-import { useWorkspace } from "../../hooks/useWorkspace";
 import { useWorkspaceFeatures } from "../../hooks/useFeatureFlags";
+import { useWorkspace } from "../../hooks/useWorkspace";
 
 /**
  * Workspace tabs component for managing multiple workspace sessions
@@ -111,6 +112,7 @@ const WorkspaceTabs = () => {
             </div>
           ) : (
             <button
+              type="button"
               onClick={() => switchTab(tab.id)}
               onDoubleClick={() => handleRenameTab(tab.id)}
               className={`group relative px-4 py-2 min-w-[120px] text-left font-medium transition-all text-sm ${
@@ -133,6 +135,7 @@ const WorkspaceTabs = () => {
                 </div>
                 {!tab.isDefault && (
                   <button
+                    type="button"
                     onClick={(e) => handleCloseTab(tab.id, e)}
                     className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-red-500"
                     title="Close workspace"
@@ -149,6 +152,7 @@ const WorkspaceTabs = () => {
       {/* More Options Button */}
       <div className="relative" ref={menuRef}>
         <button
+          type="button"
           onClick={() => setShowMenu(!showMenu)}
           className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 transition-colors"
           title="Workspace options"
@@ -160,6 +164,7 @@ const WorkspaceTabs = () => {
         {showMenu && (
           <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-2 min-w-[180px] z-50">
             <button
+              type="button"
               onClick={() => {
                 addTab();
                 setShowMenu(false);
@@ -171,6 +176,7 @@ const WorkspaceTabs = () => {
               Add Workspace ({tabs.length}/{maxWorkspaces})
             </button>
             <button
+              type="button"
               onClick={() => {
                 const tab = tabs.find((t) => t.id === activeTabId);
                 if (tab) {

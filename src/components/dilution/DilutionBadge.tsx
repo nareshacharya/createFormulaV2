@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
 import type { Dilution, Solvent } from "../../types/dilution";
 
 interface DilutionBadgeProps {
@@ -24,14 +25,16 @@ export const DilutionBadge = ({
     })
     .join(" + ");
 
+  // Determine decimal precision based on concentration value
+  const getPrecision = (concentration: number): number => {
+    if (concentration >= 0.0001) return 4;
+    if (concentration >= 0.000001) return 6;
+    return 7;
+  };
+
   // Format concentration as percentage
   const concentrationPercent = (dilution.concentration * 100).toFixed(
-    // Determine precision based on value
-    dilution.concentration >= 0.0001
-      ? 4
-      : dilution.concentration >= 0.000001
-      ? 6
-      : 7
+    getPrecision(dilution.concentration)
   );
 
   // Remove trailing zeros and decimal point if not needed

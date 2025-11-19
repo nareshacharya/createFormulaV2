@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 /**
  * DX API Service
  * 
@@ -320,6 +321,7 @@ export class DxApiService {
                     console.log('[DX API] Retrying request:', { endpoint, error });
                 }
 
+                // eslint-disable-next-line no-promise-executor-return
                 await new Promise(resolve => setTimeout(resolve, retry.retryDelay));
                 return this.makeRequest<T>(endpoint, options);
             }
@@ -608,7 +610,7 @@ export class DxApiService {
      * Maps Pega property names to app property names
      */
     private static transformIngredientsData(pegaData: unknown[]): Ingredient[] {
-        return pegaData.map((item: Record<string, unknown>) => ({
+        return (pegaData as Record<string, unknown>[]).map((item) => ({
             id: item.IngredientID as string || item.pyGUID as string,
             name: item.Name as string,
             code: item.Code as string,
@@ -634,7 +636,7 @@ export class DxApiService {
      * Transform Pega formula data to app data structure
      */
     private static transformFormulasData(pegaData: unknown[]): Formula[] {
-        return pegaData.map((item: Record<string, unknown>) => ({
+        return (pegaData as Record<string, unknown>[]).map((item) => ({
             id: item.FormulaID as string || item.pyGUID as string,
             name: item.Name as string,
             version: item.Version as string,
@@ -647,7 +649,7 @@ export class DxApiService {
             totalPercentage: Number(item.TotalPercentage) || 0,
             costPerKg: Number(item.CostPerKg) || 0,
             ingredients: Array.isArray(item.Ingredients)
-                ? (item.Ingredients as unknown[]).map((ing: Record<string, unknown>) => ({
+                ? (item.Ingredients as Record<string, unknown>[]).map((ing) => ({
                     ingredientId: ing.IngredientID as string,
                     name: ing.Name as string,
                     percentage: Number(ing.Percentage) || 0,
@@ -668,7 +670,7 @@ export class DxApiService {
      * Transform Pega attribute data to app data structure
      */
     private static transformAttributesData(pegaData: unknown[]): IngredientAttribute[] {
-        return pegaData.map((item: Record<string, unknown>) => ({
+        return (pegaData as Record<string, unknown>[]).map((item) => ({
             id: item.AttributeID as string || item.pyGUID as string,
             name: item.Name as string,
             type: (item.Type as string)?.toLowerCase() as 'text' | 'number' | 'boolean' | 'select',

@@ -1,4 +1,6 @@
-import { useEffect, useRef } from "react";
+/* eslint-disable jsx-a11y/label-has-associated-control */
+import { useEffect, useRef, useMemo, type CSSProperties } from "react";
+import { tw, mergeStyles } from "../utils/tailwindToInline";
 
 interface Tab {
   id: string;
@@ -10,15 +12,10 @@ interface PillTabsProps {
   tabs: Tab[];
   activeTab: string;
   onTabChange: (tabId: string) => void;
-  className?: string;
+  style?: CSSProperties;
 }
 
-const PillTabs = ({
-  tabs,
-  activeTab,
-  onTabChange,
-  className = "",
-}: PillTabsProps) => {
+const PillTabs = ({ tabs, activeTab, onTabChange, style }: PillTabsProps) => {
   const tabsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -49,32 +46,46 @@ const PillTabs = ({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [tabs, activeTab, onTabChange]);
 
+  const containerStyle = useMemo(
+    () => mergeStyles(tw("flex gap-1 w-full"), style),
+    [style]
+  );
+
+  const getTabStyle = useMemo(
+    () => (isActive: boolean) => {
+      const baseStyle = tw(
+        "flex-1 px-2 py-1.5 text-sm font-medium rounded-lg transition-all whitespace-nowrap cursor-pointer flex items-center justify-center gap-1"
+      );
+
+      if (isActive) {
+        return mergeStyles(baseStyle, tw("bg-blue-600 text-white shadow-sm"));
+      }
+
+      return mergeStyles(
+        baseStyle,
+        tw("bg-white text-gray-700 border border-gray-200")
+      );
+    },
+    []
+  );
+
   return (
-    <div
-      ref={tabsRef}
-      className={`flex gap-1 w-full ${className}`}
-      role="tablist"
-    >
+    <div ref={tabsRef} style={containerStyle} role="tablist">
       {tabs.map((tab) => (
         <button
+          type="button"
           key={tab.id}
           role="tab"
           aria-selected={activeTab === tab.id}
           onClick={() => onTabChange(tab.id)}
-          className={`
-            flex-1 px-2 py-1.5 text-sm font-medium rounded-lg transition-all whitespace-nowrap cursor-pointer flex items-center justify-center gap-1
-            focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500
-            ${
-              activeTab === tab.id
-                ? "bg-blue-600 text-white shadow-sm"
-                : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 hover:border-gray-300"
-            }
-          `}
+          style={getTabStyle(activeTab === tab.id)}
         >
           {tab.icon && (
-            <span className="material-symbols-rounded text-sm">{tab.icon}</span>
+            <span className="material-symbols-rounded" style={tw("text-sm")}>
+              {tab.icon}
+            </span>
           )}
-          <span className="truncate">{tab.label}</span>
+          <span style={tw("truncate")}>{tab.label}</span>
         </button>
       ))}
     </div>

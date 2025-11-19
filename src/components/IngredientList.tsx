@@ -1,32 +1,31 @@
 import { useState, useEffect } from "react";
-import ListRow from "./ListRow";
-import IngredientQuickView from "./IngredientQuickView";
 import type { Ingredient } from "../services/pega";
 import { eventBus } from "../utils/bus";
+import { tw, mergeStyles } from "../utils/tailwindToInline";
+import IngredientQuickView from "./IngredientQuickView";
+import ListRow from "./ListRow";
 
 interface IngredientListProps {
   ingredients: Ingredient[];
   searchQuery?: string;
   activeFilter?: string;
   appliedFilters?: any;
-  onIngredientSelect?: (ingredient: Ingredient) => void;
   selectedIngredients?: string[];
+  onIngredientSelect?: (ingredient: Ingredient) => void; // Reserved for future use
 }
 
 const IngredientList = ({
   ingredients,
   searchQuery = "",
-  onIngredientSelect,
   selectedIngredients = [],
   activeFilter = "",
   appliedFilters = {},
+  onIngredientSelect: _onIngredientSelect, // Reserved for future use
 }: IngredientListProps) => {
   const [selectedIngredient, setSelectedIngredient] =
     useState<Ingredient | null>(null);
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
-  const [localSelectedIngredients, setLocalSelectedIngredients] = useState<
-    string[]
-  >([]);
+  const [, setLocalSelectedIngredients] = useState<string[]>([]);
 
   // Listen for work area updates to track selected ingredients
   useEffect(() => {
@@ -119,7 +118,7 @@ const IngredientList = ({
 
   return (
     <>
-      <div className="space-y-0">
+      <div>
         {filteredIngredients.map((ingredient) => {
           const isSelected = isIngredientSelected(ingredient.name);
 
@@ -130,50 +129,66 @@ const IngredientList = ({
                 setHoveredRow(isHovered ? ingredient.id : null)
               }
               onClick={() => handleIngredientClick(ingredient)}
-              compact={true}
-              className={
-                isSelected ? "bg-blue-50 border-l-2 border-blue-400" : ""
-              }
+              compact
+              selected={isSelected}
             >
-              <div className="flex items-center justify-between w-full px-3">
-                <div className="flex items-center space-x-2 flex-1">
+              <div style={tw("flex items-center justify-between w-full px-3")}>
+                <div style={tw("flex items-center flex-1")}>
                   {/* Status Dot */}
                   <div
-                    className={`w-1.5 h-1.5 rounded-full ${getStatusColor(
-                      ingredient
-                    )} flex-shrink-0`}
+                    style={mergeStyles(
+                      tw(
+                        `rounded-full flex-shrink-0 ${getStatusColor(
+                          ingredient
+                        )}`
+                      ),
+                      {
+                        width: "0.375rem",
+                        height: "0.375rem",
+                        marginRight: "0.5rem",
+                      }
+                    )}
                     title={`Status: ${ingredient.status}`}
                   />
 
                   {/* Ingredient Info */}
-                  <div className="flex-1 min-w-0">
+                  <div style={mergeStyles(tw("flex-1"), { minWidth: 0 })}>
                     <h4
-                      className={`font-medium text-sm truncate ${
-                        isSelected ? "text-blue-900" : "text-gray-900"
-                      }`}
+                      style={tw(
+                        `font-medium text-sm truncate ${
+                          isSelected ? "text-blue-900" : "text-gray-900"
+                        }`
+                      )}
                     >
                       {ingredient.name}
                       {isSelected && (
-                        <span className="material-symbols-rounded text-blue-600 ml-1 text-xs">
+                        <span
+                          style={tw("text-blue-600 ml-1 text-xs")}
+                          className="material-symbols-rounded"
+                        >
                           check
                         </span>
                       )}
                     </h4>
                     <p
-                      className={`text-xs truncate font-normal ${
-                        isSelected ? "text-blue-600" : "text-gray-500"
-                      }`}
+                      style={tw(
+                        `text-xs truncate font-normal ${
+                          isSelected ? "text-blue-600" : "text-gray-500"
+                        }`
+                      )}
                     >
                       {ingredient.code}
                     </p>
                   </div>
 
                   {/* Cost */}
-                  <div className="text-right flex-shrink-0">
+                  <div style={tw("text-right flex-shrink-0")}>
                     <p
-                      className={`text-xs font-normal ${
-                        isSelected ? "text-blue-600" : "text-gray-500"
-                      }`}
+                      style={tw(
+                        `text-xs font-normal ${
+                          isSelected ? "text-blue-600" : "text-gray-500"
+                        }`
+                      )}
                     >
                       ${ingredient.price.toFixed(2)}/{ingredient.unit}
                     </p>
@@ -183,11 +198,18 @@ const IngredientList = ({
                 {/* Info Icon - Only visible on hover, larger size */}
                 {hoveredRow === ingredient.id && (
                   <button
-                    className="ml-2 p-1 rounded hover:bg-gray-100 cursor-pointer flex-shrink-0"
+                    type="button"
+                    style={mergeStyles(
+                      tw("p-1 rounded cursor-pointer flex-shrink-0"),
+                      { marginLeft: "0.5rem" }
+                    )}
                     onClick={(e) => handleInfoClick(e, ingredient)}
                     aria-label={`View details for ${ingredient.name}`}
                   >
-                    <span className="material-symbols-rounded text-gray-400 text-lg">
+                    <span
+                      style={tw("text-gray-400 text-lg")}
+                      className="material-symbols-rounded"
+                    >
                       info
                     </span>
                   </button>
@@ -198,15 +220,26 @@ const IngredientList = ({
         })}
 
         {filteredIngredients.length === 0 && (
-          <div className="text-center py-6 text-gray-500">
-            <span className="material-symbols-rounded text-xl mb-2">
+          <div
+            style={mergeStyles(tw("text-center text-gray-500"), {
+              paddingTop: "1.5rem",
+              paddingBottom: "1.5rem",
+            })}
+          >
+            <span
+              style={mergeStyles(tw("text-xl"), {
+                marginBottom: "0.5rem",
+                display: "block",
+              })}
+              className="material-symbols-rounded"
+            >
               search
             </span>
-            <p className="text-sm">No ingredients found</p>
+            <p style={tw("text-sm")}>No ingredients found</p>
             {(searchQuery ||
               activeFilter ||
               Object.keys(appliedFilters).length > 0) && (
-              <p className="text-xs mt-1">
+              <p style={mergeStyles(tw("text-xs"), { marginTop: "0.25rem" })}>
                 Try adjusting your search or filters
               </p>
             )}

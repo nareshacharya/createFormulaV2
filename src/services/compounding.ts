@@ -77,8 +77,8 @@ export function prepareFormulaForCompounding(
     formula: Formula,
     ingredients: CompoundingIngredient[],
     attributes: CompoundingAttribute[],
-    targetTotal: number = 100,
-    _auditTrail?: AuditEntry[]
+    targetTotal = 100
+    // auditTrail - Reserved for future use
 ): CompoundingFormula {
     // Calculate RMC from contribution costs
     const rmc = ingredients.reduce(

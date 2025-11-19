@@ -1,5 +1,10 @@
-import React from "react";
-import { iconMap, IconSizeMap, type IconProps } from "../utils/iconMap";
+import React, { useMemo, type CSSProperties } from "react";
+import {
+  iconMap,
+  IconSizeMap,
+  type IconProps as BaseIconProps,
+} from "../utils/iconMap";
+import { mergeStyles } from "../utils/tailwindToInline";
 
 /**
  * Material Symbols Icon Component
@@ -18,7 +23,7 @@ import { iconMap, IconSizeMap, type IconProps } from "../utils/iconMap";
  *
  * @example
  * // With custom styling
- * <Icon name="send" className="text-blue-600 hover:text-blue-800" />
+ * <Icon name="send" style={{color: '#2563eb'}} />
  *
  * @example
  * // With accessibility
@@ -28,9 +33,14 @@ import { iconMap, IconSizeMap, type IconProps } from "../utils/iconMap";
  *   title="Close"
  * />
  */
+
+interface IconProps extends Omit<BaseIconProps, "className"> {
+  style?: CSSProperties;
+}
+
 const Icon: React.FC<IconProps> = ({
   name,
-  className = "",
+  style,
   size = "xl",
   title,
   ariaLabel,
@@ -38,9 +48,27 @@ const Icon: React.FC<IconProps> = ({
   const sizeClass = IconSizeMap[size];
   const iconName = iconMap[name];
 
+  const iconStyle = useMemo(() => {
+    // Convert size class to fontSize
+    const fontSizeMap: Record<string, string> = {
+      "text-xs": "0.75rem",
+      "text-sm": "0.875rem",
+      "text-base": "1rem",
+      "text-lg": "1.125rem",
+      "text-xl": "1.25rem",
+      "text-2xl": "1.5rem",
+    };
+
+    return mergeStyles(
+      { fontSize: fontSizeMap[sizeClass] || "1.25rem" },
+      style
+    );
+  }, [sizeClass, style]);
+
   return (
     <span
-      className={`material-symbols-rounded ${sizeClass} ${className}`}
+      className="material-symbols-rounded"
+      style={iconStyle}
       title={title}
       aria-label={ariaLabel}
       role={ariaLabel ? "img" : undefined}

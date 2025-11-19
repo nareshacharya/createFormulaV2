@@ -1,11 +1,11 @@
-import React, { createContext, useState, useCallback } from "react";
-import toast from "react-hot-toast";
+import React, { createContext, useState, useCallback, useMemo } from "react";
+import { toast } from "react-hot-toast";
+import type { Column } from "../components/DataGrid";
 import type {
   Formula,
   Ingredient,
   IngredientAttribute,
 } from "../services/pega";
-import type { Column } from "../components/DataGrid";
 import { StateHistoryManager } from "../utils/stateHistory";
 
 interface WorkspaceData {
@@ -18,6 +18,7 @@ interface WorkspaceData {
   formulas: Formula[];
   lockedFormulas: Set<string>; // Formulas used in this workspace
   history: StateHistoryManager; // Per-workspace undo/redo history
+  projectMappings: Record<string, { id: string; name: string }>; // Map of formulaId -> { projectId, projectName }
 }
 
 interface WorkspaceTab {
@@ -50,6 +51,15 @@ interface WorkspaceContextType {
   getFormulaLockedInWorkspace: (formulaId: string) => string | null;
   lockFormula: (formulaId: string) => void;
   unlockFormula: (formulaId: string) => void;
+
+  // Project Mapping (Formula → Project)
+  setProjectMapping: (
+    formulaId: string,
+    projectId: string,
+    projectName: string
+  ) => void;
+  getProjectMapping: (formulaId: string) => { id: string; name: string } | null;
+  clearProjectMapping: (formulaId: string) => void;
 
   // Global Data
   availableFormulas: Formula[];
@@ -137,6 +147,7 @@ const createEmptyWorkspaceData = (): WorkspaceData => ({
   formulas: [],
   lockedFormulas: new Set<string>(),
   history: new StateHistoryManager(), // Create new history manager for this workspace
+  projectMappings: {}, // Initialize empty project mappings
 });
 
 export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -362,33 +373,118 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
     [activeTabId]
   );
 
+  // Project Mapping Methods
+  const setProjectMapping = useCallback(
+    (formulaId: string, projectId: string, projectName: string) => {
+      setTabs((prev) =>
+        prev.map((tab) => {
+          if (tab.id === activeTabId) {
+            return {
+              ...tab,
+              data: {
+                ...tab.data,
+                projectMappings: {
+                  ...tab.data.projectMappings,
+                  [formulaId]: { id: projectId, name: projectName },
+                },
+              },
+              lastModified: new Date(),
+            };
+          }
+          return tab;
+        })
+      );
+    },
+    [activeTabId]
+  );
+
+  const getProjectMapping = useCallback(
+    (formulaId: string) => {
+      return activeWorkspace.projectMappings[formulaId] || null;
+    },
+    [activeWorkspace.projectMappings]
+  );
+
+  const clearProjectMapping = useCallback(
+    (formulaId: string) => {
+      setTabs((prev) =>
+        prev.map((tab) => {
+          if (tab.id === activeTabId) {
+            const newProjectMappings = { ...tab.data.projectMappings };
+            delete newProjectMappings[formulaId];
+            return {
+              ...tab,
+              data: {
+                ...tab.data,
+                projectMappings: newProjectMappings,
+              },
+              lastModified: new Date(),
+            };
+          }
+          return tab;
+        })
+      );
+    },
+    [activeTabId]
+  );
+
   // Get the active workspace's history manager
   const getActiveWorkspaceHistory = useCallback(() => {
     return activeWorkspace.history;
   }, [activeWorkspace.history]);
 
-  const value: WorkspaceContextType = {
-    tabs,
-    activeTabId,
-    activeWorkspace,
-    addTab,
-    closeTab,
-    switchTab,
-    renameTab,
-    resetWorkspace,
-    updateWorkspaceData,
-    getActiveWorkspaceHistory,
-    isFormulaLocked,
-    getFormulaLockedInWorkspace,
-    lockFormula,
-    unlockFormula,
-    availableFormulas,
-    ingredients,
-    attributes,
-    setAvailableFormulas,
-    setIngredients,
-    setAttributes,
-  };
+  const value: WorkspaceContextType = useMemo(
+    () => ({
+      tabs,
+      activeTabId,
+      activeWorkspace,
+      addTab,
+      closeTab,
+      switchTab,
+      renameTab,
+      resetWorkspace,
+      updateWorkspaceData,
+      getActiveWorkspaceHistory,
+      isFormulaLocked,
+      getFormulaLockedInWorkspace,
+      lockFormula,
+      unlockFormula,
+      setProjectMapping,
+      getProjectMapping,
+      clearProjectMapping,
+      availableFormulas,
+      ingredients,
+      attributes,
+      setAvailableFormulas,
+      setIngredients,
+      setAttributes,
+    }),
+    [
+      tabs,
+      activeTabId,
+      activeWorkspace,
+      addTab,
+      closeTab,
+      switchTab,
+      renameTab,
+      resetWorkspace,
+      updateWorkspaceData,
+      getActiveWorkspaceHistory,
+      isFormulaLocked,
+      getFormulaLockedInWorkspace,
+      lockFormula,
+      unlockFormula,
+      setProjectMapping,
+      getProjectMapping,
+      clearProjectMapping,
+      availableFormulas,
+      ingredients,
+      attributes,
+      setAvailableFormulas,
+      setIngredients,
+      setAttributes,
+    ]
+  );
 
   return (
     <WorkspaceContext.Provider value={value}>

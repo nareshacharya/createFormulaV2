@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
+import { toast } from "react-hot-toast";
 import type { Formula, Ingredient } from "../services/pega";
-import toast from "react-hot-toast";
 
 interface ParsedIngredient {
   name: string;
@@ -22,7 +22,7 @@ interface ParsedIngredient {
  */
 export const useExcelUpload = (
   formulas: Formula[],
-  ingredients: Ingredient[],
+  allIngredients: Ingredient[],
   onAddIngredientsToFormula: (formulaId: string, ingredients: ParsedIngredient[]) => void
 ) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -93,7 +93,7 @@ export const useExcelUpload = (
     // State
     isExcelUploadModalOpen: isModalOpen,
     selectedFormulaId,
-    availableIngredients: ingredients,
+    availableIngredients: allIngredients,
 
     // Handlers
     handleUploadExcel,

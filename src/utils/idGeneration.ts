@@ -142,10 +142,8 @@ export const getNextSequenceNumber = (
 
     existingFormulas.forEach((formula) => {
         const parsed = parseFormulaId(formula.id);
-        if (parsed && parsed.prefix === prefix) {
-            if (parsed.sequenceNumber > maxNumber) {
-                maxNumber = parsed.sequenceNumber;
-            }
+        if (parsed && parsed.prefix === prefix && parsed.sequenceNumber > maxNumber) {
+            maxNumber = parsed.sequenceNumber;
         }
     });
 
@@ -167,10 +165,9 @@ export const getNextVersionNumber = (
         const parsed = parseFormulaId(formula.id);
         if (parsed &&
             parsed.prefix === prefix &&
-            parsed.sequenceNumber === sequenceNumber) {
-            if (parsed.version > maxVersion) {
-                maxVersion = parsed.version;
-            }
+            parsed.sequenceNumber === sequenceNumber &&
+            parsed.version > maxVersion) {
+            maxVersion = parsed.version;
         }
     });
 
@@ -347,9 +344,7 @@ export interface PegaIdResponse {
  * This is a placeholder - actual implementation will call Pega API
  */
 export const requestPegaIdGeneration = async (
-    _formulaType: FormulaType,
-    _userInitials: string,
-    _baseFormulaId?: string
+    /* formulaType, userInitials, baseFormulaId - Reserved for future Pega API implementation */
 ): Promise<PegaIdResponse> => {
     // TODO: Implement actual Pega API call
     // For now, throw error to indicate Pega integration not available
@@ -369,11 +364,8 @@ export const generateIdsWithPegaFallback = async (
 }> => {
     try {
         // Try Pega integration first
-        const response = await requestPegaIdGeneration(
-            config.formulaType,
-            config.userInitials || getCurrentUserInitials(),
-            config.baseFormulaId
-        );
+        // TODO: Pass config parameters when Pega API is implemented
+        const response = await requestPegaIdGeneration();
 
         if (response.success) {
             return {

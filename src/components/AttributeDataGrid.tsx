@@ -1,5 +1,7 @@
+/* eslint-disable react/no-unescaped-entities */
 import { useState } from "react";
 import type { IngredientAttribute } from "../services/pega";
+import { tw, mergeStyles } from "../utils/tailwindToInline";
 import SearchBar from "./SearchBar";
 
 interface AttributeDataGridProps {
@@ -39,9 +41,20 @@ const AttributeDataGrid = ({
   // Show empty state if no attributes
   if (!attributes || attributes.length === 0) {
     return (
-      <div className="flex items-center justify-center h-40 text-gray-500">
-        <div className="text-center">
-          <i className="ri-list-check-line text-3xl mb-2"></i>
+      <div
+        style={mergeStyles(
+          tw("flex items-center justify-center text-gray-500"),
+          { height: "10rem" }
+        )}
+      >
+        <div style={tw("text-center")}>
+          <i
+            style={mergeStyles(tw("text-3xl"), {
+              marginBottom: "0.5rem",
+              display: "block",
+            })}
+            className="ri-list-check-line"
+          ></i>
           <p>No attributes available</p>
         </div>
       </div>
@@ -49,10 +62,14 @@ const AttributeDataGrid = ({
   }
 
   return (
-    <div className="space-y-4">
+    <div>
       {/* Header Section - Instruction and Search */}
-      <div className="space-y-3">
-        <p className="text-sm text-gray-600">
+      <div>
+        <p
+          style={mergeStyles(tw("text-sm text-gray-600"), {
+            marginBottom: "1rem",
+          })}
+        >
           Select up to {maxSelections} attributes to add as columns. You can
           select multiple attributes.
         </p>
@@ -62,40 +79,58 @@ const AttributeDataGrid = ({
           value={searchQuery}
           onChange={setSearchQuery}
           placeholder="Search attributes..."
-          className="w-full"
+          style={mergeStyles(tw("w-full"), { marginBottom: "1rem" })}
         />
 
         {/* Selection Counter */}
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-gray-500">
+        <div
+          style={mergeStyles(tw("flex items-center justify-between text-xs"), {
+            marginBottom: "1rem",
+          })}
+        >
+          <span style={tw("text-gray-500")}>
             {filteredAttributes.length} attributes available
           </span>
-          <span className="font-medium text-blue-600">
+          <span style={tw("font-medium text-blue-600")}>
             {selectedAttributes.length} of {maxSelections} selected
           </span>
         </div>
       </div>
 
       {/* Attribute List - 3 Column Grid */}
-      <div className="grid grid-cols-3 gap-2 max-h-[400px] overflow-y-auto pr-2">
+      <div
+        style={mergeStyles(tw("overflow-y-auto"), {
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: "0.5rem",
+          maxHeight: "400px",
+          paddingRight: "0.5rem",
+        })}
+      >
         {filteredAttributes.map((attribute) => {
           const isSelected = selectedAttributes.includes(attribute.id);
           const isDisabled =
             !isSelected && selectedAttributes.length >= maxSelections;
 
+          const getItemStyle = () => {
+            if (isSelected) return tw("bg-blue-50 border-blue-300");
+            if (isDisabled) {
+              return mergeStyles(tw("bg-gray-50 border-gray-200"), {
+                opacity: 0.5,
+                cursor: "not-allowed",
+              });
+            }
+            return tw("bg-white border-gray-200");
+          };
+
           return (
             <label
               key={attribute.id}
-              className={`
-                flex items-start space-x-2 p-3 rounded-md border cursor-pointer transition-all
-                ${
-                  isSelected
-                    ? "bg-blue-50 border-blue-300 shadow-sm"
-                    : isDisabled
-                    ? "bg-gray-50 border-gray-200 opacity-50 cursor-not-allowed"
-                    : "bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm"
-                }
-              `}
+              style={mergeStyles(
+                tw("flex items-start rounded-md border cursor-pointer"),
+                { padding: "0.75rem", gap: "0.5rem" },
+                getItemStyle()
+              )}
             >
               <input
                 type="checkbox"
@@ -104,13 +139,28 @@ const AttributeDataGrid = ({
                   !isDisabled && handleAttributeToggle(attribute.id)
                 }
                 disabled={isDisabled}
-                className="mt-0.5 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-offset-0 disabled:opacity-50 flex-shrink-0 cursor-pointer"
+                style={mergeStyles(
+                  tw(
+                    "rounded border-gray-300 text-blue-600 flex-shrink-0 cursor-pointer"
+                  ),
+                  {
+                    marginTop: "0.125rem",
+                    width: "1rem",
+                    height: "1rem",
+                    opacity: isDisabled ? 0.5 : 1,
+                  }
+                )}
               />
 
               <span
-                className={`text-sm leading-tight ${
-                  isSelected ? "text-blue-900 font-medium" : "text-gray-700"
-                }`}
+                style={mergeStyles(
+                  tw(
+                    `text-sm ${
+                      isSelected ? "text-blue-900 font-medium" : "text-gray-700"
+                    }`
+                  ),
+                  { lineHeight: "1.25" }
+                )}
               >
                 {attribute.name}
               </span>
@@ -121,9 +171,20 @@ const AttributeDataGrid = ({
 
       {/* No Results Message */}
       {filteredAttributes.length === 0 && searchQuery && (
-        <div className="text-center py-8 text-gray-500">
-          <i className="ri-search-line text-2xl mb-2"></i>
-          <p className="text-sm">No attributes found for "{searchQuery}"</p>
+        <div
+          style={mergeStyles(tw("text-center text-gray-500"), {
+            paddingTop: "2rem",
+            paddingBottom: "2rem",
+          })}
+        >
+          <i
+            style={mergeStyles(tw("text-2xl"), {
+              marginBottom: "0.5rem",
+              display: "block",
+            })}
+            className="ri-search-line"
+          ></i>
+          <p style={tw("text-sm")}>No attributes found for "{searchQuery}"</p>
         </div>
       )}
     </div>

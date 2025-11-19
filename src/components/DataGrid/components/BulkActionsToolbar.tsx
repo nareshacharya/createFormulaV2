@@ -5,19 +5,21 @@ interface BulkActionsToolbarProps {
   onBulkDelete: () => void;
   onClearSelection: () => void;
   onYield?: () => void; // New yield function
-  // Action buttons (Add Formula, Merge, Normalize, Send, Undo)
+  // Action buttons (Add Formula, Merge, Normalize, Send, Undo, Compliance Check, Export)
   onAddFormula?: () => void;
   onMergeDuplicates?: () => void;
   onNormalize?: () => void;
   onSend?: () => void;
   onUndo?: () => void;
+  onComplianceCheck?: () => void;
   onExport?: () => void;
   canUndo?: boolean;
   undoCount?: number;
   canSend?: boolean;
+  canComplianceCheck?: boolean;
 }
 
-// Helper function to render toolbar buttons with responsive text
+// Helper function to render toolbar buttons with vertical layout (icon on top, text below)
 const ToolbarButton = ({
   onClick,
   disabled,
@@ -35,7 +37,7 @@ const ToolbarButton = ({
   children?: React.ReactNode;
   className?: string;
 }) => {
-  const baseClasses = `group relative flex items-center justify-center px-2 py-1 rounded-lg transition-all duration-200 
+  const baseClasses = `group relative flex flex-col items-center justify-center px-1.5 py-1 rounded-lg transition-all duration-200 w-14 
     ${!disabled ? "hover:bg-blue-600 hover:shadow-sm" : ""} 
     ${className}`;
 
@@ -45,6 +47,7 @@ const ToolbarButton = ({
 
   return (
     <button
+      type="button"
       onClick={onClick}
       disabled={disabled}
       className={`${baseClasses} ${colorClasses}`}
@@ -52,7 +55,9 @@ const ToolbarButton = ({
     >
       <span className="material-symbols-rounded text-base">{icon}</span>
       {/* Show label only on xl screens and up (1280px+) */}
-      <span className="hidden xl:inline text-xs font-medium ml-1">{label}</span>
+      <span className="hidden xl:inline text-[10px] font-medium mt-0.5 text-center leading-tight">
+        {label}
+      </span>
       {children}
     </button>
   );
@@ -68,13 +73,15 @@ export const BulkActionsToolbar = ({
   onNormalize,
   onSend,
   onUndo,
+  onComplianceCheck,
   onExport,
   canUndo = false,
   undoCount = 0,
   canSend = false,
+  canComplianceCheck = false,
 }: BulkActionsToolbarProps) => {
   return (
-    <div className="flex items-center justify-between mb-3 px-3 xl:px-6 py-2.5 bg-gray-50/50 gap-3">
+    <div className="flex items-center justify-between mb-1 px-1 xl:px-6 py-1.5 bg-gray-50/50 gap-2">
       {/* Left side - Selection count and bulk actions */}
       <div className="flex items-center space-x-2 xl:space-x-3 text-xs">
         <span className="text-gray-600 font-medium hidden lg:inline">
@@ -84,6 +91,7 @@ export const BulkActionsToolbar = ({
         {selectedCount > 0 && (
           <>
             <button
+              type="button"
               onClick={onClearSelection}
               className="bg-gray-150 text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition-all duration-200 hover:shadow-sm flex items-center gap-1 px-2 py-1 rounded-lg"
               title="Clear selection"
@@ -96,6 +104,7 @@ export const BulkActionsToolbar = ({
 
             {onBulkDelete && (
               <button
+                type="button"
                 onClick={onBulkDelete}
                 className="bg-red-100 text-red-700 hover:bg-red-200 hover:text-red-900 transition-all duration-200 hover:shadow-sm flex items-center gap-1 px-2 py-1 rounded-lg"
                 title="Delete selected items"
@@ -112,6 +121,7 @@ export const BulkActionsToolbar = ({
             {/* Yield button - only show when exactly 1 ingredient is selected */}
             {selectedCount === 1 && onYield && (
               <button
+                type="button"
                 onClick={onYield}
                 className="bg-green-100 text-green-700 hover:bg-green-200 hover:text-green-900 transition-all duration-200 hover:shadow-sm flex items-center gap-1 px-2 py-1 rounded-lg"
                 title="Adjust ingredient amount to match target total"
@@ -128,14 +138,14 @@ export const BulkActionsToolbar = ({
         )}
       </div>
 
-      {/* Right side - Data Grid Actions (Add Formula, Merge, Normalize, Send, Undo, Export) */}
-      <div className="flex items-center gap-1 xl:gap-2 overflow-x-auto">
+      {/* Right side - Data Grid Actions (Add Formula, Merge, Normalize, Send, Compliance, Undo, Export) */}
+      <div className="flex items-center gap-2 overflow-x-auto">
         {/* Add Formula Button */}
         {onAddFormula && (
           <ToolbarButton
             onClick={onAddFormula}
             icon="experiment"
-            label="Add Formula"
+            label="Add"
             title="Add Formula"
           />
         )}
@@ -160,6 +170,16 @@ export const BulkActionsToolbar = ({
           />
         )}
 
+        {/* Export Button */}
+        {onExport && (
+          <ToolbarButton
+            onClick={onExport}
+            icon="download"
+            label="Export"
+            title="Export as Excel"
+          />
+        )}
+
         {/* Send for Compounding Button */}
         {onSend && (
           <ToolbarButton
@@ -170,6 +190,21 @@ export const BulkActionsToolbar = ({
             title={
               canSend
                 ? "Send Active Formula for Compounding"
+                : "Select an active formula"
+            }
+          />
+        )}
+
+        {/* Compliance Check Button */}
+        {onComplianceCheck && (
+          <ToolbarButton
+            onClick={onComplianceCheck}
+            disabled={!canComplianceCheck}
+            icon="verified_user"
+            label="Comply"
+            title={
+              canComplianceCheck
+                ? "Check Formula Compliance"
                 : "Select an active formula"
             }
           />
@@ -187,21 +222,14 @@ export const BulkActionsToolbar = ({
             }
           >
             {undoCount > 0 && (
-              <span className="ml-1 bg-blue-500 text-white text-[9px] px-1 rounded-full font-semibold">
+              <span
+                className="absolute bg-blue-500 text-white text-[9px] px-1 rounded-full font-semibold"
+                style={{ top: "2px", right: "3px" }}
+              >
                 {undoCount}
               </span>
             )}
           </ToolbarButton>
-        )}
-
-        {/* Export Button */}
-        {onExport && (
-          <ToolbarButton
-            onClick={onExport}
-            icon="download"
-            label="Export"
-            title="Export as Excel"
-          />
         )}
       </div>
     </div>

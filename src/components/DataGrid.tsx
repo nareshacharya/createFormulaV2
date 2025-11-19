@@ -1,24 +1,26 @@
+/* eslint-disable jsx-a11y/control-has-associated-label */
 import { useState, useRef, useEffect } from "react";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { useClickOutside } from "../hooks/useClickOutside";
-import { useRowReordering } from "./DataGrid/hooks/useRowReordering";
-import { useBulkSelection } from "./DataGrid/hooks/useBulkSelection";
-import { useKeyboardNavigation } from "./DataGrid/hooks/useKeyboardNavigation";
 import { useDataGridFeatures } from "../hooks/useFeatureFlags";
-import { BulkActionsToolbar } from "./DataGrid/components/BulkActionsToolbar";
-import { EditableCell } from "./DataGrid/components/EditableCell";
-import { CellRenderer } from "./DataGrid/components/cells/CellRenderer";
-import { TableHeader } from "./DataGrid/components/headers/TableHeader";
+import { mockSolvents } from "../mocks/solvents";
+import type { Ingredient, Formula } from "../services/pega";
+import type { Dilution } from "../types/dilution";
+import { eventBus } from "../utils/bus";
+import { isOwnFormula } from "../utils/formulaIdGenerator";
+import { tw, mergeStyles } from "../utils/tailwindToInline";
 import { AddItemButton } from "./DataGrid/components/AddItemButton";
 import { AddItemModal } from "./DataGrid/components/AddItemModal";
+import { BulkActionsToolbar } from "./DataGrid/components/BulkActionsToolbar";
+import { CellRenderer } from "./DataGrid/components/cells/CellRenderer";
+import { EditableCell } from "./DataGrid/components/EditableCell";
+import { TableHeader } from "./DataGrid/components/headers/TableHeader";
+import { useBulkSelection } from "./DataGrid/hooks/useBulkSelection";
+import { useKeyboardNavigation } from "./DataGrid/hooks/useKeyboardNavigation";
+import { useRowReordering } from "./DataGrid/hooks/useRowReordering";
 import { isRowDraggable } from "./DataGrid/utils/rowOrdering";
 import { DilutionModal } from "./dilution";
-import { mockSolvents } from "../mocks/solvents";
-import { eventBus } from "../utils/bus";
-import type { Dilution } from "../types/dilution";
 import type { UseDilutionReturn } from "./dilution";
-import { isOwnFormula } from "../utils/formulaIdGenerator";
-import type { Ingredient, Formula } from "../services/pega";
 
 export interface Column {
   id: string;
@@ -50,7 +52,7 @@ interface DataGridProps {
   libraryFormulas?: Formula[];
   onAddColumn?: (columnType: "formula" | "attribute") => void;
   onAddFormula?: () => void;
-  onRowDelete?: (rowId: string) => void;
+  onRowDelete?: (rowId: string) => void; // Reserved for future use
   onBulkDelete?: (rowIds: string[]) => void;
   onCellEdit?: (rowId: string, columnId: string, value: any) => void;
   onDeleteColumn?: (columnId: string) => void;
@@ -69,7 +71,7 @@ interface DataGridProps {
   groupedByColumn?: string | null;
   editableFormula?: string;
   className?: string;
-  showEmptyState?: boolean;
+  // showEmptyState?: boolean; // Reserved for future use
   enableRowReordering?: boolean;
   enableBulkSelection?: boolean;
   dilutionState?: UseDilutionReturn;
@@ -79,10 +81,12 @@ interface DataGridProps {
   onToolbarNormalize?: () => void;
   onToolbarSend?: () => void;
   onToolbarUndo?: () => void;
+  onToolbarComplianceCheck?: () => void;
   onToolbarExport?: () => void;
   toolbarCanUndo?: boolean;
   toolbarUndoCount?: number;
   toolbarCanSend?: boolean;
+  toolbarCanComplianceCheck?: boolean;
 }
 
 const DataGrid = ({
@@ -94,7 +98,7 @@ const DataGrid = ({
   libraryFormulas = [],
   onAddColumn,
   onAddFormula,
-  onRowDelete: _onRowDelete,
+  onRowDelete: _onRowDelete, // Reserved for future use
   onBulkDelete,
   onCellEdit,
   onDeleteColumn,
@@ -113,7 +117,7 @@ const DataGrid = ({
   groupedByColumn,
   editableFormula,
   className = "",
-  showEmptyState: _showEmptyState = false,
+  // showEmptyState, // Reserved for future use
   enableRowReordering: enableRowReorderingProp,
   enableBulkSelection: enableBulkSelectionProp,
   dilutionState,
@@ -123,10 +127,12 @@ const DataGrid = ({
   onToolbarNormalize,
   onToolbarSend,
   onToolbarUndo,
+  onToolbarComplianceCheck,
   onToolbarExport,
   toolbarCanUndo = false,
   toolbarUndoCount = 0,
   toolbarCanSend = false,
+  toolbarCanComplianceCheck = false,
 }: DataGridProps) => {
   // Get feature flags
   const dataGridFlags = useDataGridFeatures();
@@ -305,14 +311,17 @@ const DataGrid = ({
   );
 
   // Group columns by their group property
-  const groupedColumns = columns.reduce((acc, column, index) => {
-    const group = column.group || "default";
-    if (!acc[group]) {
-      acc[group] = [];
-    }
-    acc[group].push({ ...column, originalIndex: index });
-    return acc;
-  }, {} as Record<string, (Column & { originalIndex: number })[]>);
+  const groupedColumns = columns.reduce(
+    (acc, column, index) => {
+      const group = column.group || "default";
+      if (!acc[group]) {
+        acc[group] = [];
+      }
+      acc[group].push({ ...column, originalIndex: index });
+      return acc;
+    },
+    {} as Record<string, (Column & { originalIndex: number })[]>
+  );
 
   // Calculate column spans for group headers
   const getGroupSpan = (groupName: string) => {
@@ -328,6 +337,26 @@ const DataGrid = ({
       default: "bg-gray-50 text-gray-700",
     };
     return colors[groupName as keyof typeof colors] || colors.default;
+  };
+
+  // Render cell content for Target Total rows
+  const renderTargetTotalCell = (
+    row: Record<string, any>,
+    column: Column
+  ): React.ReactNode => {
+    if (column.type === "number") {
+      const val = row[column.key];
+      const displayValue =
+        typeof val === "number" ? val.toFixed(5) : val || "100.00000";
+      return (
+        <span
+          style={tw("text-sm font-semibold text-gray-900 text-right block")}
+        >
+          {displayValue}
+        </span>
+      );
+    }
+    return row[column.key];
   };
 
   // Get comparison glyph for non-active formula columns
@@ -400,7 +429,6 @@ const DataGrid = ({
       onSetActiveFormula
     ) {
       onSetActiveFormula(columnId);
-      return;
     }
   };
 
@@ -575,7 +603,10 @@ const DataGrid = ({
   };
 
   return (
-    <div className={`flex flex-col h-full p-2 ${className}`} ref={tableRef}>
+    <div
+      style={mergeStyles(tw("flex flex-col h-full p-2"), tw(className))}
+      ref={tableRef}
+    >
       {/* Bulk Actions Toolbar */}
       <BulkActionsToolbar
         selectedCount={selectedRows.size}
@@ -616,17 +647,21 @@ const DataGrid = ({
         onNormalize={onToolbarNormalize}
         onSend={onToolbarSend}
         onUndo={onToolbarUndo}
+        onComplianceCheck={onToolbarComplianceCheck}
         onExport={onToolbarExport}
         canUndo={toolbarCanUndo}
         undoCount={toolbarUndoCount}
         canSend={toolbarCanSend}
+        canComplianceCheck={toolbarCanComplianceCheck}
       />
 
       <div
         ref={scrollContainerRef}
-        className="flex-1 overflow-auto border border-gray-200 rounded-lg shadow-sm"
+        style={tw(
+          "flex-1 overflow-auto border border-gray-200 rounded-lg shadow-sm"
+        )}
       >
-        <table className="w-full">
+        <table style={tw("w-full")}>
           <TableHeader
             columns={columns}
             formulas={formulas}
@@ -665,10 +700,10 @@ const DataGrid = ({
             setShowColumnActions={setShowColumnActions}
           />
 
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody style={tw("bg-white divide-y divide-gray-200")}>
             {getSortedData()
               .filter((row) => !row.isTotal)
-              .map((row, _rowIndex) => {
+              .map((row) => {
                 // Hide child ingredients if parent formula is collapsed
                 const shouldHide =
                   row.parentFormulaId &&
@@ -689,29 +724,33 @@ const DataGrid = ({
                     onDragOver={(e) => handleRowDragOver(e, row.id)}
                     onDragEnd={handleRowDragEnd}
                     onDragLeave={handleRowDragLeave}
-                    className={`
-                    group relative
-                    ${
-                      row.isTotal
-                        ? "bg-gray-100 border-t-2 border-gray-300"
-                        : "hover:bg-gray-50"
-                    }
-                    ${row.isEmpty ? "bg-gray-50" : ""}
-                    ${row.parentFormulaId ? "bg-blue-25" : ""}
-                    ${isBeingDragged ? "opacity-50" : ""}
-                    ${isDraggedOver ? "border-t-2 border-blue-500" : ""}
-                  `}
+                    className={`group relative ${
+                      row.isTotal ? "" : "hover:bg-gray-50"
+                    } ${isDraggedOver ? "border-t-2 border-blue-500" : ""}`}
+                    style={mergeStyles(
+                      tw(
+                        row.isTotal
+                          ? "bg-gray-100 border-t-2 border-gray-300"
+                          : ""
+                      ),
+                      tw(row.isEmpty ? "bg-gray-50" : ""),
+                      tw(row.parentFormulaId ? "bg-blue-25" : ""),
+                      tw(isBeingDragged ? "opacity-50" : "")
+                    )}
                   >
                     {/* Drag handle cell (if enabled) */}
                     {enableRowReordering && (
                       <td
-                        className="w-8 px-2 py-2 text-center"
+                        style={tw("w-8 px-2 py-2 text-center")}
                         onClick={(e) => e.stopPropagation()}
                       >
                         {isDraggable && (
                           <span
-                            className="material-symbols-rounded text-gray-400 cursor-move"
-                            style={{ fontSize: "16px" }}
+                            style={mergeStyles(
+                              { fontSize: "16px" },
+                              tw("text-gray-400 cursor-move")
+                            )}
+                            className="material-symbols-rounded"
                           >
                             drag_handle
                           </span>
@@ -722,7 +761,7 @@ const DataGrid = ({
                     {/* Checkbox cell (if enabled) */}
                     {enableBulkSelection && (
                       <td
-                        className="w-10 px-3 py-2 text-center"
+                        style={tw("w-10 px-3 py-2 text-center")}
                         onClick={(e) => e.stopPropagation()}
                       >
                         {!row.isTotal && !row.isEmpty && (
@@ -730,7 +769,9 @@ const DataGrid = ({
                             type="checkbox"
                             checked={isRowSelected(row.id)}
                             onChange={() => toggleRowSelection(row.id)}
-                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                            style={tw(
+                              "w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                            )}
                           />
                         )}
                       </td>
@@ -881,36 +922,38 @@ const DataGrid = ({
                       return (
                         <td
                           key={`${row.id}-${column.id}`}
-                          className={`
-                          px-3 py-2 border-r border-gray-100 last:border-r-0 font-sans
-                          ${column.key === "description" ? "relative" : ""}
-                          ${
-                            isTargetTotalInActiveFormula
-                              ? "cursor-pointer hover:bg-blue-50"
-                              : ""
-                          }
-                          ${
-                            row.isTotal && !isTargetTotalInActiveFormula
-                              ? "font-medium bg-gray-100"
-                              : ""
-                          }
-                          ${column.fixed ? "bg-gray-25" : ""}
-                          ${
-                            column.id === editableFormula && !column.fixed
-                              ? "bg-green-50"
-                              : ""
-                          }
-                          ${
-                            row.isEmpty && column.key === "description"
-                              ? "text-center"
-                              : ""
-                          }
-                        `}
-                          style={{
-                            width: getColumnWidth(),
-                            minWidth: getColumnWidth(),
-                            maxWidth: getColumnWidth(),
-                          }}
+                          style={mergeStyles(
+                            tw(
+                              "px-3 py-2 border-r border-gray-100 last:border-r-0 font-sans"
+                            ),
+                            tw(column.key === "description" ? "relative" : ""),
+                            tw(
+                              isTargetTotalInActiveFormula
+                                ? "cursor-pointer hover:bg-blue-50"
+                                : ""
+                            ),
+                            tw(
+                              row.isTotal && !isTargetTotalInActiveFormula
+                                ? "font-medium bg-gray-100"
+                                : ""
+                            ),
+                            tw(column.fixed ? "bg-gray-25" : ""),
+                            tw(
+                              column.id === editableFormula && !column.fixed
+                                ? "bg-green-50"
+                                : ""
+                            ),
+                            tw(
+                              row.isEmpty && column.key === "description"
+                                ? "text-center"
+                                : ""
+                            ),
+                            {
+                              width: getColumnWidth(),
+                              minWidth: getColumnWidth(),
+                              maxWidth: getColumnWidth(),
+                            }
+                          )}
                           colSpan={
                             row.isEmpty && column.key === "description"
                               ? columns.length
@@ -924,21 +967,7 @@ const DataGrid = ({
                           }}
                         >
                           {isTargetTotalInActiveFormula
-                            ? // For Target Total in active formula (not focused), display value directly
-                              column.type === "number"
-                              ? (() => {
-                                  const val = row[column.key];
-                                  const displayValue =
-                                    typeof val === "number"
-                                      ? val.toFixed(5)
-                                      : val || "100.00000";
-                                  return (
-                                    <span className="text-sm font-semibold text-gray-900 text-right block">
-                                      {displayValue}
-                                    </span>
-                                  );
-                                })()
-                              : row[column.key]
+                            ? renderTargetTotalCell(row, column)
                             : // For all other cells, use normal renderCell
                               renderCell(row, column)}
 
@@ -963,25 +992,28 @@ const DataGrid = ({
 
           {/* Sticky footer for total rows */}
           <tfoot
-            className={`bg-white sticky bottom-0 z-10 border-t-1 border-gray-100 ${
-              scrollState.canScrollDown
-                ? "shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]"
-                : ""
-            }`}
+            style={mergeStyles(
+              tw("bg-white sticky bottom-0 z-10 border-t-1 border-gray-100"),
+              tw(
+                scrollState.canScrollDown
+                  ? "shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]"
+                  : ""
+              )
+            )}
           >
             {getSortedData()
               .filter((row) => row.isTotal)
               .map((row) => {
                 return (
-                  <tr key={row.id} className="bg-gray-100">
+                  <tr key={row.id} style={tw("bg-gray-100")}>
                     {/* Drag handle cell (if enabled) */}
                     {enableRowReordering && (
-                      <td className="w-8 px-2 py-2 text-center" />
+                      <td style={tw("w-8 px-2 py-2 text-center")} />
                     )}
 
                     {/* Checkbox cell (if enabled) */}
                     {enableBulkSelection && (
-                      <td className="w-10 px-3 py-2 text-center" />
+                      <td style={tw("w-10 px-3 py-2 text-center")} />
                     )}
 
                     {columns.map((column) => {
@@ -1046,30 +1078,32 @@ const DataGrid = ({
                       return (
                         <td
                           key={`${row.id}-${column.id}`}
-                          className={`
-                            px-3 py-2 border-r border-gray-100 last:border-r-0 font-sans
-                            ${
+                          style={mergeStyles(
+                            tw(
+                              "px-3 py-2 border-r border-gray-100 last:border-r-0 font-sans"
+                            ),
+                            tw(
                               isTargetTotalInActiveFormula
                                 ? "cursor-pointer hover:bg-blue-50"
                                 : ""
-                            }
-                            ${
+                            ),
+                            tw(
                               row.isTotal && !isTargetTotalInActiveFormula
                                 ? "font-medium bg-gray-100"
                                 : ""
-                            }
-                            ${column.fixed ? "bg-gray-25" : ""}
-                            ${
+                            ),
+                            tw(column.fixed ? "bg-gray-25" : ""),
+                            tw(
                               column.id === editableFormula && !column.fixed
                                 ? "bg-green-50"
                                 : ""
+                            ),
+                            {
+                              width: getColumnWidth(),
+                              minWidth: getColumnWidth(),
+                              maxWidth: getColumnWidth(),
                             }
-                          `}
-                          style={{
-                            width: getColumnWidth(),
-                            minWidth: getColumnWidth(),
-                            maxWidth: getColumnWidth(),
-                          }}
+                          )}
                           onClick={() => {
                             // Make Target Total clickable to focus
                             if (isTargetTotalInActiveFormula) {
@@ -1078,21 +1112,7 @@ const DataGrid = ({
                           }}
                         >
                           {isTargetTotalInActiveFormula
-                            ? // For Target Total in active formula (not focused), display value directly
-                              column.type === "number"
-                              ? (() => {
-                                  const val = row[column.key];
-                                  const displayValue =
-                                    typeof val === "number"
-                                      ? val.toFixed(5)
-                                      : val || "100.00000";
-                                  return (
-                                    <span className="text-sm font-semibold text-gray-900 text-right block">
-                                      {displayValue}
-                                    </span>
-                                  );
-                                })()
-                              : row[column.key]
+                            ? renderTargetTotalCell(row, column)
                             : // For all other cells, use normal renderCell
                               renderCell(row, column)}
                         </td>

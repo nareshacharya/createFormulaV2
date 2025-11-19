@@ -1,11 +1,15 @@
-import Badge from "../Badge";
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import type { Ingredient } from "../../services/pega";
+import { tw } from "../../utils/tailwindToInline";
+import Badge from "../Badge";
 
 interface SuppliersSectionProps {
   ingredient: Ingredient;
 }
 
-const SuppliersSection = ({ ingredient: _ingredient }: SuppliersSectionProps) => {
+const SuppliersSection = ({
+  ingredient, // eslint-disable-line @typescript-eslint/no-unused-vars
+}: SuppliersSectionProps) => {
   // Mock suppliers data
   const mockSuppliers = [
     {
@@ -80,22 +84,22 @@ const SuppliersSection = ({ ingredient: _ingredient }: SuppliersSectionProps) =>
   };
 
   return (
-    <div className="space-y-6">
+    <div style={tw("space-y-6")}>
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <h3 style={tw("text-lg font-semibold text-gray-900 mb-4")}>
           Available Suppliers
         </h3>
-        <div className="space-y-4">
+        <div style={tw("space-y-4")}>
           {mockSuppliers.map((supplier) => (
             <div
               key={supplier.id}
-              className="border border-gray-200 rounded-lg p-4"
+              style={tw("border border-gray-200 rounded-lg p-4")}
             >
               {/* Supplier Header */}
-              <div className="flex items-start justify-between mb-4">
+              <div style={tw("flex items-start justify-between mb-4")}>
                 <div>
-                  <div className="flex items-center space-x-3 mb-2">
-                    <h4 className="text-lg font-medium text-gray-900">
+                  <div style={tw("flex items-center space-x-3 mb-2")}>
+                    <h4 style={tw("text-lg font-medium text-gray-900")}>
                       {supplier.name}
                     </h4>
                     <Badge variant={getStatusVariant(supplier.status)}>
@@ -108,54 +112,66 @@ const SuppliersSection = ({ ingredient: _ingredient }: SuppliersSectionProps) =>
                       {supplier.quality}
                     </Badge>
                   </div>
-                  <p className="text-sm text-gray-600">
+                  <p style={tw("text-sm text-gray-600")}>
                     Supplier ID: {supplier.id}
                   </p>
                 </div>
-                <div className="text-right">
-                  <p className="text-lg font-semibold text-gray-900">
+                <div style={tw("text-right")}>
+                  <p style={tw("text-lg font-semibold text-gray-900")}>
                     ${supplier.price.toFixed(2)}
                   </p>
-                  <p className="text-sm text-gray-600">per {supplier.unit}</p>
+                  <p style={tw("text-sm text-gray-600")}>per {supplier.unit}</p>
                 </div>
               </div>
 
               {/* Supplier Details Grid */}
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div style={tw("grid grid-cols-2 gap-4 mb-4")}>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                  <label
+                    style={tw("block text-xs font-medium text-gray-500 mb-1")}
+                  >
                     Lead Time
                   </label>
-                  <p className="text-sm text-gray-900">{supplier.leadTime}</p>
+                  <p style={tw("text-sm text-gray-900")}>{supplier.leadTime}</p>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                  <label
+                    style={tw("block text-xs font-medium text-gray-500 mb-1")}
+                  >
                     Minimum Order
                   </label>
-                  <p className="text-sm text-gray-900">{supplier.minOrder}</p>
+                  <p style={tw("text-sm text-gray-900")}>{supplier.minOrder}</p>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                  <label
+                    style={tw("block text-xs font-medium text-gray-500 mb-1")}
+                  >
                     Last Order
                   </label>
-                  <p className="text-sm text-gray-900">{supplier.lastOrder}</p>
+                  <p style={tw("text-sm text-gray-900")}>
+                    {supplier.lastOrder}
+                  </p>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                  <label
+                    style={tw("block text-xs font-medium text-gray-500 mb-1")}
+                  >
                     Contact
                   </label>
-                  <p className="text-sm text-gray-900">
+                  <p style={tw("text-sm text-gray-900")}>
                     {supplier.contact.name}
                   </p>
                 </div>
               </div>
 
               {/* Certifications */}
-              <div className="mb-4">
-                <label className="block text-xs font-medium text-gray-500 mb-2">
+              <div style={tw("mb-4")}>
+                <label
+                  style={tw("block text-xs font-medium text-gray-500 mb-2")}
+                >
                   Certifications
                 </label>
-                <div className="flex flex-wrap gap-2">
+                <div style={tw("flex flex-wrap gap-2")}>
                   {supplier.certifications.map((cert) => (
                     <Badge key={cert} variant="info" size="sm">
                       {cert}
@@ -165,36 +181,26 @@ const SuppliersSection = ({ ingredient: _ingredient }: SuppliersSectionProps) =>
               </div>
 
               {/* Contact Information */}
-              <div className="bg-gray-50 rounded-lg p-3">
-                <label className="block text-xs font-medium text-gray-500 mb-2">
+              <div style={tw("bg-gray-50 rounded-lg p-3")}>
+                <label
+                  style={tw("block text-xs font-medium text-gray-500 mb-2")}
+                >
                   Contact Information
                 </label>
-                <div className="space-y-1">
-                  <div className="flex items-center space-x-2">
+                <div style={tw("space-y-1")}>
+                  <div style={tw("flex items-center space-x-2")}>
                     <i className="ri-mail-line text-gray-400 text-sm"></i>
-                    <span className="text-sm text-gray-700">
+                    <span style={tw("text-sm text-gray-700")}>
                       {supplier.contact.email}
                     </span>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div style={tw("flex items-center space-x-2")}>
                     <i className="ri-phone-line text-gray-400 text-sm"></i>
-                    <span className="text-sm text-gray-700">
+                    <span style={tw("text-sm text-gray-700")}>
                       {supplier.contact.phone}
                     </span>
                   </div>
                 </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex space-x-2 mt-4">
-                <button className="flex-1 px-3 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors cursor-pointer">
-                  <i className="ri-shopping-cart-line mr-2"></i>
-                  Request Quote
-                </button>
-                <button className="px-3 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 transition-colors cursor-pointer">
-                  <i className="ri-phone-line mr-2"></i>
-                  Contact
-                </button>
               </div>
             </div>
           ))}
@@ -203,17 +209,17 @@ const SuppliersSection = ({ ingredient: _ingredient }: SuppliersSectionProps) =>
 
       {/* Supplier Performance */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <h3 style={tw("text-lg font-semibold text-gray-900 mb-4")}>
           Supplier Performance
         </h3>
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-start">
+        <div style={tw("bg-blue-50 border border-blue-200 rounded-lg p-4")}>
+          <div style={tw("flex items-start")}>
             <i className="ri-bar-chart-line text-blue-600 mt-0.5 mr-2"></i>
             <div>
-              <p className="text-sm text-blue-800 font-medium">
+              <p style={tw("text-sm text-blue-800 font-medium")}>
                 Performance Metrics
               </p>
-              <p className="text-sm text-blue-700 mt-1">
+              <p style={tw("text-sm text-blue-700 mt-1")}>
                 Detailed supplier performance analytics including delivery
                 times, quality scores, and pricing trends would be available
                 through integration with procurement systems.

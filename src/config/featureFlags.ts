@@ -548,22 +548,79 @@ export const featureFlags: FeatureFlags = {
 };
 
 // ============================================================================
+// BUILD-TOOL AGNOSTIC ENVIRONMENT DETECTION
+// ============================================================================
+
+/**
+ * Safely get the current environment in a way that works with both Vite and Webpack
+ * Supports:
+ * - Vite: import.meta.env.MODE
+ * - Webpack 5 & CommonJS: process.env.NODE_ENV
+ * - Pega DX: window.__ENV_MODE__
+ * - Browser/Other: Falls back to 'production'
+ * 
+ * @returns The environment mode string (development, staging, production, etc.)
+ */
+const getEnvironmentMode = (): string => {
+    // Try Vite first (import.meta.env) - safest check for Vite environments
+    try {
+        if (typeof import.meta !== 'undefined' && import.meta.env?.MODE) {
+            console.debug('[FeatureFlags] Environment detected: Vite', { mode: import.meta.env.MODE });
+            return import.meta.env.MODE;
+        }
+    } catch (e) {
+        // import.meta might not be available in some build contexts
+    }
+
+    // Try Webpack/CommonJS (process.env) - works with Webpack 5 and Node.js
+    try {
+        if (typeof process !== 'undefined' && process.env?.NODE_ENV) {
+            console.debug('[FeatureFlags] Environment detected: Webpack/Node', { mode: process.env.NODE_ENV });
+            return process.env.NODE_ENV;
+        }
+    } catch (e) {
+        // process might not be available in browser contexts
+    }
+
+    // Try Pega DX or custom window variable
+    try {
+        if (typeof window !== 'undefined' && (window as any).__ENV_MODE__) {
+            console.debug('[FeatureFlags] Environment detected: Custom (window.__ENV_MODE__)', { mode: (window as any).__ENV_MODE__ });
+            return (window as any).__ENV_MODE__;
+        }
+    } catch (e) {
+        // window might not be available in non-browser contexts
+    }
+
+    // Default to production for safety
+    console.warn('[FeatureFlags] Could not detect build environment, defaulting to production mode');
+    return 'production';
+};
+
+// ============================================================================
 // ENVIRONMENT-SPECIFIC OVERRIDES
 // ============================================================================
 
 /**
  * Apply environment-specific feature flag overrides
- * This function can be called at app initialization to override defaults
- * based on environment variables or build configuration
+ * This function works with all build tools: Vite, Webpack 5, and Pega DX
+ * 
+ * Can be called at app initialization to override defaults based on:
+ * - Environment variables (Vite: import.meta.env.MODE, Webpack: process.env.NODE_ENV)
+ * - Build configuration
+ * - Custom window variables (for Pega DX integration)
  */
 export const applyEnvironmentOverrides = () => {
-    const env = import.meta.env.MODE;
+    const env = getEnvironmentMode();
+
+    console.log(`[FeatureFlags] Applying overrides for environment: ${env}`);
 
     if (env === 'development') {
-        // Development overrides
+        // Development overrides - enable debugging features
         featureFlags.developer.enableVerboseLogging = true;
         featureFlags.developer.showDevConsole = false;
         featureFlags.api.showDetailedErrors = true;
+        console.info('[FeatureFlags] Development mode enabled');
     } else if (env === 'staging') {
         // Staging overrides - test all features
         featureFlags.dataGrid.enableRowReordering = true;
@@ -571,12 +628,14 @@ export const applyEnvironmentOverrides = () => {
         featureFlags.header.showLineCount = true;
         featureFlags.header.showFormulaCost = true;
         featureFlags.header.showTargetCost = true;
+        console.info('[FeatureFlags] Staging mode enabled - all features active');
     } else if (env === 'production') {
         // Production overrides - conservative defaults
         featureFlags.developer.enableVerboseLogging = false;
         featureFlags.developer.showDevConsole = false;
         featureFlags.developer.enableUrlOverrides = false;
         featureFlags.api.showDetailedErrors = false;
+        console.info('[FeatureFlags] Production mode enabled');
     }
 };
 
@@ -635,7 +694,37 @@ export const applyUrlOverrides = () => {
 // INITIALIZATION
 // ============================================================================
 
+/**
+ * IMPORTANT: For Pega DX Integration
+ * 
+ * When embedding this app in Pega DX (which uses Webpack 5), add this code
+ * to your Pega component initialization BEFORE loading the React app:
+ * 
+ * Step 1: In your index.html or main entry point:
+ * ```html
+ * <script>
+ *   // Set environment mode for Pega DX before app loads
+ *   window.__ENV_MODE__ = 'production'; // or 'development', 'staging'
+ * </script>
+ * ```
+ * 
+ * Step 2: Or in your App.tsx/main.tsx before React renders:
+ * ```typescript
+ * // Set this BEFORE rendering the app
+ * if (typeof window !== 'undefined') {
+ *   (window as any).__ENV_MODE__ = 'production';
+ * }
+ * ```
+ * 
+ * How it works:
+ * - Vite: Uses import.meta.env.MODE automatically
+ * - Webpack 5: Uses process.env.NODE_ENV automatically
+ * - Pega DX: Set window.__ENV_MODE__ as shown above
+ * - Browser/Other: Defaults to 'production' (safe fallback)
+ */
+
 // Apply overrides on module load
+// This now safely handles all build tools: Vite, Webpack 5, and Pega DX
 applyEnvironmentOverrides();
 applyUrlOverrides();
 

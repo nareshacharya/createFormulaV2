@@ -1,14 +1,14 @@
 import type { Dispatch, SetStateAction } from "react";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import type { Column } from "../../../components/DataGrid";
 import type { Formula } from "../../../services/pega";
-import { calculateTotals } from "../../../utils/formulaCalculations";
 import { eventBus } from "../../../utils/bus";
+import { calculateTotals } from "../../../utils/formulaCalculations";
 import { appStateHistory } from "../../../utils/stateHistory";
 
 interface UseDataGridHandlersProps {
     columns: Column[];
-    selectedFormulaIds: string[];
+    selectedFormulaIds: string[]; // Reserved for future use
     editableFormula: string;
     formulas: Formula[];
     availableFormulas: Formula[];
@@ -22,7 +22,7 @@ interface UseDataGridHandlersProps {
 
 export const useDataGridHandlers = ({
     columns,
-    selectedFormulaIds,
+    selectedFormulaIds: _selectedFormulaIds, // Reserved for future use
     editableFormula,
     formulas,
     availableFormulas,
@@ -63,8 +63,8 @@ export const useDataGridHandlers = ({
 
                 // Remove from tracking sets and update state
                 pendingFormulaIds.current?.delete(rowToDelete.formulaId);
-                setSelectedFormulaIds((prev) =>
-                    prev.filter((id) => id !== rowToDelete.formulaId)
+                setSelectedFormulaIds((prevSelected) =>
+                    prevSelected.filter((id) => id !== rowToDelete.formulaId)
                 );
 
                 // The useEffect in WorkArea will emit the formula-selections-updated event
@@ -88,8 +88,8 @@ export const useDataGridHandlers = ({
                 if (remainingIngredientsForFormula.length === 0 && !formulaGroupRow) {
                     console.log("✅ Last ingredient deleted, removing formula from tracking:", rowToDelete.parentFormulaId);
                     pendingFormulaIds.current?.delete(rowToDelete.parentFormulaId);
-                    setSelectedFormulaIds((prev) =>
-                        prev.filter((id) => id !== rowToDelete.parentFormulaId)
+                    setSelectedFormulaIds((prevSelected) =>
+                        prevSelected.filter((id) => id !== rowToDelete.parentFormulaId)
                     );
                 }
             }

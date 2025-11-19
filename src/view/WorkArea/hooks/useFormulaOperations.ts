@@ -1,10 +1,10 @@
 import type { Dispatch, SetStateAction } from "react";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import type { Column } from "../../../components/DataGrid";
 import type { Formula, Ingredient } from "../../../services/pega";
+import { eventBus } from "../../../utils/bus";
 import { calculateTotals } from "../../../utils/formulaCalculations";
 import { appStateHistory } from "../../../utils/stateHistory";
-import { eventBus } from "../../../utils/bus";
 
 interface UseFormulaOperationsProps {
     columns: Column[];
@@ -14,7 +14,7 @@ interface UseFormulaOperationsProps {
     tableData: any[];
     ingredients: Ingredient[];
     setTableData: Dispatch<SetStateAction<any[]>>;
-    selectedFormulaIds: string[];
+    selectedFormulaIds: string[]; // Reserved for future use
     setSelectedFormulaIds: Dispatch<SetStateAction<string[]>>;
     pendingFormulaIds: React.RefObject<Set<string>>;
 }
@@ -27,7 +27,7 @@ export const useFormulaOperations = ({
     tableData,
     ingredients,
     setTableData,
-    selectedFormulaIds,
+    selectedFormulaIds: _selectedFormulaIds, // Reserved for future use
     setSelectedFormulaIds,
     pendingFormulaIds,
 }: UseFormulaOperationsProps) => {

@@ -1,19 +1,20 @@
 import { useState, useEffect } from "react";
-import SearchBar from "../../components/SearchBar";
-import PillTabs from "../../components/PillTabs";
-import IngredientList from "../../components/IngredientList";
+import AdvancedFilterSheet from "../../components/AdvancedFilterSheet";
 import FormulaList from "../../components/FormulaList";
 import IngredientAttributeList from "../../components/IngredientAttributeList";
-import AdvancedFilterSheet from "../../components/AdvancedFilterSheet";
+import IngredientList from "../../components/IngredientList";
+import PillTabs from "../../components/PillTabs";
+import type { FilterGroup } from "../../components/QueryBuilder";
+import SearchBar from "../../components/SearchBar";
 import { PegaService } from "../../services/pega";
 import type {
   Ingredient,
   Formula,
   IngredientAttribute,
 } from "../../services/pega";
-import { evaluateQuery } from "../../utils/queryEvaluator";
-import type { FilterGroup } from "../../components/QueryBuilder";
 import { eventBus } from "../../utils/bus";
+import { evaluateQuery } from "../../utils/queryEvaluator";
+import { tw, mergeStyles } from "../../utils/tailwindToInline";
 
 const LibraryPanel = () => {
   const [activeTab, setActiveTab] = useState("ingredients");
@@ -33,7 +34,7 @@ const LibraryPanel = () => {
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [formulas, setFormulas] = useState<Formula[]>([]);
   const [attributes, setAttributes] = useState<IngredientAttribute[]>([]);
-  const [_loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   const tabs = [
     { id: "ingredients", label: "Ingredients", icon: "labs" },
@@ -230,11 +231,11 @@ const LibraryPanel = () => {
   const hasActiveFilters = currentQuery.rules && currentQuery.rules.length > 0;
 
   return (
-    <div className="h-full flex flex-col bg-white">
+    <div style={tw("h-full flex flex-col bg-white")}>
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 flex-shrink-0">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Library</h2>
+      <div style={tw("p-4 border-b border-gray-200 flex-shrink-0")}>
+        <div style={tw("flex items-center justify-between mb-4")}>
+          <h2 style={tw("text-lg font-semibold text-gray-900")}>Library</h2>
         </div>
 
         <SearchBar
@@ -245,7 +246,7 @@ const LibraryPanel = () => {
           onFilterClick={() => setShowAdvancedFilters(true)}
         />
 
-        <div className="mt-4">
+        <div style={tw("mt-4")}>
           <PillTabs
             tabs={tabs}
             activeTab={activeTab}
@@ -255,26 +256,43 @@ const LibraryPanel = () => {
 
         {/* Level 2 Filters for Ingredients */}
         {activeTab === "ingredients" && (
-          <div className="mt-3 flex items-center space-x-1">
+          <div
+            style={mergeStyles(tw("mt-3 flex items-center"), {
+              gap: "0.25rem",
+            })}
+          >
             {ingredientFilters.map((filter) => (
               <button
+                type="button"
                 key={filter.id}
                 onClick={() => setActiveFilter(filter.id)}
-                className={`
+                style={tw(`
                   px-2 py-1 text-xs font-medium rounded transition-colors whitespace-nowrap cursor-pointer
                   ${
                     activeFilter === filter.id
                       ? "bg-blue-100 text-blue-700"
                       : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                   }
-                `}
+                `)}
               >
                 {filter.label} ({filter.count})
               </button>
             ))}
             {hasActiveFilters && (
-              <div className="flex items-center space-x-1 text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded ml-2">
-                <span className="material-symbols-rounded text-sm">tune</span>
+              <div
+                style={mergeStyles(
+                  tw(
+                    "flex items-center text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded"
+                  ),
+                  { gap: "0.25rem", marginLeft: "0.5rem" }
+                )}
+              >
+                <span
+                  style={tw("text-sm")}
+                  className="material-symbols-rounded"
+                >
+                  tune
+                </span>
                 <span>Advanced</span>
               </div>
             )}
@@ -283,7 +301,7 @@ const LibraryPanel = () => {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-auto">
+      <div style={tw("flex-1 overflow-auto")}>
         {activeTab === "ingredients" && (
           <IngredientList
             ingredients={filteredIngredients}
@@ -313,8 +331,8 @@ const LibraryPanel = () => {
       </div>
 
       {/* Results Summary */}
-      <div className="p-3 border-t border-gray-200 bg-gray-50 flex-shrink-0">
-        <div className="text-xs text-gray-500 text-center">
+      <div style={tw("p-3 border-t border-gray-200 bg-gray-50 flex-shrink-0")}>
+        <div style={tw("text-xs text-gray-500 text-center")}>
           {activeTab === "ingredients" &&
             `${filteredIngredients.length} of ${ingredients.length} ingredients`}
           {activeTab === "formulas" &&

@@ -1,6 +1,7 @@
 import { useState } from "react";
-import ListRow from "./ListRow";
 import { eventBus } from "../utils/bus";
+import { tw, mergeStyles } from "../utils/tailwindToInline";
+import ListRow from "./ListRow";
 
 interface IngredientAttribute {
   id: string;
@@ -20,10 +21,10 @@ interface IngredientAttribute {
 interface IngredientAttributeListProps {
   attributes: IngredientAttribute[];
   searchQuery?: string;
-  appliedFilters?: any;
+  appliedFilters?: Record<string, unknown>;
   selectedAttributes?: string[];
   maxSelections?: number;
-  onAttributeSelect?: (attribute: IngredientAttribute) => void;
+  onAttributeSelect?: (attribute: IngredientAttribute) => void; // Reserved for future use
 }
 
 const IngredientAttributeList = ({
@@ -32,8 +33,9 @@ const IngredientAttributeList = ({
   appliedFilters = {},
   selectedAttributes = [],
   maxSelections = 5,
+  onAttributeSelect: _onAttributeSelect, // Reserved for future use
 }: IngredientAttributeListProps) => {
-  const [hoveredRow, setHoveredRow] = useState<string | null>(null);
+  const [, setHoveredRow] = useState<string | null>(null);
 
   const filteredAttributes = attributes.filter((attribute) => {
     const matchesSearch =
@@ -80,7 +82,7 @@ const IngredientAttributeList = ({
   };
 
   return (
-    <div className="space-y-0">
+    <div style={tw("space-y-0")}>
       {filteredAttributes.map((attribute) => {
         const isSelected = selectedAttributes.includes(attribute.id);
         const canAdd = selectedAttributes.length < maxSelections;
@@ -97,30 +99,37 @@ const IngredientAttributeList = ({
                 handleAttributeClick(attribute);
               }
             }}
-            compact={true}
+            compact
             className={`
               ${isSelected ? "bg-blue-50 border-l-2 border-blue-400" : ""}
               ${isDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
             `}
           >
-            <div className="flex items-center justify-between w-full px-3">
-              <div className="flex items-center space-x-3 flex-1">
+            <div style={tw("flex items-center justify-between w-full px-3")}>
+              <div style={tw("flex items-center space-x-3 flex-1")}>
                 {/* Attribute Info */}
-                <div className="flex-1 min-w-0">
+                <div style={tw("flex-1 min-w-0")}>
                   <h4
-                    className={`font-medium text-sm truncate ${
-                      isSelected ? "text-blue-900" : "text-gray-900"
-                    }`}
+                    style={tw(
+                      `font-medium text-sm truncate ${
+                        isSelected ? "text-blue-900" : "text-gray-900"
+                      }`
+                    )}
                   >
                     {attribute.name}
                     {isSelected && (
-                      <i className="ri-check-line text-blue-600 ml-1 text-xs"></i>
+                      <i
+                        style={tw("ml-1 text-xs text-blue-600")}
+                        className="ri-check-line"
+                      ></i>
                     )}
                   </h4>
                   <p
-                    className={`text-xs truncate font-normal ${
-                      isSelected ? "text-blue-600" : "text-gray-500"
-                    }`}
+                    style={tw(
+                      `text-xs truncate font-normal ${
+                        isSelected ? "text-blue-600" : "text-gray-500"
+                      }`
+                    )}
                   >
                     {attribute.category}
                     {attribute.unit && ` • ${attribute.unit}`}
@@ -133,19 +142,27 @@ const IngredientAttributeList = ({
       })}
 
       {filteredAttributes.length === 0 && (
-        <div className="text-center py-6 text-gray-500">
-          <i className="ri-list-check-line text-xl mb-2"></i>
-          <p className="text-sm">No attributes found</p>
+        <div style={tw("text-center py-6 text-gray-500")}>
+          <i
+            style={mergeStyles(tw("text-xl"), {
+              marginBottom: "0.5rem",
+              display: "block",
+            })}
+            className="ri-list-check-line"
+          ></i>
+          <p style={tw("text-sm")}>No attributes found</p>
           {(searchQuery || Object.keys(appliedFilters).length > 0) && (
-            <p className="text-xs mt-1">Try adjusting your search or filters</p>
+            <p style={mergeStyles(tw("text-xs"), { marginTop: "0.25rem" })}>
+              Try adjusting your search or filters
+            </p>
           )}
         </div>
       )}
 
       {/* Selection Counter */}
       {selectedAttributes.length > 0 && (
-        <div className="px-3 py-2 bg-blue-50 border-t border-blue-100">
-          <div className="text-xs text-blue-700 text-center">
+        <div style={tw("px-3 py-2 bg-blue-50 border-t border-blue-100")}>
+          <div style={tw("text-xs text-blue-700 text-center")}>
             {selectedAttributes.length} of {maxSelections} attributes selected
           </div>
         </div>

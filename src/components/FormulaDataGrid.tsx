@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import { useState, useEffect } from "react";
-import type { Formula } from "../services/pega";
-import Badge from "./Badge";
-import Alert from "./Alert";
 import { getListItemClasses, selectionStyles } from "../config/theme";
+import type { Formula } from "../services/pega";
+import { tw, mergeStyles } from "../utils/tailwindToInline";
+import Alert from "./Alert";
+import Badge from "./Badge";
 
 interface FormulaDataGridProps {
   formulas: Formula[];
@@ -141,10 +143,15 @@ const FormulaDataGrid = ({
    * --------------------------------------------------------------------- */
   if (!formulas || formulas.length === 0) {
     return (
-      <div className="flex items-center justify-center h-40 text-gray-500">
-        <div className="text-center">
-          <i className="ri-test-tube-line text-3xl mb-2"></i>
-          <p>No formulas available</p>
+      <div
+        style={mergeStyles(
+          tw("flex items-center justify-center text-gray-500"),
+          { height: "10rem" }
+        )}
+      >
+        <div style={tw("text-center")}>
+          <i style={tw("text-3xl")} className="ri-test-tube-line"></i>
+          <p style={{ marginTop: "8px" }}>No formulas available</p>
         </div>
       </div>
     );
@@ -194,7 +201,11 @@ const FormulaDataGrid = ({
         return Array.isArray(value) ? `${value.length} ingredients` : "-";
       case "notes":
         if (value && typeof value === "object" && "top" in value) {
-          const notes = value as any;
+          const notes = value as {
+            top?: unknown[];
+            middle?: unknown[];
+            base?: unknown[];
+          };
           return `Top: ${notes.top?.length || 0}, Mid: ${
             notes.middle?.length || 0
           }, Base: ${notes.base?.length || 0}`;
@@ -215,85 +226,132 @@ const FormulaDataGrid = ({
   }));
 
   return (
-    <div className="space-y-3">
+    <div>
       {/* Alert info */}
-      <Alert variant="info">
-        Select up to <strong>{maxSelections}</strong> formulas to compare.
-      </Alert>
+      <div style={{ marginBottom: "12px" }}>
+        <Alert variant="info">
+          Select up to <strong>{maxSelections}</strong> formulas to compare.
+        </Alert>
+      </div>
 
       {/* Compact Search and Counter Row */}
-      <div className="flex items-center gap-3">
-        <div className="flex-1">
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <i className="ri-search-line text-gray-400 text-sm"></i>
+      <div
+        style={mergeStyles(tw("flex items-center gap-3"), {
+          marginBottom: "12px",
+        })}
+      >
+        <div style={tw("flex-1")}>
+          <div style={tw("relative")}>
+            <div
+              style={{
+                position: "absolute",
+                left: 0,
+                top: 0,
+                height: "100%",
+                paddingLeft: "12px",
+                display: "flex",
+                alignItems: "center",
+                pointerEvents: "none",
+              }}
+            >
+              <i
+                style={tw("text-gray-400 text-sm")}
+                className="ri-search-line"
+              ></i>
             </div>
             <input
               type="text"
               placeholder="Search by name or formula ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="
-                w-full pl-10 py-2 text-sm border border-gray-300 rounded-md
-                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                placeholder-gray-500
-                pr-4
-              "
+              style={mergeStyles(
+                tw("w-full py-2 text-sm border border-gray-300 rounded-md"),
+                { paddingLeft: "2.5rem", paddingRight: "1rem" }
+              )}
             />
           </div>
         </div>
-        <div className="flex items-center gap-4 text-xs whitespace-nowrap">
-          <span className="text-gray-500">
+        <div style={tw("flex items-center gap-4 text-xs whitespace-nowrap")}>
+          <span style={tw("text-gray-500")}>
             {filteredFormulas.length} available
           </span>
-          <span className="font-medium text-blue-600">
+          <span style={tw("font-medium text-blue-600")}>
             {selectedFormulas.length} / {maxSelections || "∞"} selected
           </span>
         </div>
       </div>
 
       {/* Table */}
-      <div className="max-h-96 overflow-y-auto border border-gray-200 rounded-lg">
-        <table className="w-full">
-          <thead className="bg-gray-50 sticky top-0">
+      <div
+        style={mergeStyles(
+          tw("overflow-y-auto border border-gray-200 rounded-lg"),
+          { maxHeight: "24rem" }
+        )}
+      >
+        <table style={tw("w-full")}>
+          <thead
+            style={mergeStyles(tw("bg-gray-50"), {
+              position: "sticky",
+              top: 0,
+            })}
+          >
             <tr>
-              <th className="w-12 px-3 py-2">
+              <th style={mergeStyles(tw("px-3 py-2"), { width: "3rem" })}>
                 <input
                   type="checkbox"
                   checked={isAllCurrentPageSelected}
                   onChange={handleSelectAll}
+                  aria-label="Select all formulas"
                   disabled={
                     maxSelections
                       ? selectedFormulas.length >= maxSelections &&
                         !isAllCurrentPageSelected
                       : false
                   }
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50 cursor-pointer"
+                  style={mergeStyles(
+                    tw("rounded border-gray-300 cursor-pointer"),
+                    {
+                      opacity:
+                        maxSelections &&
+                        selectedFormulas.length >= maxSelections &&
+                        !isAllCurrentPageSelected
+                          ? 0.5
+                          : 1,
+                    }
+                  )}
                 />
               </th>
               {columns.map((column) => (
                 <th
                   key={column.key}
-                  className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
+                  style={tw(
+                    "px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer"
+                  )}
                   onClick={() => handleSort(column.key)}
                 >
-                  <div className="flex items-center space-x-1">
+                  <div
+                    style={mergeStyles(tw("flex items-center"), { gap: "4px" })}
+                  >
                     <span>{column.title}</span>
                     {sortConfig?.key === column.key ? (
                       <i
+                        style={tw("text-xs text-blue-600")}
                         className={`ri-arrow-${
                           sortConfig.direction === "asc" ? "up" : "down"
-                        }-line text-xs text-blue-600`}
+                        }-line`}
                       />
                     ) : (
-                      <i className="ri-expand-up-down-line text-xs text-gray-400" />
+                      <i
+                        style={tw("text-xs text-gray-400")}
+                        className="ri-expand-up-down-line"
+                      />
                     )}
                   </div>
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody style={{ borderTop: "1px solid #e5e7eb" }}>
             {paginatedFormulas.map((formula) => {
               const isSelected = selectedFormulas.includes(formula.id);
               const isHighlighted = highlightedFormulas.includes(formula.id);
@@ -313,26 +371,40 @@ const FormulaDataGrid = ({
               return (
                 <tr
                   key={formula.id}
-                  className={`hover:bg-gray-50 cursor-pointer transition-colors ${rowClasses}`}
+                  style={mergeStyles(tw(rowClasses), tw("cursor-pointer"))}
                   onClick={() => !isDisabled && handleRowClick(formula.id)}
                 >
-                  <td className="px-3 py-2">
+                  <td style={tw("px-3 py-2")}>
                     <input
                       type="checkbox"
                       checked={isSelected}
                       onChange={() => handleCheckboxChange(formula.id)}
                       disabled={isDisabled}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50 cursor-pointer"
+                      aria-label={`Select ${formula.name || "formula"}`}
+                      style={mergeStyles(
+                        tw("rounded border-gray-300 cursor-pointer"),
+                        {
+                          opacity: isDisabled ? 0.5 : 1,
+                        }
+                      )}
                     />
                   </td>
                   {displayColumns.map((col) => (
-                    <td key={col} className="px-3 py-2 text-sm font-medium">
+                    <td key={col} style={tw("px-3 py-2 text-sm font-medium")}>
                       {col === "name" ? (
-                        <span className="font-medium flex items-center gap-1.5">
+                        <span
+                          style={mergeStyles(
+                            tw("font-medium flex items-center"),
+                            { gap: "6px" }
+                          )}
+                        >
                           {renderCellValue(formula, col)}
                           {isHighlighted && (
                             <i
-                              className={`ri-check-line text-base ${selectionStyles.selected.icon}`}
+                              style={tw(
+                                `text-base ${selectionStyles.selected.icon}`
+                              )}
+                              className="ri-check-line"
                             ></i>
                           )}
                         </span>
@@ -350,22 +422,32 @@ const FormulaDataGrid = ({
 
       {/* Pagination controls */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-500">
+        <div style={tw("flex items-center justify-between")}>
+          <div style={tw("text-sm text-gray-500")}>
             Showing {startIndex + 1} to{" "}
             {Math.min(endIndex, sortedFormulas.length)} of{" "}
             {sortedFormulas.length} formulas
           </div>
-          <div className="flex items-center space-x-2">
+          <div style={mergeStyles(tw("flex items-center"), { gap: "8px" })}>
             <button
+              type="button"
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              aria-label="Go to previous page"
+              style={mergeStyles(
+                tw(
+                  "px-3 py-1 text-sm border border-gray-300 rounded-md cursor-pointer"
+                ),
+                {
+                  opacity: currentPage === 1 ? 0.5 : 1,
+                  cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                }
+              )}
             >
               <i className="ri-arrow-left-line" />
             </button>
 
-            <div className="flex items-center space-x-1">
+            <div style={mergeStyles(tw("flex items-center"), { gap: "4px" })}>
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                 let pageNum: number;
                 if (totalPages <= 5) {
@@ -377,15 +459,18 @@ const FormulaDataGrid = ({
                 } else {
                   pageNum = currentPage - 2 + i;
                 }
+                const isCurrentPage = currentPage === pageNum;
                 return (
                   <button
+                    type="button"
                     key={pageNum}
                     onClick={() => setCurrentPage(pageNum)}
-                    className={`px-3 py-1 text-sm border rounded-md cursor-pointer ${
-                      currentPage === pageNum
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "border-gray-300 hover:bg-gray-50"
-                    }`}
+                    style={mergeStyles(
+                      tw("px-3 py-1 text-sm border rounded-md cursor-pointer"),
+                      isCurrentPage
+                        ? tw("bg-blue-600 text-white border-blue-600")
+                        : tw("border-gray-300")
+                    )}
                   >
                     {pageNum}
                   </button>
@@ -394,9 +479,20 @@ const FormulaDataGrid = ({
             </div>
 
             <button
+              type="button"
               onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
               disabled={currentPage === totalPages}
-              className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              aria-label="Go to next page"
+              style={mergeStyles(
+                tw(
+                  "px-3 py-1 text-sm border border-gray-300 rounded-md cursor-pointer"
+                ),
+                {
+                  opacity: currentPage === totalPages ? 0.5 : 1,
+                  cursor:
+                    currentPage === totalPages ? "not-allowed" : "pointer",
+                }
+              )}
             >
               <i className="ri-arrow-right-line" />
             </button>

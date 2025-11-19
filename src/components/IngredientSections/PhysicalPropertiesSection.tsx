@@ -1,11 +1,13 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import type { Ingredient } from "../../services/pega";
+import { tw } from "../../utils/tailwindToInline";
 
 interface PhysicalPropertiesSectionProps {
   ingredient: Ingredient;
 }
 
 const PhysicalPropertiesSection = ({
-  ingredient: _ingredient,
+  ingredient, // eslint-disable-line @typescript-eslint/no-unused-vars
 }: PhysicalPropertiesSectionProps) => {
   // Mock physical properties data
   const mockData = {
@@ -55,25 +57,31 @@ const PhysicalPropertiesSection = ({
   ];
 
   return (
-    <div className="space-y-6">
+    <div style={tw("space-y-6")}>
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <h3 style={tw("text-lg font-semibold text-gray-900 mb-4")}>
           Physical Properties
         </h3>
-        <div className="space-y-4">
+        <div style={tw("space-y-4")}>
           {properties.map((property) => (
             <div
               key={property.label}
-              className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg"
+              style={tw("flex items-start space-x-3 p-3 bg-gray-50 rounded-lg")}
             >
-              <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <div
+                style={tw(
+                  "flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center"
+                )}
+              >
                 <i className={`${property.icon} text-blue-600 text-sm`}></i>
               </div>
-              <div className="flex-1 min-w-0">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+              <div style={tw("flex-1 min-w-0")}>
+                <label
+                  style={tw("block text-sm font-medium text-gray-700 mb-1")}
+                >
                   {property.label}
                 </label>
-                <p className="text-sm text-gray-900">{property.value}</p>
+                <p style={tw("text-sm text-gray-900")}>{property.value}</p>
               </div>
             </div>
           ))}
@@ -82,17 +90,17 @@ const PhysicalPropertiesSection = ({
 
       {/* Safety Information */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <h3 style={tw("text-lg font-semibold text-gray-900 mb-4")}>
           Safety & Handling
         </h3>
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <div className="flex items-start">
+        <div style={tw("bg-yellow-50 border border-yellow-200 rounded-lg p-4")}>
+          <div style={tw("flex items-start")}>
             <i className="ri-alert-line text-yellow-600 mt-0.5 mr-2"></i>
             <div>
-              <p className="text-sm text-yellow-800 font-medium">
+              <p style={tw("text-sm text-yellow-800 font-medium")}>
                 Safety Considerations
               </p>
-              <ul className="text-sm text-yellow-700 mt-2 space-y-1">
+              <ul style={tw("text-sm text-yellow-700 mt-2 space-y-1")}>
                 <li>
                   • Flash point: {mockData.flashPoint} - Keep away from heat
                   sources
@@ -108,14 +116,14 @@ const PhysicalPropertiesSection = ({
 
       {/* Test Methods */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <h3 style={tw("text-lg font-semibold text-gray-900 mb-4")}>
           Test Methods
         </h3>
-        <div className="bg-gray-50 rounded-lg p-4">
-          <p className="text-sm text-gray-600 mb-3">
+        <div style={tw("bg-gray-50 rounded-lg p-4")}>
+          <p style={tw("text-sm text-gray-600 mb-3")}>
             Standard test methods used for property determination:
           </p>
-          <ul className="text-sm text-gray-700 space-y-1">
+          <ul style={tw("text-sm text-gray-700 space-y-1")}>
             <li>• Density: ASTM D4052</li>
             <li>• Refractive Index: ASTM D1218</li>
             <li>• Flash Point: ASTM D93</li>

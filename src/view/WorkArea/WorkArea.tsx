@@ -1,15 +1,21 @@
+/* eslint-disable @typescript-eslint/no-use-before-define, jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
+import AttributeSelector from "../../components/AttributeSelector";
+import Badge from "../../components/Badge";
+import Button from "../../components/Button";
 import DataGrid from "../../components/DataGrid";
 import type { Column } from "../../components/DataGrid";
-import AttributeSelector from "../../components/AttributeSelector";
 import Dialog from "../../components/Dialog";
-import Modal from "../../components/Modal";
-import FormulaModal from "../../components/FormulaModal";
-import FormulaDetailsModal from "../../components/FormulaDetailsModal";
+import { useDilution } from "../../components/dilution";
 import ExcelUploadModal from "../../components/ExcelUploadModal";
-import Button from "../../components/Button";
-import Badge from "../../components/Badge";
+import FormulaDetailsModal from "../../components/FormulaDetailsModal";
+import FormulaModal from "../../components/FormulaModal";
+import Modal from "../../components/Modal";
+import { useExcelUpload } from "../../hooks/useExcelUpload";
+import { useFormulaDetails } from "../../hooks/useFormulaDetails";
+import { useWorkspace } from "../../hooks/useWorkspace";
+import { useWorkspaceHistory } from "../../hooks/useWorkspaceHistory";
 import { PegaService } from "../../services/pega";
 import type {
   Formula,
@@ -17,25 +23,21 @@ import type {
   IngredientAttribute,
 } from "../../services/pega";
 import { eventBus } from "../../utils/bus";
+import { exportData } from "../../utils/exportUtils";
 import {
   calculateTotals,
   getEmptyStateData,
 } from "../../utils/formulaCalculations";
-import { useWorkAreaState } from "./hooks/useWorkAreaState";
-import { useDataGridHandlers } from "./hooks/useDataGridHandlers";
-import { useFormulaOperations } from "./hooks/useFormulaOperations";
-import { useFormulaColumnHandlers } from "./components/FormulaColumnHandlers";
-import { useDilution } from "../../components/dilution";
 import {
   generateNewFormulaId,
   isOwnFormula,
 } from "../../utils/formulaIdGenerator";
+import { tw, mergeStyles } from "../../utils/tailwindToInline";
 import type { WorkspaceState } from "../../utils/workspaceManager";
-import { exportData } from "../../utils/exportUtils";
-import { useWorkspace } from "../../hooks/useWorkspace";
-import { useWorkspaceHistory } from "../../hooks/useWorkspaceHistory";
-import { useFormulaDetails } from "../../hooks/useFormulaDetails";
-import { useExcelUpload } from "../../hooks/useExcelUpload";
+import { useFormulaColumnHandlers } from "./components/FormulaColumnHandlers";
+import { useDataGridHandlers } from "./hooks/useDataGridHandlers";
+import { useFormulaOperations } from "./hooks/useFormulaOperations";
+import { useWorkAreaState } from "./hooks/useWorkAreaState";
 
 const WorkArea = () => {
   // Workspace context - manages data isolation between tabs
@@ -363,7 +365,6 @@ const WorkArea = () => {
   // Use Excel upload hook
   const {
     isExcelUploadModalOpen,
-    selectedFormulaId,
     availableIngredients,
     handleUploadExcel,
     handleUploadIngredients,
@@ -429,7 +430,7 @@ const WorkArea = () => {
       // Use getDisplayColumns directly without adding to dependencies
       // This is safe because getDisplayColumns is defined in the component
       const exportColumns = getDisplayColumns();
-      const exportData_impl = getEmptyStateData(tableData, false); // Get all data, not empty state
+      const exportDataImpl = getEmptyStateData(tableData, false); // Get all data, not empty state
 
       const fileName = editableFormula
         ? `formula-${editableFormula.replace(/\s+/g, "_")}-${
@@ -440,7 +441,7 @@ const WorkArea = () => {
       exportData(
         {
           columns: exportColumns,
-          data: exportData_impl,
+          data: exportDataImpl,
           filename: fileName,
         },
         "excel"
@@ -452,6 +453,24 @@ const WorkArea = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tableData, editableFormula]);
+
+  // Helper to get badge variant for formula status
+  const getStatusBadgeVariant = (
+    status: string
+  ): "success" | "warning" | "default" => {
+    if (status === "active") return "success";
+    if (status === "draft") return "warning";
+    return "default";
+  };
+
+  // Helper to determine attribute column type
+  const getAttributeColumnType = (
+    attrType: string | undefined
+  ): "text" | "number" | "select" => {
+    if (attrType === "number") return "number";
+    if (attrType === "select") return "select";
+    return "text";
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -478,15 +497,11 @@ const WorkArea = () => {
     };
 
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Sync workspace data when active workspace changes (tab switch)
   useEffect(() => {
-    console.log(
-      "🔄 Workspace changed - restoring data for:",
-      workspace.activeTabId
-    );
-
     // Restore workspace data
     const wsData = workspace.activeWorkspace;
     setColumns(wsData.columns);
@@ -500,12 +515,15 @@ const WorkArea = () => {
     const formulaIds = wsData.selectedFormulas.map((f) => f.id);
     setSelectedFormulas(formulaIds);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [workspace.activeTabId]);
+  }, [
+    workspace.activeTabId,
+    setAttributes,
+    setAvailableFormulas,
+    setIngredients,
+  ]);
 
   // Save workspace data whenever it changes
   useEffect(() => {
-    console.log("💾 Saving workspace data...");
-
     // Convert string[] to Formula[] for workspace context
     const selectedFormulaObjects = formulas.filter((f) =>
       selectedFormulas.includes(f.id)
@@ -533,7 +551,6 @@ const WorkArea = () => {
 
   // Sync selected formula IDs with LibraryPanel whenever they change
   useEffect(() => {
-    console.log("🔄 selectedFormulaIds changed:", selectedFormulaIds);
     eventBus.emit("formula-selections-updated", {
       count: selectedFormulaIds.length,
       selectedIds: selectedFormulaIds,
@@ -922,16 +939,7 @@ const WorkArea = () => {
       );
     };
 
-    // Add handler for expand/collapse toggle
-    const handleToggleFormulaExpansion = (formulaId: string) => {
-      setTableData((prev) =>
-        prev.map((row) =>
-          row.formulaId === formulaId && row.isFormula
-            ? { ...row, isExpanded: !row.isExpanded }
-            : row
-        )
-      );
-    };
+    // Removed unused _handleToggleFormulaExpansion (duplicate exists at line 1982)
 
     const handleAttributeSelected = (data: {
       attribute: IngredientAttribute;
@@ -1049,7 +1057,7 @@ const WorkArea = () => {
             case "boolean":
               sampleValue = Math.random() > 0.5 ? "Yes" : "No";
               break;
-            case "select":
+            case "select": {
               const options = data.attribute.values || [
                 "Option A",
                 "Option B",
@@ -1057,6 +1065,7 @@ const WorkArea = () => {
               ];
               sampleValue = options[Math.floor(Math.random() * options.length)];
               break;
+            }
             default:
               sampleValue = `Sample ${data.attribute.name}`;
           }
@@ -1638,7 +1647,7 @@ const WorkArea = () => {
   useEffect(() => {
     // Handler to capture current workspace state
     const handleWorkspaceStateRequest = () => {
-      const state = {
+      const workspaceSnapshot = {
         // DataGrid Core State
         columns,
         tableData,
@@ -1669,58 +1678,64 @@ const WorkArea = () => {
       };
 
       // Emit the captured state
-      eventBus.emit("workspace-state-ready", { state });
-      console.log("📦 Workspace state captured:", state);
+      eventBus.emit("workspace-state-ready", { state: workspaceSnapshot });
+      console.log("📦 Workspace state captured:", workspaceSnapshot);
     };
 
     // Handler to restore workspace state
-    const handleWorkspaceStateLoad = ({ state }: { state: WorkspaceState }) => {
-      console.log("📥 Loading workspace state:", state);
+    const handleWorkspaceStateLoad = ({
+      state: workspaceState,
+    }: {
+      state: WorkspaceState;
+    }) => {
+      console.log("📥 Loading workspace state:", workspaceState);
 
       try {
         // Restore DataGrid Core State
-        if (state.columns) setColumns(state.columns as Column[]);
-        if (state.tableData)
-          setTableData(state.tableData as Record<string, unknown>[]);
+        if (workspaceState.columns)
+          setColumns(workspaceState.columns as Column[]);
+        if (workspaceState.tableData)
+          setTableData(workspaceState.tableData as Record<string, unknown>[]);
 
         // Restore Formula State
-        if (state.formulas) setFormulas(state.formulas as Formula[]);
-        if (state.availableFormulas)
-          setAvailableFormulas(state.availableFormulas as Formula[]);
-        if (state.selectedFormulaIds)
-          setSelectedFormulaIds(state.selectedFormulaIds);
-        if (state.editableFormula !== undefined)
-          setEditableFormula(state.editableFormula);
+        if (workspaceState.formulas)
+          setFormulas(workspaceState.formulas as Formula[]);
+        if (workspaceState.availableFormulas)
+          setAvailableFormulas(workspaceState.availableFormulas as Formula[]);
+        if (workspaceState.selectedFormulaIds)
+          setSelectedFormulaIds(workspaceState.selectedFormulaIds);
+        if (workspaceState.editableFormula !== undefined)
+          setEditableFormula(workspaceState.editableFormula);
 
         // Restore Ingredient State
-        if (state.ingredients)
-          setIngredients(state.ingredients as Ingredient[]);
+        if (workspaceState.ingredients)
+          setIngredients(workspaceState.ingredients as Ingredient[]);
 
         // Restore Attribute State
-        if (state.attributes)
-          setAttributes(state.attributes as IngredientAttribute[]);
-        if (state.selectedAttributes)
-          setSelectedAttributes(state.selectedAttributes);
+        if (workspaceState.attributes)
+          setAttributes(workspaceState.attributes as IngredientAttribute[]);
+        if (workspaceState.selectedAttributes)
+          setSelectedAttributes(workspaceState.selectedAttributes);
 
         // Restore UI State
-        if (state.groupedByColumn !== undefined)
-          setGroupedByColumn(state.groupedByColumn);
+        if (workspaceState.groupedByColumn !== undefined)
+          setGroupedByColumn(workspaceState.groupedByColumn);
 
         // Emit events to sync with other components
-        const ingredientsList = state.ingredients as Ingredient[];
+        const ingredientsList = workspaceState.ingredients as Ingredient[];
         eventBus.emit("work-area-updated", {
           ingredients: ingredientsList?.map((ing) => ing.name) || [],
         });
 
-        if (state.selectedAttributes) {
+        if (workspaceState.selectedAttributes) {
           eventBus.emit("work-area-attributes-updated", {
-            selectedAttributes: state.selectedAttributes,
+            selectedAttributes: workspaceState.selectedAttributes,
           });
         }
 
-        if (state.selectedFormulaIds) {
+        if (workspaceState.selectedFormulaIds) {
           eventBus.emit("formula-selections-updated", {
-            selectedFormulas: state.selectedFormulaIds,
+            selectedFormulas: workspaceState.selectedFormulaIds,
           });
         }
 
@@ -1867,12 +1882,7 @@ const WorkArea = () => {
         key: newColumnId,
         title: attribute.name,
         attributeId: attribute.id,
-        type:
-          attribute.type === "number"
-            ? "number"
-            : attribute.type === "select"
-            ? "select"
-            : "text",
+        type: getAttributeColumnType(attribute.type),
         sortable: true,
         editable: false,
         group: "Attributes",
@@ -2023,8 +2033,8 @@ const WorkArea = () => {
         deletedFormulaIds.forEach((id) => {
           pendingFormulaIds.current?.delete(id);
         });
-        setSelectedFormulaIds((prev) =>
-          prev.filter((id) => !deletedFormulaIds.includes(id))
+        setSelectedFormulaIds((prevSelected) =>
+          prevSelected.filter((id) => !deletedFormulaIds.includes(id))
         );
         console.log("✅ Removed formulas from tracking:", deletedFormulaIds);
       }
@@ -2063,27 +2073,21 @@ const WorkArea = () => {
           formulasToRemove.forEach((id) => {
             pendingFormulaIds.current?.delete(id);
           });
-          setSelectedFormulaIds((prev) =>
-            prev.filter((id) => !formulasToRemove.includes(id))
+          setSelectedFormulaIds((prevSelected) =>
+            prevSelected.filter((id) => !formulasToRemove.includes(id))
           );
         }
       }
 
       // Also remove child ingredients of deleted formula groups
-      const newData = prev.filter((row) => {
-        // Keep rows that are not in the delete list
-        if (!rowIds.includes(row.id)) {
-          // But also remove child ingredients if their parent formula is being deleted
-          if (
+      const newData = prev.filter(
+        (row) =>
+          !rowIds.includes(row.id) &&
+          !(
             row.parentFormulaId &&
             deletedFormulaIds.includes(row.parentFormulaId)
-          ) {
-            return false;
-          }
-          return true;
-        }
-        return false;
-      });
+          )
+      );
 
       return newData;
     });
@@ -2199,9 +2203,9 @@ const WorkArea = () => {
   };
 
   return (
-    <div className="h-full bg-white flex flex-col">
+    <div style={tw("h-full bg-white flex flex-col")}>
       {/* Data Grid */}
-      <div className="flex-1 overflow-hidden">
+      <div style={tw("flex-1 overflow-hidden")}>
         <DataGrid
           columns={getDisplayColumns()}
           data={getEmptyStateData(tableData, hasIngredients)}
@@ -2237,8 +2241,8 @@ const WorkArea = () => {
           editableFormula={editableFormula}
           className="h-full"
           showEmptyState={!hasIngredients}
-          enableRowReordering={true}
-          enableBulkSelection={true}
+          enableRowReordering
+          enableBulkSelection
           dilutionState={dilutionState}
           // Toolbar actions
           onToolbarAddFormula={handleAddFormulaColumn}
@@ -2247,9 +2251,14 @@ const WorkArea = () => {
           onToolbarSend={handleToolbarSend}
           onToolbarUndo={handleUndoAction}
           onToolbarExport={handleExportToExcel}
+          onToolbarComplianceCheck={() => {
+            // Handle compliance check action
+            console.log("Compliance check initiated");
+          }}
           toolbarCanUndo={undoState.canUndo}
           toolbarUndoCount={undoState.undoCount}
           toolbarCanSend={!!activeFormula}
+          toolbarCanComplianceCheck={!!activeFormula}
         />
       </div>
 
@@ -2291,31 +2300,28 @@ const WorkArea = () => {
         onClose={() => setShowFormulaSelector(false)}
         title="Load Formula"
         size="lg"
+        noPadding
       >
-        <div className="p-4 max-h-80 overflow-y-auto">
-          <div className="space-y-2">
+        <div style={tw("p-4 max-h-80 overflow-y-auto")}>
+          <div style={mergeStyles({ gap: "0.5rem" }, tw("flex flex-col"))}>
             {availableFormulas.map((formula) => (
               <div
                 key={formula.id}
-                className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+                style={tw(
+                  "flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+                )}
                 onClick={() => handleLoadFormulaFromModal(formula)}
               >
                 <div>
-                  <div className="font-medium text-gray-900">
+                  <div style={tw("font-medium text-gray-900")}>
                     {formula.name}
                   </div>
-                  <div className="text-sm text-gray-500">
+                  <div style={tw("text-sm text-gray-500")}>
                     v{formula.version} • {formula.category}
                   </div>
                 </div>
                 <Badge
-                  variant={
-                    formula.status === "active"
-                      ? "success"
-                      : formula.status === "draft"
-                      ? "warning"
-                      : "default"
-                  }
+                  variant={getStatusBadgeVariant(formula.status)}
                   size="sm"
                 >
                   {formula.status}

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
+import { tw, mergeStyles } from "../../utils/tailwindToInline";
 
 interface WorkspaceTab {
   id: string;
@@ -145,11 +146,17 @@ const WorkspaceTabs = () => {
   };
 
   return (
-    <div className="relative flex items-center gap-2">
+    <div
+      style={mergeStyles(tw("relative flex items-center"), { gap: "0.5rem" })}
+    >
       {tabs.map((tab) => (
-        <div key={tab.id} className="relative">
+        <div key={tab.id} style={tw("relative")}>
           {editingTabId === tab.id ? (
-            <div className="flex items-center px-4 py-2 bg-purple-50 border-l-3 border-purple-500">
+            <div
+              style={tw(
+                "flex items-center px-4 py-2 bg-purple-50 border-l-3 border-purple-500"
+              )}
+            >
               <input
                 ref={inputRef}
                 type="text"
@@ -157,29 +164,50 @@ const WorkspaceTabs = () => {
                 onChange={(e) => setEditingName(e.target.value)}
                 onKeyDown={handleKeyDown}
                 onBlur={handleSaveRename}
-                className="min-w-[100px] px-2 text-sm font-medium text-purple-800 bg-transparent border-b border-purple-400 outline-none"
+                style={mergeStyles(
+                  tw(
+                    "px-2 text-sm font-medium text-purple-800 bg-transparent border-b border-purple-400 outline-none"
+                  ),
+                  { minWidth: "100px" }
+                )}
                 maxLength={20}
               />
             </div>
           ) : (
             <button
+              type="button"
               onClick={() => setActiveTabId(tab.id)}
               onDoubleClick={() => handleRenameTab(tab.id)}
-              className={`group relative px-4 py-2 min-w-[120px] text-left font-medium transition-all text-sm ${
+              style={mergeStyles(
+                tw(
+                  "group relative px-4 py-2 text-left font-medium transition-all text-sm border-l-3"
+                ),
+                { minWidth: "120px" },
                 activeTabId === tab.id
-                  ? "bg-purple-100 text-purple-800 border-l-3 border-purple-600"
-                  : "bg-transparent text-gray-600 hover:bg-gray-50 border-l-3 border-transparent"
-              }`}
+                  ? tw("bg-purple-100 text-purple-800 border-purple-600")
+                  : tw(
+                      "bg-transparent text-gray-600 hover:bg-gray-50 border-transparent"
+                    )
+              )}
               title={`Last modified: ${formatTime(tab.lastModified)}`}
             >
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
+              <div
+                style={mergeStyles(tw("flex items-center justify-between"), {
+                  gap: "0.75rem",
+                })}
+              >
+                <div
+                  style={mergeStyles(tw("flex items-center"), {
+                    gap: "0.5rem",
+                  })}
+                >
                   <span
-                    className={`material-symbols-rounded ${
+                    style={tw(
                       activeTabId === tab.id
                         ? "text-purple-600"
                         : "text-gray-400"
-                    }`}
+                    )}
+                    className="material-symbols-rounded"
                   >
                     folder
                   </span>
@@ -187,8 +215,11 @@ const WorkspaceTabs = () => {
                 </div>
                 {!tab.isDefault && (
                   <button
+                    type="button"
                     onClick={(e) => handleCloseTab(tab.id, e)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-red-500"
+                    style={tw(
+                      "opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-red-500"
+                    )}
                     title="Close workspace"
                   >
                     <span className="material-symbols-rounded">close</span>
@@ -201,32 +232,55 @@ const WorkspaceTabs = () => {
       ))}
 
       {/* More Options Button */}
-      <div className="relative" ref={menuRef}>
+      <div style={tw("relative")} ref={menuRef}>
         <button
+          type="button"
           onClick={() => setShowMenu(!showMenu)}
-          className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 transition-colors"
+          style={mergeStyles(
+            tw(
+              "flex items-center justify-center rounded hover:bg-gray-100 transition-colors"
+            ),
+            { width: "2rem", height: "2rem" }
+          )}
           title="Workspace options"
         >
-          <span className="material-symbols-rounded text-gray-500">
+          <span
+            style={tw("text-gray-500")}
+            className="material-symbols-rounded"
+          >
             more_vert
           </span>
         </button>
 
         {/* Dropdown Menu */}
         {showMenu && (
-          <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-2 min-w-[180px] z-50">
+          <div
+            style={mergeStyles(
+              tw(
+                "absolute top-full right-0 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50"
+              ),
+              { marginTop: "0.5rem", minWidth: "180px" }
+            )}
+          >
             <button
+              type="button"
               onClick={() => {
                 handleAddTab();
                 setShowMenu(false);
               }}
               disabled={tabs.length >= MAX_TABS}
-              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              style={mergeStyles(
+                tw(
+                  "w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                ),
+                { gap: "0.5rem" }
+              )}
             >
               <span className="material-symbols-rounded">add</span>
               Add Workspace ({tabs.length}/{MAX_TABS})
             </button>
             <button
+              type="button"
               onClick={() => {
                 const tab = tabs.find((t) => t.id === activeTabId);
                 if (tab) {
@@ -234,7 +288,12 @@ const WorkspaceTabs = () => {
                 }
                 setShowMenu(false);
               }}
-              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+              style={mergeStyles(
+                tw(
+                  "w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                ),
+                { gap: "0.5rem" }
+              )}
             >
               <span className="material-symbols-rounded">edit</span>
               Rename Active

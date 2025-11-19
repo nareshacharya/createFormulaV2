@@ -4,8 +4,8 @@
  */
 
 import { useEffect } from "react";
-import { eventBus } from "../../../utils/bus";
 import type { Formula, Ingredient, IngredientAttribute } from "../../../services/pega";
+import { eventBus } from "../../../utils/bus";
 
 interface UseWorkAreaEventsProps {
     handleIngredientClick: (ingredient: Ingredient) => void;

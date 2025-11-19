@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 
 // Lightweight types for Pega data structures
 export interface Ingredient {
@@ -102,15 +103,48 @@ export interface IngredientAttribute {
   examples?: string[];
 }
 
+// Project types
+export interface Project {
+  id: string;
+  name: string;
+  projectId: string;
+  displayId: string;
+  description: string;
+  category: string;
+  status: 'active' | 'in-progress' | 'planning' | 'archived';
+  createdBy: string;
+  createdDate: string;
+  lastModified: string;
+  lastModifiedBy: string;
+  region: string;
+  country: string;
+  currencies: string[];
+  defaultCurrency: string;
+  numberOfFormulas: number;
+  numberOfCategories: number;
+  budget?: number;
+  budgetCurrency?: string;
+  startDate: string;
+  endDate: string;
+  manager: string;
+  team: string[];
+  tags: string[];
+  notes?: string;
+  progress: number; // 0-100 percentage
+  priority: 'critical' | 'high' | 'medium' | 'low';
+  visibility: 'public' | 'private';
+  archived: boolean;
+}
+
 // Stubbed service functions that mirror DX API read/write and Data Page fetches
 export class PegaService {
   // TODO: Implement actual DX API calls
-  static async getIngredients(filters?: any): Promise<Ingredient[]> {
+  static async getIngredients(_filters?: Record<string, unknown>): Promise<Ingredient[]> {
     // TODO: Replace with actual API call
     return mockIngredients;
   }
 
-  static async getFormulas(filters?: any): Promise<Formula[]> {
+  static async getFormulas(_filters?: Record<string, unknown>): Promise<Formula[]> {
     // TODO: Replace with actual API call
     const { mockFormulas } = await import('../mocks/formulas');
     return mockFormulas as any;
@@ -130,7 +164,7 @@ export class PegaService {
     );
   }
 
-  static async searchFormulas(query: string, filters?: any): Promise<Formula[]> {
+  static async searchFormulas(query: string, _filters?: Record<string, unknown>): Promise<Formula[]> {
     // TODO: Replace with actual API call
     const { mockFormulas } = await import('../mocks/formulas');
     return mockFormulas.filter(formula =>
@@ -139,13 +173,75 @@ export class PegaService {
     ) as any;
   }
 
-  static async searchAttributes(query: string, filters?: any): Promise<IngredientAttribute[]> {
+  static async searchAttributes(query: string, _filters?: Record<string, unknown>): Promise<IngredientAttribute[]> {
     // TODO: Replace with actual API call
     const { mockIngredientAttributes } = await import('../mocks/ingredientAttributes');
     return mockIngredientAttributes.filter(attribute =>
       attribute.name.toLowerCase().includes(query.toLowerCase()) ||
       attribute.description.toLowerCase().includes(query.toLowerCase())
     );
+  }
+
+  // Project-related methods
+  static async getProjects(_filters?: Record<string, unknown>): Promise<Project[]> {
+    // TODO: Replace with actual API call
+    const { mockProjects } = await import('../mocks/projects');
+    return mockProjects as any;
+  }
+
+  static async getProject(id: string): Promise<Project | null> {
+    // TODO: Replace with actual API call
+    const { mockProjects } = await import('../mocks/projects');
+    return mockProjects.find(p => p.id === id || p.projectId === id) as any || null;
+  }
+
+  static async searchProjects(query: string, _filters?: Record<string, unknown>): Promise<Project[]> {
+    // TODO: Replace with actual API call
+    const { mockProjects } = await import('../mocks/projects');
+    return mockProjects.filter(project =>
+      project.name.toLowerCase().includes(query.toLowerCase()) ||
+      project.description.toLowerCase().includes(query.toLowerCase()) ||
+      project.displayId.toLowerCase().includes(query.toLowerCase()) ||
+      project.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
+    ) as any;
+  }
+
+  static async getProjectsByManager(manager: string): Promise<Project[]> {
+    // TODO: Replace with actual API call
+    const { mockProjects } = await import('../mocks/projects');
+    return mockProjects.filter(p => p.manager === manager || p.team.includes(manager)) as any;
+  }
+
+  static async getProjectsByRegion(region: string): Promise<Project[]> {
+    // TODO: Replace with actual API call
+    const { mockProjects } = await import('../mocks/projects');
+    return mockProjects.filter(p => p.region === region) as any;
+  }
+
+  static async getProjectsByStatus(status: string): Promise<Project[]> {
+    // TODO: Replace with actual API call
+    const { mockProjects } = await import('../mocks/projects');
+    return mockProjects.filter(p => p.status === status) as any;
+  }
+
+  static async createProject(project: Omit<Project, 'id'>): Promise<Project> {
+    // TODO: Replace with actual API call
+    return {
+      ...project,
+      id: `PROJ-${Date.now()}`,
+    } as any;
+  }
+
+  static async updateProject(id: string, updates: Partial<Project>): Promise<Project> {
+    // TODO: Replace with actual API call
+    const { mockProjects } = await import('../mocks/projects');
+    const existing = mockProjects.find(p => p.id === id || p.projectId === id);
+    return { ...existing!, ...updates } as any;
+  }
+
+  static async deleteProject(id: string): Promise<boolean> {
+    // TODO: Replace with actual API call
+    return true;
   }
 
   static async createFormula(formula: Omit<Formula, 'id'>): Promise<Formula> {
@@ -495,43 +591,9 @@ const mockIngredients: Ingredient[] = [
   }
 ];
 
-// Mock data for development
-const mockFormulas: Formula[] = [
-  {
-    id: 'FORM001',
-    name: 'Fresh Citrus Blend',
-    version: '1.0',
-    status: 'active',
-    createdBy: 'John Doe',
-    lastUpdated: '2024-01-15',
-    category: '',
-    totalPercentage: 0,
-    ingredients: [
-      { ingredientId: 'INGR8007758', name: '', percentage: 15.5, type: '' },
-      { ingredientId: 'INGR8007759', name: '', percentage: 8.2, type: '' }
-    ],
-    notes: { top: [], middle: [], base: [] },
-    description: ''
-  }
-];
+// Mock data for development - removed unused _mockFormulas and _mockAttributes
 
-const mockAttributes: IngredientAttribute[] = [
-  {
-    id: 'ATTR001',
-    name: 'Odor Profile',
-    type: 'select',
-    description: '',
-    category: '',
-    isRequired: false,
-    values: ['Fresh', 'Floral', 'Woody', 'Citrus', 'Spicy']
-  },
-  {
-    id: 'ATTR002',
-    name: 'Volatility',
-    type: 'select',
-    description: '',
-    category: '',
-    isRequired: false,
-    values: ['Top Note', 'Middle Note', 'Base Note']
-  }
-];
+/* Removed unused mock data:
+const _mockFormulas: Formula[] = [...];
+const _mockAttributes: IngredientAttribute[] = [...];
+*/

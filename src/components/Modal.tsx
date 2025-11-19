@@ -1,4 +1,6 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import { useEffect } from "react";
+import { tw } from "../utils/tailwindToInline";
 
 interface ModalProps {
   isOpen: boolean;
@@ -8,6 +10,7 @@ interface ModalProps {
   size?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl";
   footerActions?: React.ReactNode;
   headerActions?: React.ReactNode;
+  noPadding?: boolean;
 }
 
 const Modal = ({
@@ -18,6 +21,7 @@ const Modal = ({
   size = "md",
   footerActions,
   headerActions,
+  noPadding = false,
 }: ModalProps) => {
   useEffect(() => {
     if (isOpen) {
@@ -33,54 +37,112 @@ const Modal = ({
 
   if (!isOpen) return null;
 
-  const sizeClasses = {
-    sm: "max-w-md",
-    md: "max-w-lg",
-    lg: "max-w-2xl",
-    xl: "max-w-4xl",
-    "2xl": "max-w-6xl",
-    "3xl": "max-w-7xl",
-    "4xl": "max-w-[90rem]",
-    "5xl": "max-w-[100rem]",
+  const sizeStyles: Record<string, string> = {
+    sm: "448px", // max-w-md = 28rem
+    md: "512px", // max-w-lg = 32rem
+    lg: "672px", // max-w-2xl = 42rem
+    xl: "896px", // max-w-4xl = 56rem
+    "2xl": "1152px", // max-w-6xl = 72rem
+    "3xl": "1280px", // max-w-7xl = 80rem
+    "4xl": "1440px", // max-w-[90rem]
+    "5xl": "1600px", // max-w-[100rem]
   };
 
   return (
-    <div className="fixed inset-0 z-[10000] overflow-y-auto">
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 9999,
+        overflowY: "auto",
+      }}
+    >
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity -z-10"
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          zIndex: 9998,
+        }}
         onClick={onClose}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => e.key === "Escape" && onClose()}
+        aria-label="Close modal"
       />
 
       {/* Modal */}
-      <div className="flex min-h-full items-center justify-center p-4 relative z-10">
+      <div
+        style={{
+          display: "flex",
+          minHeight: "100%",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "16px",
+          position: "relative",
+          zIndex: 9999,
+        }}
+      >
         <div
-          className={`
-            relative bg-white rounded-lg shadow-xl w-full ${sizeClasses[size]}
-            max-h-[90vh] flex flex-col
-          `}
-          onClick={(e) => e.stopPropagation()}
+          style={{
+            ...tw("relative bg-white shadow-xl flex flex-col"),
+            width: "100%",
+            maxWidth: sizeStyles[size],
+            maxHeight: "90vh",
+            borderRadius: "8px",
+            overflow: "hidden",
+          }}
+          role="dialog"
+          aria-modal="true"
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
-            <div className="flex items-center space-x-4">
-              <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+          <div
+            style={tw(
+              "flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0"
+            )}
+          >
+            <div style={tw("flex items-center gap-4")}>
+              <h3 style={tw("text-lg font-semibold text-gray-900")}>{title}</h3>
             </div>
-            <div className="flex items-center space-x-2">{headerActions}</div>
+            <div style={tw("flex items-center gap-2")}>{headerActions}</div>
             <button
+              type="button"
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+              style={tw(
+                "text-gray-400 hover:text-gray-600 transition cursor-pointer"
+              )}
+              aria-label="Close"
             >
-              <span className="material-symbols-rounded text-xl">close</span>
+              <span className="material-symbols-rounded" style={tw("text-xl")}>
+                close
+              </span>
             </button>
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-auto relative p-6">{children}</div>
+          <div
+            style={{
+              ...tw("flex-1 overflow-auto relative"),
+              ...(noPadding ? {} : tw("p-6")),
+            }}
+          >
+            {children}
+          </div>
 
           {/* Footer */}
           {footerActions && (
-            <div className="flex-shrink-0 px-6 py-4 border-t border-gray-200 bg-gray-50">
+            <div
+              style={tw(
+                "flex-shrink-0 px-6 py-4 border-t border-gray-200 bg-gray-50"
+              )}
+            >
               {footerActions}
             </div>
           )}

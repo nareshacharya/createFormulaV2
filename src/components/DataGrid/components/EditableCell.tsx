@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import { useEffect, useRef } from "react";
 
 interface EditableCellProps {
@@ -72,11 +73,12 @@ export const EditableCell = ({
   // Render focused/editing state
   if (isFocused || isEditing) {
     // Show editValue when editing, actual value when just focused
-    const displayValue = isEditing
-      ? editValue
-      : typeof value === "number"
-      ? value.toFixed(5)
-      : String(value || "");
+    const getDisplayValue = (): string => {
+      if (isEditing) return editValue;
+      if (typeof value === "number") return value.toFixed(5);
+      return String(value || "");
+    };
+    const displayValue = getDisplayValue();
 
     return (
       <td
@@ -99,19 +101,20 @@ export const EditableCell = ({
             value={displayValue}
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={onKeyDown}
+            aria-label="Cell value editor"
             onInput={(e) => {
               // Only allow numbers, dot, and backspace
               const input = e.target as HTMLInputElement;
-              const value = input.value;
+              const inputValue = input.value;
               // Remove any non-numeric characters except dot
-              const cleaned = value.replace(/[^0-9.]/g, "");
+              const cleaned = inputValue.replace(/[^0-9.]/g, "");
               // Ensure only one dot
               const parts = cleaned.split(".");
               const sanitized =
                 parts.length > 2
-                  ? parts[0] + "." + parts.slice(1).join("")
+                  ? `${parts[0]}.${parts.slice(1).join("")}`
                   : cleaned;
-              if (value !== sanitized) {
+              if (inputValue !== sanitized) {
                 input.value = sanitized;
                 onChange(sanitized);
               }

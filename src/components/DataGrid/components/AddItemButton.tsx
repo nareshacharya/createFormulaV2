@@ -21,21 +21,21 @@ interface AddItemButtonProps {
   isTotal?: boolean;
 
   /** Whether the row is a formula group row */
-  isFormula?: boolean;
+  isFormula?: boolean; // Reserved for future use
 
   /** Callback when add button is clicked */
   onAdd: (rowId: string) => void;
 
   /** Additional CSS classes */
-  className?: string;
+  className?: string; // Reserved for future use
 }
 
 export const AddItemButton = ({
   rowId,
   isTotal = false,
-  isFormula: _isFormula = false,
+  isFormula: _isFormula, // Reserved for future use
   onAdd,
-  className: _className = "",
+  className: _className, // Reserved for future use
 }: AddItemButtonProps) => {
   // Don't show button for total rows
   if (isTotal) {
@@ -49,10 +49,11 @@ export const AddItemButton = ({
 
   return (
     <div
-      className="absolute left-0 top-full mt-1 z-20 flex justify-center w-full pointer-events-none"
+      className="absolute left-0 top-full mt-1 z-20 flex justify-center w-full pointer-events-none group"
       style={{ transform: "translateY(-16px)" }}
     >
       <button
+        type="button"
         onClick={handleClick}
         className="
           w-6 h-6 rounded-full flex items-center justify-center

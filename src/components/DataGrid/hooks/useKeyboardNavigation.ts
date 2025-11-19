@@ -140,7 +140,7 @@ export const useKeyboardNavigation = ({
             // Save the current editing cell before moving to new cell
             if (editingCell && (editingCell.rowId !== rowId || editingCell.columnId !== columnId)) {
                 const numericValue = parseFloat(editValue);
-                const finalValue = isNaN(numericValue) ? editValue : numericValue;
+                const finalValue = Number.isNaN(numericValue) ? editValue : numericValue;
                 onCellEdit?.(editingCell.rowId, editingCell.columnId, finalValue);
             }
 
@@ -185,6 +185,8 @@ export const useKeyboardNavigation = ({
                         nextIndex = editableCells.length - 1; // Wrap to last cell
                     }
                     break;
+                default:
+                    break;
             }
 
             const nextCell = editableCells[nextIndex];
@@ -212,7 +214,7 @@ export const useKeyboardNavigation = ({
 
         // Parse numeric value
         const numericValue = parseFloat(editValue);
-        const finalValue = isNaN(numericValue) ? editValue : numericValue;
+        const finalValue = Number.isNaN(numericValue) ? editValue : numericValue;
 
         onCellEdit?.(editingCell.rowId, editingCell.columnId, finalValue);
         setEditingCell(null);
@@ -228,6 +230,7 @@ export const useKeyboardNavigation = ({
             if (editingCell) {
                 switch (e.key) {
                     case "Enter":
+                    case "ArrowDown":
                         e.preventDefault();
                         saveCell();
                         navigateToCell("down");
@@ -236,11 +239,6 @@ export const useKeyboardNavigation = ({
                         e.preventDefault();
                         setEditingCell(null);
                         setEditValue("");
-                        break;
-                    case "ArrowDown":
-                        e.preventDefault();
-                        saveCell();
-                        navigateToCell("down");
                         break;
                     case "ArrowUp":
                         e.preventDefault();
@@ -273,6 +271,8 @@ export const useKeyboardNavigation = ({
                         e.preventDefault();
                         saveCell();
                         navigateToCell(e.shiftKey ? "left" : "right");
+                        break;
+                    default:
                         break;
                 }
             } else {
@@ -336,7 +336,7 @@ export const useKeyboardNavigation = ({
         const cleaned = value.replace(/[^0-9.]/g, '');
         // Ensure only one dot
         const parts = cleaned.split('.');
-        const sanitized = parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : cleaned;
+        const sanitized = parts.length > 2 ? `${parts[0]}.${parts.slice(1).join('')}` : cleaned;
         setEditValue(sanitized);
     }, []);
 

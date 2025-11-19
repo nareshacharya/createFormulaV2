@@ -1,6 +1,7 @@
-import { GroupingButton } from "../GroupingButton";
-import { isOwnFormula } from "../../../../utils/formulaIdGenerator";
+/* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
 import { useDataGridFeatures } from "../../../../hooks/useFeatureFlags";
+import { isOwnFormula } from "../../../../utils/formulaIdGenerator";
+import { GroupingButton } from "../GroupingButton";
 
 // Use Column type from DataGrid.tsx to match parent component
 interface Column {
@@ -122,6 +123,14 @@ export const ColumnHeaderCell = ({
     return "auto";
   };
 
+  // Helper to get sort arrow icon
+  const getSortArrowIcon = (): string => {
+    if (!sortConfig || sortConfig.key !== column.id) {
+      return "unfold_more";
+    }
+    return sortConfig.direction === "asc" ? "arrow_upward" : "arrow_downward";
+  };
+
   return (
     <th
       key={column.id}
@@ -226,27 +235,16 @@ export const ColumnHeaderCell = ({
               )}
             {column.sortable && (
               <button
+                type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   onSort(column.id);
                 }}
                 className="text-gray-400 hover:text-gray-600"
               >
-                {sortConfig?.key === column.id ? (
-                  sortConfig.direction === "asc" ? (
-                    <span className="material-symbols-rounded text-xs">
-                      arrow_upward
-                    </span>
-                  ) : (
-                    <span className="material-symbols-rounded text-xs">
-                      arrow_downward
-                    </span>
-                  )
-                ) : (
-                  <span className="material-symbols-rounded text-xs">
-                    unfold_more
-                  </span>
-                )}
+                <span className="material-symbols-rounded text-xs">
+                  {getSortArrowIcon()}
+                </span>
               </button>
             )}
           </div>
@@ -274,6 +272,7 @@ export const ColumnHeaderCell = ({
                 (column.group === "Attributes" &&
                   column.id !== "description")) && (
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDeleteColumn?.(column.id);
@@ -291,6 +290,7 @@ export const ColumnHeaderCell = ({
             {column.id.startsWith("formula") && !column.fixed && (
               <div className="relative">
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowColumnActions(
@@ -341,6 +341,7 @@ export const ColumnHeaderCell = ({
                           {/* Set Active - only show for owned or draft formulas */}
                           {isOwned && (
                             <button
+                              type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 onSetActiveFormula?.(column.id);
@@ -359,6 +360,7 @@ export const ColumnHeaderCell = ({
                           {(() => {
                             return isOwned ? (
                               <button
+                                type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   if (column.formulaId) {
@@ -375,6 +377,7 @@ export const ColumnHeaderCell = ({
                               </button>
                             ) : (
                               <button
+                                type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   if (column.formulaId) {
@@ -403,6 +406,7 @@ export const ColumnHeaderCell = ({
                               return formula?.formulaType === "ANALYTICAL";
                             })() && (
                               <button
+                                type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   onUploadExcel?.(column.formulaId);
@@ -419,6 +423,7 @@ export const ColumnHeaderCell = ({
 
                           {/* Create Version - always available */}
                           <button
+                            type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               onCreateVersion?.(column.id);
@@ -447,6 +452,7 @@ export const ColumnHeaderCell = ({
                             <>
                               <div className="border-t border-gray-200 my-1"></div>
                               <button
+                                type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   onNormalizeFormula?.(column.id);
@@ -460,6 +466,7 @@ export const ColumnHeaderCell = ({
                                 <span>Normalize</span>
                               </button>
                               <button
+                                type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   onSendForCompounding?.(column.id);
@@ -477,6 +484,7 @@ export const ColumnHeaderCell = ({
 
                           <div className="border-t border-gray-200 my-1"></div>
                           <button
+                            type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               onDeleteColumn?.(column.id);
