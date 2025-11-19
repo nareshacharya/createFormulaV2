@@ -764,7 +764,7 @@ const DataGrid = ({
                         style={tw("w-10 px-3 py-2 text-center")}
                         onClick={(e) => e.stopPropagation()}
                       >
-                        {!row.isTotal && !row.isEmpty && row.isFormula && (
+                        {!row.isTotal && !row.isEmpty && !row.parentFormulaId && (
                           <input
                             type="checkbox"
                             checked={isRowSelected(row.id)}

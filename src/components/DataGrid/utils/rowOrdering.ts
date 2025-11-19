@@ -32,5 +32,5 @@ export const getCurrentRowOrder = (rows: DataGridRow[]): string[] => {
 };
 
 export const isRowDraggable = (row: DataGridRow): boolean => {
-    return !row.isTotal && !row.isEmpty;
+    return !row.isTotal && !row.isEmpty && !row.parentFormulaId;
 };
