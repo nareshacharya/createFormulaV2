@@ -764,7 +764,7 @@ const DataGrid = ({
                         style={tw("w-10 px-3 py-2 text-center")}
                         onClick={(e) => e.stopPropagation()}
                       >
-                        {!row.isTotal && !row.isEmpty && !row.isFormula && (
+                        {!row.isTotal && !row.isEmpty && row.isFormula && (
                           <input
                             type="checkbox"
                             checked={isRowSelected(row.id)}
@@ -974,7 +974,8 @@ const DataGrid = ({
                           {/* Add Item Button inside description cell */}
                           {column.key === "description" &&
                             dataGridFlags.enableInlineAddItem &&
-                            !row.isEmpty && (
+                            !row.isEmpty &&
+                            !row.parentFormulaId && (
                               <AddItemButton
                                 rowId={row.id}
                                 isTotal={row.isTotal}

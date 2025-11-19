@@ -166,6 +166,7 @@ export const DescriptionCell = ({
 
       {/* Dilution Display - show percentage and solvent when dilution exists */}
       {isIngredient &&
+        !row.parentFormulaId &&
         dilutionState &&
         dilution &&
         dilution.solventIds.length > 0 && (
@@ -204,6 +205,7 @@ export const DescriptionCell = ({
 
       {/* Dilution Icon - show only when no dilution (on hover) */}
       {isIngredient &&
+        !row.parentFormulaId &&
         dilutionState &&
         (!dilution || dilution.solventIds.length === 0) && (
           <div className="flex items-center justify-center ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
