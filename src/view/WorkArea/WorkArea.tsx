@@ -894,7 +894,11 @@ const WorkArea = () => {
         status: data.formula.status,
       };
 
-      console.log("✅ Formula group row created with:", { id: formulaGroupRow.id, formulaId: formulaGroupRow.formulaId, isFormula: formulaGroupRow.isFormula });
+      console.log("✅ Formula group row created with:", {
+        id: formulaGroupRow.id,
+        formulaId: formulaGroupRow.formulaId,
+        isFormula: formulaGroupRow.isFormula,
+      });
 
       // Ensure initial state is saved before first action
       ensureInitialStateSaved();

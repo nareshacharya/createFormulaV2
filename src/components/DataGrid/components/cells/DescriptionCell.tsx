@@ -115,7 +115,10 @@ export const DescriptionCell = ({
           </button>
         )}
         {row.isFormula && (
-          <span className="material-symbols-rounded text-blue-600 text-sm" style={tw("mr-3")}>
+          <span
+            className="material-symbols-rounded text-blue-600 text-sm"
+            style={tw("mr-3")}
+          >
             folder
           </span>
         )}
@@ -123,7 +126,9 @@ export const DescriptionCell = ({
         {statusColor && (
           <div
             style={tw(
-              `w-1.5 h-1.5 rounded-full ${statusColor} flex-shrink-0 ${row.isFormula ? "" : "mr-2"}`
+              `w-1.5 h-1.5 rounded-full ${statusColor} flex-shrink-0 ${
+                row.isFormula ? "" : "mr-2"
+              }`
             )}
             title={`Status: ${row.status || "active"}${
               row.mac !== undefined && row.mac < 0 ? " (non-compliant)" : ""
@@ -145,12 +150,22 @@ export const DescriptionCell = ({
       {/* Explode button for formulas */}
       {row.isFormula && (
         <>
-          {console.log("🔍 Rendering explode button for formula:", row.formulaId, "has callback:", !!onExplodeFormula)}
+          {console.log(
+            "🔍 Rendering explode button for formula:",
+            row.formulaId,
+            "has callback:",
+            !!onExplodeFormula
+          )}
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              console.log("🧨 Explode button clicked for formula:", row.formulaId, "callback exists:", !!onExplodeFormula);
+              console.log(
+                "🧨 Explode button clicked for formula:",
+                row.formulaId,
+                "callback exists:",
+                !!onExplodeFormula
+              );
               if (onExplodeFormula) {
                 onExplodeFormula(row.formulaId);
               } else {
