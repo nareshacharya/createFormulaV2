@@ -100,8 +100,8 @@ const IngredientAttributeList = ({
               }
             }}
             compact
+            selected={isSelected}
             className={`
-              ${isSelected ? "bg-blue-50 border-l-2 border-blue-400" : ""}
               ${isDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
             `}
           >

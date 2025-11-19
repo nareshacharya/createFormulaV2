@@ -91,32 +91,34 @@ export const DescriptionCell = ({
         paddingLeft: `${indent}px`,
       }}
     >
-      <div style={tw("flex items-center space-x-2 flex-1 min-w-0")}>
+      <div style={tw("flex items-center flex-1 min-w-0")}>
         {row.isFormula && (
-          <div style={tw("flex items-center space-x-1 mr-2")}>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleFormulaExpansion?.(row.formulaId);
-              }}
-              className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-blue-600 cursor-pointer"
-              title={row.isExpanded ? "Collapse Formula" : "Expand Formula"}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleFormulaExpansion?.(row.formulaId);
+            }}
+            className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-blue-600 cursor-pointer"
+            title={row.isExpanded ? "Collapse Formula" : "Expand Formula"}
+            style={tw("-ml-1")}
+          >
+            <span
+              className={`material-symbols-rounded text-sm ${
+                row.isExpanded
+                  ? "content: 'expand_less'"
+                  : "content: 'expand_more'"
+              }`}
             >
-              <span
-                className={`material-symbols-rounded text-sm ${
-                  row.isExpanded
-                    ? "content: 'expand_less'"
-                    : "content: 'expand_more'"
-                }`}
-              >
-                {row.isExpanded ? "expand_less" : "expand_more"}
-              </span>
-            </button>
-          </div>
+              {row.isExpanded ? "expand_less" : "expand_more"}
+            </span>
+          </button>
         )}
         {row.isFormula && (
-          <span className="material-symbols-rounded text-blue-600 text-sm">
+          <span
+            className="material-symbols-rounded text-blue-600 text-sm"
+            style={tw("mr-3")}
+          >
             folder
           </span>
         )}
@@ -124,7 +126,9 @@ export const DescriptionCell = ({
         {statusColor && (
           <div
             style={tw(
-              `w-1.5 h-1.5 rounded-full ${statusColor} flex-shrink-0 mr-2`
+              `w-1.5 h-1.5 rounded-full ${statusColor} flex-shrink-0 ${
+                row.isFormula ? "" : "mr-2"
+              }`
             )}
             title={`Status: ${row.status || "active"}${
               row.mac !== undefined && row.mac < 0 ? " (non-compliant)" : ""
@@ -137,6 +141,7 @@ export const DescriptionCell = ({
           } ${row.isTotal ? "font-semibold" : ""} ${
             row.parentFormulaId && !row.isExpanded ? "text-gray-600" : ""
           }`}
+          style={tw(row.isFormula && statusColor ? "ml-2" : "")}
         >
           {value || ""}
         </span>
@@ -144,28 +149,47 @@ export const DescriptionCell = ({
 
       {/* Explode button for formulas */}
       {row.isFormula && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onExplodeFormula?.(row.formulaId);
-          }}
-          style={tw(
-            "flex-shrink-0 ml-2 text-orange-600 hover:text-orange-700 transition-colors"
+        <>
+          {console.log(
+            "🔍 Rendering explode button for formula:",
+            row.formulaId,
+            "has callback:",
+            !!onExplodeFormula
           )}
-          title="Explode Formula"
-        >
-          <span
-            className="material-symbols-rounded text-lg"
-            style={{ fontVariationSettings: "'FILL' 1" }}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log(
+                "🧨 Explode button clicked for formula:",
+                row.formulaId,
+                "callback exists:",
+                !!onExplodeFormula
+              );
+              if (onExplodeFormula) {
+                onExplodeFormula(row.formulaId);
+              } else {
+                console.error("❌ onExplodeFormula callback is undefined!");
+              }
+            }}
+            style={tw(
+              "flex-shrink-0 ml-2 text-orange-600 hover:text-orange-700 transition-colors"
+            )}
+            title="Explode Formula"
           >
-            bomb
-          </span>
-        </button>
+            <span
+              className="material-symbols-rounded text-lg"
+              style={{ fontVariationSettings: "'FILL' 1" }}
+            >
+              bomb
+            </span>
+          </button>
+        </>
       )}
 
       {/* Dilution Display - show percentage and solvent when dilution exists */}
       {isIngredient &&
+        !row.parentFormulaId &&
         dilutionState &&
         dilution &&
         dilution.solventIds.length > 0 && (
@@ -204,6 +228,7 @@ export const DescriptionCell = ({
 
       {/* Dilution Icon - show only when no dilution (on hover) */}
       {isIngredient &&
+        !row.parentFormulaId &&
         dilutionState &&
         (!dilution || dilution.solventIds.length === 0) && (
           <div className="flex items-center justify-center ml-2 opacity-0 group-hover:opacity-100 transition-opacity">

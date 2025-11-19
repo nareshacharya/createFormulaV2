@@ -215,18 +215,25 @@ export const useFormulaOperations = ({
         );
 
         setTableData((prev) => {
-            const formula = formulas.find((f) => f.id === formulaId);
-            if (!formula) {
-                console.log("❌ Formula not found:", formulaId);
-                return prev;
-            }
-
             const formulaGroupRow = prev.find(
                 (row) => row.isFormula && row.formulaId === formulaId
             );
 
             if (!formulaGroupRow) {
                 console.log("❌ Formula group row not found for:", formulaId);
+                return prev;
+            }
+
+            // Get formula from either formulas or availableFormulas array
+            let formula = formulas.find((f) => f.id === formulaId);
+            if (!formula) {
+                formula = availableFormulas.find((f) => f.id === formulaId);
+            }
+
+            if (!formula) {
+                console.log("❌ Formula not found in formulas or availableFormulas:", formulaId);
+                console.log("Available formulas:", availableFormulas.map(f => f.id));
+                console.log("Workspace formulas:", formulas.map(f => f.id));
                 return prev;
             }
 
@@ -258,13 +265,19 @@ export const useFormulaOperations = ({
                     isTotal: false,
                     isFormula: false,
                     level: 0,
+                    ingredientId: ing.ingredientId,
+                    status: ingredient?.status,
+                    mac: ingredient?.mac,
+                    percentage: ing.percentage,
                 };
 
                 formulaColumns.forEach((col) => {
                     if (col.id === editableFormula) {
-                        rowData[col.key] = parseFloat((ing.percentage * multiplier).toFixed(2));
+                        const scaledValue = parseFloat((ing.percentage * multiplier).toFixed(2));
+                        rowData[col.id] = scaledValue;
+                        rowData.contCost = parseFloat(((scaledValue * (ingredient?.price || 0)) / 1000).toFixed(4));
                     } else {
-                        rowData[col.key] = 0;
+                        rowData[col.id] = 0;
                     }
                 });
 

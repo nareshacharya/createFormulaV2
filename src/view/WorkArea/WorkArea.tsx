@@ -1,5 +1,13 @@
 /* eslint-disable @typescript-eslint/no-use-before-define, jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
-import { useEffect, useState, useRef, useCallback, useMemo } from "react";
+import {
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+  lazy,
+  Suspense,
+} from "react";
 import { toast } from "react-hot-toast";
 import AttributeSelector from "../../components/AttributeSelector";
 import Badge from "../../components/Badge";
@@ -8,9 +16,6 @@ import DataGrid from "../../components/DataGrid";
 import type { Column } from "../../components/DataGrid";
 import Dialog from "../../components/Dialog";
 import { useDilution } from "../../components/dilution";
-import ExcelUploadModal from "../../components/ExcelUploadModal";
-import FormulaDetailsModal from "../../components/FormulaDetailsModal";
-import FormulaModal from "../../components/FormulaModal";
 import Modal from "../../components/Modal";
 import { useExcelUpload } from "../../hooks/useExcelUpload";
 import { useFormulaDetails } from "../../hooks/useFormulaDetails";
@@ -38,6 +43,18 @@ import { useFormulaColumnHandlers } from "./components/FormulaColumnHandlers";
 import { useDataGridHandlers } from "./hooks/useDataGridHandlers";
 import { useFormulaOperations } from "./hooks/useFormulaOperations";
 import { useWorkAreaState } from "./hooks/useWorkAreaState";
+import { useWorkAreaDataSync } from "./hooks/useWorkAreaDataSync";
+import { useRowOperations } from "./hooks/useRowOperations";
+import { useWorkAreaColumnDisplay } from "./hooks/useWorkAreaColumnDisplay";
+
+// Lazy load modals for better initial bundle performance
+const FormulaModal = lazy(() => import("../../components/FormulaModal"));
+const FormulaDetailsModal = lazy(
+  () => import("../../components/FormulaDetailsModal")
+);
+const ExcelUploadModal = lazy(
+  () => import("../../components/ExcelUploadModal")
+);
 
 const WorkArea = () => {
   // Workspace context - manages data isolation between tabs
@@ -128,39 +145,53 @@ const WorkArea = () => {
     workspaceHistory,
   ]);
 
-  // Helper function to save state after an action completes
+  // Track pending state save to avoid duplicate saves
+  const pendingStateSaveRef = useRef<{
+    action: string;
+    description: string;
+  } | null>(null);
+
+  // Helper function to queue a state save after an action completes
   const saveStateAfterAction = useCallback(
     (action: string, description: string) => {
-      // Use setTimeout to ensure state updates have completed
-      setTimeout(() => {
-        // Access dilutionState directly to get current value
-        const currentDilutions = dilutionState.dilutions;
-        workspaceHistory.push(
-          {
-            columns,
-            tableData,
-            formulas,
-            availableFormulas,
-            dilutions: currentDilutions,
-          },
-          action,
-          description
-        );
-        eventBus.emit("undo-state-updated", {
-          canUndo: workspaceHistory.canUndo(),
-          count: workspaceHistory.getUndoCount(),
-        });
-      }, 0);
+      // Queue the state save to be executed in the next effect
+      pendingStateSaveRef.current = { action, description };
     },
-    [
-      columns,
-      tableData,
-      formulas,
-      availableFormulas,
-      dilutionState,
-      workspaceHistory,
-    ]
+    []
   );
+
+  // Effect to handle pending state saves when state changes
+  useEffect(() => {
+    if (pendingStateSaveRef.current) {
+      const { action, description } = pendingStateSaveRef.current;
+      pendingStateSaveRef.current = null; // Clear the pending save
+
+      // Access current state values
+      const currentDilutions = dilutionState.dilutions;
+      workspaceHistory.push(
+        {
+          columns,
+          tableData,
+          formulas,
+          availableFormulas,
+          dilutions: currentDilutions,
+        },
+        action,
+        description
+      );
+      eventBus.emit("undo-state-updated", {
+        canUndo: workspaceHistory.canUndo(),
+        count: workspaceHistory.getUndoCount(),
+      });
+    }
+  }, [
+    columns,
+    tableData,
+    formulas,
+    availableFormulas,
+    dilutionState,
+    workspaceHistory,
+  ]);
 
   // Listen to workspace switches and reset undo state for the new workspace
   useEffect(() => {
@@ -263,6 +294,57 @@ const WorkArea = () => {
     setTableData,
     handleNormalize,
   });
+
+  // Use extracted row operations hook
+  const {
+    handleToggleFormulaExpansion,
+    handleRowReorder,
+    handleToggleGrouping,
+    handleBulkDelete,
+    handleSetActiveFormula,
+  } = useRowOperations(
+    tableData,
+    columns,
+    formulas,
+    availableFormulas,
+    pendingFormulaIds,
+    setTableData,
+    setGroupedByColumn,
+    setSelectedFormulaIds,
+    setEditableFormula,
+    ensureInitialStateSaved,
+    saveStateAfterAction
+  );
+
+  // Use extracted column display hook
+  const {
+    shouldShowAttributeAddButton,
+    shouldShowFormulaAddButton,
+    getDisplayColumns,
+  } = useWorkAreaColumnDisplay(
+    columns,
+    maxAttributeSelections,
+    maxFormulaSelections
+  );
+
+  // Use extracted workspace data sync hook
+  useWorkAreaDataSync(
+    workspace,
+    columns,
+    tableData,
+    formulas,
+    selectedFormulaIds,
+    editableFormula,
+    selectedAttributes,
+    selectedFormulas,
+    setColumns,
+    setTableData,
+    setFormulas,
+    setSelectedFormulaIds,
+    setEditableFormula,
+    setSelectedAttributes,
+    setSelectedFormulas
+  );
 
   // Callback for updating formula details
   const handleUpdateFormula = useCallback(
@@ -457,7 +539,7 @@ const WorkArea = () => {
           sortable: false,
           group: "Metadata",
         } as any);
-        
+
         exportColumns.splice(descriptionColIndex + 2, 0, {
           id: "ingredientId",
           key: "ingredientId",
@@ -475,23 +557,21 @@ const WorkArea = () => {
       // Also ensure we preserve ALL fields from the original row
       const enrichedData = tableData.map((row) => {
         const enrichedRow: Record<string, any> = { ...row };
-        
+
         // Explicitly set or preserve ingredientId
         if (!enrichedRow.ingredientId && row.ingredientId) {
           enrichedRow.ingredientId = row.ingredientId;
         }
         enrichedRow.ingredientId = enrichedRow.ingredientId || "-";
-        
+
         // Explicitly set or preserve formulaId
         if (!enrichedRow.formulaId && row.formulaId) {
           enrichedRow.formulaId = row.formulaId;
         }
         enrichedRow.formulaId = enrichedRow.formulaId || "-";
-        
+
         return enrichedRow;
       });
-
-
 
       // Create readable filename based on active formula or generic name
       const timestamp = new Date().toISOString().split("T")[0];
@@ -568,7 +648,7 @@ const WorkArea = () => {
   useEffect(() => {
     // Restore workspace data
     const wsData = workspace.activeWorkspace;
-    
+
     // Ensure all ingredient rows have ingredientId field for export
     const migratedTableData = wsData.tableData.map((row) => {
       // For ingredient rows, ensure ingredientId field exists even if it wasn't set before
@@ -580,7 +660,7 @@ const WorkArea = () => {
       }
       return row;
     });
-    
+
     setColumns(wsData.columns);
     setTableData(migratedTableData);
     setFormulas(wsData.formulas);
@@ -896,6 +976,12 @@ const WorkArea = () => {
         status: data.formula.status,
       };
 
+      console.log("✅ Formula group row created with:", {
+        id: formulaGroupRow.id,
+        formulaId: formulaGroupRow.formulaId,
+        isFormula: formulaGroupRow.isFormula,
+      });
+
       // Ensure initial state is saved before first action
       ensureInitialStateSaved();
 
@@ -921,7 +1007,7 @@ const WorkArea = () => {
           // IMPORTANT: If ingredientId is missing from formula data, lookup by name in global ingredients
           let finalIngredientId = ing.ingredientId;
           let ingredient = ingredients.find((i) => i.id === ing.ingredientId);
-          
+
           // If not found by ID, try lookup by name (for API responses that don't include ingredientId)
           if (!ingredient && ing.name) {
             ingredient = ingredients.find((i) => i.name === ing.name);
@@ -929,7 +1015,7 @@ const WorkArea = () => {
               finalIngredientId = ingredient.id;
             }
           }
-          
+
           const ingredientCostPerKg = ingredient?.price || 0;
 
           const rowData: any = {
@@ -942,6 +1028,7 @@ const WorkArea = () => {
             parentFormulaId: data.formula.id,
             level: 1,
             percentage: ing.percentage,
+            originalPercentage: ing.percentage, // Store original percentage for scaling
             status: ingredient?.status,
             mac: ingredient?.mac,
             ingredientId: finalIngredientId, // Use ingredientId or lookup by name
@@ -1355,18 +1442,23 @@ const WorkArea = () => {
 
     const handleFormulaSelectedForColumn = (data: { formula: Formula }) => {
       // HELPER: Create ingredient row with proper ID lookup
-      const createIngredientRow = (ing: any, formulaId: string, columnId: string, rowIndex: number): any => {
+      const createIngredientRow = (
+        ing: any,
+        formulaId: string,
+        columnId: string,
+        rowIndex: number
+      ): any => {
         // Try to find ingredient by ID first, then by name
         let ingredient = ingredients.find((i) => i.id === ing.ingredientId);
         let finalIngredientId = ing.ingredientId;
-        
+
         if (!ingredient && ing.name) {
           ingredient = ingredients.find((i) => i.name === ing.name);
           if (ingredient) {
             finalIngredientId = ingredient.id;
           }
         }
-        
+
         const ingredientCostPerKg = ingredient?.price || 0;
 
         const rowData: any = {
@@ -1379,10 +1471,10 @@ const WorkArea = () => {
           percentage: ing.percentage,
           status: ingredient?.status,
           mac: ingredient?.mac,
-          ingredientId: finalIngredientId,  // ✅ NOW SET!
+          ingredientId: finalIngredientId, // ✅ NOW SET!
           [columnId]: ing.percentage,
         };
-        
+
         return rowData;
       };
 
@@ -1475,7 +1567,12 @@ const WorkArea = () => {
         } else if (!hasExistingData && data.formula.ingredients) {
           // If we have other columns but no data yet, still add ingredients
           const ingredientRows = data.formula.ingredients.map((ing, index) => {
-            const row = createIngredientRow(ing, data.formula.id, newColumnId, index);
+            const row = createIngredientRow(
+              ing,
+              data.formula.id,
+              newColumnId,
+              index
+            );
 
             // Add 0 for other formula columns
             currentFormulaColumns.forEach((col) => {
@@ -2035,234 +2132,8 @@ const WorkArea = () => {
     setShowAttributeDialog(false);
   };
 
-  // Add the missing handleToggleFormulaExpansion function
-  const handleToggleFormulaExpansion = (formulaId: string) => {
-    setTableData((prev) =>
-      prev.map((row) =>
-        row.formulaId === formulaId && row.isFormula
-          ? { ...row, isExpanded: !row.isExpanded }
-          : row
-      )
-    );
-  };
-
-  // Row reordering handler
-  const handleRowReorder = (rowOrder: string[]) => {
-    // Ensure initial state is saved before first action
-    ensureInitialStateSaved();
-
-    setTableData((prev) => {
-      // Separate total rows from regular rows
-      const totalRows = prev.filter((row) => row.isTotal);
-      const regularRows = prev.filter((row) => !row.isTotal);
-
-      // Create a map for quick lookup
-      const rowMap = new Map(regularRows.map((row) => [row.id, row]));
-
-      // Reorder according to the new order
-      const reorderedRows = rowOrder
-        .map((id) => rowMap.get(id))
-        .filter((row): row is NonNullable<typeof row> => row !== undefined);
-
-      // Return reordered rows followed by total rows
-      return [...reorderedRows, ...totalRows];
-    });
-
-    // Save state after action completes
-    saveStateAfterAction("reorder_rows", "Reordered rows");
-  };
-  // Toggle grouping handler
-  const handleToggleGrouping = (columnId: string) => {
-    setGroupedByColumn((prev) => (prev === columnId ? null : columnId));
-  };
-
-  // Bulk delete handler
-  const handleBulkDelete = (rowIds: string[]) => {
-
-    // Ensure initial state is saved before first action
-    ensureInitialStateSaved();
-
-    setTableData((prev) => {
-      const rowsToDelete = prev.filter((row) => rowIds.includes(row.id));
-
-      // Check if any formula group rows are being deleted
-      const deletedFormulaIds = rowsToDelete
-        .filter((row) => row.isFormula && row.formulaId)
-        .map((row) => row.formulaId);
-
-      // Remove deleted formulas from tracking
-      if (deletedFormulaIds.length > 0) {
-        deletedFormulaIds.forEach((id) => {
-          pendingFormulaIds.current?.delete(id);
-        });
-        setSelectedFormulaIds((prevSelected) =>
-          prevSelected.filter((id) => !deletedFormulaIds.includes(id))
-        );
-        console.log("✅ Removed formulas from tracking:", deletedFormulaIds);
-      }
-
-      // Also check if deleting ingredients that belong to formulas
-      const deletedIngredients = rowsToDelete.filter(
-        (row) => row.parentFormulaId
-      );
-      if (deletedIngredients.length > 0) {
-        console.log(
-          "📋 Deleted ingredients with parentFormulaId:",
-          deletedIngredients
-        );
-
-        // For each formula, check if all its ingredients and group row are being deleted
-        const affectedFormulaIds = new Set(
-          deletedIngredients.map((row) => row.parentFormulaId)
-        );
-        const formulasToRemove: string[] = [];
-
-        affectedFormulaIds.forEach((formulaId) => {
-          const remainingRows = prev.filter(
-            (row) =>
-              !rowIds.includes(row.id) &&
-              (row.formulaId === formulaId || row.parentFormulaId === formulaId)
-          );
-
-          // If no rows remain for this formula, remove it from tracking
-          if (remainingRows.length === 0) {
-            formulasToRemove.push(formulaId);
-          }
-        });
-
-        if (formulasToRemove.length > 0) {
-          console.log("✅ Formulas with all rows deleted:", formulasToRemove);
-          formulasToRemove.forEach((id) => {
-            pendingFormulaIds.current?.delete(id);
-          });
-          setSelectedFormulaIds((prevSelected) =>
-            prevSelected.filter((id) => !formulasToRemove.includes(id))
-          );
-        }
-      }
-
-      // Also remove child ingredients of deleted formula groups
-      const newData = prev.filter(
-        (row) =>
-          !rowIds.includes(row.id) &&
-          !(
-            row.parentFormulaId &&
-            deletedFormulaIds.includes(row.parentFormulaId)
-          )
-      );
-
-      return newData;
-    });
-
-    // Save state after action completes
-    saveStateAfterAction("bulk_delete", `Deleted ${rowIds.length} row(s)`);
-
-    toast.success(
-      `${rowIds.length} row${rowIds.length > 1 ? "s" : ""} deleted`
-    );
-  };
-
   // Check if we have any ingredient data to show
   const hasIngredients = tableData.some((row) => !row.isTotal);
-
-  const handleSetActiveFormula = (columnId: string) => {
-    // Find the formula associated with this column
-    const column = columns.find((col) => col.id === columnId);
-
-    // Check if formula is locked (not owned and not draft)
-    if (column && column.formulaId) {
-      const isFormulaOwned = isOwnFormula(column.formulaId);
-
-      // Check if formula is in draft status
-      const workspaceFormula = formulas.find((f) => f.id === column.formulaId);
-      const availableFormula = availableFormulas.find(
-        (f) => f.id === column.formulaId
-      );
-      const isDraft =
-        workspaceFormula?.status === "draft" ||
-        availableFormula?.status === "draft";
-
-      // Prevent setting locked formulas as active
-      if (!isFormulaOwned && !isDraft) {
-        toast.error(
-          "Cannot set locked formula as active. Create a new version to edit."
-        );
-        return;
-      }
-    }
-
-    setEditableFormula(columnId);
-
-    // Find the formula and emit to header
-    if (column && column.formulaId) {
-      const formula = formulas.find((f) => f.id === column.formulaId);
-      if (formula) {
-        eventBus.emit("active-formula-changed", { formula });
-
-        // Calculate and emit line count and target cost for active formula
-        const ingredientRows = tableData.filter(
-          (row) => !row.isTotal && !row.isFormula
-        );
-        const lineCount = ingredientRows.filter((row) => {
-          const value = parseFloat(row[columnId]) || 0;
-          return value > 0;
-        }).length;
-
-        // Calculate target cost (sum of all percentages in active formula)
-        const totalRow = tableData.find(
-          (row) => row.isTotal && row.totalType === "running"
-        );
-        const targetCost = totalRow ? parseFloat(totalRow[columnId]) || 0 : 0;
-
-        // Calculate formula cost (RMC) for active formula: sum of (amount% × cost/kg) / 100
-        const formulaCost = ingredientRows.reduce((sum, row) => {
-          const amount = parseFloat(row[columnId]) || 0;
-          const costPerKg = parseFloat(row.costKg) || 0;
-          // Calculate contribution cost: (amount% × cost/kg) / 100
-          return sum + (amount * costPerKg) / 100;
-        }, 0);
-
-        eventBus.emit("active-formula-metrics-updated", {
-          lineCount,
-          targetCost,
-          formulaCost,
-        });
-      }
-    }
-  };
-
-  // Check if we should show the add column button for attributes
-  const shouldShowAttributeAddButton = () => {
-    const currentAttributeColumns = columns.filter(
-      (col) => col.group === "Attributes" && col.attributeId
-    );
-    return currentAttributeColumns.length < maxAttributeSelections;
-  };
-
-  // Check if we should show the add column button for formulas
-  const shouldShowFormulaAddButton = () => {
-    const currentFormulaColumns = columns.filter(
-      (col) => col.group === "Formulas" && col.formulaId
-    );
-    return currentFormulaColumns.length < maxFormulaSelections;
-  };
-
-  // Update columns to conditionally hide the add buttons
-  const getDisplayColumns = () => {
-    let displayColumns = [...columns];
-
-    if (!shouldShowAttributeAddButton()) {
-      displayColumns = displayColumns.filter(
-        (col) => col.id !== "attributeAdd"
-      );
-    }
-
-    if (!shouldShowFormulaAddButton()) {
-      displayColumns = displayColumns.filter((col) => col.id !== "formulaAdd");
-    }
-
-    return displayColumns;
-  };
 
   return (
     <div style={tw("h-full bg-white flex flex-col")}>
@@ -2324,37 +2195,43 @@ const WorkArea = () => {
         />
       </div>
 
-      {/* Formula Modal */}
-      <FormulaModal
-        isOpen={showFormulaModal}
-        onClose={() => setShowFormulaModal(false)}
-        onCreateFormula={handleFormulaModalCreateFormula}
-        onSelectFormula={handleFormulaModalSelectFormula}
-        availableFormulas={availableFormulas}
-        maxSelections={maxFormulaSelections}
-        currentSelections={
-          columns.filter((col) => col.group === "Formulas" && col.formulaId)
-            .length
-        }
-        selectedFormulaIds={selectedFormulaIds} // Pass selected formula IDs
-      />
+      {/* Formula Modal - Lazy loaded */}
+      <Suspense fallback={null}>
+        <FormulaModal
+          isOpen={showFormulaModal}
+          onClose={() => setShowFormulaModal(false)}
+          onCreateFormula={handleFormulaModalCreateFormula}
+          onSelectFormula={handleFormulaModalSelectFormula}
+          availableFormulas={availableFormulas}
+          maxSelections={maxFormulaSelections}
+          currentSelections={
+            columns.filter((col) => col.group === "Formulas" && col.formulaId)
+              .length
+          }
+          selectedFormulaIds={selectedFormulaIds} // Pass selected formula IDs
+        />
+      </Suspense>
 
-      {/* Formula Details Modal */}
-      <FormulaDetailsModal
-        isOpen={isFormulaDetailsModalOpen}
-        onClose={handleCloseFormulaDetails}
-        formula={selectedFormula}
-        isReadOnly={isReadOnly}
-        onSave={handleSaveFormula}
-      />
+      {/* Formula Details Modal - Lazy loaded */}
+      <Suspense fallback={null}>
+        <FormulaDetailsModal
+          isOpen={isFormulaDetailsModalOpen}
+          onClose={handleCloseFormulaDetails}
+          formula={selectedFormula}
+          isReadOnly={isReadOnly}
+          onSave={handleSaveFormula}
+        />
+      </Suspense>
 
-      {/* Excel Upload Modal */}
-      <ExcelUploadModal
-        isOpen={isExcelUploadModalOpen}
-        onClose={handleCloseExcelUpload}
-        onUpload={handleUploadIngredients}
-        availableIngredients={availableIngredients}
-      />
+      {/* Excel Upload Modal - Lazy loaded */}
+      <Suspense fallback={null}>
+        <ExcelUploadModal
+          isOpen={isExcelUploadModalOpen}
+          onClose={handleCloseExcelUpload}
+          onUpload={handleUploadIngredients}
+          availableIngredients={availableIngredients}
+        />
+      </Suspense>
 
       {/* Load Formula Modal */}
       <Modal
