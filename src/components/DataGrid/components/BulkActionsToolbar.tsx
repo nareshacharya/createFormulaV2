@@ -191,7 +191,7 @@ export const BulkActionsToolbar = ({
             onClick={onComplianceCheck}
             disabled={!canComplianceCheck}
             icon="verified_user"
-            label="Compliance"
+            label="Comply"
             title={
               canComplianceCheck
                 ? "Check Formula Compliance"
@@ -212,7 +212,7 @@ export const BulkActionsToolbar = ({
             }
           >
             {undoCount > 0 && (
-              <span className="ml-1 bg-blue-500 text-white text-[9px] px-1 rounded-full font-semibold">
+              <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-[9px] px-1 rounded-full font-semibold">
                 {undoCount}
               </span>
             )}
