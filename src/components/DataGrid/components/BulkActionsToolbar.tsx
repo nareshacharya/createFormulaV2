@@ -212,7 +212,7 @@ export const BulkActionsToolbar = ({
             }
           >
             {undoCount > 0 && (
-              <span className="absolute top-0.25 right-0.35 bg-blue-500 text-white text-[9px] px-1 rounded-full font-semibold">
+              <span className="absolute bg-blue-500 text-white text-[9px] px-1 rounded-full font-semibold" style={{ top: "2px", right: "3px" }}>
                 {undoCount}
               </span>
             )}
