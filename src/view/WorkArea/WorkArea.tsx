@@ -2251,9 +2251,14 @@ const WorkArea = () => {
           onToolbarSend={handleToolbarSend}
           onToolbarUndo={handleUndoAction}
           onToolbarExport={handleExportToExcel}
+          onToolbarComplianceCheck={() => {
+            // Handle compliance check action
+            console.log('Compliance check initiated');
+          }}
           toolbarCanUndo={undoState.canUndo}
           toolbarUndoCount={undoState.undoCount}
           toolbarCanSend={!!activeFormula}
+          toolbarCanComplianceCheck={!!activeFormula}
         />
       </div>
 
