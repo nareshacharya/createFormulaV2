@@ -37,7 +37,7 @@ const ToolbarButton = ({
   children?: React.ReactNode;
   className?: string;
 }) => {
-  const baseClasses = `group relative flex flex-col items-center justify-center px-1.5 py-1 rounded-lg transition-all duration-200 w-12 
+  const baseClasses = `group relative flex flex-col items-center justify-center px-1.5 py-1 rounded-lg transition-all duration-200 w-14 
     ${!disabled ? "hover:bg-blue-600 hover:shadow-sm" : ""} 
     ${className}`;
 
@@ -212,7 +212,7 @@ export const BulkActionsToolbar = ({
             }
           >
             {undoCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-[9px] px-1 rounded-full font-semibold">
+              <span className="absolute -top-0.5 -right-2 bg-blue-500 text-white text-[9px] px-1 rounded-full font-semibold">
                 {undoCount}
               </span>
             )}
