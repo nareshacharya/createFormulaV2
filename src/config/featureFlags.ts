@@ -457,8 +457,8 @@ export const featureFlags: FeatureFlags = {
         showFormulaId: true,
         showFormulaStatus: true,
         showLineCount: false, // TODO: Enable after client approval
-        showFormulaCost: false, // TODO: Enable after client approval
-        showTargetCost: false, // TODO: Enable after client approval
+        showFormulaCost: true,
+        showTargetCost: true,
 
         // Other header elements
         showProjectDropdown: true,
