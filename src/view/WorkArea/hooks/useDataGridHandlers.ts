@@ -114,7 +114,7 @@ export const useDataGridHandlers = ({
 
         setTableData((prev) => {
             const updatedRow = prev.find((row) => row.id === rowId);
-            const newData = prev.map((row) => {
+            let newData = prev.map((row) => {
                 if (row.id === rowId) {
                     const newRow = { ...row, [columnId]: parseFloat(value) || 0 };
 
@@ -135,6 +135,33 @@ export const useDataGridHandlers = ({
                 }
                 return row;
             });
+
+            // If editing a formula row in active formula column, scale all child ingredients
+            if (
+                updatedRow &&
+                updatedRow.isFormula &&
+                updatedRow.formulaId &&
+                columnId === editableFormula
+            ) {
+                const formulaId = updatedRow.formulaId;
+                const newFormulaPercentage = parseFloat(value) || 0;
+
+                // Update all child ingredient rows of this formula
+                newData = newData.map((childRow) => {
+                    if (childRow.parentFormulaId === formulaId && childRow.originalPercentage !== undefined) {
+                        // Scale the child ingredient value: (originalPercentage * newFormulaPercentage) / 100
+                        const scaledValue = parseFloat(
+                            ((childRow.originalPercentage * newFormulaPercentage) / 100).toFixed(2)
+                        );
+                        return {
+                            ...childRow,
+                            [columnId]: scaledValue,
+                            contCost: parseFloat(((scaledValue * childRow.costKg) / 1000).toFixed(4)),
+                        };
+                    }
+                    return childRow;
+                });
+            }
 
             // Show toast for target total updates
             if (updatedRow?.totalType === "target") {

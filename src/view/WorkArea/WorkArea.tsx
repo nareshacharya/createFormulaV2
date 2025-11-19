@@ -940,6 +940,7 @@ const WorkArea = () => {
             parentFormulaId: data.formula.id,
             level: 1,
             percentage: ing.percentage,
+            originalPercentage: ing.percentage, // Store original percentage for scaling
             status: ingredient?.status,
             mac: ingredient?.mac,
             ingredientId: finalIngredientId, // Use ingredientId or lookup by name
