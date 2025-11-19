@@ -38,6 +38,9 @@ import { useFormulaColumnHandlers } from "./components/FormulaColumnHandlers";
 import { useDataGridHandlers } from "./hooks/useDataGridHandlers";
 import { useFormulaOperations } from "./hooks/useFormulaOperations";
 import { useWorkAreaState } from "./hooks/useWorkAreaState";
+import { useWorkAreaDataSync } from "./hooks/useWorkAreaDataSync";
+import { useRowOperations } from "./hooks/useRowOperations";
+import { useWorkAreaColumnDisplay } from "./hooks/useWorkAreaColumnDisplay";
 
 const WorkArea = () => {
   // Workspace context - manages data isolation between tabs
@@ -277,6 +280,57 @@ const WorkArea = () => {
     setTableData,
     handleNormalize,
   });
+
+  // Use extracted row operations hook
+  const {
+    handleToggleFormulaExpansion,
+    handleRowReorder,
+    handleToggleGrouping,
+    handleBulkDelete,
+    handleSetActiveFormula,
+  } = useRowOperations(
+    tableData,
+    columns,
+    formulas,
+    availableFormulas,
+    pendingFormulaIds,
+    setTableData,
+    setGroupedByColumn,
+    setSelectedFormulaIds,
+    setEditableFormula,
+    ensureInitialStateSaved,
+    saveStateAfterAction
+  );
+
+  // Use extracted column display hook
+  const {
+    shouldShowAttributeAddButton,
+    shouldShowFormulaAddButton,
+    getDisplayColumns,
+  } = useWorkAreaColumnDisplay(
+    columns,
+    maxAttributeSelections,
+    maxFormulaSelections
+  );
+
+  // Use extracted workspace data sync hook
+  useWorkAreaDataSync(
+    workspace,
+    columns,
+    tableData,
+    formulas,
+    selectedFormulaIds,
+    editableFormula,
+    selectedAttributes,
+    selectedFormulas,
+    setColumns,
+    setTableData,
+    setFormulas,
+    setSelectedFormulaIds,
+    setEditableFormula,
+    setSelectedAttributes,
+    setSelectedFormulas
+  );
 
   // Callback for updating formula details
   const handleUpdateFormula = useCallback(
@@ -2064,233 +2118,8 @@ const WorkArea = () => {
     setShowAttributeDialog(false);
   };
 
-  // Add the missing handleToggleFormulaExpansion function
-  const handleToggleFormulaExpansion = (formulaId: string) => {
-    setTableData((prev) =>
-      prev.map((row) =>
-        row.formulaId === formulaId && row.isFormula
-          ? { ...row, isExpanded: !row.isExpanded }
-          : row
-      )
-    );
-  };
-
-  // Row reordering handler
-  const handleRowReorder = (rowOrder: string[]) => {
-    // Ensure initial state is saved before first action
-    ensureInitialStateSaved();
-
-    setTableData((prev) => {
-      // Separate total rows from regular rows
-      const totalRows = prev.filter((row) => row.isTotal);
-      const regularRows = prev.filter((row) => !row.isTotal);
-
-      // Create a map for quick lookup
-      const rowMap = new Map(regularRows.map((row) => [row.id, row]));
-
-      // Reorder according to the new order
-      const reorderedRows = rowOrder
-        .map((id) => rowMap.get(id))
-        .filter((row): row is NonNullable<typeof row> => row !== undefined);
-
-      // Return reordered rows followed by total rows
-      return [...reorderedRows, ...totalRows];
-    });
-
-    // Save state after action completes
-    saveStateAfterAction("reorder_rows", "Reordered rows");
-  };
-  // Toggle grouping handler
-  const handleToggleGrouping = (columnId: string) => {
-    setGroupedByColumn((prev) => (prev === columnId ? null : columnId));
-  };
-
-  // Bulk delete handler
-  const handleBulkDelete = (rowIds: string[]) => {
-    // Ensure initial state is saved before first action
-    ensureInitialStateSaved();
-
-    setTableData((prev) => {
-      const rowsToDelete = prev.filter((row) => rowIds.includes(row.id));
-
-      // Check if any formula group rows are being deleted
-      const deletedFormulaIds = rowsToDelete
-        .filter((row) => row.isFormula && row.formulaId)
-        .map((row) => row.formulaId);
-
-      // Remove deleted formulas from tracking
-      if (deletedFormulaIds.length > 0) {
-        deletedFormulaIds.forEach((id) => {
-          pendingFormulaIds.current?.delete(id);
-        });
-        setSelectedFormulaIds((prevSelected) =>
-          prevSelected.filter((id) => !deletedFormulaIds.includes(id))
-        );
-        console.log("✅ Removed formulas from tracking:", deletedFormulaIds);
-      }
-
-      // Also check if deleting ingredients that belong to formulas
-      const deletedIngredients = rowsToDelete.filter(
-        (row) => row.parentFormulaId
-      );
-      if (deletedIngredients.length > 0) {
-        console.log(
-          "📋 Deleted ingredients with parentFormulaId:",
-          deletedIngredients
-        );
-
-        // For each formula, check if all its ingredients and group row are being deleted
-        const affectedFormulaIds = new Set(
-          deletedIngredients.map((row) => row.parentFormulaId)
-        );
-        const formulasToRemove: string[] = [];
-
-        affectedFormulaIds.forEach((formulaId) => {
-          const remainingRows = prev.filter(
-            (row) =>
-              !rowIds.includes(row.id) &&
-              (row.formulaId === formulaId || row.parentFormulaId === formulaId)
-          );
-
-          // If no rows remain for this formula, remove it from tracking
-          if (remainingRows.length === 0) {
-            formulasToRemove.push(formulaId);
-          }
-        });
-
-        if (formulasToRemove.length > 0) {
-          console.log("✅ Formulas with all rows deleted:", formulasToRemove);
-          formulasToRemove.forEach((id) => {
-            pendingFormulaIds.current?.delete(id);
-          });
-          setSelectedFormulaIds((prevSelected) =>
-            prevSelected.filter((id) => !formulasToRemove.includes(id))
-          );
-        }
-      }
-
-      // Also remove child ingredients of deleted formula groups
-      const newData = prev.filter(
-        (row) =>
-          !rowIds.includes(row.id) &&
-          !(
-            row.parentFormulaId &&
-            deletedFormulaIds.includes(row.parentFormulaId)
-          )
-      );
-
-      return newData;
-    });
-
-    // Save state after action completes
-    saveStateAfterAction("bulk_delete", `Deleted ${rowIds.length} row(s)`);
-
-    toast.success(
-      `${rowIds.length} row${rowIds.length > 1 ? "s" : ""} deleted`
-    );
-  };
-
   // Check if we have any ingredient data to show
   const hasIngredients = tableData.some((row) => !row.isTotal);
-
-  const handleSetActiveFormula = (columnId: string) => {
-    // Find the formula associated with this column
-    const column = columns.find((col) => col.id === columnId);
-
-    // Check if formula is locked (not owned and not draft)
-    if (column && column.formulaId) {
-      const isFormulaOwned = isOwnFormula(column.formulaId);
-
-      // Check if formula is in draft status
-      const workspaceFormula = formulas.find((f) => f.id === column.formulaId);
-      const availableFormula = availableFormulas.find(
-        (f) => f.id === column.formulaId
-      );
-      const isDraft =
-        workspaceFormula?.status === "draft" ||
-        availableFormula?.status === "draft";
-
-      // Prevent setting locked formulas as active
-      if (!isFormulaOwned && !isDraft) {
-        toast.error(
-          "Cannot set locked formula as active. Create a new version to edit."
-        );
-        return;
-      }
-    }
-
-    setEditableFormula(columnId);
-
-    // Find the formula and emit to header
-    if (column && column.formulaId) {
-      const formula = formulas.find((f) => f.id === column.formulaId);
-      if (formula) {
-        eventBus.emit("active-formula-changed", { formula });
-
-        // Calculate and emit line count and target cost for active formula
-        const ingredientRows = tableData.filter(
-          (row) => !row.isTotal && !row.isFormula
-        );
-        const lineCount = ingredientRows.filter((row) => {
-          const value = parseFloat(row[columnId]) || 0;
-          return value > 0;
-        }).length;
-
-        // Calculate target cost (sum of all percentages in active formula)
-        const totalRow = tableData.find(
-          (row) => row.isTotal && row.totalType === "running"
-        );
-        const targetCost = totalRow ? parseFloat(totalRow[columnId]) || 0 : 0;
-
-        // Calculate formula cost (RMC) for active formula: sum of (amount% × cost/kg) / 100
-        const formulaCost = ingredientRows.reduce((sum, row) => {
-          const amount = parseFloat(row[columnId]) || 0;
-          const costPerKg = parseFloat(row.costKg) || 0;
-          // Calculate contribution cost: (amount% × cost/kg) / 100
-          return sum + (amount * costPerKg) / 100;
-        }, 0);
-
-        eventBus.emit("active-formula-metrics-updated", {
-          lineCount,
-          targetCost,
-          formulaCost,
-        });
-      }
-    }
-  };
-
-  // Check if we should show the add column button for attributes
-  const shouldShowAttributeAddButton = () => {
-    const currentAttributeColumns = columns.filter(
-      (col) => col.group === "Attributes" && col.attributeId
-    );
-    return currentAttributeColumns.length < maxAttributeSelections;
-  };
-
-  // Check if we should show the add column button for formulas
-  const shouldShowFormulaAddButton = () => {
-    const currentFormulaColumns = columns.filter(
-      (col) => col.group === "Formulas" && col.formulaId
-    );
-    return currentFormulaColumns.length < maxFormulaSelections;
-  };
-
-  // Update columns to conditionally hide the add buttons
-  const getDisplayColumns = () => {
-    let displayColumns = [...columns];
-
-    if (!shouldShowAttributeAddButton()) {
-      displayColumns = displayColumns.filter(
-        (col) => col.id !== "attributeAdd"
-      );
-    }
-
-    if (!shouldShowFormulaAddButton()) {
-      displayColumns = displayColumns.filter((col) => col.id !== "formulaAdd");
-    }
-
-    return displayColumns;
-  };
 
   return (
     <div style={tw("h-full bg-white flex flex-col")}>
