@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define, jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
-import { useEffect, useState, useRef, useCallback, useMemo } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo, lazy, Suspense } from "react";
 import { toast } from "react-hot-toast";
 import AttributeSelector from "../../components/AttributeSelector";
 import Badge from "../../components/Badge";
@@ -8,9 +8,6 @@ import DataGrid from "../../components/DataGrid";
 import type { Column } from "../../components/DataGrid";
 import Dialog from "../../components/Dialog";
 import { useDilution } from "../../components/dilution";
-import ExcelUploadModal from "../../components/ExcelUploadModal";
-import FormulaDetailsModal from "../../components/FormulaDetailsModal";
-import FormulaModal from "../../components/FormulaModal";
 import Modal from "../../components/Modal";
 import { useExcelUpload } from "../../hooks/useExcelUpload";
 import { useFormulaDetails } from "../../hooks/useFormulaDetails";
@@ -41,6 +38,11 @@ import { useWorkAreaState } from "./hooks/useWorkAreaState";
 import { useWorkAreaDataSync } from "./hooks/useWorkAreaDataSync";
 import { useRowOperations } from "./hooks/useRowOperations";
 import { useWorkAreaColumnDisplay } from "./hooks/useWorkAreaColumnDisplay";
+
+// Lazy load modals for better initial bundle performance
+const FormulaModal = lazy(() => import("../../components/FormulaModal"));
+const FormulaDetailsModal = lazy(() => import("../../components/FormulaDetailsModal"));
+const ExcelUploadModal = lazy(() => import("../../components/ExcelUploadModal"));
 
 const WorkArea = () => {
   // Workspace context - manages data isolation between tabs
@@ -2181,37 +2183,43 @@ const WorkArea = () => {
         />
       </div>
 
-      {/* Formula Modal */}
-      <FormulaModal
-        isOpen={showFormulaModal}
-        onClose={() => setShowFormulaModal(false)}
-        onCreateFormula={handleFormulaModalCreateFormula}
-        onSelectFormula={handleFormulaModalSelectFormula}
-        availableFormulas={availableFormulas}
-        maxSelections={maxFormulaSelections}
-        currentSelections={
-          columns.filter((col) => col.group === "Formulas" && col.formulaId)
-            .length
-        }
-        selectedFormulaIds={selectedFormulaIds} // Pass selected formula IDs
-      />
+      {/* Formula Modal - Lazy loaded */}
+      <Suspense fallback={null}>
+        <FormulaModal
+          isOpen={showFormulaModal}
+          onClose={() => setShowFormulaModal(false)}
+          onCreateFormula={handleFormulaModalCreateFormula}
+          onSelectFormula={handleFormulaModalSelectFormula}
+          availableFormulas={availableFormulas}
+          maxSelections={maxFormulaSelections}
+          currentSelections={
+            columns.filter((col) => col.group === "Formulas" && col.formulaId)
+              .length
+          }
+          selectedFormulaIds={selectedFormulaIds} // Pass selected formula IDs
+        />
+      </Suspense>
 
-      {/* Formula Details Modal */}
-      <FormulaDetailsModal
-        isOpen={isFormulaDetailsModalOpen}
-        onClose={handleCloseFormulaDetails}
-        formula={selectedFormula}
-        isReadOnly={isReadOnly}
-        onSave={handleSaveFormula}
-      />
+      {/* Formula Details Modal - Lazy loaded */}
+      <Suspense fallback={null}>
+        <FormulaDetailsModal
+          isOpen={isFormulaDetailsModalOpen}
+          onClose={handleCloseFormulaDetails}
+          formula={selectedFormula}
+          isReadOnly={isReadOnly}
+          onSave={handleSaveFormula}
+        />
+      </Suspense>
 
-      {/* Excel Upload Modal */}
-      <ExcelUploadModal
-        isOpen={isExcelUploadModalOpen}
-        onClose={handleCloseExcelUpload}
-        onUpload={handleUploadIngredients}
-        availableIngredients={availableIngredients}
-      />
+      {/* Excel Upload Modal - Lazy loaded */}
+      <Suspense fallback={null}>
+        <ExcelUploadModal
+          isOpen={isExcelUploadModalOpen}
+          onClose={handleCloseExcelUpload}
+          onUpload={handleUploadIngredients}
+          availableIngredients={availableIngredients}
+        />
+      </Suspense>
 
       {/* Load Formula Modal */}
       <Modal
