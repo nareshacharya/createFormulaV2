@@ -1,0 +1,42 @@
+{
+  "pxMore": "false",
+  "pxObjClass": "Code-Pega-List",
+  "pxPageCount": "0",
+  "pxQueryTimeStamp": "20251118T055258.127 GMT",
+  "pxResultCount": "3",
+  "pxTotalResultCount": "0",
+  "pyForceUseStandardDB": "true",
+  "pyMaxRecords": "500",
+  "pyObjClass": "Unilever-FragranceDW-Data-Formula",
+  "pyQueryTimeoutInterval": "30",
+  "pyRowCount": "0",
+  "pyStartIndex": "0",
+  "pyUseReportsDatabase": "false",
+  "pzLoadTime": "November 18, 2025 at 5:52:58 AM GMT",
+  "pzPageNameBase": "D_GetFormulasForFormulaPanel",
+  "pzPageToDisplay": "D_GetFormulasForFormulaPanel",
+  "pxResults": [
+    {
+      "FormulaID": "B00003",
+      "FormulaVersion": "1",
+      "Fragrance": "Test",
+      "pxObjClass": "Unilever-FragranceDW-Data-Formula",
+      "pzInsKey": "UNILEVER-FRAGRANCEDW-DATA-FORMULA B00003!1"
+    },
+    {
+      "FormulaID": "B00003",
+      "FormulaVersion": "2",
+      "Fragrance": "Test",
+      "pxObjClass": "Unilever-FragranceDW-Data-Formula",
+      "pzInsKey": "UNILEVER-FRAGRANCEDW-DATA-FORMULA B00003!2"
+    },
+    {
+      "FormulaID": "B00002",
+      "FormulaVersion": "1",
+      "Fragrance": "Test",
+      "pxObjClass": "Unilever-FragranceDW-Data-Formula",
+      "pzInsKey": "UNILEVER-FRAGRANCEDW-DATA-FORMULA B00002!1"
+    }
+  ]
+
+}

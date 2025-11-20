@@ -1,0 +1,198 @@
+{
+  "pxObjClass": "Unilever-FragranceDW-Work-Task-Ingredient",
+  "pzLoadTime": "November 19, 2025 at 12:41:20 PM GMT",
+  "pzPageNameBase": "D_GetIngredientSummary",
+  "pzPageNameHash": "_pa372190942934906pz",
+  "IngredientDetails": {
+    "BoilingPoint": "100.000000000",
+    "CASID": "1231231-11-1",
+    "ChemicalClass": "Esters",
+    "ChemicalNamePreferred": "IngDB",
+    "CID": "1212",
+    "Density20C": "12.000000000",
+    "DerivedSourceClass": "Natural",
+    "EINECS_EC_ID": "12121212",
+    "INGClass": "Ingredient",
+    "IngredientID": "ING2001449",
+    "IngredientVersion": "Version 1",
+    "INGSERSStatus": "SERS Approved",
+    "INGStatus": "Active",
+    "LastModifiedDate": "20251028T050000.000 GMT",
+    "LIMSIngID": "INGR-21213",
+    "OdorStrength": "10",
+    "OlfactivePrimaryDescriptor": "Aromatic",
+    "OlfactiveSecondaryDescriptor": "Fruity",
+    "OlfactiveSuperClass": "Rose Ester",
+    "OlfactiveTertiaryDescriptor": "Cedarwood",
+    "PaletteEntityCSV": "Analytical, Perfumer",
+    "PhysicalAppearance": "10",
+    "PhysicalState": "Solid",
+    "pxObjClass": "Unilever-FragranceDW-Data-Ingredient",
+    "pzLoadTime": "November 19, 2025 at 12:41:20 PM GMT",
+    "pzPageNameBase": "D_GetSelectedIngredient",
+    "pzPageNameHash": "_pa372190943139071pz",
+    "ReachID": "2323232",
+    "RefractiveIndex20C": "12.000000000",
+    "RefractiveIndex25C": "12.000000000",
+    "RIFMMaterialID": "121212",
+    "SERSChemicalClass_CSV": "PolyCyclic Musk",
+    "SpecificGravity20C": "12.000000000",
+    "SpecificGravity25C": "12.000000000",
+    "SpecificGravityRange20C": "12.000000000",
+    "SupplierINGID_CSV": "SUP-001",
+    "UpperBoilingPointC": "100.000000000",
+    "Version": "1",
+    "VersionStatus": "Active",
+    "Compliance": {
+      "BiodegStatus_CSV": "Ready and Ultimately",
+      "CaliforniaProp65": "0",
+      "CARB": "30.000000000",
+      "CCIC": "Yes",
+      "EPA": "Yes",
+      "HalalStatus": "Yes",
+      "IngredientID": "ING2001449",
+      "NonAnimalDerived": "Yes",
+      "NonPlantDerived": "Yes",
+      "NonProteins": "Yes",
+      "NonviableOrganisms": "Yes",
+      "pxCreateDateTime": "20251030T102526.119 GMT",
+      "pxCreateOperator": "SERSUser",
+      "pxCreateOpName": "SERS Team",
+      "pxCreateSystemID": "unilvr-sit",
+      "pxObjClass": "Unilever-FragranceDW-Data-Compliance",
+      "pxUpdateDateTime": "20251030T102526.119 GMT",
+      "pxUpdateOperator": "SERSUser",
+      "pxUpdateOpName": "SERS Team",
+      "pxUpdateSystemID": "unilvr-sit",
+      "pzInsKey": "Unilever-FragranceDW-Data-Compliance ING2001449!1",
+      "pzLoadTime": "November 19, 2025 at 12:41:20 PM GMT",
+      "pzPageNameBase": "D_ComplianceData",
+      "pzPageNameHash": "_pa372191244787766pz",
+      "RenewablePercentage": "30.00000",
+      "RenewableStatus": "Yes",
+      "Version": "1",
+      "VersionStatus": "Active",
+      "pxDPParameters": {
+        "IngredientID": "ING2001449",
+        "Version": "1"
+      },
+      "pySourcePage": {
+        "pxObjClass": "Embed-DataSource",
+        "pySourceClass": "Unilever-FragranceDW-Data-Compliance",
+        "pySourceIdentifier": "Compliance",
+        "pySourceNumber": "1",
+        "pySourceType": "Lookup"
+      }
+    },
+    "Composition": {
+      "pxObjClass": "Unilever-FragranceDW-Data-Composition",
+      "CompositionList": [
+        {
+          "CASID": "0123456-78-9",
+          "ChemicalNamePreferred": "Test-",
+          "ChildIngredientID": "ING1000009",
+          "CompositionID": "INCMPS-2222",
+          "DirectAdd": "30.000000000",
+          "ExistingIngredientID": "ING1000009",
+          "IndirectAddNatural": "30.000000000",
+          "IndirectAddSynthetic": "40.000000000",
+          "IngredientID": "ING2001449",
+          "LIMSIngID": "INGR-0000234",
+          "pxObjClass": "Unilever-FragranceDW-Data-Composition",
+          "Version": "1",
+          "VersionStatus": "Active"
+        }
+      ]
+    },
+    "pxDPParameters": {
+      "IngredientID": "ING2001449",
+      "Version": "1"
+    },
+    "pySourcePage": {
+      "pxObjClass": "Embed-DataSource",
+      "pySourceClass": "Unilever-FragranceDW-Data-Ingredient",
+      "pySourceIdentifier": "Ingredient",
+      "pySourceNumber": "3",
+      "pySourceType": "Lookup"
+    },
+    "Safety": {
+      "GHSCodePrecautionary": "P101",
+      "GHSHazard_Class": "H223",
+      "GHSHazardStats": "Flammable aerosol.",
+      "GHSPictogram": "Compressed Gases",
+      "GHSPrecautionaryStatements_CSV": "If medical advice is needed, have product container or label at hand.",
+      "GHSSignalWord": "Danger",
+      "IngredientID": "ING2001449",
+      "LC50InhalationDustMistMgL": "10.000000000",
+      "LC50InhalationGasPpm": "10.000000000",
+      "LC50InhalationVaporMgL": "10.000000000",
+      "LD50DermalMgkg": "10.000000000",
+      "LD50OralMgkg": "10.000000000",
+      "NonHazardousForCLP": "Yes",
+      "pxCreateDateTime": "20251030T102526.135 GMT",
+      "pxCreateOperator": "SERSUser",
+      "pxCreateOpName": "SERS Team",
+      "pxCreateSystemID": "unilvr-sit",
+      "pxObjClass": "Unilever-FragranceDW-Data-Safety",
+      "pxUpdateDateTime": "20251030T102526.135 GMT",
+      "pxUpdateOperator": "SERSUser",
+      "pxUpdateOpName": "SERS Team",
+      "pxUpdateSystemID": "unilvr-sit",
+      "pzInsKey": "Unilever-FragranceDW-Data-Safety ING2001449!1",
+      "pzLoadTime": "November 19, 2025 at 12:41:20 PM GMT",
+      "pzPageNameBase": "D_SafetyData",
+      "pzPageNameHash": "_pa372191173155170pz",
+      "Version": "1",
+      "VersionStatus": "Active",
+      "pxDPParameters": {
+        "IngredientID": "ING2001449",
+        "Version": "1"
+      },
+      "pySourcePage": {
+        "pxObjClass": "Embed-DataSource",
+        "pySourceClass": "Unilever-FragranceDW-Data-Safety",
+        "pySourceIdentifier": "Safety",
+        "pySourceNumber": "1",
+        "pySourceType": "Lookup"
+      }
+    },
+    "Supplier": [
+      {
+        "ExistingSupplierID": "Vendor-0000",
+        "IngredientID": "ING2001449",
+        "pxObjClass": "Unilever-FragranceDW-Data-Supplier",
+        "SupplierID": "SUP-001",
+        "SupplierName": "Supplier",
+        "TradeName": "Trade",
+        "Version": "1",
+        "Cost": [
+          {
+            "CostAmount": "1000.000000000",
+            "CostID": "INGCOST-349",
+            "Country": "India",
+            "IngredientID": "ING2001449",
+            "Pricetn": "10.000000000",
+            "PriceType": "Ex-Works",
+            "PricingDate": "20251029",
+            "PricingSource": "UL Negotiated Contract Price",
+            "pxObjClass": "Unilever-FragranceDW-Data-Cost",
+            "RevisionDate": "20251028",
+            "SupplierID": "SUP-001",
+            "Version": "1"
+          }
+        ]
+      }
+    ]
+  },
+  "pxDPParameters": {
+    "IngredientID": "ING2001449",
+    "Version": "1"
+  },
+  "pySourcePage": {
+    "pxObjClass": "Embed-DataSource",
+    "pySourceClass": "Unilever-FragranceDW-Work-Task-Ingredient",
+    "pySourceIdentifier": "GetIngredientSummaryResDT",
+    "pySourceNumber": "1",
+    "pySourceType": "Data Transform"
+  }
+}

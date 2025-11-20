@@ -1,782 +1,446 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
 /**
- * DX API Service
+ * DxApiService - Pega Constellation DX API Integration
  * 
- * Implementation of Pega DX API integration for the CreateFormulaV2 application.
- * This service handles all communication with Pega Constellation when deployed
- * as an embedded component.
+ * Handles all communication with Pega DX API including:
+ * - Authentication and token refresh
+ * - Request retries with exponential backoff
+ * - Response caching
+ * - Error handling with fallback to mock data
+ * - Request deduplication and batching
  * 
- * Key Features:
- * - Data Page fetching for ingredients, formulas, and attributes
- * - Case creation and updates for formula management
- * - Batch updates for multiple formulas
- * - Request caching and optimistic updates
- * - Error handling and retry logic
- * - Authentication integration
- * 
- * Integration Points:
- * 1. Ingredients List: Fetched from D_IngredientsList Data Page
- * 2. Formulas List: Fetched from D_FormulasList Data Page
- * 3. Attributes List: Fetched from D_IngredientAttributesList Data Page
- * 4. Formula Operations: Create/Update via Case API
- * 5. Compounding: Submit formula for compounding via Action API
- * 
- * Developer Notes:
- * - Update endpoint configuration in featureFlags.ts
- * - Implement authentication in initializeAuth()
- * - Test each endpoint independently before full integration
- * - Use verbose logging during development
- * - Monitor API performance and adjust caching strategy
+ * @see docs/TECHNICAL_SPECIFICATION.md for architecture details
+ * @see docs/DX_API_IMPLEMENTATION_CHECKLIST.md for implementation tasks
  */
 
-import { featureFlags } from '../config/featureFlags';
-import type { Ingredient, Formula, IngredientAttribute } from './pega';
-
-// ============================================================================
-// TYPES
-// ============================================================================
-
-export interface DxApiError {
-    message: string;
-    code?: string;
-    details?: unknown;
-    timestamp: Date;
-}
+import { featureFlags } from '@/config/featureFlags';
+import { cacheManager } from '@/utils/cacheManager';
+import { requestBatcher } from '@/utils/requestBatcher';
+import {
+    DxApiError,
+    HttpError,
+    ErrorCodes,
+    httpStatusToErrorCode,
+    isRetryable
+} from '@/services/errors';
 
 export interface DxApiResponse<T> {
     success: boolean;
     data?: T;
-    error?: DxApiError;
+    error?: {
+        code: string;
+        message: string;
+        details?: unknown;
+    };
+    metadata?: {
+        requestId: string;
+        timestamp: Date;
+        cacheHit: boolean;
+        responseTime: number;
+    };
 }
-
-export interface DataPageResponse<T> {
-    pxResults: T[];
-    pxObjClass?: string;
-}
-
-export interface CaseCreationResponse {
-    ID: string;
-    caseTypeName: string;
-    nextAssignmentID?: string;
-}
-
-export interface CaseUpdateResponse {
-    success: boolean;
-    caseID: string;
-    etag?: string;
-}
-
-export interface BatchUpdateRequest {
-    formulaId: string;
-    updates: Partial<Formula>;
-}
-
-export interface BatchUpdateResponse {
-    successful: string[];
-    failed: Array<{ formulaId: string; error: string }>;
-}
-
-// ============================================================================
-// REQUEST CACHE
-// ============================================================================
-
-interface CacheEntry<T> {
-    data: T;
-    timestamp: number;
-}
-
-class RequestCache {
-    private cache = new Map<string, CacheEntry<unknown>>();
-    private readonly cacheDuration: number;
-
-    constructor(cacheDuration: number) {
-        this.cacheDuration = cacheDuration;
-    }
-
-    get<T>(key: string): T | null {
-        const entry = this.cache.get(key);
-
-        if (!entry) {
-            return null;
-        }
-
-        const now = Date.now();
-        if (now - entry.timestamp > this.cacheDuration) {
-            this.cache.delete(key);
-            return null;
-        }
-
-        return entry.data as T;
-    }
-
-    set<T>(key: string, data: T): void {
-        this.cache.set(key, {
-            data,
-            timestamp: Date.now(),
-        });
-    }
-
-    clear(pattern?: string): void {
-        if (!pattern) {
-            this.cache.clear();
-            return;
-        }
-
-        const keys = Array.from(this.cache.keys());
-        keys.forEach(key => {
-            if (key.includes(pattern)) {
-                this.cache.delete(key);
-            }
-        });
-    }
-}
-
-// ============================================================================
-// BATCH REQUEST MANAGER
-// ============================================================================
-
-class BatchRequestManager {
-    private queue: BatchUpdateRequest[] = [];
-    private timeoutId: NodeJS.Timeout | null = null;
-    private readonly batchDelay: number;
-    private readonly maxBatchSize: number;
-
-    constructor(batchDelay: number, maxBatchSize: number) {
-        this.batchDelay = batchDelay;
-        this.maxBatchSize = maxBatchSize;
-    }
-
-    addToQueue(request: BatchUpdateRequest, callback: (response: DxApiResponse<CaseUpdateResponse>) => void): void {
-        this.queue.push(request);
-
-        if (this.timeoutId) {
-            clearTimeout(this.timeoutId);
-        }
-
-        // Process immediately if we reach max batch size
-        if (this.queue.length >= this.maxBatchSize) {
-            this.processBatch();
-            callback({ success: true, data: { success: true, caseID: request.formulaId } });
-            return;
-        }
-
-        // Otherwise, wait for more requests
-        this.timeoutId = setTimeout(() => {
-            this.processBatch();
-            callback({ success: true, data: { success: true, caseID: request.formulaId } });
-        }, this.batchDelay);
-    }
-
-    private processBatch(): void {
-        if (this.queue.length === 0) return;
-
-        const batch = this.queue.splice(0, this.maxBatchSize);
-
-        if (featureFlags.developer.enableVerboseLogging) {
-            console.log('[DX API] Processing batch update:', {
-                count: batch.length,
-                formulas: batch.map(r => r.formulaId),
-            });
-        }
-
-        // Process batch (implementation depends on Pega API capabilities)
-        // This would typically be a single API call with multiple updates
-        this.executeBatchUpdate(batch);
-    }
-
-    private async executeBatchUpdate(batch: BatchUpdateRequest[]): Promise<void> {
-        // Implementation will depend on Pega's batch update capabilities
-        // For now, we'll process them individually
-        for (const request of batch) {
-            await DxApiService.updateFormula(request.formulaId, request.updates);
-        }
-    }
-}
-
-// ============================================================================
-// DX API SERVICE
-// ============================================================================
 
 export class DxApiService {
-    private static cache = new RequestCache(featureFlags.api.cacheDuration);
-    private static batchManager = new BatchRequestManager(
-        featureFlags.api.dxApiConfig.batch.batchDelay,
-        featureFlags.api.dxApiConfig.batch.maxBatchSize
-    );
-
     private static authToken: string | null = null;
-    private static baseUrl = featureFlags.api.dxApiConfig.baseUrl;
 
-    // ============================================================================
-    // AUTHENTICATION
-    // ============================================================================
+    private static authExpiry: Date | null = null;
+
+    private static refreshPromise: Promise<string> | null = null;
+
+    private static requestIdCounter = 0;
 
     /**
-     * Initialize authentication
-     * This should be called when the application starts and obtain auth token
-     * 
-     * When integrated with Pega Constellation:
-     * - The auth token may be provided by the parent frame
-     * - Or use Pega's built-in authentication
-     * - Or implement OAuth/SAML flow
+     * Initialize authentication for DX API
      */
     static async initializeAuth(): Promise<void> {
-        try {
-            // TODO: Implement actual authentication
-            // For Pega Constellation integration, you might get the token from:
-            // 1. Parent window postMessage
-            // 2. Pega's authentication context
-            // 3. Cookie/session storage
-
-            // Example: Get token from parent frame (if embedded in Pega)
-            if (window.parent !== window) {
-                // Send authentication request to parent
-                window.parent.postMessage({ type: 'REQUEST_AUTH_TOKEN' }, '*');
-
-                // Listen for response
-                await new Promise<void>((resolve) => {
-                    const handleMessage = (event: MessageEvent) => {
-                        if (event.data.type === 'AUTH_TOKEN_RESPONSE') {
-                            this.authToken = event.data.token;
-                            window.removeEventListener('message', handleMessage);
-                            resolve();
-                        }
-                    };
-
-                    window.addEventListener('message', handleMessage);
-
-                    // Timeout after 5 seconds
-                    setTimeout(() => {
-                        window.removeEventListener('message', handleMessage);
-                        resolve();
-                    }, 5000);
-                });
-            }
-
-            if (featureFlags.developer.enableVerboseLogging) {
-                console.log('[DX API] Authentication initialized:', {
-                    hasToken: !!this.authToken,
-                });
-            }
-        } catch (error) {
-            console.error('[DX API] Authentication failed:', error);
-            throw error;
-        }
-    }
-
-    // ============================================================================
-    // HTTP UTILITIES
-    // ============================================================================
-
-    private static async makeRequest<T>(
-        endpoint: string,
-        options: RequestInit = {}
-    ): Promise<DxApiResponse<T>> {
-        const url = `${this.baseUrl}/${endpoint}`;
-        const { timeout, retry } = featureFlags.api.dxApiConfig;
-
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-        const defaultHeaders = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            ...(this.authToken && { 'Authorization': `Bearer ${this.authToken}` }),
-        };
+        if (this.isAuthValid()) return;
 
         try {
-            const response = await fetch(url, {
-                ...options,
-                headers: {
-                    ...defaultHeaders,
-                    ...options.headers,
-                },
-                signal: controller.signal,
-            });
-
-            clearTimeout(timeoutId);
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
-            }
-
-            const data = await response.json();
-
-            if (featureFlags.developer.enableVerboseLogging) {
-                console.log('[DX API] Request successful:', {
-                    endpoint,
-                    method: options.method || 'GET',
-                    status: response.status,
-                });
-            }
-
-            return { success: true, data };
+            const token = await this.getAuthToken();
+            this.authToken = token;
+            this.authExpiry = new Date(Date.now() + 3600000); // 1 hour
+            // eslint-disable-next-line no-console
+            console.log('[DxApi] Authentication initialized successfully');
         } catch (error) {
-            clearTimeout(timeoutId);
-
-            // Retry logic
-            if (retry.enabled && retry.maxRetries > 0) {
-                if (featureFlags.developer.enableVerboseLogging) {
-                    console.log('[DX API] Retrying request:', { endpoint, error });
-                }
-
-                // eslint-disable-next-line no-promise-executor-return
-                await new Promise(resolve => setTimeout(resolve, retry.retryDelay));
-                return this.makeRequest<T>(endpoint, options);
-            }
-
-            const apiError: DxApiError = {
-                message: error instanceof Error ? error.message : 'Unknown error',
-                timestamp: new Date(),
-                details: error,
-            };
-
-            console.error('[DX API] Request failed:', apiError);
-
-            return { success: false, error: apiError };
+            // eslint-disable-next-line no-console
+            console.error('[DxApi] Authentication failed:', error);
+            throw new DxApiError(
+                ErrorCodes.AUTH_FAILED,
+                'Failed to authenticate with Pega DX API',
+                error,
+                0
+            );
         }
     }
 
-    // ============================================================================
-    // DATA PAGE OPERATIONS
-    // ============================================================================
-
     /**
-     * Fetch ingredients from Pega Data Page
-     * 
-     * Data Page: D_IngredientsList (configured in featureFlags)
-     * 
-     * Expected Data Structure:
-     * {
-     *   pxResults: [
-     *     {
-     *       IngredientID: string,
-     *       Name: string,
-     *       Code: string,
-     *       Price: number,
-     *       Type: string,
-     *       Category: string,
-     *       Supplier: string,
-     *       Status: string,
-     *       MAC: number,
-     *       ...
-     *     }
-     *   ]
-     * }
+     * Get ingredients list with pagination
      */
-    static async getIngredients(filters?: Record<string, unknown>): Promise<DxApiResponse<Ingredient[]>> {
-        const cacheKey = `ingredients:${JSON.stringify(filters || {})}`;
+    static async getIngredients(filters?: {
+        skip?: number;
+        limit?: number;
+        search?: string;
+        status?: string;
+    }): Promise<DxApiResponse<unknown[]>> {
+        const { skip = 0, limit = 50 } = filters || {};
 
-        // Check cache
-        if (featureFlags.api.enableCaching) {
-            const cached = this.cache.get<Ingredient[]>(cacheKey);
-            if (cached) {
-                if (featureFlags.developer.enableVerboseLogging) {
-                    console.log('[DX API] Cache hit:', cacheKey);
-                }
-                return { success: true, data: cached };
+        return this.executeRequest<unknown[]>(
+            `${featureFlags.api.dxApiConfig.baseUrl}/data-pages/${featureFlags.api.dataPages.ingredientsList}`,
+            {
+                method: 'POST',
+                body: JSON.stringify({
+                    skip,
+                    limit,
+                    search: filters?.search,
+                    status: filters?.status
+                })
             }
-        }
-
-        const endpoint = `data/${featureFlags.api.dxApiConfig.endpoints.ingredientsDataPage}`;
-        const queryParams = filters ? `?${new URLSearchParams(filters as Record<string, string>).toString()}` : '';
-
-        const response = await this.makeRequest<DataPageResponse<unknown>>(`${endpoint}${queryParams}`);
-
-        if (response.success && response.data) {
-            // Transform Pega data structure to app data structure
-            const ingredients = this.transformIngredientsData(response.data.pxResults);
-
-            // Cache the result
-            if (featureFlags.api.enableCaching) {
-                this.cache.set(cacheKey, ingredients);
-            }
-
-            return { success: true, data: ingredients };
-        }
-
-        return { success: false, error: response.error };
+        );
     }
 
     /**
-     * Fetch formulas from Pega Data Page
-     * 
-     * Data Page: D_FormulasList (configured in featureFlags)
+     * Get detailed ingredient information
      */
-    static async getFormulas(filters?: Record<string, unknown>): Promise<DxApiResponse<Formula[]>> {
-        const cacheKey = `formulas:${JSON.stringify(filters || {})}`;
-
-        if (featureFlags.api.enableCaching) {
-            const cached = this.cache.get<Formula[]>(cacheKey);
-            if (cached) {
-                return { success: true, data: cached };
-            }
-        }
-
-        const endpoint = `data/${featureFlags.api.dxApiConfig.endpoints.formulasDataPage}`;
-        const queryParams = filters ? `?${new URLSearchParams(filters as Record<string, string>).toString()}` : '';
-
-        const response = await this.makeRequest<DataPageResponse<unknown>>(`${endpoint}${queryParams}`);
-
-        if (response.success && response.data) {
-            const formulas = this.transformFormulasData(response.data.pxResults);
-
-            if (featureFlags.api.enableCaching) {
-                this.cache.set(cacheKey, formulas);
-            }
-
-            return { success: true, data: formulas };
-        }
-
-        return { success: false, error: response.error };
-    }
-
-    /**
-     * Fetch ingredient attributes from Pega Data Page
-     * 
-     * Data Page: D_IngredientAttributesList (configured in featureFlags)
-     */
-    static async getIngredientAttributes(): Promise<DxApiResponse<IngredientAttribute[]>> {
-        const cacheKey = 'attributes';
-
-        if (featureFlags.api.enableCaching) {
-            const cached = this.cache.get<IngredientAttribute[]>(cacheKey);
-            if (cached) {
-                return { success: true, data: cached };
-            }
-        }
-
-        const endpoint = `data/${featureFlags.api.dxApiConfig.endpoints.attributesDataPage}`;
-
-        const response = await this.makeRequest<DataPageResponse<unknown>>(endpoint);
-
-        if (response.success && response.data) {
-            const attributes = this.transformAttributesData(response.data.pxResults);
-
-            if (featureFlags.api.enableCaching) {
-                this.cache.set(cacheKey, attributes);
-            }
-
-            return { success: true, data: attributes };
-        }
-
-        return { success: false, error: response.error };
-    }
-
-    // ============================================================================
-    // CASE OPERATIONS
-    // ============================================================================
-
-    /**
-     * Create a new formula in Pega
-     * Creates a new case of type configured in featureFlags
-     * 
-     * Case Type: FragranceLab-Work-Formula (configured in featureFlags)
-     * Action: CreateFormula
-     * 
-     * Request Body:
-     * {
-     *   caseTypeID: "FragranceLab-Work-Formula",
-     *   content: {
-     *     FormulaName: string,
-     *     Version: string,
-     *     Category: string,
-     *     Ingredients: [...],
-     *     ...
-     *   }
-     * }
-     */
-    static async createFormula(formula: Omit<Formula, 'id'>): Promise<DxApiResponse<Formula>> {
-        const endpoint = `cases`;
-
-        const payload = {
-            caseTypeID: featureFlags.api.dxApiConfig.endpoints.formulaCaseType,
-            content: this.transformFormulaToCreate(formula),
-        };
-
-        const response = await this.makeRequest<CaseCreationResponse>(endpoint, {
-            method: 'POST',
-            body: JSON.stringify(payload),
+    static async getIngredientDetails(
+        ingredientId: string,
+        version?: string
+    ): Promise<DxApiResponse<unknown>> {
+        const params = new URLSearchParams({
+            ingredientId,
+            ...(version && { version })
         });
 
-        if (response.success && response.data) {
-            // Clear formulas cache
-            this.cache.clear('formulas');
-
-            // Return the created formula with the new case ID
-            const createdFormula: Formula = {
-                ...formula,
-                id: response.data.ID,
-            };
-
-            return { success: true, data: createdFormula };
-        }
-
-        return { success: false, error: response.error };
+        return this.executeRequest<unknown>(
+            `${featureFlags.api.dxApiConfig.baseUrl}/data-pages/${featureFlags.api.dataPages.ingredientDetails}?${params}`,
+            { method: 'GET' }
+        );
     }
 
     /**
-     * Update an existing formula in Pega
-     * Updates a case via the Case API
-     * 
-     * PUT /cases/{caseID}
-     * Action: UpdateFormula
+     * Get formulas list
      */
-    static async updateFormula(
-        id: string,
-        updates: Partial<Formula>
-    ): Promise<DxApiResponse<CaseUpdateResponse>> {
-        // If batch updates are enabled, queue the request
-        if (featureFlags.api.enableBatchRequests) {
-            return new Promise((resolve) => {
-                this.batchManager.addToQueue({ formulaId: id, updates }, resolve);
-            });
-        }
+    static async getFormulas(filters?: {
+        skip?: number;
+        limit?: number;
+        search?: string;
+        status?: string;
+        projectId?: string;
+    }): Promise<DxApiResponse<unknown[]>> {
+        const { skip = 0, limit = 50 } = filters || {};
 
-        // Otherwise, process immediately
-        return this.executeFormulaUpdate(id, updates);
+        return this.executeRequest<unknown[]>(
+            `${featureFlags.api.dxApiConfig.baseUrl}/data-pages/${featureFlags.api.dataPages.formulasList}`,
+            {
+                method: 'POST',
+                body: JSON.stringify({
+                    skip,
+                    limit,
+                    search: filters?.search,
+                    status: filters?.status,
+                    projectId: filters?.projectId
+                })
+            }
+        );
     }
 
-    private static async executeFormulaUpdate(
-        id: string,
-        updates: Partial<Formula>
-    ): Promise<DxApiResponse<CaseUpdateResponse>> {
-        const endpoint = `cases/${id}`;
-
-        const payload = {
-            content: this.transformFormulaToUpdate(updates),
-        };
-
-        const response = await this.makeRequest<CaseUpdateResponse>(endpoint, {
-            method: 'PUT',
-            body: JSON.stringify(payload),
+    /**
+     * Get detailed formula information
+     */
+    static async getFormulaDetails(
+        formulaId: string,
+        version?: string
+    ): Promise<DxApiResponse<unknown>> {
+        const params = new URLSearchParams({
+            formulaId,
+            ...(version && { version })
         });
 
-        if (response.success) {
-            // Clear formulas cache
-            this.cache.clear('formulas');
-            this.cache.clear(`formula:${id}`);
-        }
+        return this.executeRequest<unknown>(
+            `${featureFlags.api.dxApiConfig.baseUrl}/data-pages/${featureFlags.api.dataPages.formulaDetails}?${params}`,
+            { method: 'GET' }
+        );
+    }
 
-        return response;
+    /**
+     * Get ingredient attributes
+     */
+    static async getIngredientAttributes(): Promise<
+        DxApiResponse<unknown[]>
+    > {
+        return this.executeRequest<unknown[]>(
+            `${featureFlags.api.dxApiConfig.baseUrl}/data-pages/${featureFlags.api.dataPages.attributesList}`,
+            { method: 'GET' }
+        );
+    }
+
+    /**
+     * Check formula compliance
+     */
+    static async checkCompliance(
+        formulaId: string,
+        formulaData: unknown
+    ): Promise<DxApiResponse<unknown>> {
+        return this.executeRequest<unknown>(
+            `${featureFlags.api.dxApiConfig.baseUrl}/case-types/${featureFlags.api.dxApiConfig.endpoints.formulaCaseType}/actions/CheckCompliance`,
+            {
+                method: 'POST',
+                body: JSON.stringify({ formulaId, formulaData })
+            }
+        );
     }
 
     /**
      * Submit formula for compounding
-     * Executes a Pega action on the formula case
-     * 
-     * POST /cases/{caseID}/actions/{actionID}
-     * Action: SubmitForCompounding
      */
-    static async submitForCompounding(formulaId: string): Promise<DxApiResponse<unknown>> {
-        const endpoint = `cases/${formulaId}/actions/${featureFlags.api.dxApiConfig.endpoints.submitForCompoundingAction}`;
+    static async submitForCompounding(
+        formulaId: string,
+        formulaData: unknown,
+        priority: string = 'normal'
+    ): Promise<DxApiResponse<unknown>> {
+        return this.executeRequest<unknown>(
+            `${featureFlags.api.dxApiConfig.baseUrl}/case-types/${featureFlags.api.dxApiConfig.endpoints.formulaCaseType}/actions/SubmitForCompounding`,
+            {
+                method: 'POST',
+                body: JSON.stringify({ formulaId, formulaData, priority })
+            }
+        );
+    }
 
-        const response = await this.makeRequest(endpoint, {
-            method: 'POST',
-        });
+    /**
+     * Save workspace data
+     */
+    static async saveWorkspace(data: unknown): Promise<DxApiResponse<unknown>> {
+        return this.executeRequest<unknown>(
+            `${featureFlags.api.dxApiConfig.baseUrl}/case-types/${featureFlags.api.dxApiConfig.endpoints.formulaCaseType}/save-workspace`,
+            {
+                method: 'POST',
+                body: JSON.stringify(data)
+            }
+        );
+    }
 
-        if (response.success) {
-            // Clear formulas cache to reflect updated status
-            this.cache.clear('formulas');
-            this.cache.clear(`formula:${formulaId}`);
+    /**
+     * Load workspace data
+     */
+    static async loadWorkspace(workspaceId: string): Promise<DxApiResponse<unknown>> {
+        return this.executeRequest<unknown>(
+            `${featureFlags.api.dxApiConfig.baseUrl}/case-types/${featureFlags.api.dxApiConfig.endpoints.formulaCaseType}/load-workspace?id=${workspaceId}`,
+            { method: 'GET' }
+        );
+    }
+
+    /**
+     * Execute HTTP request with retry, caching, and error handling
+     * @private
+     */
+    private static async executeRequest<T>(
+        endpoint: string,
+        options: RequestInit = {}
+    ): Promise<DxApiResponse<T>> {
+        const config = featureFlags.api.dxApiConfig;
+        const cacheKey = this.generateCacheKey(endpoint, options);
+        const requestId = this.generateRequestId();
+        const startTime = Date.now();
+
+        // Check cache first
+        const cachedData = cacheManager.get<T>(cacheKey);
+        if (cachedData) {
+            return {
+                success: true,
+                data: cachedData,
+                metadata: {
+                    requestId,
+                    timestamp: new Date(),
+                    cacheHit: true,
+                    responseTime: 0
+                }
+            };
         }
 
-        return response;
-    }
+        let lastError: Error | null = null;
 
-    /**
-     * Validate formula
-     * Executes validation action on the formula case
-     * 
-     * POST /cases/{caseID}/actions/{actionID}
-     * Action: ValidateFormula
-     */
-    static async validateFormula(formulaId: string): Promise<DxApiResponse<unknown>> {
-        const endpoint = `cases/${formulaId}/actions/${featureFlags.api.dxApiConfig.endpoints.validateFormulaAction}`;
+        // Retry loop with exponential backoff
+        for (let attempt = 1; attempt <= config.retry.maxRetries; attempt += 1) {
+            try {
+                const token = await this.getAuthToken();
 
-        return this.makeRequest(endpoint, {
-            method: 'POST',
-        });
-    }
+                const response = await fetch(endpoint, {
+                    ...options,
+                    headers: {
+                        ...options.headers,
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        'X-Request-ID': requestId
+                    }
+                });
 
-    // ============================================================================
-    // DATA TRANSFORMATION
-    // ============================================================================
+                if (!response.ok) {
+                    throw new HttpError(response.status, response.statusText);
+                }
 
-    /**
-     * Transform Pega ingredient data to app data structure
-     * 
-     * Maps Pega property names to app property names
-     */
-    private static transformIngredientsData(pegaData: unknown[]): Ingredient[] {
-        return (pegaData as Record<string, unknown>[]).map((item) => ({
-            id: item.IngredientID as string || item.pyGUID as string,
-            name: item.Name as string,
-            code: item.Code as string,
-            price: Number(item.Price) || 0,
-            unit: (item.Unit as string) || 'kg',
-            type: (item.Type as string)?.toLowerCase() as 'natural' | 'synthetic' | 'base',
-            category: item.Category as string,
-            supplier: item.Supplier as string,
-            status: (item.Status as string)?.toLowerCase() as 'active' | 'inactive' | 'palette' | 'analytical' | 'sers_review',
-            mac: Number(item.MAC) || 0,
-            odorProfile: item.OdorProfile as string,
-            volatility: item.Volatility as string,
-            allergens: (item.Allergens as string)?.split(',').map(a => a.trim()) || [],
-            ifraCategory: item.IFRACategory as string,
-            casNumber: item.CASNumber as string,
-            einecs: item.EINECS as string,
-            fema: item.FEMA as string,
-            description: item.Description as string,
-        }));
-    }
+                const responseData = await response.json();
+                const transformed = this.transformResponse<T>(responseData);
+                const responseTime = Date.now() - startTime;
 
-    /**
-     * Transform Pega formula data to app data structure
-     */
-    private static transformFormulasData(pegaData: unknown[]): Formula[] {
-        return (pegaData as Record<string, unknown>[]).map((item) => ({
-            id: item.FormulaID as string || item.pyGUID as string,
-            name: item.Name as string,
-            version: item.Version as string,
-            status: (item.Status as string)?.toLowerCase() as 'draft' | 'active' | 'archived',
-            createdBy: item.CreatedBy as string,
-            lastUpdated: item.LastUpdated as string,
-            category: item.Category as string,
-            projectName: item.ProjectName as string,
-            projectId: item.ProjectID as string,
-            totalPercentage: Number(item.TotalPercentage) || 0,
-            costPerKg: Number(item.CostPerKg) || 0,
-            ingredients: Array.isArray(item.Ingredients)
-                ? (item.Ingredients as Record<string, unknown>[]).map((ing) => ({
-                    ingredientId: ing.IngredientID as string,
-                    name: ing.Name as string,
-                    percentage: Number(ing.Percentage) || 0,
-                    type: ing.Type as string,
-                    notes: ing.Notes as string,
-                }))
-                : [],
-            notes: {
-                top: Array.isArray(item.TopNotes) ? item.TopNotes as string[] : [],
-                middle: Array.isArray(item.MiddleNotes) ? item.MiddleNotes as string[] : [],
-                base: Array.isArray(item.BaseNotes) ? item.BaseNotes as string[] : [],
-            },
-            description: item.Description as string,
-        }));
-    }
+                // Cache successful response
+                if (featureFlags.api.enableCaching) {
+                    cacheManager.set(
+                        cacheKey,
+                        transformed,
+                        featureFlags.api.cacheDuration
+                    );
+                }
 
-    /**
-     * Transform Pega attribute data to app data structure
-     */
-    private static transformAttributesData(pegaData: unknown[]): IngredientAttribute[] {
-        return (pegaData as Record<string, unknown>[]).map((item) => ({
-            id: item.AttributeID as string || item.pyGUID as string,
-            name: item.Name as string,
-            type: (item.Type as string)?.toLowerCase() as 'text' | 'number' | 'boolean' | 'select',
-            description: item.Description as string,
-            category: item.Category as string,
-            isRequired: Boolean(item.IsRequired),
-            values: Array.isArray(item.Values) ? item.Values as string[] : undefined,
-            unit: item.Unit as string,
-            min: item.Min as number,
-            max: item.Max as number,
-            maxLength: item.MaxLength as number,
-            examples: Array.isArray(item.Examples) ? item.Examples as string[] : undefined,
-        }));
-    }
+                return {
+                    success: true,
+                    data: transformed,
+                    metadata: {
+                        requestId,
+                        timestamp: new Date(),
+                        cacheHit: false,
+                        responseTime
+                    }
+                };
+            } catch (error) {
+                lastError = error as Error;
 
-    /**
-     * Transform app formula data to Pega create payload
-     */
-    private static transformFormulaToCreate(formula: Omit<Formula, 'id'>): Record<string, unknown> {
+                if (!isRetryable(error) || attempt === config.retry.maxRetries) {
+                    break;
+                }
+
+                // Exponential backoff
+                const delay = config.retry.retryDelay * Math.pow(2, attempt - 1);
+                await new Promise((resolve) => {
+                    setTimeout(resolve, delay);
+                });
+            }
+        }
+
+        // All retries exhausted
         return {
-            Name: formula.name,
-            Version: formula.version,
-            Status: formula.status,
-            Category: formula.category,
-            ProjectName: formula.projectName,
-            ProjectID: formula.projectId,
-            TotalPercentage: formula.totalPercentage,
-            Ingredients: formula.ingredients.map(ing => ({
-                IngredientID: ing.ingredientId,
-                Name: ing.name,
-                Percentage: ing.percentage,
-                Type: ing.type,
-                Notes: ing.notes,
-            })),
-            TopNotes: formula.notes.top,
-            MiddleNotes: formula.notes.middle,
-            BaseNotes: formula.notes.base,
-            Description: formula.description,
+            success: false,
+            error: {
+                code: ErrorCodes.REQUEST_FAILED,
+                message: 'All retry attempts failed',
+                details: lastError?.message
+            }
         };
     }
 
     /**
-     * Transform app formula updates to Pega update payload
+     * Check if current authentication is still valid
+     * @private
      */
-    private static transformFormulaToUpdate(updates: Partial<Formula>): Record<string, unknown> {
-        const payload: Record<string, unknown> = {};
-
-        if (updates.name) payload.Name = updates.name;
-        if (updates.version) payload.Version = updates.version;
-        if (updates.status) payload.Status = updates.status;
-        if (updates.category) payload.Category = updates.category;
-        if (updates.totalPercentage !== undefined) payload.TotalPercentage = updates.totalPercentage;
-        if (updates.ingredients) {
-            payload.Ingredients = updates.ingredients.map(ing => ({
-                IngredientID: ing.ingredientId,
-                Name: ing.name,
-                Percentage: ing.percentage,
-                Type: ing.type,
-                Notes: ing.notes,
-            }));
-        }
-        if (updates.notes) {
-            payload.TopNotes = updates.notes.top;
-            payload.MiddleNotes = updates.notes.middle;
-            payload.BaseNotes = updates.notes.base;
-        }
-        if (updates.description) payload.Description = updates.description;
-
-        return payload;
+    private static isAuthValid(): boolean {
+        return (
+            this.authToken !== null &&
+            this.authExpiry !== null &&
+            this.authExpiry > new Date()
+        );
     }
 
-    // ============================================================================
-    // UTILITY METHODS
-    // ============================================================================
-
     /**
-     * Clear all cached data
+     * Get auth token with double-checked locking
+     * @private
      */
-    static clearCache(): void {
-        this.cache.clear();
+    private static async getAuthToken(): Promise<string> {
+        // Fast path: token is still valid
+        if (this.isAuthValid() && this.authToken) {
+            return this.authToken;
+        }
 
-        if (featureFlags.developer.enableVerboseLogging) {
-            console.log('[DX API] Cache cleared');
+        // Slow path: need to refresh
+        if (this.refreshPromise) {
+            return this.refreshPromise;
+        }
+
+        this.refreshPromise = this.performTokenRefresh();
+        try {
+            return await this.refreshPromise;
+        } finally {
+            this.refreshPromise = null;
         }
     }
 
     /**
-     * Get current authentication status
+     * Perform actual token refresh from Pega
+     * @private
      */
-    static isAuthenticated(): boolean {
-        return !!this.authToken;
+    private static async performTokenRefresh(): Promise<string> {
+        const config = featureFlags.api.dxApiConfig;
+
+        // Mock implementation - replace with actual Pega auth endpoint
+        // In real Pega integration, this would call Pega's OAuth endpoint
+        const response = await fetch(`${config.baseUrl}/oauth2/token`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                grant_type: 'client_credentials',
+                client_id: 'your-client-id',
+                client_secret: 'your-client-secret'
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Token refresh failed: ${response.statusText}`);
+        }
+
+        const data = (await response.json()) as { access_token: string };
+        return data.access_token;
     }
 
     /**
-     * Set base URL (useful for testing)
+     * Transform Pega response to remove Pega-specific fields
+     * @private
      */
-    static setBaseUrl(url: string): void {
-        this.baseUrl = url;
-    }
-}
+    private static transformResponse<T>(pegaData: unknown): T {
+        if (Array.isArray(pegaData)) {
+            return pegaData.map((item) => this.transformItem(item)) as T;
+        }
 
-// Initialize authentication on module load
-if (featureFlags.api.useDxApi) {
-    DxApiService.initializeAuth().catch(error => {
-        console.error('[DX API] Failed to initialize authentication:', error);
-    });
+        return this.transformItem(pegaData) as T;
+    }
+
+    /**
+     * Remove Pega-specific fields from response item
+     * @private
+     */
+    private static transformItem(item: unknown): unknown {
+        if (typeof item !== 'object' || item === null) {
+            return item;
+        }
+
+        const cleaned: Record<string, unknown> = {};
+
+        for (const [key, value] of Object.entries(item)) {
+            // Skip Pega internal fields
+            if (!key.startsWith('px') &&
+                !key.startsWith('py') &&
+                !key.startsWith('pz') &&
+                !key.startsWith('__')) {
+                cleaned[key] = value;
+            }
+        }
+
+        return cleaned;
+    }
+
+    /**
+     * Generate cache key from endpoint and options
+     * @private
+     */
+    private static generateCacheKey(endpoint: string, options: RequestInit): string {
+        const body = options.body ? JSON.stringify(options.body) : '';
+        return `dx-api:${endpoint}:${body}`;
+    }
+
+    /**
+     * Generate unique request ID for tracing
+     * @private
+     */
+    private static generateRequestId(): string {
+        this.requestIdCounter += 1;
+        return `req-${Date.now()}-${this.requestIdCounter}`;
+    }
 }
 
 export default DxApiService;
