@@ -39,11 +39,11 @@ const dragHandleStyles = `
 `;
 
 // Inject drag handle styles
-if (typeof document !== 'undefined') {
-  const style = document.createElement('style');
+if (typeof document !== "undefined") {
+  const style = document.createElement("style");
   style.textContent = dragHandleStyles;
-  if (!document.getElementById('drag-handle-styles')) {
-    style.id = 'drag-handle-styles';
+  if (!document.getElementById("drag-handle-styles")) {
+    style.id = "drag-handle-styles";
     document.head.appendChild(style);
   }
 }
@@ -767,10 +767,7 @@ const DataGrid = ({
                     {/* Drag handle cell (if enabled) */}
                     {enableRowReordering && (
                       <td
-                        style={mergeStyles(
-                          tw("w-8 px-2 py-2 text-center"),
-                          {}
-                        )}
+                        style={mergeStyles(tw("w-8 px-2 py-2 text-center"), {})}
                         onClick={(e) => e.stopPropagation()}
                         data-drag-handle-cell
                       >
@@ -988,7 +985,9 @@ const DataGrid = ({
                           )}
                           colSpan={
                             row.isEmpty && column.key === "description"
-                              ? columns.length + (enableRowReordering ? 1 : 0) + (enableBulkSelection ? 1 : 0)
+                              ? columns.length +
+                                (enableRowReordering ? 1 : 0) +
+                                (enableBulkSelection ? 1 : 0)
                               : 1
                           }
                           onClick={() => {
@@ -1193,18 +1192,15 @@ const DataGrid = ({
 
 // Memoize DataGrid component to prevent unnecessary re-renders
 // Only re-render if data, columns, or formulas actually change
-const MemoizedDataGrid = React.memo(
-  DataGrid,
-  (prevProps, nextProps) => {
-    return (
-      prevProps.data === nextProps.data &&
-      prevProps.columns === nextProps.columns &&
-      prevProps.formulas === nextProps.formulas &&
-      prevProps.availableFormulas === nextProps.availableFormulas &&
-      prevProps.ingredients === nextProps.ingredients &&
-      prevProps.loading === nextProps.loading
-    );
-  }
-);
+const MemoizedDataGrid = React.memo(DataGrid, (prevProps, nextProps) => {
+  return (
+    prevProps.data === nextProps.data &&
+    prevProps.columns === nextProps.columns &&
+    prevProps.formulas === nextProps.formulas &&
+    prevProps.availableFormulas === nextProps.availableFormulas &&
+    prevProps.ingredients === nextProps.ingredients &&
+    prevProps.loading === nextProps.loading
+  );
+});
 
 export default MemoizedDataGrid;

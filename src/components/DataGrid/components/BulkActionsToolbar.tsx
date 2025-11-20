@@ -23,11 +23,11 @@ const toolbarButtonStyles = `
 `;
 
 // Inject styles
-if (typeof document !== 'undefined') {
-  const style = document.createElement('style');
+if (typeof document !== "undefined") {
+  const style = document.createElement("style");
   style.textContent = toolbarButtonStyles;
-  if (!document.getElementById('toolbar-button-styles')) {
-    style.id = 'toolbar-button-styles';
+  if (!document.getElementById("toolbar-button-styles")) {
+    style.id = "toolbar-button-styles";
     document.head.appendChild(style);
   }
 }
@@ -85,8 +85,8 @@ const ToolbarButton = ({
       className={`toolbar-button ${baseClasses} ${colorClasses}`}
       title={title}
       style={{
-        width: '3.5rem',
-        maxWidth: '3.5rem',
+        width: "3.5rem",
+        maxWidth: "3.5rem",
       }}
     >
       <span className="material-symbols-rounded text-base">{icon}</span>
@@ -138,8 +138,8 @@ export const BulkActionsToolbar = ({
           hover:shadow-sm`}
         title={title}
         style={{
-          width: '3.5rem',
-          maxWidth: '3.5rem',
+          width: "3.5rem",
+          maxWidth: "3.5rem",
         }}
       >
         <span className="material-symbols-rounded text-base">{icon}</span>
