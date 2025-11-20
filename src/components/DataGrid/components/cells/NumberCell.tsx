@@ -1,3 +1,25 @@
+// CSS injection for explode button hover state
+const explodeButtonStyles = `
+  .explode-button {
+    color: #9ca3af;
+    transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+  }
+  .explode-button:hover {
+    color: #2563eb;
+  }
+`;
+
+if (typeof document !== "undefined") {
+  const styleId = "explode-button-styles";
+  if (!document.getElementById(styleId)) {
+    const styleSheet = document.createElement("style");
+    styleSheet.id = styleId;
+    styleSheet.textContent = explodeButtonStyles;
+    document.head.appendChild(styleSheet);
+  }
+}
+
 // Use Column type from DataGrid.tsx to match parent component
 interface Column {
   id: string;
@@ -91,7 +113,7 @@ export const NumberCell = ({
             e.stopPropagation();
             onExplodeFormula?.(row.formulaId);
           }}
-          className="opacity-0 group-hover:opacity-100 text-orange-600 hover:text-orange-700 transition-all"
+          className="opacity-0 group-hover:opacity-100 explode-button transition-all"
           title="Explode Formula"
         >
           <span

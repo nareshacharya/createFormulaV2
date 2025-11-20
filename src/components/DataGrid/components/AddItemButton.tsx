@@ -58,12 +58,13 @@ export const AddItemButton = ({
         className="
           w-6 h-6 rounded-full flex items-center justify-center
           transition-all duration-200
-          bg-purple-200 text-purple-700 shadow-lg
+          bg-white text-blue-600 shadow-lg
           opacity-0 group-hover:opacity-100
           scale-90 group-hover:scale-100
-          hover:bg-purple-500 hover:text-white hover:scale-110
+          hover:bg-blue-600 hover:text-white hover:scale-110
           focus:outline-none focus:ring-2 focus:ring-blue-300 focus:opacity-100
           pointer-events-auto
+          border border-blue-200 hover:border-blue-600
         "
         title="Add ingredient or formula below this row"
         aria-label="Add ingredient or formula below this row"
