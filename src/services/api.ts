@@ -195,6 +195,31 @@ export class ApiService {
     }
 
     /**
+     * Check formula compliance
+     */
+    static async checkCompliance(formulaId: string, data?: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+        try {
+            if (this.isUsingDxApi()) {
+                const response = await DxApiService.checkCompliance(formulaId, data);
+                return this.mapDxApiResponse(response);
+            } else {
+                // Mock implementation
+                return {
+                    success: true,
+                    data: {
+                        isCompliant: true,
+                        warnings: [],
+                        errors: [],
+                        timestamp: new Date().toISOString(),
+                    }
+                };
+            }
+        } catch (error) {
+            return this.handleError(error);
+        }
+    }
+
+    /**
      * Submit formula for compounding
      */
     static async submitForCompounding(formulaId: string): Promise<ApiResponse<unknown>> {
