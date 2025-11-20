@@ -331,7 +331,7 @@ export const useFormulaColumnHandlers = (config: FormulaHandlersConfig) => {
     try {
       // Import services dynamically
       const { ApiService } = await import("../../../services/api");
-      const { prepareFormulaForCompounding, validateFormulaForCompounding } = 
+      const { prepareFormulaForCompounding, validateFormulaForCompounding } =
         await import("../../../services/compounding");
 
       // Prepare formula data for submission

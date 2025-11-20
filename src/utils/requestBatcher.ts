@@ -167,8 +167,8 @@ export class RequestBatcher {
         return {
             totalRequests: this.totalRequests,
             deduplicatedRequests: this.deduplicatedRequests,
-            deduplicationRate: this.totalRequests > 0 
-                ? (this.deduplicatedRequests / this.totalRequests) * 100 
+            deduplicationRate: this.totalRequests > 0
+                ? (this.deduplicatedRequests / this.totalRequests) * 100
                 : 0,
             batchesProcessed: this.batchesProcessed,
             currentQueueSize: this.queue.length,
