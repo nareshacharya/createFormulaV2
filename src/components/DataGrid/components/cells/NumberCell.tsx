@@ -10,10 +10,10 @@ const explodeButtonStyles = `
   }
 `;
 
-if (typeof document !== 'undefined') {
-  const styleId = 'explode-button-styles';
+if (typeof document !== "undefined") {
+  const styleId = "explode-button-styles";
   if (!document.getElementById(styleId)) {
-    const styleSheet = document.createElement('style');
+    const styleSheet = document.createElement("style");
     styleSheet.id = styleId;
     styleSheet.textContent = explodeButtonStyles;
     document.head.appendChild(styleSheet);
