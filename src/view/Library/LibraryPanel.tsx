@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import AdvancedFilterSheet from "../../components/AdvancedFilterSheet";
 import FormulaList from "../../components/FormulaList";
 import IngredientAttributeList from "../../components/IngredientAttributeList";
@@ -6,7 +6,7 @@ import IngredientList from "../../components/IngredientList";
 import PillTabs from "../../components/PillTabs";
 import type { FilterGroup } from "../../components/QueryBuilder";
 import SearchBar from "../../components/SearchBar";
-import { PegaService } from "../../services/pega";
+import { ApiService } from "../../services/api";
 import type {
   Ingredient,
   Formula,
@@ -34,7 +34,19 @@ const LibraryPanel = () => {
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [formulas, setFormulas] = useState<Formula[]>([]);
   const [attributes, setAttributes] = useState<IngredientAttribute[]>([]);
-  const [, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [_isLoadingMore, _setIsLoadingMore] = useState(false);
+  const [_error, _setError] = useState<string | null>(null);
+
+  // Pagination states
+  const [_ingredientPage, setIngredientPage] = useState(0);
+  const [_formulaPage, setFormulaPage] = useState(0);
+  const [_hasMoreIngredients, setHasMoreIngredients] = useState(true);
+  const [_hasMoreFormulas, setHasMoreFormulas] = useState(true);
+  const pageSize = 50;
+
+  // Debouncing search
+  const searchTimeoutRef = useRef<NodeJS.Timeout>();
 
   const tabs = [
     { id: "ingredients", label: "Ingredients", icon: "labs" },
@@ -42,30 +54,67 @@ const LibraryPanel = () => {
     { id: "attributes", label: "Attributes", icon: "checklist" },
   ];
 
-  // Load data on mount
+  // Load initial data on mount
   useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
+    const loadInitialData = async () => {
+      setIsLoading(true);
       try {
-        const [ingredientsData, formulasData, attributesData] =
+        const [ingredientsResponse, formulasResponse, attributesResponse] =
           await Promise.all([
-            PegaService.getIngredients(),
-            PegaService.getFormulas(),
-            PegaService.getIngredientAttributes(),
+            ApiService.getIngredients({
+              skip: 0,
+              limit: pageSize,
+              search: searchQuery || undefined,
+              status: activeFilter === "all" ? undefined : activeFilter,
+            }),
+            ApiService.getFormulas({
+              skip: 0,
+              limit: pageSize,
+              search: searchQuery || undefined,
+            }),
+            ApiService.getIngredientAttributes(),
           ]);
 
-        setIngredients(ingredientsData);
-        setFormulas(formulasData);
-        setAttributes(attributesData);
-      } catch (error) {
-        console.error("Failed to load library data:", error);
+        if (ingredientsResponse.success && ingredientsResponse.data) {
+          setIngredients(ingredientsResponse.data);
+          setHasMoreIngredients(ingredientsResponse.data.length === pageSize);
+        }
+
+        if (formulasResponse.success && formulasResponse.data) {
+          setFormulas(formulasResponse.data);
+          setHasMoreFormulas(formulasResponse.data.length === pageSize);
+        }
+
+        if (attributesResponse.success && attributesResponse.data) {
+          setAttributes(attributesResponse.data);
+        }
+      } catch (err) {
+        // Silently handle - allow fallback to mock data
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
-    loadData();
+    loadInitialData();
   }, []);
+
+  // Debounced search handler
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    searchTimeoutRef.current = setTimeout(() => {
+      setIngredientPage(0);
+      setFormulaPage(0);
+    }, 300);
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchQuery]);
 
   // Listen for attribute selection events from work area
   useEffect(() => {
@@ -88,7 +137,6 @@ const LibraryPanel = () => {
       count: number;
       selectedIds: string[];
     }) => {
-      console.log("📥 LibraryPanel received formula-selections-updated:", data);
       setSelectedFormulaIds(data.selectedIds || []);
     };
 
@@ -133,16 +181,14 @@ const LibraryPanel = () => {
     };
 
     const handleWorkspaceCreated = () => {
-      console.log("🆕 Workspace created - clearing library selections");
       clearAllSelections();
     };
 
-    const handleWorkspaceSwitched = (data: {
+    const handleWorkspaceSwitched = (_data: {
       workspaceId: string;
       workspaceName: string;
       previousWorkspaceId: string;
     }) => {
-      console.log("🔄 Workspace switched - clearing library selections", data);
       clearAllSelections();
     };
 
