@@ -22,6 +22,32 @@ import { isRowDraggable } from "./DataGrid/utils/rowOrdering";
 import { DilutionModal } from "./dilution";
 import type { UseDilutionReturn } from "./dilution";
 
+// Drag handle column responsive styles
+const dragHandleStyles = `
+  @media (max-width: 1023px) {
+    [data-drag-handle-header],
+    [data-drag-handle-cell] {
+      display: none !important;
+    }
+  }
+  @media (min-width: 1024px) {
+    [data-drag-handle-header],
+    [data-drag-handle-cell] {
+      display: table-cell !important;
+    }
+  }
+`;
+
+// Inject drag handle styles
+if (typeof document !== 'undefined') {
+  const style = document.createElement('style');
+  style.textContent = dragHandleStyles;
+  if (!document.getElementById('drag-handle-styles')) {
+    style.id = 'drag-handle-styles';
+    document.head.appendChild(style);
+  }
+}
+
 export interface Column {
   id: string;
   key: string;
@@ -742,10 +768,11 @@ const DataGrid = ({
                     {enableRowReordering && (
                       <td
                         style={mergeStyles(
-                          tw("w-8 px-2 py-2 text-center hidden lg:table-cell"),
+                          tw("w-8 px-2 py-2 text-center"),
                           {}
                         )}
                         onClick={(e) => e.stopPropagation()}
+                        data-drag-handle-cell
                       >
                         {isDraggable && (
                           <span
