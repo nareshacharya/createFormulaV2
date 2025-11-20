@@ -961,7 +961,7 @@ const DataGrid = ({
                           )}
                           colSpan={
                             row.isEmpty && column.key === "description"
-                              ? columns.length
+                              ? columns.length + (enableRowReordering ? 1 : 0) + (enableBulkSelection ? 1 : 0)
                               : 1
                           }
                           onClick={() => {

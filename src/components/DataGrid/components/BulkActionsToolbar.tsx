@@ -37,7 +37,7 @@ const ToolbarButton = ({
   children?: React.ReactNode;
   className?: string;
 }) => {
-  const baseClasses = `group relative flex flex-col items-center justify-center px-1.5 py-1 rounded-lg transition-all duration-200 w-10 lg:w-14
+  const baseClasses = `group relative flex flex-col items-center justify-center px-1.5 py-1 rounded-lg transition-all duration-200 w-14
     ${!disabled ? "hover:bg-blue-600 hover:shadow-sm" : ""} 
     ${className}`;
 
@@ -52,6 +52,10 @@ const ToolbarButton = ({
       disabled={disabled}
       className={`${baseClasses} ${colorClasses}`}
       title={title}
+      style={{
+        maxWidth: 'clamp(2.5rem, 100%, 3.5rem)',
+        width: 'clamp(2.5rem, 100%, 3.5rem)',
+      }}
     >
       <span className="material-symbols-rounded text-base">{icon}</span>
       {/* Show label only on xl screens and up (1280px+) */}
