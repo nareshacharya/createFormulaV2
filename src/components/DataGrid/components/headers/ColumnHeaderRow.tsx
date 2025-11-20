@@ -97,7 +97,7 @@ export const ColumnHeaderRow = ({
     <tr>
       {/* Drag handle column (if enabled) */}
       {enableRowReordering && (
-        <th className="w-8 px-2 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider bg-gray-50 border-r border-b border-gray-200">
+        <th className="hidden lg:table-cell w-8 px-2 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider bg-gray-50 border-r border-b border-gray-200">
           <span
             className="material-symbols-rounded text-gray-400"
             style={{ fontSize: "16px" }}

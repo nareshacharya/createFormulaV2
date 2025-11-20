@@ -37,7 +37,7 @@ const ToolbarButton = ({
   children?: React.ReactNode;
   className?: string;
 }) => {
-  const baseClasses = `group relative flex flex-col items-center justify-center px-1.5 py-1 rounded-lg transition-all duration-200 w-14 
+  const baseClasses = `group relative flex flex-col items-center justify-center px-1.5 py-1 rounded-lg transition-all duration-200 w-10 lg:w-14
     ${!disabled ? "hover:bg-blue-600 hover:shadow-sm" : ""} 
     ${className}`;
 
@@ -83,7 +83,7 @@ export const BulkActionsToolbar = ({
   return (
     <div className="flex items-center justify-between mb-1 px-1 xl:px-6 py-1.5 bg-gray-50/50 gap-2">
       {/* Left side - Selection count and bulk actions */}
-      <div className="flex items-center space-x-2 xl:space-x-3 text-xs">
+      <div className="flex items-center space-x-2 xl:space-x-3 text-xs pl-4 lg:pl-0">
         <span className="text-gray-600 font-medium hidden lg:inline">
           {selectedCount} selected
         </span>

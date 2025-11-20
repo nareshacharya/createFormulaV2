@@ -741,7 +741,10 @@ const DataGrid = ({
                     {/* Drag handle cell (if enabled) */}
                     {enableRowReordering && (
                       <td
-                        style={tw("w-8 px-2 py-2 text-center")}
+                        style={mergeStyles(
+                          tw("w-8 px-2 py-2 text-center hidden lg:table-cell"),
+                          {}
+                        )}
                         onClick={(e) => e.stopPropagation()}
                       >
                         {isDraggable && (
