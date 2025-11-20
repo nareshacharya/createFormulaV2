@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/control-has-associated-label */
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { useClickOutside } from "../hooks/useClickOutside";
 import { useDataGridFeatures } from "../hooks/useFeatureFlags";
@@ -1161,4 +1161,20 @@ const DataGrid = ({
   );
 };
 
-export default DataGrid;
+// Memoize DataGrid component to prevent unnecessary re-renders
+// Only re-render if data, columns, or formulas actually change
+const MemoizedDataGrid = React.memo(
+  DataGrid,
+  (prevProps, nextProps) => {
+    return (
+      prevProps.data === nextProps.data &&
+      prevProps.columns === nextProps.columns &&
+      prevProps.formulas === nextProps.formulas &&
+      prevProps.availableFormulas === nextProps.availableFormulas &&
+      prevProps.ingredients === nextProps.ingredients &&
+      prevProps.loading === nextProps.loading
+    );
+  }
+);
+
+export default MemoizedDataGrid;
