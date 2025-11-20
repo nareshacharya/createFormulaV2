@@ -116,6 +116,40 @@ export const BulkActionsToolbar = ({
   canSend = false,
   canComplianceCheck = false,
 }: BulkActionsToolbarProps) => {
+  // Helper function to render secondary action buttons (Delete, Yield, Clear)
+  const SecondaryButton = ({
+    onClick,
+    icon,
+    label,
+    title,
+    colorClasses = "bg-gray-150 text-gray-700 hover:bg-gray-200 hover:text-gray-900",
+  }: {
+    onClick: () => void;
+    icon: string;
+    label: string;
+    title: string;
+    colorClasses?: string;
+  }) => {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className={`toolbar-button ${colorClasses} group relative flex flex-col items-center justify-center px-1.5 py-1 rounded-lg transition-all duration-200 w-14
+          hover:shadow-sm`}
+        title={title}
+        style={{
+          width: '3.5rem',
+          maxWidth: '3.5rem',
+        }}
+      >
+        <span className="material-symbols-rounded text-base">{icon}</span>
+        <span className="toolbar-label hidden lg:inline text-[10px] font-medium mt-0.5 text-center leading-tight">
+          {label}
+        </span>
+      </button>
+    );
+  };
+
   return (
     <div className="flex items-center justify-between mb-1 px-1 xl:px-6 py-1.5 bg-gray-50/50 gap-2">
       {/* Left side - Selection count and bulk actions */}
@@ -126,49 +160,33 @@ export const BulkActionsToolbar = ({
 
         {selectedCount > 0 && (
           <>
-            <button
-              type="button"
+            <SecondaryButton
               onClick={onClearSelection}
-              className="bg-gray-150 text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition-all duration-200 hover:shadow-sm flex items-center gap-1 px-2 py-1 rounded-lg"
+              icon="clear"
+              label="Clear"
               title="Clear selection"
-            >
-              <span className="material-symbols-rounded text-base">clear</span>
-              <span className="hidden xl:inline text-xs font-medium">
-                Clear
-              </span>
-            </button>
+              colorClasses="bg-gray-150 text-gray-700 hover:bg-gray-200 hover:text-gray-900"
+            />
 
             {onBulkDelete && (
-              <button
-                type="button"
+              <SecondaryButton
                 onClick={onBulkDelete}
-                className="bg-red-100 text-red-700 hover:bg-red-200 hover:text-red-900 transition-all duration-200 hover:shadow-sm flex items-center gap-1 px-2 py-1 rounded-lg"
+                icon="delete"
+                label="Delete"
                 title="Delete selected items"
-              >
-                <span className="material-symbols-rounded text-base">
-                  delete
-                </span>
-                <span className="hidden xl:inline text-xs font-medium">
-                  Delete
-                </span>
-              </button>
+                colorClasses="bg-red-100 text-red-700 hover:bg-red-200 hover:text-red-900"
+              />
             )}
 
             {/* Yield button - only show when exactly 1 ingredient is selected */}
             {selectedCount === 1 && onYield && (
-              <button
-                type="button"
+              <SecondaryButton
                 onClick={onYield}
-                className="bg-green-100 text-green-700 hover:bg-green-200 hover:text-green-900 transition-all duration-200 hover:shadow-sm flex items-center gap-1 px-2 py-1 rounded-lg"
+                icon="sync_alt"
+                label="Yield"
                 title="Adjust ingredient amount to match target total"
-              >
-                <span className="material-symbols-rounded text-base">
-                  sync_alt
-                </span>
-                <span className="hidden xl:inline text-xs font-medium">
-                  Yield
-                </span>
-              </button>
+                colorClasses="bg-green-100 text-green-700 hover:bg-green-200 hover:text-green-900"
+              />
             )}
           </>
         )}
