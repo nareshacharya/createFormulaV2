@@ -1,5 +1,31 @@
 import type React from "react";
 
+// Toolbar button width responsive styles
+const toolbarButtonStyles = `
+  @media (max-width: 1023px) {
+    .toolbar-button {
+      width: 2.5rem !important;
+      max-width: 2.5rem !important;
+    }
+  }
+  @media (min-width: 1024px) {
+    .toolbar-button {
+      width: 3.5rem !important;
+      max-width: 3.5rem !important;
+    }
+  }
+`;
+
+// Inject styles
+if (typeof document !== 'undefined') {
+  const style = document.createElement('style');
+  style.textContent = toolbarButtonStyles;
+  if (!document.getElementById('toolbar-button-styles')) {
+    style.id = 'toolbar-button-styles';
+    document.head.appendChild(style);
+  }
+}
+
 interface BulkActionsToolbarProps {
   selectedCount: number;
   onBulkDelete: () => void;
@@ -50,11 +76,11 @@ const ToolbarButton = ({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`${baseClasses} ${colorClasses}`}
+      className={`toolbar-button ${baseClasses} ${colorClasses}`}
       title={title}
       style={{
-        maxWidth: 'clamp(2.5rem, 100%, 3.5rem)',
-        width: 'clamp(2.5rem, 100%, 3.5rem)',
+        width: '3.5rem',
+        maxWidth: '3.5rem',
       }}
     >
       <span className="material-symbols-rounded text-base">{icon}</span>
