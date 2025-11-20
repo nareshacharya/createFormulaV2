@@ -7,11 +7,17 @@ const toolbarButtonStyles = `
       width: 2.5rem !important;
       max-width: 2.5rem !important;
     }
+    .toolbar-button .toolbar-label {
+      display: none !important;
+    }
   }
   @media (min-width: 1024px) {
     .toolbar-button {
       width: 3.5rem !important;
       max-width: 3.5rem !important;
+    }
+    .toolbar-label {
+      display: inline !important;
     }
   }
 `;
@@ -84,8 +90,8 @@ const ToolbarButton = ({
       }}
     >
       <span className="material-symbols-rounded text-base">{icon}</span>
-      {/* Show label only on xl screens and up (1280px+) */}
-      <span className="hidden xl:inline text-[10px] font-medium mt-0.5 text-center leading-tight">
+      {/* Show label on lg screens and up (1024px+) */}
+      <span className="toolbar-label hidden lg:inline text-[10px] font-medium mt-0.5 text-center leading-tight">
         {label}
       </span>
       {children}
