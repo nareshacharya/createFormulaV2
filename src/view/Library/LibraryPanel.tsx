@@ -26,6 +26,8 @@ const LibraryPanel = () => {
     rules: [],
   });
   const [activeFilter, setActiveFilter] = useState<string>("all");
+  const [_attributeTypeFilter, _setAttributeTypeFilter] =
+    useState<string>("all");
   const [selectedAttributes, setSelectedAttributes] = useState<string[]>([]);
   const [selectedFormulaIds, setSelectedFormulaIds] = useState<string[]>([]);
   const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
@@ -34,7 +36,7 @@ const LibraryPanel = () => {
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [formulas, setFormulas] = useState<Formula[]>([]);
   const [attributes, setAttributes] = useState<IngredientAttribute[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [_isLoading, setIsLoading] = useState(true);
   const [_isLoadingMore, _setIsLoadingMore] = useState(false);
   const [_error, _setError] = useState<string | null>(null);
 
@@ -247,11 +249,26 @@ const LibraryPanel = () => {
   const basesCount = ingredients.filter((i) => i.type === "base").length;
   const totalCount = ingredients.length;
 
+  // Calculate attribute type counts
+  const textCount = attributes.filter((a) => a.type === "text").length;
+  const numberCount = attributes.filter((a) => a.type === "number").length;
+  const booleanCount = attributes.filter((a) => a.type === "boolean").length;
+  const selectCount = attributes.filter((a) => a.type === "select").length;
+  const totalAttributeCount = attributes.length;
+
   const ingredientFilters = [
     { id: "all", label: "All", count: totalCount },
     { id: "natural", label: "Natural", count: naturalCount },
     { id: "synthetic", label: "Synthetic", count: syntheticCount },
     { id: "bases", label: "Bases", count: basesCount },
+  ];
+
+  const attributeTypeFilters = [
+    { id: "all", label: "All", count: totalAttributeCount },
+    { id: "text", label: "Text", count: textCount },
+    { id: "number", label: "Number", count: numberCount },
+    { id: "boolean", label: "Boolean", count: booleanCount },
+    { id: "select", label: "Select", count: selectCount },
   ];
 
   const handleApplyFilters = (query: FilterGroup) => {
@@ -342,6 +359,28 @@ const LibraryPanel = () => {
                 <span>Advanced</span>
               </div>
             )}
+          </div>
+        )}
+
+        {activeTab === "attributes" && (
+          <div
+            style={mergeStyles(tw("mt-3 flex items-center flex-wrap"), {
+              gap: "0.25rem",
+            })}
+          >
+            {attributeTypeFilters.map((filter) => (
+              <button
+                type="button"
+                key={filter.id}
+                onClick={() => _setAttributeTypeFilter(filter.id)}
+                style={tw(`
+                  px-2 py-1 text-xs font-medium rounded transition-colors whitespace-nowrap cursor-pointer
+                  text-gray-600 hover:text-gray-900 hover:bg-gray-100
+                `)}
+              >
+                {filter.label} ({filter.count})
+              </button>
+            ))}
           </div>
         )}
       </div>

@@ -75,7 +75,9 @@ const FormulaDetailsModal = ({
   useEffect(() => {
     if (formData?.projectId && !formData?.projectName) {
       const loadProject = async () => {
-        const response = await ApiService.getProject(formData.projectId as string);
+        const response = await ApiService.getProject(
+          formData.projectId as string
+        );
         if (response.success && response.data) {
           const project = response.data;
           setFormData((prev) =>
