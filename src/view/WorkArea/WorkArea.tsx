@@ -1071,26 +1071,56 @@ const WorkArea = () => {
           newData = [...formulaRowsToInsert, totalRow];
         } else if (data.insertAfterRowId) {
           // Insert after specific row if provided
-          const insertIndex = prev.findIndex(
+          const insertAfterRow = prev.find(
             (row) => row.id === data.insertAfterRowId
           );
-          if (insertIndex !== -1) {
+          
+          if (insertAfterRow && insertAfterRow.isFormula && insertAfterRow.formulaId) {
+            // If inserting after a formula row, find the last ingredient of THAT formula
+            // to avoid splitting formula groups
+            const formulaGroupId = insertAfterRow.formulaId;
+            const formulaRowIndex = prev.findIndex((r) => r.id === data.insertAfterRowId);
+            let insertIndex = formulaRowIndex;
+
+            // Search forward to find all consecutive ingredients of this formula
+            for (let i = formulaRowIndex + 1; i < prev.length; i++) {
+              const row = prev[i];
+              if (row.isTotal) break;
+              if (row.parentFormulaId === formulaGroupId && !row.isFormula) {
+                insertIndex = i;
+              } else {
+                break;
+              }
+            }
+
             newData = [
               ...prev.slice(0, insertIndex + 1),
               ...formulaRowsToInsert,
               ...prev.slice(insertIndex + 1),
             ];
           } else {
-            // Fallback to default behavior if row not found
-            const totalIndex = prev.findIndex((row) => row.isTotal);
-            if (totalIndex !== -1) {
+            // For non-formula rows, insert right after the specified row
+            const insertIndex = prev.findIndex(
+              (row) => row.id === data.insertAfterRowId
+            );
+            if (insertIndex !== -1) {
               newData = [
-                ...prev.slice(0, totalIndex),
+                ...prev.slice(0, insertIndex + 1),
                 ...formulaRowsToInsert,
-                ...prev.slice(totalIndex),
+                ...prev.slice(insertIndex + 1),
               ];
             } else {
-              newData = [...prev, ...formulaRowsToInsert];
+              // Fallback to default behavior if row not found
+              const totalIndex = prev.findIndex((row) => row.isTotal);
+              if (totalIndex !== -1) {
+                newData = [
+                  ...prev.slice(0, totalIndex),
+                  ...formulaRowsToInsert,
+                  ...prev.slice(totalIndex),
+                ];
+              } else {
+                newData = [...prev, ...formulaRowsToInsert];
+              }
             }
           }
         } else {
