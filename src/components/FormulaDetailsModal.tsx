@@ -12,7 +12,7 @@ import {
 import type { FormField } from "../models/FormField.model";
 import { isFieldVisibleForType } from "../models/FormField.model";
 import type { Formula, Project } from "../services/pega";
-import { PegaService } from "../services/pega";
+import { ApiService } from "../services/api";
 import { tw, mergeStyles } from "../utils/tailwindToInline";
 import { WorkspaceContext } from "../context/WorkspaceContext";
 import Button from "./Button";
@@ -74,26 +74,27 @@ const FormulaDetailsModal = ({
   // Load project data when projectId changes
   useEffect(() => {
     if (formData?.projectId && !formData?.projectName) {
-      PegaService.getProject(formData.projectId as string).then(
-        (project: Project | null) => {
-          if (project) {
-            setFormData((prev) =>
-              prev
-                ? {
-                    ...prev,
-                    projectName: project.name,
-                    projectRegion: project.region,
-                    projectCountry: project.country,
-                    projectManager: project.manager,
-                    projectStatus: project.status,
-                    projectCurrencies: project.currencies,
-                    projectDefaultCurrency: project.defaultCurrency,
-                  }
-                : null
-            );
-          }
+      const loadProject = async () => {
+        const response = await ApiService.getProject(formData.projectId as string);
+        if (response.success && response.data) {
+          const project = response.data;
+          setFormData((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  projectName: project.name,
+                  projectRegion: project.region,
+                  projectCountry: project.country,
+                  projectManager: project.manager,
+                  projectStatus: project.status,
+                  projectCurrencies: project.currencies,
+                  projectDefaultCurrency: project.defaultCurrency,
+                }
+              : null
+          );
         }
-      );
+      };
+      loadProject();
     }
   }, [formData?.projectId, formData?.projectName]);
 

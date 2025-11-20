@@ -293,6 +293,44 @@ export class ApiService {
     }
 
     // ============================================================================
+    // PROJECTS
+    // ============================================================================
+
+    /**
+     * Get a specific project by ID
+     */
+    static async getProject(projectId: string): Promise<ApiResponse<Project | null>> {
+        try {
+            if (this.isUsingDxApi()) {
+                const response = await DxApiService.getProject?.(projectId);
+                return response ? this.mapDxApiResponse(response) : { success: true, data: null };
+            } else {
+                const project = await PegaService.getProject(projectId);
+                return { success: true, data: project };
+            }
+        } catch (error) {
+            return this.handleError(error);
+        }
+    }
+
+    /**
+     * Search projects by query
+     */
+    static async searchProjects(query: string): Promise<ApiResponse<Project[]>> {
+        try {
+            if (this.isUsingDxApi()) {
+                const response = await DxApiService.searchProjects?.(query);
+                return response ? this.mapDxApiResponse(response) : { success: true, data: [] };
+            } else {
+                const projects = await PegaService.searchProjects(query);
+                return { success: true, data: projects };
+            }
+        } catch (error) {
+            return this.handleError(error);
+        }
+    }
+
+    // ============================================================================
     // UTILITY METHODS
     // ============================================================================
 
@@ -389,5 +427,5 @@ if (featureFlags.developer.enableVerboseLogging) {
 export default ApiService;
 
 // Re-export types for convenience
-export type { Ingredient, Formula, IngredientAttribute } from './pega';
+export type { Ingredient, Formula, IngredientAttribute, Project } from './pega';
 export type { DxApiResponse, DxApiError } from './dxApi';
