@@ -32,6 +32,12 @@ export class RequestBatcher {
 
     private readonly debounceDelay: number = 300; // ms
 
+    private totalRequests = 0;
+
+    private deduplicatedRequests = 0;
+
+    private batchesProcessed = 0;
+
     private constructor() {
         // Singleton - use getInstance()
     }
@@ -58,6 +64,8 @@ export class RequestBatcher {
         factory: () => Promise<T>,
         priority: number = 2
     ): Promise<T> {
+        this.totalRequests += 1;
+
         return new Promise<T>((resolve, reject) => {
             this.queue.push({ key, factory, resolve, reject, priority });
             this.schedule();
@@ -86,6 +94,8 @@ export class RequestBatcher {
         const batch = this.queue.splice(0);
         if (batch.length === 0) return;
 
+        this.batchesProcessed += 1;
+
         // Sort by priority (ascending: lower number = higher priority)
         batch.sort((a, b) => a.priority - b.priority);
 
@@ -103,6 +113,10 @@ export class RequestBatcher {
                 duplicateMap.get(req.key)?.push(req);
             }
         }
+
+        // Track deduplication savings
+        const totalDuplicates = Array.from(duplicateMap.values()).reduce((sum, arr) => sum + arr.length, 0);
+        this.deduplicatedRequests += totalDuplicates;
 
         // Execute all unique requests in parallel
         const requests = Array.from(grouped.values());
@@ -138,6 +152,36 @@ export class RequestBatcher {
      */
     getQueueSize(): number {
         return this.queue.length;
+    }
+
+    /**
+     * Get deduplication statistics
+     */
+    getStats(): {
+        totalRequests: number;
+        deduplicatedRequests: number;
+        deduplicationRate: number;
+        batchesProcessed: number;
+        currentQueueSize: number;
+    } {
+        return {
+            totalRequests: this.totalRequests,
+            deduplicatedRequests: this.deduplicatedRequests,
+            deduplicationRate: this.totalRequests > 0 
+                ? (this.deduplicatedRequests / this.totalRequests) * 100 
+                : 0,
+            batchesProcessed: this.batchesProcessed,
+            currentQueueSize: this.queue.length,
+        };
+    }
+
+    /**
+     * Reset metrics (useful for testing and perf monitoring)
+     */
+    resetMetrics(): void {
+        this.totalRequests = 0;
+        this.deduplicatedRequests = 0;
+        this.batchesProcessed = 0;
     }
 
     /**

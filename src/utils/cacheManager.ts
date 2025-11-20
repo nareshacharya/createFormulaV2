@@ -32,6 +32,12 @@ export class CacheManager {
 
     private currentSize = 0;
 
+    private hits = 0;
+
+    private misses = 0;
+
+    private evictions = 0;
+
     private constructor() {
         this.cache = new Map();
         this.timers = new Map();
@@ -107,14 +113,19 @@ export class CacheManager {
     get<T>(key: string): T | null {
         const entry = this.cache.get(key);
         if (!entry) {
+            this.misses += 1;
             return null;
         }
 
         const age = Date.now() - entry.createdAt;
         if (age > entry.ttl) {
             this.delete(key);
+            this.misses += 1;
             return null;
         }
+
+        // Track cache hit
+        this.hits += 1;
 
         // Update access statistics
         entry.accessCount += 1;
@@ -172,12 +183,21 @@ export class CacheManager {
         maxSize: number;
         entries: number;
         utilizationPercent: number;
+        hits: number;
+        misses: number;
+        hitRate: number;
+        evictions: number;
     } {
+        const total = this.hits + this.misses;
         return {
             size: this.currentSize,
             maxSize: this.maxSize,
             entries: this.cache.size,
-            utilizationPercent: (this.currentSize / this.maxSize) * 100
+            utilizationPercent: (this.currentSize / this.maxSize) * 100,
+            hits: this.hits,
+            misses: this.misses,
+            hitRate: total > 0 ? (this.hits / total) * 100 : 0,
+            evictions: this.evictions,
         };
     }
 
@@ -195,6 +215,7 @@ export class CacheManager {
         for (const [key] of sorted) {
             if (this.currentSize <= targetSize) break;
             this.delete(key);
+            this.evictions += 1;
         }
     }
 
@@ -208,6 +229,44 @@ export class CacheManager {
             ttl: entry.ttl,
             accessCount: entry.accessCount
         }));
+    }
+
+    /**
+     * Reset metrics (useful for testing and perf monitoring)
+     */
+    resetMetrics(): void {
+        this.hits = 0;
+        this.misses = 0;
+        this.evictions = 0;
+    }
+
+    /**
+     * Prefetch data into cache (for performance optimization)
+     * @param key Cache key
+     * @param fetchFn Function to fetch data
+     * @param ttl Time to live in milliseconds
+     */
+    async prefetch<T>(
+        key: string,
+        fetchFn: () => Promise<T>,
+        ttl: number = 5 * 60 * 1000
+    ): Promise<T> {
+        // Check if already cached
+        const cached = this.get<T>(key);
+        if (cached !== null) {
+            return cached;
+        }
+
+        // Fetch and cache
+        try {
+            const data = await fetchFn();
+            this.set(key, data, ttl);
+            return data;
+        } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error(`[Cache] Prefetch failed for key "${key}":`, error);
+            throw error;
+        }
     }
 }
 
