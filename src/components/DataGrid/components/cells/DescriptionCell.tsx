@@ -3,6 +3,28 @@ import { tw } from "../../../../utils/tailwindToInline";
 import { DilutionIcon } from "../../../dilution";
 import type { UseDilutionReturn } from "../../../dilution";
 
+// CSS injection for explode button hover state
+const explodeButtonStyles = `
+  .explode-button {
+    color: #9ca3af;
+    transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+  }
+  .explode-button:hover {
+    color: #2563eb;
+  }
+`;
+
+if (typeof document !== 'undefined') {
+  const styleId = 'explode-button-styles';
+  if (!document.getElementById(styleId)) {
+    const styleSheet = document.createElement('style');
+    styleSheet.id = styleId;
+    styleSheet.textContent = explodeButtonStyles;
+    document.head.appendChild(styleSheet);
+  }
+}
+
 interface DescriptionCellProps {
   row: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   value: any; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -172,9 +194,8 @@ export const DescriptionCell = ({
                 console.error("❌ onExplodeFormula callback is undefined!");
               }
             }}
-            style={tw(
-              "flex-shrink-0 ml-2 text-gray-400 hover:text-blue-600 transition-colors cursor-pointer"
-            )}
+            className="explode-button"
+            style={tw("flex-shrink-0 ml-2")}
             title="Explode Formula"
           >
             <span
