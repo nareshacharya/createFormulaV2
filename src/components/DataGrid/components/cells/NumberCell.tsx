@@ -91,7 +91,7 @@ export const NumberCell = ({
             e.stopPropagation();
             onExplodeFormula?.(row.formulaId);
           }}
-          className="opacity-0 group-hover:opacity-100 text-orange-600 hover:text-orange-700 transition-all"
+          className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-blue-600 transition-all cursor-pointer"
           title="Explode Formula"
         >
           <span

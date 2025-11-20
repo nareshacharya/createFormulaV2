@@ -173,7 +173,7 @@ export const DescriptionCell = ({
               }
             }}
             style={tw(
-              "flex-shrink-0 ml-2 text-orange-600 hover:text-orange-700 transition-colors"
+              "flex-shrink-0 ml-2 text-gray-400 hover:text-blue-600 transition-colors cursor-pointer"
             )}
             title="Explode Formula"
           >
