@@ -257,6 +257,7 @@ const WorkArea = () => {
     availableFormulas,
     tableData,
     pendingFormulaIds,
+    workspaceHistory,
     setTableData,
     setColumns,
     setSelectedFormulaIds,
@@ -1074,12 +1075,18 @@ const WorkArea = () => {
           const insertAfterRow = prev.find(
             (row) => row.id === data.insertAfterRowId
           );
-          
-          if (insertAfterRow && insertAfterRow.isFormula && insertAfterRow.formulaId) {
+
+          if (
+            insertAfterRow &&
+            insertAfterRow.isFormula &&
+            insertAfterRow.formulaId
+          ) {
             // If inserting after a formula row, find the last ingredient of THAT formula
             // to avoid splitting formula groups
             const formulaGroupId = insertAfterRow.formulaId;
-            const formulaRowIndex = prev.findIndex((r) => r.id === data.insertAfterRowId);
+            const formulaRowIndex = prev.findIndex(
+              (r) => r.id === data.insertAfterRowId
+            );
             let insertIndex = formulaRowIndex;
 
             // Search forward to find all consecutive ingredients of this formula
@@ -1471,6 +1478,24 @@ const WorkArea = () => {
     };
 
     const handleFormulaSelectedForColumn = (data: { formula: Formula }) => {
+      console.log("🔍 handleFormulaSelectedForColumn called with:", {
+        formulaName: data.formula.name,
+        formulaId: data.formula.id,
+        hasIngredients: !!data.formula.ingredients,
+        ingredientsCount: data.formula.ingredients?.length || 0,
+        ingredients: data.formula.ingredients,
+      });
+
+      // FALLBACK: If ingredients are missing, try to fetch them
+      let formulaWithIngredients = data.formula;
+      if (!data.formula.ingredients || data.formula.ingredients.length === 0) {
+        console.warn(
+          "⚠️ Formula has no ingredients! Attempting to fetch formula details..."
+        );
+        // In a real app, we could fetch here, but for now just log it
+        // The formula object should always have ingredients from the API
+      }
+
       // HELPER: Create ingredient row with proper ID lookup
       const createIngredientRow = (
         ing: any,
@@ -1502,6 +1527,7 @@ const WorkArea = () => {
           status: ingredient?.status,
           mac: ingredient?.mac,
           ingredientId: finalIngredientId, // ✅ NOW SET!
+          parentFormulaId: formulaId, // Track which formula this ingredient belongs to
           [columnId]: ing.percentage,
         };
 
@@ -1574,6 +1600,19 @@ const WorkArea = () => {
         const isFirstColumn = currentFormulaColumns.length === 0;
         const hasExistingData = prev.some((row) => !row.isTotal);
 
+        console.log("📊 setTableData state check:", {
+          isFirstColumn,
+          hasExistingData,
+          prevLength: prev.length,
+          prevRows: prev.map((r) => ({
+            id: r.id,
+            description: r.description,
+            isTotal: r.isTotal,
+          })),
+          hasIngredients: !!data.formula.ingredients,
+          ingredientsCount: data.formula.ingredients?.length || 0,
+        });
+
         // If this is the first formula and we don't have ingredients yet, add them
         if (isFirstColumn && !hasExistingData && data.formula.ingredients) {
           // Create ingredient rows from the formula
@@ -1593,7 +1632,7 @@ const WorkArea = () => {
           };
 
           const updatedData = [...ingredientRows, totalRow];
-          return calculateTotals(updatedData, [newColumn]);
+          return calculateTotals(updatedData, columns.concat(newColumn));
         } else if (!hasExistingData && data.formula.ingredients) {
           // If we have other columns but no data yet, still add ingredients
           const ingredientRows = data.formula.ingredients.map((ing, index) => {
@@ -2203,7 +2242,6 @@ const WorkArea = () => {
           groupedByColumn={groupedByColumn}
           editableFormula={editableFormula}
           className="h-full"
-          showEmptyState={!hasIngredients}
           enableRowReordering
           enableBulkSelection
           dilutionState={dilutionState}

@@ -22,6 +22,17 @@ import {
     httpStatusToErrorCode,
     isRetryable
 } from '@/services/errors';
+import type {
+    CreateFormulaPayload,
+    CreateFormulaResponse,
+    CreateFormulaVersionPayload,
+    CreateFormulaVersionResponse,
+    ShareFormulaPayload,
+    ShareFormulaResponse,
+    CreateAnalyticalFormulaPayload,
+    CreateAnalyticalFormulaResponse,
+    CheckDuplicateSampleIDResponse,
+} from '@/types/formula.creation.types';
 
 export interface DxApiResponse<T> {
     success: boolean;
@@ -226,6 +237,158 @@ export class DxApiService {
             `${featureFlags.api.dxApiConfig.baseUrl}/case-types/${featureFlags.api.dxApiConfig.endpoints.formulaCaseType}/load-workspace?id=${workspaceId}`,
             { method: 'GET' }
         );
+    }
+
+    /**
+     * Create new formula
+     * POST to D_CreateFormula data page
+     * 
+     * User Stories: US #1108, US #1137
+     * Status always set to DRAFT on creation
+     * Returns FormulaID for use in subsequent operations (versioning, sharing)
+     */
+    static async createFormula(
+        payload: CreateFormulaPayload
+    ): Promise<DxApiResponse<CreateFormulaResponse['data']>> {
+        try {
+            return await this.executeRequest<CreateFormulaResponse['data']>(
+                `${featureFlags.api.dxApiConfig.baseUrl}/data-pages/${featureFlags.api.dataPages.createFormula}`,
+                {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                }
+            );
+        } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error('[DxApi] Create formula failed:', error);
+            throw new DxApiError(
+                ErrorCodes.REQUEST_FAILED,
+                'Failed to create formula',
+                error,
+                0
+            );
+        }
+    }
+
+    /**
+     * Create formula version
+     * POST to D_CreateFormulaVersion data page
+     * 
+     * Must be called after createFormula to link version to formula
+     * FormulaID is obtained from createFormula response
+     */
+    static async createFormulaVersion(
+        payload: CreateFormulaVersionPayload
+    ): Promise<DxApiResponse<CreateFormulaVersionResponse['data']>> {
+        try {
+            return await this.executeRequest<CreateFormulaVersionResponse['data']>(
+                `${featureFlags.api.dxApiConfig.baseUrl}/data-pages/${featureFlags.api.dataPages.createFormulaVersion}`,
+                {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                }
+            );
+        } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error('[DxApi] Create formula version failed:', error);
+            throw new DxApiError(
+                ErrorCodes.REQUEST_FAILED,
+                'Failed to create formula version',
+                error,
+                0
+            );
+        }
+    }
+
+    /**
+     * Share formula with another user or group
+     * POST to D_ShareFormula data page
+     * 
+     * Allows sharing formulas with team members
+     * Permission level (View/Edit) determines access rights
+     */
+    static async shareFormula(
+        payload: ShareFormulaPayload
+    ): Promise<DxApiResponse<ShareFormulaResponse['data']>> {
+        try {
+            return await this.executeRequest<ShareFormulaResponse['data']>(
+                `${featureFlags.api.dxApiConfig.baseUrl}/data-pages/${featureFlags.api.dataPages.shareFormula}`,
+                {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                }
+            );
+        } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error('[DxApi] Share formula failed:', error);
+            throw new DxApiError(
+                ErrorCodes.REQUEST_FAILED,
+                'Failed to share formula',
+                error,
+                0
+            );
+        }
+    }
+
+    /**
+     * Create analytical formula
+     * POST to D_CreateAnalyticalFormula data page
+     * 
+     * User Story: US #1137
+     * IMPORTANT: Call checkDuplicateSampleId BEFORE calling this method
+     * Sample ID must be unique and verified first
+     */
+    static async createAnalyticalFormula(
+        payload: CreateAnalyticalFormulaPayload
+    ): Promise<DxApiResponse<CreateAnalyticalFormulaResponse['data']>> {
+        try {
+            return await this.executeRequest<CreateAnalyticalFormulaResponse['data']>(
+                `${featureFlags.api.dxApiConfig.baseUrl}/data-pages/${featureFlags.api.dataPages.createAnalyticalFormula}`,
+                {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                }
+            );
+        } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error('[DxApi] Create analytical formula failed:', error);
+            throw new DxApiError(
+                ErrorCodes.REQUEST_FAILED,
+                'Failed to create analytical formula',
+                error,
+                0
+            );
+        }
+    }
+
+    /**
+     * Check if Sample ID already exists
+     * GET from D_CheckSampleIDExists data page
+     * 
+     * Used to validate Sample ID uniqueness before creating analytical formula
+     * Must be called BEFORE createAnalyticalFormula
+     * Returns true if Sample ID already exists, false if available
+     */
+    static async checkDuplicateSampleId(
+        sampleId: string
+    ): Promise<DxApiResponse<CheckDuplicateSampleIDResponse['data']>> {
+        const params = new URLSearchParams({ SampleID: sampleId });
+
+        try {
+            return await this.executeRequest<CheckDuplicateSampleIDResponse['data']>(
+                `${featureFlags.api.dxApiConfig.baseUrl}/data-pages/${featureFlags.api.dataPages.checkSampleIDExists}?${params}`,
+                { method: 'GET' }
+            );
+        } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error('[DxApi] Check duplicate Sample ID failed:', error);
+            throw new DxApiError(
+                ErrorCodes.REQUEST_FAILED,
+                'Failed to check Sample ID uniqueness',
+                error,
+                0
+            );
+        }
     }
 
     /**

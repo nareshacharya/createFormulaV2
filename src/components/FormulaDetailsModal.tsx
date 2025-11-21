@@ -1,22 +1,25 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import { useContext, useEffect, useState } from "react";
-import { FORMULA_DETAILS_FIELDS } from "../config/fieldConfigs/formulaDetails.fields";
-import { GENERAL_INFO_FIELDS } from "../config/fieldConfigs/generalInfo.fields";
-import { PRODUCT_INFO_FIELDS } from "../config/fieldConfigs/productInfo.fields";
-import { PROJECT_REFERENCE_FIELDS } from "../config/fieldConfigs/projectReference.fields";
+import { toast } from "react-hot-toast";
+import { isFieldVisible } from "../config/formulaCreation.config";
 import type { FormulaType } from "../config/formulaTypes.config";
 import {
   FORMULA_TYPES,
   getFormulaTypeLabel,
 } from "../config/formulaTypes.config";
-import type { FormField } from "../models/FormField.model";
-import { isFieldVisibleForType } from "../models/FormField.model";
-import type { Formula, Project } from "../services/pega";
+import type { Formula } from "../services/pega";
 import { ApiService } from "../services/api";
 import { tw, mergeStyles } from "../utils/tailwindToInline";
 import { WorkspaceContext } from "../context/WorkspaceContext";
 import Button from "./Button";
 import Modal from "./Modal";
+
+// Import section components
+import FormulaTypeSelection from "./FormulaSections/FormulaTypeSelection";
+import FormulaProductInformation from "./FormulaSections/FormulaProductInformation";
+import FormulaProjectInformation from "./FormulaSections/FormulaProjectInformation";
+import FormulaProductionInformation from "./FormulaSections/FormulaProductionInformation";
+import FormulaAdditionalInformation from "./FormulaSections/FormulaAdditionalInformation";
 
 interface FormulaDetailsModalProps {
   isOpen: boolean;
@@ -26,15 +29,46 @@ interface FormulaDetailsModalProps {
   onSave?: (updatedFormula: Partial<Formula>) => void;
 }
 
+interface FormData {
+  formulaType: FormulaType;
+  name: string;
+  sampleID: string;
+  category: string;
+  region: string;
+  country: string;
+  description: string;
+  createdBy: string;
+  baseFormulaId: string;
+  dilutionPercentage: number | undefined;
+  fragranceDosage: number | undefined;
+  fragranceName: string;
+  productFormat: string;
+  limsCode: string;
+  sapPlmCode: string;
+  brand: string;
+  claims: string[];
+  variant: string;
+  supplier: string;
+  productionCode: string;
+  productionDate: string;
+  recommendedDosage: number | undefined;
+  dosageUnit: string;
+  commentOnProduct: string;
+  projectId: string;
+  projectName: string;
+  projectCurrencies: string[];
+  projectDefaultCurrency: string;
+  version?: string;
+}
+
 /**
- * FormulaDetailsModal Component (View Layer)
+ * FormulaDetailsModal Component
  *
  * Displays formula details in either:
  * - Edit mode (for editable/owned formulas)
  * - View-only mode (for locked/reference formulas)
  *
- * Dynamically renders all fields from formula creation configuration
- * based on formula type with proper field types (dropdowns, text, etc.)
+ * Uses the same section-based components as FormulaModal for consistency
  */
 const FormulaDetailsModal = ({
   isOpen,
@@ -43,29 +77,50 @@ const FormulaDetailsModal = ({
   isReadOnly,
   onSave,
 }: FormulaDetailsModalProps) => {
-  const [formData, setFormData] = useState<Partial<Formula> | null>(null);
-  const [hoveredTooltip, setHoveredTooltip] = useState<string | null>(null);
+  const [formData, setFormData] = useState<FormData | null>(null);
+  const [activeFormSection, setActiveFormSection] = useState("identification");
   const workspaceContext = useContext(WorkspaceContext);
 
-  // Combine all field configurations
-  const allFields: FormField[] = [
-    ...GENERAL_INFO_FIELDS,
-    ...FORMULA_DETAILS_FIELDS,
-    ...PRODUCT_INFO_FIELDS,
-    ...PROJECT_REFERENCE_FIELDS,
+  const formSections = [
+    { id: "identification", label: "Identification", icon: "label" },
+    { id: "details", label: "Details", icon: "info" },
+    { id: "product-project", label: "Product & Project", icon: "shopping_bag" },
+    { id: "additional", label: "Additional", icon: "more" },
   ];
 
   useEffect(() => {
     if (formula) {
-      // Map formula data to field names expected by field configurations
-      const mappedData = {
-        ...formula,
-        // Map 'name' to 'fragranceName' for BASE/DILUTION/PERFUMER formulas
-        fragranceName: formula.fragranceName || formula.name,
-        // Ensure formulaVersion is set from version if not already set
-        formulaVersion:
-          formula.formulaVersion ||
-          parseInt(formula.version?.replace("v", "") || "1", 10),
+      // Map formula data to form data structure
+      const mappedData: FormData = {
+        formulaType: (formula.formulaType || FORMULA_TYPES.BASE) as FormulaType,
+        name: formula.name || "",
+        sampleID: formula.sampleId || "",
+        category: formula.category || "",
+        region: formula.region || "",
+        country: formula.country || "",
+        description: formula.description || "",
+        createdBy: formula.createdBy || "Current User",
+        baseFormulaId: formula.baseFormulaId || "",
+        dilutionPercentage: formula.fragranceDosageActual,
+        fragranceDosage: formula.fragranceDosageActual,
+        fragranceName: formula.fragranceName || "",
+        productFormat: formula.productFormat || "",
+        limsCode: formula.limsCode || "",
+        sapPlmCode: formula.sapPlmCode || "",
+        brand: formula.brand || "",
+        claims: formula.claims || [],
+        variant: formula.variant || "",
+        supplier: formula.supplier || "",
+        productionCode: formula.productionCode || "",
+        productionDate: formula.productionDate || "",
+        recommendedDosage: formula.recommendedProductDosage,
+        dosageUnit: formula.unitOfRecommendedDosage || "",
+        commentOnProduct: formula.commentOnProduct || "",
+        projectId: formula.projectId || "",
+        projectName: formula.projectName || "",
+        projectCurrencies: [],
+        projectDefaultCurrency: "",
+        version: formula.version,
       };
       setFormData(mappedData);
     }
@@ -73,60 +128,70 @@ const FormulaDetailsModal = ({
 
   // Load project data when projectId changes
   useEffect(() => {
-    if (formData?.projectId && !formData?.projectName) {
+    if (formData?.projectId) {
       const loadProject = async () => {
-        const response = await ApiService.getProject(
-          formData.projectId as string
-        );
-        if (response.success && response.data) {
-          const project = response.data;
-          setFormData((prev) =>
-            prev
-              ? {
-                  ...prev,
-                  projectName: project.name,
-                  projectRegion: project.region,
-                  projectCountry: project.country,
-                  projectManager: project.manager,
-                  projectStatus: project.status,
-                  projectCurrencies: project.currencies,
-                  projectDefaultCurrency: project.defaultCurrency,
-                }
-              : null
-          );
+        try {
+          const response = await ApiService.getProject(formData.projectId);
+          if (response.success && response.data) {
+            const project = response.data;
+            setFormData((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    projectCurrencies: project.currencies || [],
+                    projectDefaultCurrency: project.defaultCurrency || "",
+                  }
+                : null
+            );
+          }
+        } catch (error) {
+          // Silently handle error
         }
       };
       loadProject();
     }
-  }, [formData?.projectId, formData?.projectName]);
+  }, [formData?.projectId]);
 
-  const handleInputChange = (
-    fieldName: string,
-    value: string | number | string[] | undefined
-  ) => {
+  const handleInputChange = (updates: Record<string, any>) => {
     if (isReadOnly) return;
-    setFormData((prev) => (prev ? { ...prev, [fieldName]: value } : null));
+    setFormData((prev) => (prev ? { ...prev, ...updates } : null));
   };
 
   const handleSave = () => {
     if (!formData || isReadOnly) return;
-    // Map fragranceName back to name for the formula object
-    const saveData = {
-      ...formData,
-      name: formData.fragranceName || formData.name,
+
+    // Map form data back to formula object
+    const saveData: Partial<Formula> = {
+      name: formData.name || formData.fragranceName,
+      category: formData.category,
+      region: formData.region,
+      country: formData.country,
+      description: formData.description,
+      fragranceName: formData.fragranceName,
+      sampleId: formData.sampleID,
+      productFormat: formData.productFormat,
+      limsCode: formData.limsCode,
+      sapPlmCode: formData.sapPlmCode,
+      brand: formData.brand,
+      claims: formData.claims,
+      variant: formData.variant,
+      supplier: formData.supplier,
+      productionCode: formData.productionCode,
+      productionDate: formData.productionDate,
+      recommendedProductDosage: formData.recommendedDosage,
+      unitOfRecommendedDosage: formData.dosageUnit,
+      commentOnProduct: formData.commentOnProduct,
+      projectId: formData.projectId,
+      fragranceDosageActual: formData.fragranceDosage,
     };
 
     // Save project mapping to workspace context if projectId is set
-    if (workspaceContext && saveData.id && saveData.projectId) {
-      const projectName = (formData.projectName as string) || "";
-      workspaceContext.setProjectMapping(
-        saveData.id,
-        saveData.projectId as string,
-        projectName
-      );
+    if (workspaceContext && formula?.id && saveData.projectId) {
+      workspaceContext.setProjectMapping(formula.id, saveData.projectId, "");
     }
 
     onSave?.(saveData);
+    toast.success("Formula details updated successfully");
     onClose();
   };
 
@@ -137,310 +202,53 @@ const FormulaDetailsModal = ({
 
   if (!formula || !formData) return null;
 
-  const formulaType = (formula.formulaType ||
-    FORMULA_TYPES.BASE) as FormulaType;
+  const formulaType = formData.formulaType;
 
-  // Filter fields visible for this formula type
-  const visibleFields = allFields.filter((field) =>
-    isFieldVisibleForType(
-      field,
-      formulaType,
-      formData as Record<string, unknown>
-    )
-  );
-
-  // Group fields by category
-  const generalInfoFields = visibleFields.filter(
-    (f) => f.group === "general-info"
-  );
-  const formulaDetailsFields = visibleFields.filter(
-    (f) => f.group === "formula-details"
-  );
-  const productInfoFields = visibleFields.filter(
-    (f) => f.group === "product-info"
-  );
-  const projectReferenceFields = visibleFields.filter(
-    (f) => f.group === "project-ref"
-  );
-
-  // Mock data for dropdown fields (in production, these would be loaded from API)
-  const mockOptions: Record<string, Array<{ value: string; label: string }>> = {
-    category: [
-      { value: "Fine Fragrance", label: "Fine Fragrance" },
-      { value: "Eau de Toilette", label: "Eau de Toilette" },
-      { value: "Eau de Parfum", label: "Eau de Parfum" },
-      { value: "Home Care", label: "Home Care" },
-      { value: "Personal Care", label: "Personal Care" },
-      { value: "Deodorant", label: "Deodorant" },
-    ],
-    region: [
-      { value: "EMEA", label: "EMEA" },
-      { value: "Americas", label: "Americas" },
-      { value: "APAC", label: "APAC" },
-    ],
-    country: [
-      { value: "US", label: "United States" },
-      { value: "UK", label: "United Kingdom" },
-      { value: "FR", label: "France" },
-      { value: "DE", label: "Germany" },
-      { value: "IT", label: "Italy" },
-      { value: "ES", label: "Spain" },
-      { value: "CN", label: "China" },
-      { value: "JP", label: "Japan" },
-      { value: "IN", label: "India" },
-    ],
-    productFormat: [
-      { value: "spray", label: "Spray" },
-      { value: "lotion", label: "Lotion" },
-      { value: "cream", label: "Cream" },
-      { value: "gel", label: "Gel" },
-      { value: "powder", label: "Powder" },
-      { value: "stick", label: "Stick" },
-    ],
-  };
-
-  /**
-   * Render individual field based on type
-   */
-  const renderField = (field: FormField) => {
-    const value = (formData as Record<string, unknown>)[field.name] ?? "";
-    const isDisabled = isReadOnly || field.disabled;
-
-    const inputStyle = mergeStyles(
-      tw(
-        "w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-      ),
-      isDisabled ? tw("bg-gray-50 cursor-not-allowed") : {}
-    );
-
-    switch (field.type) {
-      case "select": {
-        // Use field options if available, otherwise use mock options
-        const options = field.options || mockOptions[field.name] || [];
+  const renderFormSection = () => {
+    switch (activeFormSection) {
+      case "identification":
         return (
-          <select
-            value={value as string}
-            onChange={(e) => handleInputChange(field.name, e.target.value)}
-            disabled={isDisabled}
-            style={inputStyle}
-          >
-            <option value="">
-              {field.placeholder || `Select ${field.label}`}
-            </option>
-            {options.map((option) => (
-              <option
-                key={option.value}
-                value={option.value}
-                disabled={
-                  "disabled" in option ? Boolean(option.disabled) : false
-                }
-              >
-                {option.label}
-              </option>
-            ))}
-          </select>
-        );
-      }
-
-      case "multi-select": {
-        // Render as text input showing comma-separated values
-        const multiValue = Array.isArray(value)
-          ? value.join(", ")
-          : String(value || "");
-        return (
-          <input
-            type="text"
-            value={multiValue}
-            onChange={(e) =>
-              handleInputChange(
-                field.name,
-                e.target.value.split(",").map((v) => v.trim())
-              )
-            }
-            disabled={isDisabled}
-            placeholder={field.placeholder}
-            style={inputStyle}
-          />
-        );
-      }
-
-      case "number":
-        return (
-          <input
-            type="number"
-            value={value as string}
-            onChange={(e) =>
-              handleInputChange(
-                field.name,
-                e.target.value ? Number(e.target.value) : undefined
-              )
-            }
-            disabled={isDisabled}
-            placeholder={field.placeholder}
-            min={field.validation?.min}
-            max={field.validation?.max}
-            style={inputStyle}
+          <FormulaTypeSelection
+            formulaData={formData as any}
+            onDataChange={handleInputChange}
           />
         );
 
-      case "date":
+      case "details":
         return (
-          <input
-            type="date"
-            value={value as string}
-            onChange={(e) => handleInputChange(field.name, e.target.value)}
-            disabled={isDisabled}
-            style={inputStyle}
+          <FormulaProductInformation
+            formulaData={formData as any}
+            onDataChange={handleInputChange}
           />
         );
 
-      case "textarea":
+      case "product-project":
         return (
-          <textarea
-            value={value as string}
-            onChange={(e) => handleInputChange(field.name, e.target.value)}
-            disabled={isDisabled}
-            placeholder={field.placeholder}
-            rows={3}
-            maxLength={field.maxLength}
-            style={inputStyle}
+          <FormulaProjectInformation
+            formulaData={formData as any}
+            onDataChange={handleInputChange}
           />
         );
 
-      case "text":
-      default:
+      case "additional":
         return (
-          <input
-            type="text"
-            value={value as string}
-            onChange={(e) => handleInputChange(field.name, e.target.value)}
-            disabled={isDisabled}
-            placeholder={field.placeholder}
-            maxLength={field.maxLength}
-            style={inputStyle}
-          />
-        );
-    }
-  };
-
-  /**
-   * Render field section
-   */
-  const renderFieldSection = (fields: FormField[], title: string) => {
-    if (fields.length === 0) return null;
-
-    return (
-      <div
-        style={mergeStyles(tw("border-b border-gray-200"), {
-          paddingBottom: "1.25rem",
-        })}
-      >
-        <h3
-          style={mergeStyles(tw("text-sm font-semibold text-gray-900"), {
-            marginBottom: "0.75rem",
-          })}
-        >
-          {title}
-        </h3>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
-            gap: "1rem",
-          }}
-        >
-          {fields.map((field) => (
-            <div
-              key={field.name}
-              style={field.type === "textarea" ? { gridColumn: "span 2" } : {}}
-            >
-              <label
-                style={mergeStyles(
-                  tw(
-                    "block text-xs font-medium text-gray-700 flex items-center"
-                  ),
-                  { marginBottom: "0.25rem" }
-                )}
-              >
-                <span>{field.label}</span>
-                {field.required && (
-                  <span
-                    style={mergeStyles(tw("text-red-500"), {
-                      marginLeft: "0.25rem",
-                    })}
-                  >
-                    *
-                  </span>
-                )}
-                {field.helpText && (
-                  <div
-                    className="tooltip-container"
-                    style={{
-                      position: "relative",
-                      display: "inline-block",
-                      marginLeft: "0.25rem",
-                    }}
-                    onMouseEnter={() => setHoveredTooltip(field.name)}
-                    onMouseLeave={() => setHoveredTooltip(null)}
-                  >
-                    <span
-                      className="material-symbols-rounded"
-                      style={{
-                        fontSize: "14px",
-                        color: "#9ca3af",
-                        cursor: "help",
-                      }}
-                    >
-                      info
-                    </span>
-                    <div
-                      className="tooltip-content"
-                      style={{
-                        position: "absolute",
-                        bottom: "100%",
-                        left: 0,
-                        marginBottom: "0.5rem",
-                        width: "256px",
-                        padding: "0.5rem",
-                        backgroundColor: "#111827",
-                        color: "white",
-                        fontSize: "12px",
-                        borderRadius: "0.375rem",
-                        boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
-                        zIndex: 50,
-                        pointerEvents: "none",
-                        visibility:
-                          hoveredTooltip === field.name ? "visible" : "hidden",
-                        whiteSpace: "normal",
-                        wordWrap: "break-word",
-                        opacity: hoveredTooltip === field.name ? 1 : 0,
-                        transition: "opacity 0.2s ease-in-out",
-                      }}
-                    >
-                      {field.helpText}
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "100%",
-                          left: "1rem",
-                          marginTop: "-0.25rem",
-                          borderWidth: "4px",
-                          borderStyle: "solid",
-                          borderColor:
-                            "transparent transparent transparent transparent",
-                          borderTopColor: "#111827",
-                        }}
-                      ></div>
-                    </div>
-                  </div>
-                )}
-              </label>
-              {renderField(field)}
+          <>
+            <FormulaProductionInformation
+              formulaData={formData as any}
+              onDataChange={handleInputChange}
+            />
+            <div style={tw("mt-6 border-t border-gray-200 pt-6")}>
+              <FormulaAdditionalInformation
+                formulaData={formData as any}
+                onDataChange={handleInputChange}
+              />
             </div>
-          ))}
-        </div>
-      </div>
-    );
+          </>
+        );
+
+      default:
+        return null;
+    }
   };
 
   return (
@@ -448,167 +256,171 @@ const FormulaDetailsModal = ({
       isOpen={isOpen}
       onClose={handleCancel}
       title={isReadOnly ? "View Formula Details" : "Edit Formula Details"}
-      size="xl"
+      size="4xl"
       noPadding
     >
-      <div
-        style={mergeStyles(tw("px-6 py-4"), {
-          display: "flex",
-          flexDirection: "column",
-          gap: "1.25rem",
-        })}
-      >
-        {/* Read-only indicator */}
-        {isReadOnly && (
+      <div className="space-y-0">
+        {/* Header with formula type and read-only indicator */}
+        <div className="px-6 pt-6 pb-3 flex items-center justify-between">
           <div
-            style={mergeStyles(
-              tw(
-                "bg-gray-50 border border-gray-200 rounded-lg p-3 flex items-center"
-              ),
-              { gap: "0.5rem" }
-            )}
+            style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}
           >
-            <span
-              style={tw("text-gray-500 text-base")}
-              className="material-symbols-rounded"
-            >
-              lock
+            <span style={tw("text-sm font-medium text-gray-700")}>
+              Formula Type:
             </span>
-            <div style={tw("flex-1")}>
-              <p style={tw("text-sm font-medium text-gray-700")}>
-                Reference Formula (Read-Only)
-              </p>
-              <p style={tw("text-xs text-gray-500")}>
-                This formula is locked and cannot be edited
-              </p>
+            <span
+              style={tw(
+                "inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+              )}
+            >
+              {getFormulaTypeLabel(formulaType)}
+            </span>
+          </div>
+          {isReadOnly && (
+            <div
+              style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
+            >
+              <span
+                className="material-symbols-rounded"
+                style={tw("text-sm text-gray-500")}
+              >
+                lock
+              </span>
+              <span style={tw("text-xs text-gray-600")}>Read-Only</span>
+            </div>
+          )}
+        </div>
+
+        {isReadOnly && (
+          <div className="px-6 pb-3">
+            <div
+              style={mergeStyles(
+                tw(
+                  "bg-gray-50 border border-gray-200 rounded-lg p-3 flex items-center"
+                ),
+                { gap: "0.5rem" }
+              )}
+            >
+              <span
+                style={tw("text-gray-500 text-base")}
+                className="material-symbols-rounded"
+              >
+                info
+              </span>
+              <div style={tw("flex-1")}>
+                <p style={tw("text-sm font-medium text-gray-700")}>
+                  Reference Formula
+                </p>
+                <p style={tw("text-xs text-gray-500")}>
+                  This formula is locked and cannot be edited
+                </p>
+              </div>
             </div>
           </div>
         )}
 
-        {/* Formula Type Badge */}
-        <div style={mergeStyles(tw("flex items-center"), { gap: "0.75rem" })}>
-          <span style={tw("text-sm font-medium text-gray-700")}>
-            Formula Type:
-          </span>
-          <span
-            style={tw(
-              "inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-            )}
-          >
-            {getFormulaTypeLabel(formulaType)}
-          </span>
-        </div>
-
-        {/* Form Fields organized by sections */}
         <div
-          style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}
-        >
-          {/* General Information Section */}
-          {renderFieldSection(generalInfoFields, "General Information")}
-
-          {/* Formula Details Section */}
-          {renderFieldSection(formulaDetailsFields, "Formula Details")}
-
-          {/* Project Reference Section */}
-          {renderFieldSection(projectReferenceFields, "Project Reference")}
-
-          {/* Product Information Section */}
-          {renderFieldSection(productInfoFields, "Product Information")}
-
-          {/* Description - Always visible */}
-          <div>
-            <label
-              style={mergeStyles(
-                tw("block text-xs font-medium text-gray-700"),
-                { marginBottom: "0.25rem" }
-              )}
-            >
-              Description
-            </label>
-            <textarea
-              value={formData.description || ""}
-              onChange={(e) => handleInputChange("description", e.target.value)}
-              disabled={isReadOnly}
-              rows={3}
-              placeholder="Enter description (optional)"
-              style={mergeStyles(
-                tw(
-                  "w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                ),
-                isReadOnly ? tw("bg-gray-50 cursor-not-allowed") : {}
-              )}
-            />
-          </div>
-
-          {/* Metadata - Read-only */}
-          <div
-            style={mergeStyles(
-              {
-                display: "grid",
-                gridTemplateColumns: "repeat(2, 1fr)",
-                gap: "1rem",
-              },
-              { paddingTop: "0.5rem" }
-            )}
-          >
-            <div>
-              <label
-                style={mergeStyles(
-                  tw("block text-xs font-medium text-gray-700"),
-                  { marginBottom: "0.25rem" }
-                )}
-              >
-                Created By
-              </label>
-              <input
-                type="text"
-                value={formula.createdBy || "Current User"}
-                disabled
-                style={tw(
-                  "w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed"
-                )}
-              />
-            </div>
-            <div>
-              <label
-                style={mergeStyles(
-                  tw("block text-xs font-medium text-gray-700"),
-                  { marginBottom: "0.25rem" }
-                )}
-              >
-                Last Updated
-              </label>
-              <input
-                type="text"
-                value={
-                  formula.lastUpdated
-                    ? new Date(formula.lastUpdated).toLocaleDateString()
-                    : new Date().toLocaleDateString()
-                }
-                disabled
-                style={tw(
-                  "w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed"
-                )}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div
-          style={mergeStyles(tw("flex justify-end border-t border-gray-200"), {
-            gap: "0.75rem",
-            paddingTop: "1.25rem",
+          style={mergeStyles(tw("flex"), {
+            height: "100%",
+            maxHeight: "calc(90vh - 200px)",
           })}
         >
-          <Button variant="secondary" onClick={handleCancel}>
-            {isReadOnly ? "Close" : "Cancel"}
-          </Button>
-          {!isReadOnly && (
-            <Button variant="primary" onClick={handleSave}>
-              Save Changes
-            </Button>
+          {/* Vertical Navigation Sidebar */}
+          <div
+            style={mergeStyles(
+              tw("bg-gray-50 border-r border-gray-200 flex-shrink-0"),
+              { width: "14rem" }
+            )}
+          >
+            <nav style={{ padding: "1rem" }}>
+              {formSections.map((section) => {
+                const isActive = activeFormSection === section.id;
+                return (
+                  <button
+                    type="button"
+                    key={section.id}
+                    onClick={() => setActiveFormSection(section.id)}
+                    disabled={isReadOnly}
+                    style={mergeStyles(
+                      tw(
+                        "w-full flex items-center text-sm font-medium rounded-md cursor-pointer disabled:cursor-not-allowed"
+                      ),
+                      {
+                        paddingLeft: "0.75rem",
+                        paddingRight: "0.75rem",
+                        paddingTop: "0.625rem",
+                        paddingBottom: "0.625rem",
+                        marginBottom: "0.25rem",
+                        textAlign: "left",
+                      },
+                      isActive
+                        ? mergeStyles(tw("bg-blue-100 text-blue-700"), {
+                            borderLeft: "4px solid #2563eb",
+                          })
+                        : tw("text-gray-600 hover:bg-gray-100")
+                    )}
+                  >
+                    <span
+                      className="material-symbols-rounded"
+                      style={mergeStyles(tw("text-base flex-shrink-0"), {
+                        marginRight: "0.75rem",
+                      })}
+                    >
+                      {section.icon}
+                    </span>
+                    <span style={tw("truncate")}>{section.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+
+          {/* Form Content Area */}
+          <div
+            style={mergeStyles(tw("flex-1 overflow-y-auto p-6"), {
+              backgroundColor: "#ffffff",
+            })}
+          >
+            {renderFormSection()}
+          </div>
+        </div>
+
+        {/* Metadata Section - Always at bottom */}
+        <div
+          style={mergeStyles(
+            tw(
+              "px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-between items-center"
+            ),
+            {
+              display: "flex",
+              gap: "1rem",
+              fontSize: "0.75rem",
+            }
           )}
+        >
+          <div style={tw("flex gap-4 flex-1 text-gray-600")}>
+            <div>
+              <span style={tw("font-medium")}>Created by:</span>{" "}
+              {formula.createdBy}
+            </div>
+            <div>
+              <span style={tw("font-medium")}>ID:</span> {formula.id}
+            </div>
+            {formula.lastUpdated && (
+              <div>
+                <span style={tw("font-medium")}>Updated:</span>{" "}
+                {new Date(formula.lastUpdated).toLocaleDateString()}
+              </div>
+            )}
+          </div>
+
+          {/* Action Buttons */}
+          <div style={mergeStyles(tw("flex justify-end"), { gap: "0.75rem" })}>
+            <Button variant="outline" onClick={handleCancel}>
+              {isReadOnly ? "Close" : "Cancel"}
+            </Button>
+            {!isReadOnly && <Button onClick={handleSave}>Save Changes</Button>}
+          </div>
         </div>
       </div>
     </Modal>

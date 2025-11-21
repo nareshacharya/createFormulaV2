@@ -15,9 +15,10 @@ interface Props {
 
 const FormulaProductInformation = ({ formulaData, onDataChange }: Props) => {
   return (
-    <div style={tw("space-y-5")}>
-      <div>
-        <h4 style={tw("text-xs font-semibold text-gray-600 uppercase mb-2")}>
+    <div>
+      {/* SECTION: Product Information */}
+      <div style={tw("mb-6")}>
+        <h4 style={tw("text-xs font-semibold text-gray-600 uppercase mb-4")}>
           Product Information
         </h4>
         <div

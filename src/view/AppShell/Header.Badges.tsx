@@ -132,14 +132,40 @@ const HeaderBadges = ({ activeFormula }: HeaderBadgesProps) => {
     });
   };
 
-  // Get mapped project from workspace context
-  const mappedProject =
-    workspaceContext && currentFormula
+  // Get mapped project from workspace context OR from formula.projectId
+  const getProjectInfo = () => {
+    // First check if project ID is in the formula
+    if (currentFormula?.projectId) {
+      // Try to get from workspace context (includes user mapping)
+      const mapped =
+        workspaceContext && currentFormula
+          ? workspaceContext.getProjectMapping(currentFormula.id)
+          : null;
+
+      // If found in context, use it
+      if (mapped?.name) {
+        return mapped;
+      }
+
+      // Otherwise return basic info from formula projectId
+      return {
+        id: currentFormula.projectId,
+        name: currentFormula.projectName || currentFormula.projectId,
+      };
+    }
+
+    // Check context mapping as fallback
+    return workspaceContext && currentFormula
       ? workspaceContext.getProjectMapping(currentFormula.id)
       : null;
+  };
 
-  // Show project section if there's a formula (always show, empty state if no mapping)
-  const shouldShowProject = currentFormula !== null;
+  const mappedProject = getProjectInfo();
+
+  // Show project section if there's a formula AND either mapped project or projectId exists
+  const shouldShowProject =
+    currentFormula !== null &&
+    (mappedProject?.name || currentFormula?.projectId);
 
   return (
     <div style={mergeStyles(tw("flex items-center"), { gap: "1.5rem" })}>

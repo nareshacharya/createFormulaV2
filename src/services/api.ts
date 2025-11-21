@@ -23,6 +23,12 @@ import { featureFlags } from '../config/featureFlags';
 import { DxApiService, type DxApiResponse } from './dxApi';
 import { PegaService } from './pega';
 import type { Ingredient, Formula, IngredientAttribute } from './pega';
+import type {
+    CreateFormulaPayload,
+    CreateFormulaVersionPayload,
+    ShareFormulaPayload,
+    CreateAnalyticalFormulaPayload,
+} from '../types/formula.creation.types';
 
 // ============================================================================
 // TYPES
@@ -260,6 +266,224 @@ export class ApiService {
                         isValid: true,
                         errors: [],
                         warnings: [],
+                    }
+                };
+            }
+        } catch (error) {
+            return this.handleError(error);
+        }
+    }
+
+    // ============================================================================
+    // FORMULA CREATION (User Story: US #1108, US #1137)
+    // ============================================================================
+
+    /**
+     * Create a new formula via D_CreateFormula data page
+     * Supports all formula types: Base, Dilution, Analytical Formula, Perfumer Formula
+     * 
+     * Flow:
+     * 1. Call createFormula - returns FormulaID
+     * 2. Call createFormulaVersion - links version to formula
+     * 3. Optionally call shareFormula - shares with team
+     * 4. If analytical: call checkDuplicateSampleId first, then createAnalyticalFormula
+     */
+    static async createFormulaFromData(
+        payload: CreateFormulaPayload
+    ): Promise<ApiResponse<{ formulaId: string; versionId: string; formulaStatus: string }>> {
+        try {
+            if (this.isUsingDxApi()) {
+                const response = await DxApiService.createFormula(payload);
+
+                if (response.success && response.data) {
+                    const formulaId = response.data.FormulaID;
+                    const versionId = `${formulaId}.1`; // Default to version 1
+
+                    return {
+                        success: true,
+                        data: {
+                            formulaId,
+                            versionId,
+                            formulaStatus: response.data.FormulaStatus || 'DRAFT',
+                        }
+                    };
+                }
+
+                return { success: false, error: response.error };
+            } else {
+                // Mock data: Create and return formula in DX API response format
+                const response = await PegaService.createFormulaFromPayload(payload);
+
+                if (response.success && response.data) {
+                    const formulaId = response.data.FormulaID;
+                    const versionId = `${formulaId}.1`; // Default to version 1
+
+                    return {
+                        success: true,
+                        data: {
+                            formulaId,
+                            versionId,
+                            formulaStatus: response.data.FormulaStatus || 'DRAFT',
+                        }
+                    };
+                }
+
+                return { success: false, error: response.error };
+            }
+        } catch (error) {
+            return this.handleError(error);
+        }
+    }
+
+    /**
+     * Create formula version
+     * Links a version to a formula after creation
+     */
+    static async createFormulaVersionRecord(
+        payload: CreateFormulaVersionPayload
+    ): Promise<ApiResponse<{ versionNumber: string; formulaId: string }>> {
+        try {
+            if (this.isUsingDxApi()) {
+                const response = await DxApiService.createFormulaVersion(payload);
+
+                if (response.success && response.data) {
+                    return {
+                        success: true,
+                        data: {
+                            versionNumber: response.data.VersionNumber,
+                            formulaId: response.data.FormulaID,
+                        }
+                    };
+                }
+
+                return { success: false, error: response.error };
+            } else {
+                // Mock data
+                const result = await PegaService.createFormulaVersion(payload);
+                return {
+                    success: true,
+                    data: {
+                        versionNumber: result.versionNumber,
+                        formulaId: result.formulaId,
+                    }
+                };
+            }
+        } catch (error) {
+            return this.handleError(error);
+        }
+    }
+
+    /**
+     * Share formula with another user or group
+     * Sets permission level (View/Edit)
+     */
+    static async shareFormulaWithUser(
+        payload: ShareFormulaPayload
+    ): Promise<ApiResponse<{ formulaId: string; sharedWith: string; shareType: string }>> {
+        try {
+            if (this.isUsingDxApi()) {
+                const response = await DxApiService.shareFormula(payload);
+
+                if (response.success && response.data) {
+                    return {
+                        success: true,
+                        data: {
+                            formulaId: response.data.FormulaID,
+                            sharedWith: response.data.SharedWithUserID,
+                            shareType: response.data.ShareType,
+                        }
+                    };
+                }
+
+                return { success: false, error: response.error };
+            } else {
+                // Mock data
+                return {
+                    success: true,
+                    data: {
+                        formulaId: payload.data.FormulaID,
+                        sharedWith: payload.data.SharedWithUserID,
+                        shareType: payload.data.ShareType,
+                    }
+                };
+            }
+        } catch (error) {
+            return this.handleError(error);
+        }
+    }
+
+    /**
+     * Check if Sample ID already exists
+     * MUST be called before createAnalyticalFormula
+     * 
+     * Returns true if Sample ID is available, false if taken
+     */
+    static async checkSampleIdAvailability(sampleId: string): Promise<ApiResponse<{ available: boolean; existingFormulaId?: string }>> {
+        try {
+            if (this.isUsingDxApi()) {
+                const response = await DxApiService.checkDuplicateSampleId(sampleId);
+
+                if (response.success && response.data) {
+                    return {
+                        success: true,
+                        data: {
+                            available: !response.data.Exists,
+                            existingFormulaId: response.data.ExistingFormulaID,
+                        }
+                    };
+                }
+
+                return { success: false, error: response.error };
+            } else {
+                // Mock data
+                const available = await PegaService.checkDuplicateSampleId(sampleId);
+                return {
+                    success: true,
+                    data: {
+                        available,
+                        existingFormulaId: available ? undefined : 'MOCK_FORMULA_ID',
+                    }
+                };
+            }
+        } catch (error) {
+            return this.handleError(error);
+        }
+    }
+
+    /**
+     * Create analytical formula
+     * Use checkSampleIdAvailability BEFORE calling this
+     * 
+     * User Story: US #1137
+     */
+    static async createAnalyticalFormulaRecord(
+        payload: CreateAnalyticalFormulaPayload
+    ): Promise<ApiResponse<{ formulaId: string; analyticalFormulaId: string; sampleId: string }>> {
+        try {
+            if (this.isUsingDxApi()) {
+                const response = await DxApiService.createAnalyticalFormula(payload);
+
+                if (response.success && response.data) {
+                    return {
+                        success: true,
+                        data: {
+                            formulaId: response.data.FormulaID,
+                            analyticalFormulaId: response.data.AnalyticalFormulaID,
+                            sampleId: response.data.SampleID,
+                        }
+                    };
+                }
+
+                return { success: false, error: response.error };
+            } else {
+                // Mock data
+                const result = await PegaService.createAnalyticalFormula(payload);
+                return {
+                    success: true,
+                    data: {
+                        formulaId: result.formulaId,
+                        analyticalFormulaId: result.analyticalFormulaId,
+                        sampleId: result.sampleId,
                     }
                 };
             }

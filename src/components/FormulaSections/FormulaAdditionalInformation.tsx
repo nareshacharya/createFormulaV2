@@ -14,9 +14,13 @@ interface Props {
 
 const FormulaAdditionalInformation = ({ formulaData, onDataChange }: Props) => {
   return (
-    <div style={tw("space-y-5")}>
+    <div>
+      <h4 style={tw("text-xs font-semibold text-gray-600 uppercase mb-4")}>
+        Additional Information
+      </h4>
+
       {/* Claims - Full Width */}
-      <div>
+      <div style={tw("mb-3")}>
         <label style={tw("block text-sm font-medium text-gray-700 mb-2")}>
           Claims
         </label>

@@ -6,7 +6,7 @@ import {
   useCallback,
 } from "react";
 import { BrowserRouter, HashRouter } from "react-router-dom";
-import Toast from "./components/Toast";
+import { Toaster } from "react-hot-toast";
 import { FeatureFlagsProvider } from "./context/FeatureFlagsContext";
 import { WorkspaceProvider } from "./context/WorkspaceContext";
 import { AppRoutes } from "./router";
@@ -193,11 +193,34 @@ function App() {
       <FeatureFlagsProvider>
         <WorkspaceProvider>
           <ModalContext.Provider value={contextValue}>
-            <Toast />
             <AppRoutes />
 
             {/* Global Modal Portal */}
             {modalContent}
+
+            {/* Toast Notifications */}
+            <Toaster
+              position="bottom-center"
+              toastOptions={{
+                duration: 4000,
+                style: {
+                  background: "#1f2937",
+                  color: "#fff",
+                  borderRadius: "0.5rem",
+                  boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                },
+                success: {
+                  style: {
+                    background: "#059669",
+                  },
+                },
+                error: {
+                  style: {
+                    background: "#dc2626",
+                  },
+                },
+              }}
+            />
           </ModalContext.Provider>
         </WorkspaceProvider>
       </FeatureFlagsProvider>

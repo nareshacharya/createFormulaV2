@@ -120,6 +120,12 @@ export interface ApiFeatureFlags {
         formulaDetails: string;
         attributesList: string;
         ingredientDataForFormula: string;
+        // Formula Creation Data Pages
+        createFormula: string;
+        createFormulaVersion: string;
+        shareFormula: string;
+        createAnalyticalFormula: string;
+        checkSampleIDExists: string;
     };
 }
 
@@ -445,6 +451,12 @@ export const featureFlags: FeatureFlags = {
             formulaDetails: 'D_GetFormulaDetailsForFormulaPanel',
             attributesList: 'D_AttributesList',
             ingredientDataForFormula: 'D_GetIngredientsDataForSelectedFormula',
+            // Formula Creation Data Pages (User Story: US #1108, US #1137)
+            createFormula: 'D_CreateFormula',
+            createFormulaVersion: 'D_CreateFormulaVersion',
+            shareFormula: 'D_ShareFormula',
+            createAnalyticalFormula: 'D_CreateAnalyticalFormula',
+            checkSampleIDExists: 'D_CheckSampleIDExists',
         },
     },
 

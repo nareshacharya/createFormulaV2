@@ -370,6 +370,80 @@ export class PegaService {
     }
     return { ...existing, ...updates };
   }
+
+  // ============================================================================
+  // FORMULA CREATION METHODS (User Story: US #1108, US #1137)
+  // ============================================================================
+
+  /**
+   * Create formula from payload (D_CreateFormula)
+   * Returns response in DX API format (CreateFormulaResponse)
+   */
+  static async createFormulaFromPayload(payload: any): Promise<any> {
+    const formulaId = `F${String(Date.now()).slice(-6)}`;
+    const createdDate = new Date().toISOString();
+
+    // Return in DX API response format
+    return {
+      success: true,
+      data: {
+        FormulaID: formulaId,
+        FragranceName: payload.data.FragranceName,
+        SampleID: payload.data.SampleID,
+        FormulaType: payload.data.FormulaType?.toUpperCase(),
+        FormulaStatus: 'DRAFT',
+        CreatedDate: createdDate,
+        CreatedByUserID: payload.data.CreatedByUserID || 'System',
+        ...(payload.data.FormulaType?.toUpperCase() === 'PERFUMER' && {
+          PerfumerFormulaID: `PERF${String(Date.now()).slice(-6)}`
+        }),
+        ...(payload.data.FormulaType?.toUpperCase() === 'ANALYTICAL' && {
+          AnalyticalFormulaID: `AN${String(Date.now()).slice(-6)}`
+        })
+      }
+    };
+  }
+
+  /**
+   * Create formula version (D_CreateFormulaVersion)
+   */
+  static async createFormulaVersion(payload: any): Promise<{ versionNumber: string; formulaId: string }> {
+    return {
+      versionNumber: payload.data.VersionNumber,
+      formulaId: payload.data.FormulaID,
+    };
+  }
+
+  /**
+   * Create analytical formula (D_CreateAnalyticalFormula)
+   * User Story: US #1137
+   */
+  static async createAnalyticalFormula(payload: any): Promise<{ formulaId: string; analyticalFormulaId: string; sampleId: string }> {
+    const formulaId = `A${String(Date.now()).slice(-6)}`;
+    const analyticalId = `AN${String(Date.now()).slice(-6)}`;
+
+    return {
+      formulaId,
+      analyticalFormulaId: analyticalId,
+      sampleId: payload.data.SampleID,
+    };
+  }
+
+  /**
+   * Check if Sample ID is available (D_CheckSampleIDExists)
+   * Returns true if available, false if duplicate
+   */
+  static async checkDuplicateSampleId(sampleId: string): Promise<boolean> {
+    // Mock implementation: always return true (available)
+    // In production, this would query existing formulas
+    const { mockFormulas } = await import('../mocks/formulas');
+
+    const exists = (mockFormulas as Formula[]).some(f =>
+      f.sampleId?.toLowerCase() === sampleId.toLowerCase()
+    );
+
+    return !exists; // Return availability (true = available, false = duplicate)
+  }
 }
 
 // Mock data for development - expanded with more ingredients

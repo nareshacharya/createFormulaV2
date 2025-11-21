@@ -4,7 +4,7 @@ import type { Column } from "../../../components/DataGrid";
 import type { Formula } from "../../../services/pega";
 import { eventBus } from "../../../utils/bus";
 import { calculateTotals } from "../../../utils/formulaCalculations";
-import { appStateHistory } from "../../../utils/stateHistory";
+import type { StateHistoryManager } from "../../../utils/stateHistory";
 
 interface UseDataGridHandlersProps {
     columns: Column[];
@@ -14,6 +14,7 @@ interface UseDataGridHandlersProps {
     availableFormulas: Formula[];
     tableData: any[];
     pendingFormulaIds: React.RefObject<Set<string>>;
+    workspaceHistory: StateHistoryManager;
     setTableData: Dispatch<SetStateAction<any[]>>;
     setColumns: Dispatch<SetStateAction<Column[]>>;
     setSelectedFormulaIds: Dispatch<SetStateAction<string[]>>;
@@ -28,6 +29,7 @@ export const useDataGridHandlers = ({
     availableFormulas,
     tableData,
     pendingFormulaIds,
+    workspaceHistory,
     setTableData,
     setColumns,
     setSelectedFormulaIds,
@@ -37,7 +39,7 @@ export const useDataGridHandlers = ({
         console.log("🔥 handleRowDelete ENTRY - rowId:", rowId);
 
         // Save state before deletion
-        appStateHistory.push(
+        workspaceHistory.push(
             { columns, tableData, formulas, availableFormulas },
             "delete_row",
             `Deleted row: ${rowId}`
@@ -52,11 +54,11 @@ export const useDataGridHandlers = ({
                 formulaId: rowToDelete?.formulaId,
                 parentFormulaId: rowToDelete?.parentFormulaId
             });
-            let newData = prev.filter((row) => row.id !== rowId);
 
             // If deleting a formula group row, also delete its ingredients and update tracking
             if (rowToDelete?.isFormula && rowToDelete?.formulaId) {
                 console.log("📋 Deleting formula GROUP row:", rowToDelete.formulaId);
+                let newData = prev.filter((row) => row.id !== rowId);
                 newData = newData.filter(
                     (row) => row.parentFormulaId !== rowToDelete.formulaId
                 );
@@ -69,9 +71,44 @@ export const useDataGridHandlers = ({
 
                 // The useEffect in WorkArea will emit the formula-selections-updated event
                 console.log("✅ Formula group row deleted, selectedFormulaIds will be updated");
+
+                return newData;
             }
+
+            // For regular ingredient rows: check if they have data in formula columns
+            if (!rowToDelete?.isTotal && !rowToDelete?.isFormula) {
+                // Get all formula columns
+                const formulaColumns = columns.filter(
+                    (col) => col.group === "Formulas" && col.formulaId
+                );
+
+                // Check if this row has any data in formula columns
+                const hasDataInFormulas = formulaColumns.some(
+                    (col) => rowToDelete?.[col.id] && rowToDelete[col.id] !== 0
+                );
+
+                if (hasDataInFormulas) {
+                    // Row has data - set formula values to 0 instead of deleting the row
+                    console.log(`Row ${rowId} has formula data - setting values to 0 instead of deleting`);
+                    return prev.map((row) => {
+                        if (row.id === rowId) {
+                            const updatedRow = { ...row };
+                            // Set all formula column values to 0
+                            formulaColumns.forEach((col) => {
+                                updatedRow[col.id] = 0;
+                            });
+                            return updatedRow;
+                        }
+                        return row;
+                    });
+                }
+            }
+
+            // Default behavior: delete the row
+            let newData = prev.filter((row) => row.id !== rowId);
+
             // If deleting an ingredient that belongs to a formula, check if all formula ingredients are gone
-            else if (rowToDelete?.parentFormulaId) {
+            if (rowToDelete?.parentFormulaId) {
                 console.log("📋 Deleting ingredient from formula:", rowToDelete.parentFormulaId);
 
                 // Check if this is the last ingredient for this formula
@@ -99,14 +136,14 @@ export const useDataGridHandlers = ({
 
         // Emit undo state update
         eventBus.emit("undo-state-updated", {
-            canUndo: appStateHistory.canUndo(),
-            count: appStateHistory.getUndoCount(),
+            canUndo: workspaceHistory.canUndo(),
+            count: workspaceHistory.getUndoCount(),
         });
     };
 
     const handleCellEdit = (rowId: string, columnId: string, value: any) => {
         // Save state before editing
-        appStateHistory.push(
+        workspaceHistory.push(
             { columns, tableData, formulas, availableFormulas },
             "edit_cell",
             `Edited cell: row ${rowId}, column ${columnId}`
@@ -175,8 +212,8 @@ export const useDataGridHandlers = ({
 
         // Emit undo state update
         eventBus.emit("undo-state-updated", {
-            canUndo: appStateHistory.canUndo(),
-            count: appStateHistory.getUndoCount(),
+            canUndo: workspaceHistory.canUndo(),
+            count: workspaceHistory.getUndoCount(),
         });
     };
 
@@ -185,7 +222,7 @@ export const useDataGridHandlers = ({
         if (!columnToDelete) return;
 
         // Save state before deletion
-        appStateHistory.push(
+        workspaceHistory.push(
             { columns, tableData, formulas, availableFormulas },
             "delete_column",
             `Deleted column: ${columnToDelete.title}`
@@ -193,12 +230,50 @@ export const useDataGridHandlers = ({
 
         setColumns((prev) => prev.filter((col) => col.id !== columnId));
 
-        setTableData((prev) =>
-            prev.map((row) => {
+        // When deleting a formula column, also clean up ingredients that ONLY belong to that formula
+        setTableData((prev) => {
+            let newData = prev.map((row) => {
                 const { [columnId]: deleted, ...rest } = row;
                 return rest;
-            })
-        );
+            });
+
+            // If it's a formula column, check if any ingredients should be removed
+            if (columnToDelete.formulaId) {
+                // Get all formula columns (excluding the one being deleted)
+                const remainingFormulaColumns = columns.filter(
+                    (col) =>
+                        col.group === "Formulas" && col.formulaId && col.id !== columnId
+                );
+
+                // Check each ingredient row that belongs to the deleted formula
+                newData = newData.filter((row) => {
+                    // Skip total rows
+                    if (row.isTotal) {
+                        return true;
+                    }
+
+                    // If this ingredient belongs to the deleted formula
+                    if (row.parentFormulaId === columnToDelete.formulaId) {
+                        // Check if this ingredient has data in any remaining formula column
+                        const hasDataInOtherFormulas = remainingFormulaColumns.some(
+                            (col) => row[col.id] && row[col.id] !== 0
+                        );
+
+                        // If no data in other formulas, remove the ingredient row
+                        if (!hasDataInOtherFormulas) {
+                            console.log(
+                                `Removing ingredient row ${row.id} - only belonged to deleted formula ${columnToDelete.formulaId}`
+                            );
+                            return false; // Remove this row
+                        }
+                    }
+
+                    return true; // Keep the row
+                });
+            }
+
+            return newData;
+        });
 
         // If it's a formula column, update selected formula IDs
         if (columnToDelete.formulaId) {
@@ -208,21 +283,44 @@ export const useDataGridHandlers = ({
 
             // The useEffect in WorkArea will emit the formula-selections-updated event
 
-            // If this was the active formula, set another formula as active
+            // If this was the active formula, set another EDITABLE formula as active (prefer owned/draft formulas)
             if (editableFormula === columnId) {
                 const remainingFormulaColumns = columns.filter(
                     (col) =>
                         col.group === "Formulas" && col.formulaId && col.id !== columnId
                 );
-                if (remainingFormulaColumns.length > 0) {
-                    setEditableFormula(remainingFormulaColumns[0].id);
+
+                // Find an editable formula (owned or draft status)
+                let nextEditableColumn = null;
+                for (const col of remainingFormulaColumns) {
+                    const workspaceFormula = formulas.find(
+                        (f) => f.id === col.formulaId
+                    );
+                    const availableFormula = availableFormulas.find(
+                        (f) => f.id === col.formulaId
+                    );
+                    const formula = workspaceFormula || availableFormula;
+
+                    // Check if formula is owned or in draft status
+                    if (
+                        formula &&
+                        (formula.status === "draft" || formula.createdBy === formula.createdBy)
+                    ) {
+                        nextEditableColumn = col;
+                        break;
+                    }
+                }
+
+                if (nextEditableColumn) {
+                    setEditableFormula(nextEditableColumn.id);
                     const formula = formulas.find(
-                        (f) => f.id === remainingFormulaColumns[0].formulaId
+                        (f) => f.id === nextEditableColumn.formulaId
                     );
                     if (formula) {
                         eventBus.emit("active-formula-changed", { formula });
                     }
                 } else {
+                    // No editable formulas left
                     setEditableFormula("");
                     eventBus.emit("active-formula-changed", { formula: null });
                 }
@@ -245,14 +343,14 @@ export const useDataGridHandlers = ({
 
         // Emit undo state update
         eventBus.emit("undo-state-updated", {
-            canUndo: appStateHistory.canUndo(),
-            count: appStateHistory.getUndoCount(),
+            canUndo: workspaceHistory.canUndo(),
+            count: workspaceHistory.getUndoCount(),
         });
     };
 
     const handleColumnReorder = (fromIndex: number, toIndex: number) => {
         // Save state before reordering
-        appStateHistory.push(
+        workspaceHistory.push(
             { columns, tableData, formulas, availableFormulas },
             "reorder_columns",
             `Reordered columns: ${fromIndex} to ${toIndex}`
@@ -267,8 +365,8 @@ export const useDataGridHandlers = ({
 
         // Emit undo state update
         eventBus.emit("undo-state-updated", {
-            canUndo: appStateHistory.canUndo(),
-            count: appStateHistory.getUndoCount(),
+            canUndo: workspaceHistory.canUndo(),
+            count: workspaceHistory.getUndoCount(),
         });
     };
 
