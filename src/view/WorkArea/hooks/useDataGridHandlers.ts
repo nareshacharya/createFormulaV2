@@ -302,9 +302,10 @@ export const useDataGridHandlers = ({
                     const formula = workspaceFormula || availableFormula;
 
                     // Check if formula is owned or in draft status
+                    const isFormulaOwned = col.formulaId ? isOwnFormula(col.formulaId) : false;
                     if (
                         formula &&
-                        (formula.status === "draft" || formula.createdBy === formula.createdBy)
+                        (formula.status === "draft" || isFormulaOwned)
                     ) {
                         nextEditableColumn = col;
                         break;

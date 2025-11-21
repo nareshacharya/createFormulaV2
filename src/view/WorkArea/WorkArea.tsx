@@ -1526,8 +1526,8 @@ const WorkArea = () => {
           percentage: ing.percentage,
           status: ingredient?.status,
           mac: ingredient?.mac,
-          ingredientId: finalIngredientId, // ✅ NOW SET!
-          parentFormulaId: formulaId, // Track which formula this ingredient belongs to
+          ingredientId: finalIngredientId,
+          // Don't set parentFormulaId for formula column ingredients - they're standalone
           [columnId]: ing.percentage,
         };
 
@@ -1611,10 +1611,11 @@ const WorkArea = () => {
           })),
           hasIngredients: !!data.formula.ingredients,
           ingredientsCount: data.formula.ingredients?.length || 0,
+          formulaIngredients: data.formula.ingredients
         });
 
         // If this is the first formula and we don't have ingredients yet, add them
-        if (isFirstColumn && !hasExistingData && data.formula.ingredients) {
+        if (isFirstColumn && !hasExistingData && data.formula.ingredients?.length > 0) {
           // Create ingredient rows from the formula
           const ingredientRows = data.formula.ingredients.map((ing, index) =>
             createIngredientRow(ing, data.formula.id, newColumnId, index)
@@ -1633,7 +1634,7 @@ const WorkArea = () => {
 
           const updatedData = [...ingredientRows, totalRow];
           return calculateTotals(updatedData, columns.concat(newColumn));
-        } else if (!hasExistingData && data.formula.ingredients) {
+        } else if (!hasExistingData && data.formula.ingredients?.length > 0) {
           // If we have other columns but no data yet, still add ingredients
           const ingredientRows = data.formula.ingredients.map((ing, index) => {
             const row = createIngredientRow(
@@ -1674,7 +1675,7 @@ const WorkArea = () => {
             [...updatedData, ...ingredientRows],
             columns.concat(newColumn)
           );
-        } else if (data.formula.ingredients) {
+        } else if (data.formula.ingredients?.length > 0) {
           // We have existing data - add new formula's ingredients and merge with existing rows
           const newIngredientRows = data.formula.ingredients.map((ing, index) =>
             createIngredientRow(ing, data.formula.id, newColumnId, index)

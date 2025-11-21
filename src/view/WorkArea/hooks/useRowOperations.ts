@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { toast } from "react-hot-toast";
 import type { Column } from "../../../components/DataGrid";
 import type { Formula } from "../../../services/pega";
+import { eventBus } from "../../../utils/bus";
 import { isOwnFormula } from "../../../utils/formulaIdGenerator";
 
 export const useRowOperations = (
@@ -174,8 +175,15 @@ export const useRowOperations = (
                     return;
                 }
 
-                // Set as active
-                setEditableFormula(column.formulaId);
+                // Set as active (use columnId, not formulaId)
+                setEditableFormula(columnId);
+                
+                // Emit event with formula object
+                const formula = workspaceFormula || availableFormula;
+                if (formula) {
+                    eventBus.emit("active-formula-changed", { formula });
+                }
+                
                 toast.success("Formula set as active");
             }
         },
