@@ -211,6 +211,7 @@ const FormulaDetailsModal = ({
           <FormulaTypeSelection
             formulaData={formData as any}
             onDataChange={handleInputChange}
+            isReadOnly={isReadOnly}
           />
         );
 
@@ -219,6 +220,7 @@ const FormulaDetailsModal = ({
           <FormulaProductInformation
             formulaData={formData as any}
             onDataChange={handleInputChange}
+            isReadOnly={isReadOnly}
           />
         );
 
@@ -227,6 +229,7 @@ const FormulaDetailsModal = ({
           <FormulaProjectInformation
             formulaData={formData as any}
             onDataChange={handleInputChange}
+            isReadOnly={isReadOnly}
           />
         );
 
@@ -236,11 +239,13 @@ const FormulaDetailsModal = ({
             <FormulaProductionInformation
               formulaData={formData as any}
               onDataChange={handleInputChange}
+              isReadOnly={isReadOnly}
             />
             <div style={tw("mt-6 border-t border-gray-200 pt-6")}>
               <FormulaAdditionalInformation
                 formulaData={formData as any}
                 onDataChange={handleInputChange}
+                isReadOnly={isReadOnly}
               />
             </div>
           </>
@@ -340,10 +345,9 @@ const FormulaDetailsModal = ({
                     type="button"
                     key={section.id}
                     onClick={() => setActiveFormSection(section.id)}
-                    disabled={isReadOnly}
                     style={mergeStyles(
                       tw(
-                        "w-full flex items-center text-sm font-medium rounded-md cursor-pointer disabled:cursor-not-allowed"
+                        "w-full flex items-center text-sm font-medium rounded-md cursor-pointer"
                       ),
                       {
                         paddingLeft: "0.75rem",

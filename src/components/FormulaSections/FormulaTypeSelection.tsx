@@ -25,11 +25,13 @@ interface FormulaData {
 interface FormulaTypeSectionProps {
   formulaData: FormulaData;
   onDataChange: (updates: Partial<FormulaData>) => void;
+  isReadOnly?: boolean;
 }
 
 const FormulaTypeSelection = ({
   formulaData,
   onDataChange,
+  isReadOnly = false,
 }: FormulaTypeSectionProps) => {
   return (
     <div>
@@ -103,12 +105,13 @@ const FormulaTypeSelection = ({
                 key={type}
                 type="button"
                 onClick={() => onDataChange({ formulaType: type })}
+                disabled={isReadOnly}
                 style={tw(
                   `p-3 rounded-lg border-2 transition-all ${
                     formulaData.formulaType === type
                       ? "border-blue-500 bg-blue-50"
                       : "border-gray-200 hover:border-gray-300"
-                  }`
+                  } ${isReadOnly ? "opacity-60 cursor-not-allowed" : ""}`
                 )}
               >
                 <div style={tw("flex items-center justify-between")}>
@@ -149,8 +152,9 @@ const FormulaTypeSelection = ({
               type="text"
               value={formulaData.name}
               onChange={(e) => onDataChange({ name: e.target.value })}
+              disabled={isReadOnly}
               style={tw(
-                "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                `w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isReadOnly ? "bg-gray-100 text-gray-600 cursor-not-allowed" : ""}`
               )}
               placeholder="Enter fragrance name"
             />
@@ -166,8 +170,9 @@ const FormulaTypeSelection = ({
                 type="text"
                 value={formulaData.sampleID}
                 onChange={(e) => onDataChange({ sampleID: e.target.value })}
+                disabled={isReadOnly}
                 style={tw(
-                  "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  `w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isReadOnly ? "bg-gray-100 text-gray-600 cursor-not-allowed" : ""}`
                 )}
                 placeholder="Enter sample ID"
               />
@@ -186,8 +191,9 @@ const FormulaTypeSelection = ({
                 onChange={(e) =>
                   onDataChange({ baseFormulaId: e.target.value })
                 }
+                disabled={isReadOnly}
                 style={tw(
-                  "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  `w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isReadOnly ? "bg-gray-100 text-gray-600 cursor-not-allowed" : ""}`
                 )}
                 placeholder="Search for base formula..."
               />
@@ -209,8 +215,9 @@ const FormulaTypeSelection = ({
                       dilutionPercentage: parseFloat(e.target.value),
                     })
                   }
+                  disabled={isReadOnly}
                   style={tw(
-                    "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    `w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isReadOnly ? "bg-gray-100 text-gray-600 cursor-not-allowed" : ""}`
                   )}
                   placeholder="0.00"
                   min="0"
@@ -232,8 +239,9 @@ const FormulaTypeSelection = ({
             <select
               value={formulaData.category}
               onChange={(e) => onDataChange({ category: e.target.value })}
+              disabled={isReadOnly}
               style={tw(
-                "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-8"
+                `w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-8 ${isReadOnly ? "bg-gray-100 text-gray-600 cursor-not-allowed" : ""}`
               )}
             >
               <option value="">Select category...</option>
@@ -253,8 +261,9 @@ const FormulaTypeSelection = ({
             <select
               value={formulaData.region}
               onChange={(e) => onDataChange({ region: e.target.value })}
+              disabled={isReadOnly}
               style={tw(
-                "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-8"
+                `w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-8 ${isReadOnly ? "bg-gray-100 text-gray-600 cursor-not-allowed" : ""}`
               )}
             >
               <option value="">Select region...</option>
@@ -274,9 +283,9 @@ const FormulaTypeSelection = ({
               value={formulaData.country}
               onChange={(e) => onDataChange({ country: e.target.value })}
               style={tw(
-                "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-8"
+                `w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-8 ${isReadOnly || !formulaData.region ? "bg-gray-100 text-gray-600 cursor-not-allowed" : ""}`
               )}
-              disabled={!formulaData.region}
+              disabled={isReadOnly || !formulaData.region}
             >
               <option value="">Select country...</option>
               {formulaData.region === "NA" && (
@@ -325,8 +334,9 @@ const FormulaTypeSelection = ({
                 onChange={(e) =>
                   onDataChange({ fragranceDosage: parseFloat(e.target.value) })
                 }
+                disabled={isReadOnly}
                 style={tw(
-                  "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  `w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isReadOnly ? "bg-gray-100 text-gray-600 cursor-not-allowed" : ""}`
                 )}
                 placeholder="0.00"
                 min="0"
@@ -346,8 +356,9 @@ const FormulaTypeSelection = ({
             <select
               value={formulaData.productFormat || ""}
               onChange={(e) => onDataChange({ productFormat: e.target.value })}
+              disabled={isReadOnly}
               style={tw(
-                "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-8"
+                `w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-8 ${isReadOnly ? "bg-gray-100 text-gray-600 cursor-not-allowed" : ""}`
               )}
             >
               <option value="">Select format...</option>

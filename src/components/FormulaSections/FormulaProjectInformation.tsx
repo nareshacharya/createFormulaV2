@@ -16,6 +16,7 @@ interface FormulaData {
 interface Props {
   formulaData: FormulaData;
   onDataChange: (updates: Partial<FormulaData>) => void;
+  isReadOnly?: boolean;
 }
 
 // Mock project data - in real app, this would come from API
@@ -55,7 +56,7 @@ const MAJOR_CURRENCIES = [
   "MXN",
 ];
 
-const FormulaProjectInformation = ({ formulaData, onDataChange }: Props) => {
+const FormulaProjectInformation = ({ formulaData, onDataChange, isReadOnly = false }: Props) => {
   // Get project details when selected
   const selectedProject = MOCK_PROJECTS.find(
     (p) => p.id === formulaData.projectId
@@ -106,8 +107,9 @@ const FormulaProjectInformation = ({ formulaData, onDataChange }: Props) => {
                 type="text"
                 value={formulaData.sapPlmCode || ""}
                 onChange={(e) => onDataChange({ sapPlmCode: e.target.value })}
+                disabled={isReadOnly}
                 style={tw(
-                  "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  `w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isReadOnly ? "bg-gray-100 text-gray-600 cursor-not-allowed" : ""}`
                 )}
                 placeholder="Enter SAP PLM code"
               />
@@ -125,8 +127,9 @@ const FormulaProjectInformation = ({ formulaData, onDataChange }: Props) => {
                 type="text"
                 value={formulaData.limsCode || ""}
                 onChange={(e) => onDataChange({ limsCode: e.target.value })}
+                disabled={isReadOnly}
                 style={tw(
-                  "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  `w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isReadOnly ? "bg-gray-100 text-gray-600 cursor-not-allowed" : ""}`
                 )}
                 placeholder="Enter LIMS code"
               />
@@ -155,8 +158,9 @@ const FormulaProjectInformation = ({ formulaData, onDataChange }: Props) => {
             <select
               value={formulaData.projectId || ""}
               onChange={(e) => handleProjectChange(e.target.value)}
+              disabled={isReadOnly}
               style={tw(
-                "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-8"
+                `w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-8 ${isReadOnly ? "bg-gray-100 text-gray-600 cursor-not-allowed" : ""}`
               )}
             >
               <option value="">Select a project (optional)...</option>
@@ -215,9 +219,9 @@ const FormulaProjectInformation = ({ formulaData, onDataChange }: Props) => {
                 onDataChange({ projectDefaultCurrency: e.target.value })
               }
               style={tw(
-                "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-8"
+                `w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-8 ${isReadOnly || !formulaData.projectId ? "bg-gray-100 text-gray-600 cursor-not-allowed" : ""}`
               )}
-              disabled={!formulaData.projectId}
+              disabled={isReadOnly || !formulaData.projectId}
             >
               <option value="">
                 {formulaData.projectId

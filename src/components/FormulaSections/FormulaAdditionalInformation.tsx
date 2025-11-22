@@ -10,9 +10,10 @@ interface FormulaData {
 interface Props {
   formulaData: FormulaData;
   onDataChange: (updates: Partial<FormulaData>) => void;
+  isReadOnly?: boolean;
 }
 
-const FormulaAdditionalInformation = ({ formulaData, onDataChange }: Props) => {
+const FormulaAdditionalInformation = ({ formulaData, onDataChange, isReadOnly = false }: Props) => {
   return (
     <div>
       <h4 style={tw("text-xs font-semibold text-gray-600 uppercase mb-4")}>
@@ -35,8 +36,9 @@ const FormulaAdditionalInformation = ({ formulaData, onDataChange }: Props) => {
                 .filter((c) => c),
             })
           }
+          disabled={isReadOnly}
           style={tw(
-            "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            `w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isReadOnly ? "bg-gray-100 text-gray-600 cursor-not-allowed" : ""}`
           )}
           placeholder="Enter claims (comma-separated)"
         />
@@ -50,8 +52,9 @@ const FormulaAdditionalInformation = ({ formulaData, onDataChange }: Props) => {
         <textarea
           value={formulaData.commentOnProduct}
           onChange={(e) => onDataChange({ commentOnProduct: e.target.value })}
+          disabled={isReadOnly}
           style={tw(
-            "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            `w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isReadOnly ? "bg-gray-100 text-gray-600 cursor-not-allowed" : ""}`
           )}
           placeholder="Enter comments..."
           rows={4}

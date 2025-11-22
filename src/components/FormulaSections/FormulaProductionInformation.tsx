@@ -12,9 +12,10 @@ interface FormulaData {
 interface Props {
   formulaData: FormulaData;
   onDataChange: (updates: Partial<FormulaData>) => void;
+  isReadOnly?: boolean;
 }
 
-const FormulaProductionInformation = ({ formulaData, onDataChange }: Props) => {
+const FormulaProductionInformation = ({ formulaData, onDataChange, isReadOnly = false }: Props) => {
   return (
     <div>
       <h4 style={tw("text-xs font-semibold text-gray-600 uppercase mb-4")}>
@@ -36,8 +37,9 @@ const FormulaProductionInformation = ({ formulaData, onDataChange }: Props) => {
             type="text"
             value={formulaData.productionCode || ""}
             onChange={(e) => onDataChange({ productionCode: e.target.value })}
+            disabled={isReadOnly}
             style={tw(
-              "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              `w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isReadOnly ? "bg-gray-100 text-gray-600 cursor-not-allowed" : ""}`
             )}
             placeholder="Enter production code"
           />
@@ -52,8 +54,9 @@ const FormulaProductionInformation = ({ formulaData, onDataChange }: Props) => {
             type="date"
             value={formulaData.productionDate || ""}
             onChange={(e) => onDataChange({ productionDate: e.target.value })}
+            disabled={isReadOnly}
             style={tw(
-              "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              `w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isReadOnly ? "bg-gray-100 text-gray-600 cursor-not-allowed" : ""}`
             )}
           />
         </div>
@@ -72,8 +75,9 @@ const FormulaProductionInformation = ({ formulaData, onDataChange }: Props) => {
                   recommendedDosage: parseFloat(e.target.value),
                 })
               }
+              disabled={isReadOnly}
               style={tw(
-                "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                `w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isReadOnly ? "bg-gray-100 text-gray-600 cursor-not-allowed" : ""}`
               )}
               placeholder="0.00"
               min="0"
@@ -82,8 +86,9 @@ const FormulaProductionInformation = ({ formulaData, onDataChange }: Props) => {
             <select
               value={formulaData.dosageUnit || ""}
               onChange={(e) => onDataChange({ dosageUnit: e.target.value })}
+              disabled={isReadOnly}
               style={tw(
-                "w-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                `w-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isReadOnly ? "bg-gray-100 text-gray-600 cursor-not-allowed" : ""}`
               )}
             >
               <option value="">Unit</option>

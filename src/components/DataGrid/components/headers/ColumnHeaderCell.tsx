@@ -139,7 +139,7 @@ export const ColumnHeaderCell = ({
         cursor-pointer select-none border-r border-b border-gray-200 last:border-r-0
         ${
           column.id === editableFormula
-            ? "bg-green-100 text-green-900 font-bold border-2 border-green-400 shadow-md shadow-green-200"
+            ? "bg-green-100 text-green-900 font-bold"
             : "bg-gray-50 text-gray-700 hover:bg-gray-100"
         }
         ${dragOverColumn === index ? "bg-blue-100" : ""}
