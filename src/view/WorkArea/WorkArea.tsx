@@ -37,6 +37,7 @@ import {
   generateNewFormulaId,
   isOwnFormula,
 } from "../../utils/formulaIdGenerator";
+import { isFormulaEditable } from "../../utils/formulaUtils";
 import { tw, mergeStyles } from "../../utils/tailwindToInline";
 import type { WorkspaceState } from "../../utils/workspaceManager";
 import { useFormulaColumnHandlers } from "./components/FormulaColumnHandlers";
@@ -258,6 +259,7 @@ const WorkArea = () => {
     tableData,
     pendingFormulaIds,
     workspaceHistory,
+    workspace,
     setTableData,
     setColumns,
     setSelectedFormulaIds,
@@ -1385,6 +1387,19 @@ const WorkArea = () => {
         return;
       }
 
+      // Check if formula is editable and locked in another workspace
+      if (isFormulaEditable(data.formula)) {
+        if (workspace.isFormulaLocked(data.formula.id)) {
+          const lockedWorkspace = workspace.getFormulaLockedInWorkspace(data.formula.id);
+          toast.error(`Formula "${data.formula.name}" is already open in workspace "${lockedWorkspace}"`, {
+            duration: 4000,
+          });
+          return;
+        }
+        // Lock the formula in this workspace
+        workspace.lockFormula(data.formula.id);
+      }
+
       // Ensure initial state is saved before first action
       ensureInitialStateSaved();
 
@@ -1541,6 +1556,19 @@ const WorkArea = () => {
       if (currentFormulaColumns.length >= maxFormulaSelections) {
         console.log("Maximum number of formula columns reached");
         return;
+      }
+
+      // Check if formula is editable and locked in another workspace
+      if (isFormulaEditable(data.formula)) {
+        if (workspace.isFormulaLocked(data.formula.id)) {
+          const lockedWorkspace = workspace.getFormulaLockedInWorkspace(data.formula.id);
+          toast.error(`Formula "${data.formula.name}" is already open in workspace "${lockedWorkspace}"`, {
+            duration: 4000,
+          });
+          return;
+        }
+        // Lock the formula in this workspace
+        workspace.lockFormula(data.formula.id);
       }
 
       // Ensure initial state is saved before first action

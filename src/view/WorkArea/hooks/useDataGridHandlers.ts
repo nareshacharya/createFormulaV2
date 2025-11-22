@@ -2,8 +2,11 @@ import type { Dispatch, SetStateAction } from "react";
 import { toast } from "react-hot-toast";
 import type { Column } from "../../../components/DataGrid";
 import type { Formula } from "../../../services/pega";
+import type { WorkspaceContextType } from "../../../context/WorkspaceContext";
 import { eventBus } from "../../../utils/bus";
 import { calculateTotals } from "../../../utils/formulaCalculations";
+import { isFormulaEditable } from "../../../utils/formulaUtils";
+import { isOwnFormula } from "../../../utils/formulaIdGenerator";
 import type { StateHistoryManager } from "../../../utils/stateHistory";
 
 interface UseDataGridHandlersProps {
@@ -15,6 +18,7 @@ interface UseDataGridHandlersProps {
     tableData: any[];
     pendingFormulaIds: React.RefObject<Set<string>>;
     workspaceHistory: StateHistoryManager;
+    workspace: WorkspaceContextType;
     setTableData: Dispatch<SetStateAction<any[]>>;
     setColumns: Dispatch<SetStateAction<Column[]>>;
     setSelectedFormulaIds: Dispatch<SetStateAction<string[]>>;
@@ -275,8 +279,15 @@ export const useDataGridHandlers = ({
             return newData;
         });
 
-        // If it's a formula column, update selected formula IDs
+        // If it's a formula column, update selected formula IDs and unlock if editable
         if (columnToDelete.formulaId) {
+            // Unlock formula if it's editable
+            const formula = formulas.find((f) => f.id === columnToDelete.formulaId) || 
+                           availableFormulas.find((f) => f.id === columnToDelete.formulaId);
+            if (formula && isFormulaEditable(formula)) {
+                workspace.unlockFormula(columnToDelete.formulaId);
+            }
+
             setSelectedFormulaIds((prev) =>
                 prev.filter((id) => id !== columnToDelete.formulaId)
             );
