@@ -24,44 +24,36 @@ export interface FormStep {
 
 export const FORM_STEPS: FormStep[] = [
     {
-        id: 'type-selection',
-        label: 'Formula Type',
-        description: 'Select the type of formula you want to create',
+        id: 'identification',
+        label: 'Identification',
+        description: 'Select formula type and basic identification',
         sequence: 1,
         required: true,
-        icon: 'science'
+        icon: 'label'
     },
     {
-        id: 'general-info',
-        label: 'General Information',
-        description: 'Provide basic formula information',
+        id: 'details',
+        label: 'Details',
+        description: 'Formula-specific information and dosage',
         sequence: 2,
         required: true,
         icon: 'info'
     },
     {
-        id: 'formula-details',
-        label: 'Formula Details',
-        description: 'Enter formula-specific information',
+        id: 'product-project',
+        label: 'Product & Project',
+        description: 'Product details and project reference',
         sequence: 3,
-        required: true,
-        icon: 'description'
+        required: false,
+        icon: 'shopping_bag'
     },
     {
-        id: 'product-info',
-        label: 'Product Information',
-        description: 'Add product-related details',
+        id: 'additional',
+        label: 'Additional',
+        description: 'System codes, production, and extra info',
         sequence: 4,
         required: false,
-        icon: 'inventory'
-    },
-    {
-        id: 'project-ref',
-        label: 'Project Reference',
-        description: 'Link to project if applicable',
-        sequence: 5,
-        required: false,
-        icon: 'folder'
+        icon: 'more'
     }
 ];
 
@@ -83,8 +75,7 @@ export const FIELD_VISIBILITY: Record<FormulaType, FieldVisibilityConfig> = {
             'region',
             'country',
             'fragranceName',
-            'productFormat',
-            'formulaVersion'
+            'productFormat'
         ],
         optional: [
             'projectId',
@@ -114,8 +105,7 @@ export const FIELD_VISIBILITY: Record<FormulaType, FieldVisibilityConfig> = {
             'region',
             'country',
             'fragranceName',
-            'productFormat',
-            'formulaVersion'
+            'productFormat'
         ],
         optional: [
             'projectId',
@@ -145,8 +135,7 @@ export const FIELD_VISIBILITY: Record<FormulaType, FieldVisibilityConfig> = {
             'region',
             'country',
             'sampleId',
-            'productFormat',
-            'formulaVersion'
+            'productFormat'
         ],
         optional: [
             'projectId',
@@ -177,7 +166,6 @@ export const FIELD_VISIBILITY: Record<FormulaType, FieldVisibilityConfig> = {
             'country',
             'fragranceName',
             'fragranceDosageActual',
-            'formulaVersion',
             'productFormat'
         ],
         optional: [

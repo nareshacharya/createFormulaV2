@@ -138,21 +138,130 @@ export interface Project {
 
 // Stubbed service functions that mirror DX API read/write and Data Page fetches
 export class PegaService {
-  // TODO: Implement actual DX API calls
-  static async getIngredients(_filters?: Record<string, unknown>): Promise<Ingredient[]> {
-    // TODO: Replace with actual API call
-    return mockIngredients;
+  /**
+   * Get ingredients list with pagination support
+   * @param filters Optional filters including pagination (skip, limit), search, status, type
+   * @returns Array of ingredients
+   */
+  static async getIngredients(filters?: {
+    skip?: number;
+    limit?: number;
+    search?: string;
+    status?: string;
+    type?: string;
+  }): Promise<Ingredient[]> {
+    const { skip = 0, limit = 50, search, status, type } = filters || {};
+
+    let results = [...mockIngredients];
+
+    // Apply filters
+    if (search) {
+      const query = search.toLowerCase();
+      results = results.filter(
+        (i) =>
+          i.name.toLowerCase().includes(query) ||
+          i.code?.toLowerCase().includes(query)
+      );
+    }
+
+    if (status) {
+      results = results.filter((i) => i.status === status);
+    }
+
+    if (type) {
+      results = results.filter((i) => i.type === type);
+    }
+
+    // Apply pagination
+    return results.slice(skip, skip + limit);
   }
 
-  static async getFormulas(_filters?: Record<string, unknown>): Promise<Formula[]> {
-    // TODO: Replace with actual API call
+  /**
+   * Get detailed ingredient information
+   * @param ingredientId The ingredient ID to fetch details for
+   * @param version Optional version parameter (for future versioning)
+   * @returns Detailed ingredient information
+   */
+  static async getIngredientDetails(
+    ingredientId: string,
+    _version?: string
+  ): Promise<Ingredient | null> {
+    const ingredient = mockIngredients.find((i) => i.id === ingredientId);
+    if (!ingredient) return null;
+
+    // In a real implementation, this would fetch enriched data from Pega
+    // including compliance, safety, supplier, and composition details
+    return ingredient;
+  }
+
+  /**
+   * Get formulas list with pagination support
+   * @param filters Optional filters including pagination (skip, limit), search, status, projectId
+   * @returns Array of formulas
+   */
+  static async getFormulas(filters?: {
+    skip?: number;
+    limit?: number;
+    search?: string;
+    status?: string;
+    projectId?: string;
+  }): Promise<Formula[]> {
+    const { skip = 0, limit = 50, search, status, projectId } = filters || {};
     const { mockFormulas } = await import('../mocks/formulas');
-    return mockFormulas as any;
+
+    let results = [...(mockFormulas as unknown as Formula[])];
+
+    // Apply filters
+    if (search) {
+      const query = search.toLowerCase();
+      results = results.filter(
+        (f) =>
+          f.name.toLowerCase().includes(query) ||
+          f.id.toLowerCase().includes(query)
+      );
+    }
+
+    if (status) {
+      results = results.filter((f) => f.status === status);
+    }
+
+    if (projectId) {
+      results = results.filter((f) => f.projectId === projectId);
+    }
+
+    // Apply pagination
+    return results.slice(skip, skip + limit);
   }
 
+  /**
+   * Get detailed formula information
+   * @param formulaId The formula ID to fetch details for
+   * @param version Optional version parameter (for future versioning)
+   * @returns Detailed formula information
+   */
+  static async getFormulaDetails(
+    formulaId: string,
+    _version?: string
+  ): Promise<Formula | null> {
+    const { mockFormulas } = await import('../mocks/formulas');
+    const formula = (mockFormulas as unknown as Formula[]).find(
+      (f) => f.id === formulaId
+    );
+    if (!formula) return null;
+
+    // In a real implementation, this would fetch enriched data from Pega
+    // including compliance information and audit history
+    return formula;
+  }
+
+  /**
+   * Get ingredient attributes list
+   * @returns Array of all ingredient attributes
+   */
   static async getIngredientAttributes(): Promise<IngredientAttribute[]> {
-    // TODO: Replace with actual API call
-    const { mockIngredientAttributes } = await import('../mocks/ingredientAttributes');
+    const { mockIngredientAttributes } = await import(
+      '../mocks/ingredientAttributes'
+    );
     return mockIngredientAttributes;
   }
 
@@ -167,10 +276,10 @@ export class PegaService {
   static async searchFormulas(query: string, _filters?: Record<string, unknown>): Promise<Formula[]> {
     // TODO: Replace with actual API call
     const { mockFormulas } = await import('../mocks/formulas');
-    return mockFormulas.filter(formula =>
+    return (mockFormulas as Formula[]).filter(formula =>
       formula.name.toLowerCase().includes(query.toLowerCase()) ||
       formula.description.toLowerCase().includes(query.toLowerCase())
-    ) as any;
+    );
   }
 
   static async searchAttributes(query: string, _filters?: Record<string, unknown>): Promise<IngredientAttribute[]> {
@@ -186,42 +295,42 @@ export class PegaService {
   static async getProjects(_filters?: Record<string, unknown>): Promise<Project[]> {
     // TODO: Replace with actual API call
     const { mockProjects } = await import('../mocks/projects');
-    return mockProjects as any;
+    return mockProjects as Project[];
   }
 
   static async getProject(id: string): Promise<Project | null> {
     // TODO: Replace with actual API call
     const { mockProjects } = await import('../mocks/projects');
-    return mockProjects.find(p => p.id === id || p.projectId === id) as any || null;
+    return (mockProjects as Project[]).find(p => p.id === id || p.projectId === id) || null;
   }
 
   static async searchProjects(query: string, _filters?: Record<string, unknown>): Promise<Project[]> {
     // TODO: Replace with actual API call
     const { mockProjects } = await import('../mocks/projects');
-    return mockProjects.filter(project =>
+    return (mockProjects as Project[]).filter(project =>
       project.name.toLowerCase().includes(query.toLowerCase()) ||
       project.description.toLowerCase().includes(query.toLowerCase()) ||
       project.displayId.toLowerCase().includes(query.toLowerCase()) ||
       project.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
-    ) as any;
+    );
   }
 
   static async getProjectsByManager(manager: string): Promise<Project[]> {
     // TODO: Replace with actual API call
     const { mockProjects } = await import('../mocks/projects');
-    return mockProjects.filter(p => p.manager === manager || p.team.includes(manager)) as any;
+    return (mockProjects as Project[]).filter(p => p.manager === manager || p.team.includes(manager));
   }
 
   static async getProjectsByRegion(region: string): Promise<Project[]> {
     // TODO: Replace with actual API call
     const { mockProjects } = await import('../mocks/projects');
-    return mockProjects.filter(p => p.region === region) as any;
+    return (mockProjects as Project[]).filter(p => p.region === region);
   }
 
   static async getProjectsByStatus(status: string): Promise<Project[]> {
     // TODO: Replace with actual API call
     const { mockProjects } = await import('../mocks/projects');
-    return mockProjects.filter(p => p.status === status) as any;
+    return (mockProjects as Project[]).filter(p => p.status === status);
   }
 
   static async createProject(project: Omit<Project, 'id'>): Promise<Project> {
@@ -229,17 +338,20 @@ export class PegaService {
     return {
       ...project,
       id: `PROJ-${Date.now()}`,
-    } as any;
+    } as Project;
   }
 
   static async updateProject(id: string, updates: Partial<Project>): Promise<Project> {
     // TODO: Replace with actual API call
     const { mockProjects } = await import('../mocks/projects');
-    const existing = mockProjects.find(p => p.id === id || p.projectId === id);
-    return { ...existing!, ...updates } as any;
+    const existing = (mockProjects as Project[]).find(p => p.id === id || p.projectId === id);
+    if (!existing) {
+      throw new Error(`Project ${id} not found`);
+    }
+    return { ...existing, ...updates };
   }
 
-  static async deleteProject(id: string): Promise<boolean> {
+  static async deleteProject(_id: string): Promise<boolean> {
     // TODO: Replace with actual API call
     return true;
   }
@@ -252,8 +364,85 @@ export class PegaService {
   static async updateFormula(id: string, updates: Partial<Formula>): Promise<Formula> {
     // TODO: Replace with actual API call
     const { mockFormulas } = await import('../mocks/formulas');
-    const existing = mockFormulas.find(f => f.id === id);
-    return { ...existing!, ...updates } as any;
+    const existing = (mockFormulas as Formula[]).find(f => f.id === id);
+    if (!existing) {
+      throw new Error(`Formula ${id} not found`);
+    }
+    return { ...existing, ...updates };
+  }
+
+  // ============================================================================
+  // FORMULA CREATION METHODS (User Story: US #1108, US #1137)
+  // ============================================================================
+
+  /**
+   * Create formula from payload (D_CreateFormula)
+   * Returns response in DX API format (CreateFormulaResponse)
+   */
+  static async createFormulaFromPayload(payload: any): Promise<any> {
+    const formulaId = `F${String(Date.now()).slice(-6)}`;
+    const createdDate = new Date().toISOString();
+
+    // Return in DX API response format
+    return {
+      success: true,
+      data: {
+        FormulaID: formulaId,
+        FragranceName: payload.data.FragranceName,
+        SampleID: payload.data.SampleID,
+        FormulaType: payload.data.FormulaType?.toUpperCase(),
+        FormulaStatus: 'DRAFT',
+        CreatedDate: createdDate,
+        CreatedByUserID: payload.data.CreatedByUserID || 'System',
+        ...(payload.data.FormulaType?.toUpperCase() === 'PERFUMER' && {
+          PerfumerFormulaID: `PERF${String(Date.now()).slice(-6)}`
+        }),
+        ...(payload.data.FormulaType?.toUpperCase() === 'ANALYTICAL' && {
+          AnalyticalFormulaID: `AN${String(Date.now()).slice(-6)}`
+        })
+      }
+    };
+  }
+
+  /**
+   * Create formula version (D_CreateFormulaVersion)
+   */
+  static async createFormulaVersion(payload: any): Promise<{ versionNumber: string; formulaId: string }> {
+    return {
+      versionNumber: payload.data.VersionNumber,
+      formulaId: payload.data.FormulaID,
+    };
+  }
+
+  /**
+   * Create analytical formula (D_CreateAnalyticalFormula)
+   * User Story: US #1137
+   */
+  static async createAnalyticalFormula(payload: any): Promise<{ formulaId: string; analyticalFormulaId: string; sampleId: string }> {
+    const formulaId = `A${String(Date.now()).slice(-6)}`;
+    const analyticalId = `AN${String(Date.now()).slice(-6)}`;
+
+    return {
+      formulaId,
+      analyticalFormulaId: analyticalId,
+      sampleId: payload.data.SampleID,
+    };
+  }
+
+  /**
+   * Check if Sample ID is available (D_CheckSampleIDExists)
+   * Returns true if available, false if duplicate
+   */
+  static async checkDuplicateSampleId(sampleId: string): Promise<boolean> {
+    // Mock implementation: always return true (available)
+    // In production, this would query existing formulas
+    const { mockFormulas } = await import('../mocks/formulas');
+
+    const exists = (mockFormulas as Formula[]).some(f =>
+      f.sampleId?.toLowerCase() === sampleId.toLowerCase()
+    );
+
+    return !exists; // Return availability (true = available, false = duplicate)
   }
 }
 

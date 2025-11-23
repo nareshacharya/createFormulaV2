@@ -89,7 +89,7 @@ const ToolbarButton = ({
         maxWidth: "3.5rem",
       }}
     >
-      <span className="material-symbols-rounded text-base">{icon}</span>
+      <span className="material-symbols-rounded text-lg">{icon}</span>
       {/* Show label on lg screens and up (1024px+) */}
       <span className="toolbar-label hidden lg:inline text-[10px] font-medium mt-0.5 text-center leading-tight">
         {label}

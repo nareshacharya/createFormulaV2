@@ -16,11 +16,24 @@ export default defineConfig({
   build: {
     sourcemap: true,
     outDir: 'out',
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
+    },
   },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src')
     }
+  },
+  optimizeDeps: {
+    include: ['xlsx'],
+    esbuildOptions: {
+      supported: {
+        bigint: true,
+      },
+    },
   },
   server: {
     port: 3000,

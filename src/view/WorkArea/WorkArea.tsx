@@ -37,6 +37,7 @@ import {
   generateNewFormulaId,
   isOwnFormula,
 } from "../../utils/formulaIdGenerator";
+import { isFormulaEditable } from "../../utils/formulaUtils";
 import { tw, mergeStyles } from "../../utils/tailwindToInline";
 import type { WorkspaceState } from "../../utils/workspaceManager";
 import { useFormulaColumnHandlers } from "./components/FormulaColumnHandlers";
@@ -257,6 +258,8 @@ const WorkArea = () => {
     availableFormulas,
     tableData,
     pendingFormulaIds,
+    workspaceHistory,
+    workspace,
     setTableData,
     setColumns,
     setSelectedFormulaIds,
@@ -1074,12 +1077,18 @@ const WorkArea = () => {
           const insertAfterRow = prev.find(
             (row) => row.id === data.insertAfterRowId
           );
-          
-          if (insertAfterRow && insertAfterRow.isFormula && insertAfterRow.formulaId) {
+
+          if (
+            insertAfterRow &&
+            insertAfterRow.isFormula &&
+            insertAfterRow.formulaId
+          ) {
             // If inserting after a formula row, find the last ingredient of THAT formula
             // to avoid splitting formula groups
             const formulaGroupId = insertAfterRow.formulaId;
-            const formulaRowIndex = prev.findIndex((r) => r.id === data.insertAfterRowId);
+            const formulaRowIndex = prev.findIndex(
+              (r) => r.id === data.insertAfterRowId
+            );
             let insertIndex = formulaRowIndex;
 
             // Search forward to find all consecutive ingredients of this formula
@@ -1378,6 +1387,19 @@ const WorkArea = () => {
         return;
       }
 
+      // Check if formula is editable and locked in another workspace
+      if (isFormulaEditable(data.formula)) {
+        if (workspace.isFormulaLocked(data.formula.id)) {
+          const lockedWorkspace = workspace.getFormulaLockedInWorkspace(data.formula.id);
+          toast.error(`Formula "${data.formula.name}" is already open in workspace "${lockedWorkspace}"`, {
+            duration: 4000,
+          });
+          return;
+        }
+        // Lock the formula in this workspace
+        workspace.lockFormula(data.formula.id);
+      }
+
       // Ensure initial state is saved before first action
       ensureInitialStateSaved();
 
@@ -1471,6 +1493,24 @@ const WorkArea = () => {
     };
 
     const handleFormulaSelectedForColumn = (data: { formula: Formula }) => {
+      console.log("🔍 handleFormulaSelectedForColumn called with:", {
+        formulaName: data.formula.name,
+        formulaId: data.formula.id,
+        hasIngredients: !!data.formula.ingredients,
+        ingredientsCount: data.formula.ingredients?.length || 0,
+        ingredients: data.formula.ingredients,
+      });
+
+      // FALLBACK: If ingredients are missing, try to fetch them
+      let formulaWithIngredients = data.formula;
+      if (!data.formula.ingredients || data.formula.ingredients.length === 0) {
+        console.warn(
+          "⚠️ Formula has no ingredients! Attempting to fetch formula details..."
+        );
+        // In a real app, we could fetch here, but for now just log it
+        // The formula object should always have ingredients from the API
+      }
+
       // HELPER: Create ingredient row with proper ID lookup
       const createIngredientRow = (
         ing: any,
@@ -1501,7 +1541,8 @@ const WorkArea = () => {
           percentage: ing.percentage,
           status: ingredient?.status,
           mac: ingredient?.mac,
-          ingredientId: finalIngredientId, // ✅ NOW SET!
+          ingredientId: finalIngredientId,
+          // Don't set parentFormulaId for formula column ingredients - they're standalone
           [columnId]: ing.percentage,
         };
 
@@ -1515,6 +1556,19 @@ const WorkArea = () => {
       if (currentFormulaColumns.length >= maxFormulaSelections) {
         console.log("Maximum number of formula columns reached");
         return;
+      }
+
+      // Check if formula is editable and locked in another workspace
+      if (isFormulaEditable(data.formula)) {
+        if (workspace.isFormulaLocked(data.formula.id)) {
+          const lockedWorkspace = workspace.getFormulaLockedInWorkspace(data.formula.id);
+          toast.error(`Formula "${data.formula.name}" is already open in workspace "${lockedWorkspace}"`, {
+            duration: 4000,
+          });
+          return;
+        }
+        // Lock the formula in this workspace
+        workspace.lockFormula(data.formula.id);
       }
 
       // Ensure initial state is saved before first action
@@ -1574,8 +1628,22 @@ const WorkArea = () => {
         const isFirstColumn = currentFormulaColumns.length === 0;
         const hasExistingData = prev.some((row) => !row.isTotal);
 
+        console.log("📊 setTableData state check:", {
+          isFirstColumn,
+          hasExistingData,
+          prevLength: prev.length,
+          prevRows: prev.map((r) => ({
+            id: r.id,
+            description: r.description,
+            isTotal: r.isTotal,
+          })),
+          hasIngredients: !!data.formula.ingredients,
+          ingredientsCount: data.formula.ingredients?.length || 0,
+          formulaIngredients: data.formula.ingredients
+        });
+
         // If this is the first formula and we don't have ingredients yet, add them
-        if (isFirstColumn && !hasExistingData && data.formula.ingredients) {
+        if (isFirstColumn && !hasExistingData && data.formula.ingredients?.length > 0) {
           // Create ingredient rows from the formula
           const ingredientRows = data.formula.ingredients.map((ing, index) =>
             createIngredientRow(ing, data.formula.id, newColumnId, index)
@@ -1593,8 +1661,8 @@ const WorkArea = () => {
           };
 
           const updatedData = [...ingredientRows, totalRow];
-          return calculateTotals(updatedData, [newColumn]);
-        } else if (!hasExistingData && data.formula.ingredients) {
+          return calculateTotals(updatedData, columns.concat(newColumn));
+        } else if (!hasExistingData && data.formula.ingredients?.length > 0) {
           // If we have other columns but no data yet, still add ingredients
           const ingredientRows = data.formula.ingredients.map((ing, index) => {
             const row = createIngredientRow(
@@ -1635,7 +1703,7 @@ const WorkArea = () => {
             [...updatedData, ...ingredientRows],
             columns.concat(newColumn)
           );
-        } else if (data.formula.ingredients) {
+        } else if (data.formula.ingredients?.length > 0) {
           // We have existing data - add new formula's ingredients and merge with existing rows
           const newIngredientRows = data.formula.ingredients.map((ing, index) =>
             createIngredientRow(ing, data.formula.id, newColumnId, index)
@@ -2203,7 +2271,6 @@ const WorkArea = () => {
           groupedByColumn={groupedByColumn}
           editableFormula={editableFormula}
           className="h-full"
-          showEmptyState={!hasIngredients}
           enableRowReordering
           enableBulkSelection
           dilutionState={dilutionState}

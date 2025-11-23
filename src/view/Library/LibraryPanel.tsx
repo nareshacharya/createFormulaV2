@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import AdvancedFilterSheet from "../../components/AdvancedFilterSheet";
 import FormulaList from "../../components/FormulaList";
 import IngredientAttributeList from "../../components/IngredientAttributeList";
@@ -6,7 +6,7 @@ import IngredientList from "../../components/IngredientList";
 import PillTabs from "../../components/PillTabs";
 import type { FilterGroup } from "../../components/QueryBuilder";
 import SearchBar from "../../components/SearchBar";
-import { PegaService } from "../../services/pega";
+import { ApiService } from "../../services/api";
 import type {
   Ingredient,
   Formula,
@@ -26,6 +26,8 @@ const LibraryPanel = () => {
     rules: [],
   });
   const [activeFilter, setActiveFilter] = useState<string>("all");
+  const [_attributeTypeFilter, _setAttributeTypeFilter] =
+    useState<string>("all");
   const [selectedAttributes, setSelectedAttributes] = useState<string[]>([]);
   const [selectedFormulaIds, setSelectedFormulaIds] = useState<string[]>([]);
   const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
@@ -34,7 +36,19 @@ const LibraryPanel = () => {
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [formulas, setFormulas] = useState<Formula[]>([]);
   const [attributes, setAttributes] = useState<IngredientAttribute[]>([]);
-  const [, setLoading] = useState(true);
+  const [_isLoading, setIsLoading] = useState(true);
+  const [_isLoadingMore, _setIsLoadingMore] = useState(false);
+  const [_error, _setError] = useState<string | null>(null);
+
+  // Pagination states
+  const [_ingredientPage, setIngredientPage] = useState(0);
+  const [_formulaPage, setFormulaPage] = useState(0);
+  const [_hasMoreIngredients, setHasMoreIngredients] = useState(true);
+  const [_hasMoreFormulas, setHasMoreFormulas] = useState(true);
+  const pageSize = 50;
+
+  // Debouncing search
+  const searchTimeoutRef = useRef<NodeJS.Timeout>();
 
   const tabs = [
     { id: "ingredients", label: "Ingredients", icon: "labs" },
@@ -42,30 +56,67 @@ const LibraryPanel = () => {
     { id: "attributes", label: "Attributes", icon: "checklist" },
   ];
 
-  // Load data on mount
+  // Load initial data on mount
   useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
+    const loadInitialData = async () => {
+      setIsLoading(true);
       try {
-        const [ingredientsData, formulasData, attributesData] =
+        const [ingredientsResponse, formulasResponse, attributesResponse] =
           await Promise.all([
-            PegaService.getIngredients(),
-            PegaService.getFormulas(),
-            PegaService.getIngredientAttributes(),
+            ApiService.getIngredients({
+              skip: 0,
+              limit: pageSize,
+              search: searchQuery || undefined,
+              status: activeFilter === "all" ? undefined : activeFilter,
+            }),
+            ApiService.getFormulas({
+              skip: 0,
+              limit: pageSize,
+              search: searchQuery || undefined,
+            }),
+            ApiService.getIngredientAttributes(),
           ]);
 
-        setIngredients(ingredientsData);
-        setFormulas(formulasData);
-        setAttributes(attributesData);
-      } catch (error) {
-        console.error("Failed to load library data:", error);
+        if (ingredientsResponse.success && ingredientsResponse.data) {
+          setIngredients(ingredientsResponse.data);
+          setHasMoreIngredients(ingredientsResponse.data.length === pageSize);
+        }
+
+        if (formulasResponse.success && formulasResponse.data) {
+          setFormulas(formulasResponse.data);
+          setHasMoreFormulas(formulasResponse.data.length === pageSize);
+        }
+
+        if (attributesResponse.success && attributesResponse.data) {
+          setAttributes(attributesResponse.data);
+        }
+      } catch (err) {
+        // Silently handle - allow fallback to mock data
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
-    loadData();
+    loadInitialData();
   }, []);
+
+  // Debounced search handler
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    searchTimeoutRef.current = setTimeout(() => {
+      setIngredientPage(0);
+      setFormulaPage(0);
+    }, 300);
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchQuery]);
 
   // Listen for attribute selection events from work area
   useEffect(() => {
@@ -88,7 +139,6 @@ const LibraryPanel = () => {
       count: number;
       selectedIds: string[];
     }) => {
-      console.log("📥 LibraryPanel received formula-selections-updated:", data);
       setSelectedFormulaIds(data.selectedIds || []);
     };
 
@@ -133,16 +183,14 @@ const LibraryPanel = () => {
     };
 
     const handleWorkspaceCreated = () => {
-      console.log("🆕 Workspace created - clearing library selections");
       clearAllSelections();
     };
 
-    const handleWorkspaceSwitched = (data: {
+    const handleWorkspaceSwitched = (_data: {
       workspaceId: string;
       workspaceName: string;
       previousWorkspaceId: string;
     }) => {
-      console.log("🔄 Workspace switched - clearing library selections", data);
       clearAllSelections();
     };
 
@@ -201,11 +249,26 @@ const LibraryPanel = () => {
   const basesCount = ingredients.filter((i) => i.type === "base").length;
   const totalCount = ingredients.length;
 
+  // Calculate attribute type counts
+  const textCount = attributes.filter((a) => a.type === "text").length;
+  const numberCount = attributes.filter((a) => a.type === "number").length;
+  const booleanCount = attributes.filter((a) => a.type === "boolean").length;
+  const selectCount = attributes.filter((a) => a.type === "select").length;
+  const totalAttributeCount = attributes.length;
+
   const ingredientFilters = [
     { id: "all", label: "All", count: totalCount },
     { id: "natural", label: "Natural", count: naturalCount },
     { id: "synthetic", label: "Synthetic", count: syntheticCount },
     { id: "bases", label: "Bases", count: basesCount },
+  ];
+
+  const attributeTypeFilters = [
+    { id: "all", label: "All", count: totalAttributeCount },
+    { id: "text", label: "Text", count: textCount },
+    { id: "number", label: "Number", count: numberCount },
+    { id: "boolean", label: "Boolean", count: booleanCount },
+    { id: "select", label: "Select", count: selectCount },
   ];
 
   const handleApplyFilters = (query: FilterGroup) => {
@@ -296,6 +359,28 @@ const LibraryPanel = () => {
                 <span>Advanced</span>
               </div>
             )}
+          </div>
+        )}
+
+        {activeTab === "attributes" && (
+          <div
+            style={mergeStyles(tw("mt-3 flex items-center flex-wrap"), {
+              gap: "0.25rem",
+            })}
+          >
+            {attributeTypeFilters.map((filter) => (
+              <button
+                type="button"
+                key={filter.id}
+                onClick={() => _setAttributeTypeFilter(filter.id)}
+                style={tw(`
+                  px-2 py-1 text-xs font-medium rounded transition-colors whitespace-nowrap cursor-pointer
+                  text-gray-600 hover:text-gray-900 hover:bg-gray-100
+                `)}
+              >
+                {filter.label} ({filter.count})
+              </button>
+            ))}
           </div>
         )}
       </div>

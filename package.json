@@ -19,7 +19,8 @@
     "react-i18next": "^15.2.0",
     "react-is": "^17.0.2",
     "react-querybuilder": "^5.2.0",
-    "react-router-dom": "^7.1.1"
+    "react-router-dom": "^7.1.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/hast": "^3.0.4",

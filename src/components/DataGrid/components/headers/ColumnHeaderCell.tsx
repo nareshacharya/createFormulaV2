@@ -135,12 +135,12 @@ export const ColumnHeaderCell = ({
     <th
       key={column.id}
       className={`
-        relative px-3 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider
+        relative px-3 py-3 text-left text-xs font-medium uppercase tracking-wider
         cursor-pointer select-none border-r border-b border-gray-200 last:border-r-0
         ${
           column.id === editableFormula
-            ? "bg-green-100 text-green-800"
-            : "bg-gray-50 hover:bg-gray-100"
+            ? "bg-green-100 text-green-900 font-bold"
+            : "bg-gray-50 text-gray-700 hover:bg-gray-100"
         }
         ${dragOverColumn === index ? "bg-blue-100" : ""}
         ${draggedColumn === index ? "opacity-50" : ""}
@@ -186,9 +186,11 @@ export const ColumnHeaderCell = ({
         <div className="flex items-center justify-between gap-1">
           <div className="flex items-center space-x-1 min-w-0">
             <div className="flex flex-col min-w-0">
-              <span className="truncate text-xs" title={column.title}>
-                {column.title}
-              </span>
+              <div className="flex items-center gap-1">
+                <span className="truncate text-xs" title={column.title}>
+                  {column.title}
+                </span>
+              </div>
               {column.formulaDisplayId && (
                 <span
                   className="text-xs text-gray-400 font-normal truncate"

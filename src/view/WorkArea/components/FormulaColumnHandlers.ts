@@ -296,7 +296,7 @@ export const useFormulaColumnHandlers = (config: FormulaHandlersConfig) => {
     });
   };
 
-  const handleSendForCompoundingFromMenu = (columnId: string) => {
+  const handleSendForCompoundingFromMenu = async (columnId: string) => {
     const column = columns.find((col) => col.id === columnId);
     if (!column || !column.formulaId) {
       toast.error("No formula found for this column");
@@ -321,9 +321,6 @@ export const useFormulaColumnHandlers = (config: FormulaHandlersConfig) => {
       return;
     }
 
-    // TODO: Replace with actual Pega DX API call
-    // await PegaService.sendForCompounding(formula.id);
-
     // Type narrowing for TypeScript strictness
     const selectedFormula = formula;
 
@@ -331,29 +328,90 @@ export const useFormulaColumnHandlers = (config: FormulaHandlersConfig) => {
       id: "send-compounding",
     });
 
-    // Simulate API call
-    setTimeout(() => {
-      toast.success(`Formula "${selectedFormula.name}" sent for compounding`, {
-        id: "send-compounding",
-        duration: 4000,
-      });
+    try {
+      // Import services dynamically
+      const { ApiService } = await import("../../../services/api");
+      const { prepareFormulaForCompounding, validateFormulaForCompounding } =
+        await import("../../../services/compounding");
 
-      // Save state for undo
-      appStateHistory.push(
-        { columns, tableData, formulas },
-        "send_for_compounding",
-        `Sent formula ${selectedFormula.name} for compounding`
+      // Prepare formula data for submission
+      const compoundingFormula = prepareFormulaForCompounding(
+        selectedFormula,
+        // Map table data to ingredients (placeholder - actual implementation would extract ingredients from tableData)
+        [],
+        // Attributes (placeholder)
+        []
       );
 
-      // Emit event to update undo state
-      eventBus.emit("undo-state-updated", {
-        canUndo: appStateHistory.canUndo(),
-        count: appStateHistory.getUndoCount(),
-      });
+      // Validate before submission
+      const validation = validateFormulaForCompounding(compoundingFormula);
+      if (!validation.isValid) {
+        toast.error(
+          `Validation failed: ${validation.errors.join(", ")}`,
+          {
+            id: "send-compounding",
+            duration: 5000,
+          }
+        );
+        return;
+      }
 
-      // Emit the send-for-compounding event for header sync
-      eventBus.emit("send-for-compounding");
-    }, 1500);
+      // Submit via ApiService
+      const response = await ApiService.submitForCompounding(
+        selectedFormula.id,
+        compoundingFormula
+      );
+
+      if (response.success) {
+        toast.success(
+          `Formula "${selectedFormula.name}" sent for compounding`,
+          {
+            id: "send-compounding",
+            duration: 4000,
+          }
+        );
+
+        // Save state for undo
+        appStateHistory.push(
+          { columns, tableData, formulas },
+          "send_for_compounding",
+          `Sent formula ${selectedFormula.name} for compounding`
+        );
+
+        // Emit event to update undo state
+        eventBus.emit("undo-state-updated", {
+          canUndo: appStateHistory.canUndo(),
+          count: appStateHistory.getUndoCount(),
+        });
+
+        // Emit the send-for-compounding event for header sync
+        eventBus.emit("send-for-compounding");
+
+        // Emit submission success event
+        eventBus.emit("formula-submitted", {
+          formulaId: selectedFormula.id,
+          formulaName: selectedFormula.name,
+          result: response.data,
+        });
+      } else {
+        toast.error(
+          `Failed to send formula: ${response.error?.message || "Unknown error"}`,
+          {
+            id: "send-compounding",
+            duration: 4000,
+          }
+        );
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      toast.error(
+        `Error sending formula: ${errorMessage}`,
+        {
+          id: "send-compounding",
+          duration: 4000,
+        }
+      );
+    }
   };
 
   return {

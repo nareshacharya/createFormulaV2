@@ -731,10 +731,12 @@ const DataGrid = ({
               .filter((row) => !row.isTotal)
               .map((row) => {
                 // Hide child ingredients if parent formula is collapsed
+                // Only hide if there's a parent formula GROUP ROW that is collapsed
+                const parentFormulaRow = row.parentFormulaId
+                  ? data.find((r) => r.formulaId === row.parentFormulaId)
+                  : null;
                 const shouldHide =
-                  row.parentFormulaId &&
-                  !data.find((r) => r.formulaId === row.parentFormulaId)
-                    ?.isExpanded;
+                  parentFormulaRow && parentFormulaRow.isExpanded === false;
 
                 if (shouldHide) return null;
 
@@ -793,7 +795,7 @@ const DataGrid = ({
                       >
                         {!row.isTotal &&
                           !row.isEmpty &&
-                          !row.parentFormulaId && (
+                          (row.isFormula || !row.parentFormulaId) && (
                             <input
                               type="checkbox"
                               checked={isRowSelected(row.id)}

@@ -32,5 +32,13 @@ export const getCurrentRowOrder = (rows: DataGridRow[]): string[] => {
 };
 
 export const isRowDraggable = (row: DataGridRow): boolean => {
-    return !row.isTotal && !row.isEmpty && !row.parentFormulaId;
+    // Exclude total rows and empty rows
+    if (row.isTotal || row.isEmpty) return false;
+    
+    // If it's a formula group header, allow dragging
+    if (row.isFormula) return true;
+    
+    // For ingredient rows: only allow if NOT a child of a formula group
+    // Child ingredients have parentFormulaId AND there's a corresponding formula group row
+    return !row.parentFormulaId;
 };

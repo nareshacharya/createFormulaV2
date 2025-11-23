@@ -11,13 +11,15 @@ interface FormulaData {
 interface Props {
   formulaData: FormulaData;
   onDataChange: (updates: Partial<FormulaData>) => void;
+  isReadOnly?: boolean;
 }
 
-const FormulaProductInformation = ({ formulaData, onDataChange }: Props) => {
+const FormulaProductInformation = ({ formulaData, onDataChange, isReadOnly = false }: Props) => {
   return (
-    <div style={tw("space-y-5")}>
-      <div>
-        <h4 style={tw("text-xs font-semibold text-gray-600 uppercase mb-2")}>
+    <div>
+      {/* SECTION: Product Information */}
+      <div style={tw("mb-6")}>
+        <h4 style={tw("text-xs font-semibold text-gray-600 uppercase mb-4")}>
           Product Information
         </h4>
         <div
@@ -36,8 +38,9 @@ const FormulaProductInformation = ({ formulaData, onDataChange }: Props) => {
               type="text"
               value={formulaData.brand || ""}
               onChange={(e) => onDataChange({ brand: e.target.value })}
+              disabled={isReadOnly}
               style={tw(
-                "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                `w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isReadOnly ? "bg-gray-100 text-gray-600 cursor-not-allowed" : ""}`
               )}
               placeholder="Enter brand"
             />
@@ -52,8 +55,9 @@ const FormulaProductInformation = ({ formulaData, onDataChange }: Props) => {
               type="text"
               value={formulaData.variant || ""}
               onChange={(e) => onDataChange({ variant: e.target.value })}
+              disabled={isReadOnly}
               style={tw(
-                "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                `w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isReadOnly ? "bg-gray-100 text-gray-600 cursor-not-allowed" : ""}`
               )}
               placeholder="Enter variant name"
             />
@@ -68,8 +72,9 @@ const FormulaProductInformation = ({ formulaData, onDataChange }: Props) => {
               type="text"
               value={formulaData.supplier || ""}
               onChange={(e) => onDataChange({ supplier: e.target.value })}
+              disabled={isReadOnly}
               style={tw(
-                "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                `w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isReadOnly ? "bg-gray-100 text-gray-600 cursor-not-allowed" : ""}`
               )}
               placeholder="Enter supplier"
             />

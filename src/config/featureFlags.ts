@@ -88,6 +88,9 @@ export interface ApiFeatureFlags {
     /** Use DX API instead of mock data (set to true for Pega integration) */
     useDxApi: boolean;
 
+    /** Use mock data as fallback when DX API fails */
+    useMockDataAsFallback: boolean;
+
     /** DX API configuration */
     dxApiConfig: DxApiConfig;
 
@@ -108,6 +111,22 @@ export interface ApiFeatureFlags {
 
     /** Show detailed API error messages */
     showDetailedErrors: boolean;
+
+    /** Data page mappings */
+    dataPages: {
+        ingredientsList: string;
+        ingredientDetails: string;
+        formulasList: string;
+        formulaDetails: string;
+        attributesList: string;
+        ingredientDataForFormula: string;
+        // Formula Creation Data Pages
+        createFormula: string;
+        createFormulaVersion: string;
+        shareFormula: string;
+        createAnalyticalFormula: string;
+        checkSampleIDExists: string;
+    };
 }
 
 // ============================================================================
@@ -379,6 +398,9 @@ export const featureFlags: FeatureFlags = {
         // Set to true when deploying to Pega Constellation
         useDxApi: false,
 
+        // Fallback to mock data when DX API fails (recommended: true for safety)
+        useMockDataAsFallback: true,
+
         dxApiConfig: {
             // Update these values when integrating with Pega
             baseUrl: 'https://your-pega-instance.com/prweb/api/application/v2',
@@ -420,6 +442,22 @@ export const featureFlags: FeatureFlags = {
         enableBatchRequests: true,
         showApiLoadingStates: true,
         showDetailedErrors: false, // Set to true for development
+
+        // Data page mappings for Pega integration
+        dataPages: {
+            ingredientsList: 'D_GetIngredientsForFormulaPanel',
+            ingredientDetails: 'D_GetingredientSummary',
+            formulasList: 'D_GetFormulasForFormulaPanel',
+            formulaDetails: 'D_GetFormulaDetailsForFormulaPanel',
+            attributesList: 'D_AttributesList',
+            ingredientDataForFormula: 'D_GetIngredientsDataForSelectedFormula',
+            // Formula Creation Data Pages (User Story: US #1108, US #1137)
+            createFormula: 'D_CreateFormula',
+            createFormulaVersion: 'D_CreateFormulaVersion',
+            shareFormula: 'D_ShareFormula',
+            createAnalyticalFormula: 'D_CreateAnalyticalFormula',
+            checkSampleIDExists: 'D_CheckSampleIDExists',
+        },
     },
 
     // ============================================================================
