@@ -54,9 +54,9 @@ const getBasePath = (): string => {
       // Normalize the path - remove trailing slash
       const basePath = import.meta.env.BASE_URL.replace(/\/$/, "") || "/";
       // eslint-disable-next-line no-console
-      console.debug("[App] Base path detected: Vite", {
-        basePath,
-      });
+      // console.debug("[App] Base path detected: Vite", {
+      //   basePath,
+      // });
       return basePath;
     }
   } catch (e) {
@@ -74,9 +74,9 @@ const getBasePath = (): string => {
         publicUrl = publicUrl.replace(/\/$/, "") || "/";
       }
       // eslint-disable-next-line no-console
-      console.debug("[App] Base path detected: Webpack PUBLIC_URL", {
-        basePath: publicUrl,
-      });
+      // console.debug("[App] Base path detected: Webpack PUBLIC_URL", {
+      //   basePath: publicUrl,
+      // });
       return publicUrl;
     }
   } catch (e) {
@@ -89,9 +89,9 @@ const getBasePath = (): string => {
       typeof window !== "undefined" ? (window as WindowExtended) : undefined;
     if (globalWindow?.__BASE_PATH__) {
       // eslint-disable-next-line no-console
-      console.debug("[App] Base path detected: window.__BASE_PATH__", {
-        basePath: globalWindow.__BASE_PATH__,
-      });
+      // console.debug("[App] Base path detected: window.__BASE_PATH__", {
+      //   basePath: globalWindow.__BASE_PATH__,
+      // });
       return globalWindow.__BASE_PATH__;
     }
   } catch (e) {

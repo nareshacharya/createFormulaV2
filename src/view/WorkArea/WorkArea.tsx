@@ -53,8 +53,8 @@ const FormulaModal = lazy(() => import("../../components/FormulaModal"));
 const FormulaDetailsModal = lazy(
   () => import("../../components/FormulaDetailsModal")
 );
-const ExcelUploadModal = lazy(
-  () => import("../../components/ExcelUploadModal")
+const AnalyticalCompositionUploadModal = lazy(
+  () => import("../../components/AnalyticalCompositionUploadModal")
 );
 
 const WorkArea = () => {
@@ -367,30 +367,26 @@ const WorkArea = () => {
     [setFormulas, setAvailableFormulas]
   );
 
-  // Callback for adding ingredients from Excel upload
+  // Callback for adding analytical composition from upload
   const handleAddIngredientsToFormula = useCallback(
-    (
-      formulaId: string,
-      parsedIngredients: Array<{
-        mappedIngredientId: string;
-        percentage: number;
-      }>
-    ) => {
+    (formulaId: string, composition: any) => {
       const formula = formulas.find((f) => f.id === formulaId);
       if (!formula) return;
 
-      // Add new rows to tableData for each ingredient
-      const newRows = parsedIngredients
-        .map((parsed) => {
-          const ingredient = ingredients.find(
-            (ing) => ing.id === parsed.mappedIngredientId
-          );
-          if (!ingredient) return null;
+      // Add new rows to tableData for each ingredient from composition
+      const newRows = composition.ingredients
+        .map((parsed: any) => {
+          // Try to find ingredient by mapped ID, otherwise use the parsed name
+          const ingredient = parsed.mappedIngredientId
+            ? ingredients.find((ing) => ing.id === parsed.mappedIngredientId)
+            : null;
 
           const newRow: Record<string, unknown> = {
             id: `${Date.now()}-${Math.random()}`,
-            ingredient: ingredient.name,
-            ingredientId: ingredient.id,
+            // Use ingredient name in description field for display in DataGrid
+            description: ingredient?.name || parsed.name,
+            // Only set ingredientId if we have a mapped ingredient
+            ...(ingredient && { ingredientId: ingredient.id }),
           };
 
           // Add formula percentage - find column by formulaId
@@ -399,7 +395,10 @@ const WorkArea = () => {
           );
 
           if (formulaColumn) {
-            newRow[formulaColumn.id] = parsed.percentage;
+            // Limit percentage to 5 decimals when adding to grid
+            const limitedPercentage =
+              Math.round(parsed.percentage * 100000) / 100000;
+            newRow[formulaColumn.id] = limitedPercentage;
           }
 
           return newRow;
@@ -450,6 +449,7 @@ const WorkArea = () => {
   // Use Excel upload hook
   const {
     isExcelUploadModalOpen,
+    selectedFormulaId,
     availableIngredients,
     handleUploadExcel,
     handleUploadIngredients,
@@ -1390,10 +1390,15 @@ const WorkArea = () => {
       // Check if formula is editable and locked in another workspace
       if (isFormulaEditable(data.formula)) {
         if (workspace.isFormulaLocked(data.formula.id)) {
-          const lockedWorkspace = workspace.getFormulaLockedInWorkspace(data.formula.id);
-          toast.error(`Formula "${data.formula.name}" is already open in workspace "${lockedWorkspace}"`, {
-            duration: 4000,
-          });
+          const lockedWorkspace = workspace.getFormulaLockedInWorkspace(
+            data.formula.id
+          );
+          toast.error(
+            `Formula "${data.formula.name}" is already open in workspace "${lockedWorkspace}"`,
+            {
+              duration: 4000,
+            }
+          );
           return;
         }
         // Lock the formula in this workspace
@@ -1561,10 +1566,15 @@ const WorkArea = () => {
       // Check if formula is editable and locked in another workspace
       if (isFormulaEditable(data.formula)) {
         if (workspace.isFormulaLocked(data.formula.id)) {
-          const lockedWorkspace = workspace.getFormulaLockedInWorkspace(data.formula.id);
-          toast.error(`Formula "${data.formula.name}" is already open in workspace "${lockedWorkspace}"`, {
-            duration: 4000,
-          });
+          const lockedWorkspace = workspace.getFormulaLockedInWorkspace(
+            data.formula.id
+          );
+          toast.error(
+            `Formula "${data.formula.name}" is already open in workspace "${lockedWorkspace}"`,
+            {
+              duration: 4000,
+            }
+          );
           return;
         }
         // Lock the formula in this workspace
@@ -1639,11 +1649,10 @@ const WorkArea = () => {
           })),
           hasIngredients: !!data.formula.ingredients,
           ingredientsCount: data.formula.ingredients?.length || 0,
-          formulaIngredients: data.formula.ingredients
         });
 
         // If this is the first formula and we don't have ingredients yet, add them
-        if (isFirstColumn && !hasExistingData && data.formula.ingredients?.length > 0) {
+        if (isFirstColumn && !hasExistingData && data.formula.ingredients) {
           // Create ingredient rows from the formula
           const ingredientRows = data.formula.ingredients.map((ing, index) =>
             createIngredientRow(ing, data.formula.id, newColumnId, index)
@@ -1662,7 +1671,7 @@ const WorkArea = () => {
 
           const updatedData = [...ingredientRows, totalRow];
           return calculateTotals(updatedData, columns.concat(newColumn));
-        } else if (!hasExistingData && data.formula.ingredients?.length > 0) {
+        } else if (!hasExistingData && data.formula.ingredients) {
           // If we have other columns but no data yet, still add ingredients
           const ingredientRows = data.formula.ingredients.map((ing, index) => {
             const row = createIngredientRow(
@@ -1703,7 +1712,7 @@ const WorkArea = () => {
             [...updatedData, ...ingredientRows],
             columns.concat(newColumn)
           );
-        } else if (data.formula.ingredients?.length > 0) {
+        } else if (data.formula.ingredients) {
           // We have existing data - add new formula's ingredients and merge with existing rows
           const newIngredientRows = data.formula.ingredients.map((ing, index) =>
             createIngredientRow(ing, data.formula.id, newColumnId, index)
@@ -2320,13 +2329,18 @@ const WorkArea = () => {
         />
       </Suspense>
 
-      {/* Excel Upload Modal - Lazy loaded */}
+      {/* Analytical Composition Upload Modal - Lazy loaded */}
       <Suspense fallback={null}>
-        <ExcelUploadModal
+        <AnalyticalCompositionUploadModal
           isOpen={isExcelUploadModalOpen}
+          sampleID={
+            selectedFormulaId
+              ? formulas.find((f) => f.id === selectedFormulaId)?.sampleId || ""
+              : ""
+          }
+          availableIngredients={availableIngredients}
           onClose={handleCloseExcelUpload}
           onUpload={handleUploadIngredients}
-          availableIngredients={availableIngredients}
         />
       </Suspense>
 

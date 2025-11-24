@@ -651,14 +651,14 @@ const getEnvironmentMode = (): string => {
 export const applyEnvironmentOverrides = () => {
     const env = getEnvironmentMode();
 
-    console.log(`[FeatureFlags] Applying overrides for environment: ${env}`);
+    // console.log(`[FeatureFlags] Applying overrides for environment: ${env}`);
 
     if (env === 'development') {
         // Development overrides - enable debugging features
         featureFlags.developer.enableVerboseLogging = true;
         featureFlags.developer.showDevConsole = false;
         featureFlags.api.showDetailedErrors = true;
-        console.info('[FeatureFlags] Development mode enabled');
+        // console.info('[FeatureFlags] Development mode enabled');
     } else if (env === 'staging') {
         // Staging overrides - test all features
         featureFlags.dataGrid.enableRowReordering = true;
@@ -666,14 +666,14 @@ export const applyEnvironmentOverrides = () => {
         featureFlags.header.showLineCount = true;
         featureFlags.header.showFormulaCost = true;
         featureFlags.header.showTargetCost = true;
-        console.info('[FeatureFlags] Staging mode enabled - all features active');
+        // console.info('[FeatureFlags] Staging mode enabled - all features active');
     } else if (env === 'production') {
         // Production overrides - conservative defaults
         featureFlags.developer.enableVerboseLogging = false;
         featureFlags.developer.showDevConsole = false;
         featureFlags.developer.enableUrlOverrides = false;
         featureFlags.api.showDetailedErrors = false;
-        console.info('[FeatureFlags] Production mode enabled');
+        // console.info('[FeatureFlags] Production mode enabled');
     }
 };
 
@@ -718,14 +718,14 @@ export const applyUrlOverrides = () => {
     const useDxApi = parseBoolean(urlParams.get('feature_useDxApi'));
     if (useDxApi !== null) featureFlags.api.useDxApi = useDxApi;
 
-    console.log('Feature flags overrides applied from URL:', {
-        rowReordering,
-        columnRemoveIcon,
-        lineCount,
-        formulaCost,
-        targetCost,
-        useDxApi,
-    });
+    // console.log('Feature flags overrides applied from URL:', {
+    //     rowReordering,
+    //     columnRemoveIcon,
+    //     lineCount,
+    //     formulaCost,
+    //     targetCost,
+    //     useDxApi,
+    // });
 };
 
 // ============================================================================

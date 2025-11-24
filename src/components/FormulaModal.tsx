@@ -1,10 +1,11 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { isFieldVisible } from "../config/formulaCreation.config";
 import { FORMULA_TYPES } from "../config/formulaTypes.config";
 import type { FormulaType } from "../config/formulaTypes.config";
-import type { Formula } from "../services/pega";
+import type { Formula, Ingredient } from "../services/pega";
+import { PegaService } from "../services/pega";
 import {
   generateFormulaId,
   getCurrentUserInitials,
@@ -87,6 +88,9 @@ const FormulaModal = ({
   const [isAnalyticalUploadOpen, setIsAnalyticalUploadOpen] = useState(false);
   const [analyticalComposition, setAnalyticalComposition] =
     useState<AnalyticalCompositionUpload | null>(null);
+  const [availableIngredients, setAvailableIngredients] = useState<
+    Ingredient[]
+  >([]);
   const [newFormulaData, setNewFormulaData] = useState<NewFormulaData>({
     formulaType: FORMULA_TYPES.BASE as FormulaType,
     name: "",
@@ -118,6 +122,20 @@ const FormulaModal = ({
   });
 
   const remainingSelections = maxSelections - currentSelections;
+
+  // Fetch available ingredients for analytical composition upload
+  useEffect(() => {
+    const fetchIngredients = async () => {
+      try {
+        const ingredients = await PegaService.getIngredients({});
+        setAvailableIngredients(ingredients);
+      } catch (error) {
+        // Continue without ingredients - validation will catch unmapped items
+      }
+    };
+
+    fetchIngredients();
+  }, []);
 
   const formSections = [
     { id: "identification", label: "Identification", icon: "label" },
@@ -177,7 +195,7 @@ const FormulaModal = ({
     // Type-specific mandatory validation
     if (
       isFieldVisible("fragranceName", newFormulaData.formulaType) &&
-      !newFormulaData.fragranceName
+      !newFormulaData.name
     ) {
       toast.error("Fragrance name is required for this formula type");
       return;
@@ -272,11 +290,7 @@ const FormulaModal = ({
       const response = await ApiService.createFormulaFromData(payload);
 
       if (response.success) {
-        toast.success(
-          `Formula "${
-            newFormulaData.name || newFormulaData.fragranceName
-          }" created successfully!`
-        );
+        toast.success(`Formula "${newFormulaData.name}" created successfully!`);
 
         // Generate formula object for callback
         const typeSpecificId = generateFormulaId({
@@ -288,7 +302,7 @@ const FormulaModal = ({
         const formulaName =
           newFormulaData.formulaType === FORMULA_TYPES.ANALYTICAL
             ? `ANALYTICAL-${newFormulaData.sampleID}`
-            : newFormulaData.fragranceName;
+            : newFormulaData.name;
 
         const versionMatch = typeSpecificId.match(/v(\d+)$/);
         const extractedVersion = versionMatch
@@ -331,10 +345,9 @@ const FormulaModal = ({
           country: newFormulaData.country,
           sapPlmCode: newFormulaData.sapPlmCode,
           limsCode: newFormulaData.limsCode,
-          fragranceName: newFormulaData.fragranceName,
+          fragranceName: newFormulaData.name,
           sampleId: newFormulaData.sampleID,
           fragranceDosageActual: newFormulaData.fragranceDosage,
-          formulaVersion: newFormulaData.version,
           productFormat: newFormulaData.productFormat,
           brand: newFormulaData.brand,
           supplier: newFormulaData.supplier,
@@ -532,18 +545,19 @@ const FormulaModal = ({
     if (activeTab === "create") {
       // Check mandatory fields based on formula type visibility
       const hasMandatoryFields =
+        newFormulaData.formulaType &&
         newFormulaData.category &&
         newFormulaData.region &&
         newFormulaData.country &&
         newFormulaData.productFormat &&
         (isFieldVisible("fragranceName", newFormulaData.formulaType)
-          ? newFormulaData.fragranceName.trim()
+          ? newFormulaData.name?.trim()
           : true) &&
         (isFieldVisible("sampleId", newFormulaData.formulaType)
-          ? newFormulaData.sampleID.trim()
+          ? newFormulaData.sampleID?.trim()
           : true) &&
         (isFieldVisible("baseFormulaId", newFormulaData.formulaType)
-          ? newFormulaData.baseFormulaId.trim()
+          ? newFormulaData.baseFormulaId?.trim()
           : true) &&
         (isFieldVisible("dilutionPercentage", newFormulaData.formulaType)
           ? newFormulaData.dilutionPercentage
@@ -707,7 +721,7 @@ const FormulaModal = ({
       <AnalyticalCompositionUploadModal
         isOpen={isAnalyticalUploadOpen}
         sampleID={newFormulaData.sampleID}
-        availableIngredients={[]} // TODO: Get from API
+        availableIngredients={availableIngredients}
         onClose={() => setIsAnalyticalUploadOpen(false)}
         onUpload={handleAnalyticalCompositionUpload}
       />

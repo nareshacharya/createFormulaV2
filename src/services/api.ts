@@ -716,18 +716,18 @@ export class ApiService {
         if (featureFlags.developer?.enableVerboseLogging) {
             const mode = this.getApiMode();
             // eslint-disable-next-line no-console
-            console.log('[API Service] Current mode:', mode);
+            // console.log('[API Service] Current mode:', mode);
 
             if (this.isUsingDxApi()) {
                 // eslint-disable-next-line no-console
-                console.log('[API Service] DX API configuration:', {
-                    baseUrl: featureFlags.api.dxApiConfig.baseUrl,
-                    cachingEnabled: featureFlags.api.enableCaching,
-                    batchingEnabled: featureFlags.api.enableBatchRequests,
-                });
+                // console.log('[API Service] DX API configuration:', {
+                //     baseUrl: featureFlags.api.dxApiConfig.baseUrl,
+                //     cachingEnabled: featureFlags.api.enableCaching,
+                //     batchingEnabled: featureFlags.api.enableBatchRequests,
+                // });
             } else {
                 // eslint-disable-next-line no-console
-                console.log('[API Service] Using mock data');
+                // console.log('[API Service] Using mock data');
             }
         }
     }

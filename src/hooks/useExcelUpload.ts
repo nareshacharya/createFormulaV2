@@ -1,35 +1,29 @@
 import { useState, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import type { Formula, Ingredient } from "../services/pega";
-
-interface ParsedIngredient {
-  name: string;
-  percentage: number;
-  mappedIngredientId: string | null;
-  status: "matched" | "unmatched" | "pending";
-}
+import type { AnalyticalCompositionUpload } from "../types/formula.creation.types";
 
 /**
  * useExcelUpload Hook (Controller Layer)
  * 
- * Manages Excel upload modal state and ingredient mapping operations.
+ * Manages analytical composition upload modal state and operations.
  * Exclusive for analytical formulas.
  * 
  * @param formulas - List of all available formulas
  * @param ingredients - List of all available ingredients
- * @param onAddIngredientsToFormula - Callback to add ingredients to formula
+ * @param onAddIngredientsToFormula - Callback to handle composition upload
  * @returns Modal state and handlers
  */
 export const useExcelUpload = (
   formulas: Formula[],
   allIngredients: Ingredient[],
-  onAddIngredientsToFormula: (formulaId: string, ingredients: ParsedIngredient[]) => void
+  onAddIngredientsToFormula: (formulaId: string, composition: AnalyticalCompositionUpload) => void
 ) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFormulaId, setSelectedFormulaId] = useState<string | null>(null);
 
   /**
-   * Open Excel upload modal
+   * Open analytical composition upload modal
    * Only available for analytical formulas
    */
   const handleUploadExcel = useCallback((formulaId: string) => {
@@ -53,31 +47,24 @@ export const useExcelUpload = (
   }, [formulas]);
 
   /**
-   * Process uploaded ingredients and add to formula
+   * Process uploaded composition and add to formula
    */
-  const handleUploadIngredients = useCallback((parsedIngredients: ParsedIngredient[]) => {
+  const handleUploadIngredients = useCallback((composition: AnalyticalCompositionUpload) => {
     if (!selectedFormulaId) {
       toast.error("No formula selected");
       return;
     }
 
     try {
-      // Validate all ingredients are mapped
-      const unmapped = parsedIngredients.filter(ing => ing.status === "unmatched");
-      if (unmapped.length > 0) {
-        toast.error(`${unmapped.length} ingredient(s) are still unmapped`);
-        return;
-      }
+      // Add composition to formula
+      onAddIngredientsToFormula(selectedFormulaId, composition);
 
-      // Add ingredients to formula
-      onAddIngredientsToFormula(selectedFormulaId, parsedIngredients);
-
-      toast.success(`Successfully added ${parsedIngredients.length} ingredients to formula`);
+      toast.success(`Successfully uploaded ${composition.ingredients.length} ingredients to formula`);
       setIsModalOpen(false);
       setSelectedFormulaId(null);
     } catch (error) {
-      toast.error("Failed to add ingredients to formula");
-      console.error("Error adding ingredients:", error);
+      toast.error("Failed to add composition to formula");
+      console.error("Error adding composition:", error);
     }
   }, [selectedFormulaId, onAddIngredientsToFormula]);
 

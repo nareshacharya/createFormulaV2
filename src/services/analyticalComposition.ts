@@ -132,18 +132,49 @@ export class AnalyticalCompositionService {
                         }
                     );
 
+                    // Auto-detect column structure
+                    // Try to find percentage column (usually has numeric values between 0-100)
+                    const headerRow = rows[0] || {};
+                    let percentageColumnKey = "B"; // Default
+                    let ingredientColumnKey = "A"; // Default
+
+                    // If we have data, analyze it to find which column has percentages
+                    if (rows.length > 1) {
+                        const dataRow = rows[1];
+                        // Look for a column with percentage-like values (numbers between 0-100 or 0-500 for multiple versions)
+                        const columnsToCheck = ["B", "C", "D", "E"];
+                        for (let i = 0; i < columnsToCheck.length; i += 1) {
+                            const col = columnsToCheck[i];
+                            const val = parseFloat(String(dataRow[col])) || NaN;
+                            // If we find a number between 0-500 (allowing for 0-100 range or cumulative %),
+                            // and it's not just an ID-like number
+                            if (val > 0 && val <= 500 && !Number.isNaN(val)) {
+                                percentageColumnKey = col;
+                                // Ingredient name is typically the column before percentages
+                                ingredientColumnKey = String.fromCharCode(65 + Math.max(0, Math.min(4, i)));
+                                break;
+                            }
+                        }
+                    }
+
                     const ingredients: AnalyticalCompositionIngredient[] = rows
                         .slice(1) // Skip header
-                        .filter((row) => row.A && row.B) // Must have name and percentage
+                        .filter((row) => row[ingredientColumnKey] && row[percentageColumnKey]) // Must have name and percentage
                         .map((row) => {
-                            const ingredientName = String(row.A).trim();
-                            const percentage = parseFloat(String(row.B)) || 0;
-                            const retentionTime = row.C
-                                ? parseFloat(String(row.C))
+                            const ingredientName = String(row[ingredientColumnKey]).trim();
+                            // Parse percentage and limit to 5 decimals
+                            const rawPercentage = parseFloat(String(row[percentageColumnKey])) || 0;
+                            const percentage = Math.round(rawPercentage * 100000) / 100000; // Limit to 5 decimals
+
+                            // Retention time, peak area, match quality in columns C, D, E (after ingredient and percentage)
+                            const retentionTime = row.C && row.C !== row[percentageColumnKey]
+                                ? Math.round(parseFloat(String(row.C)) * 100000) / 100000
                                 : undefined;
-                            const peakArea = row.D ? parseFloat(String(row.D)) : undefined;
-                            const matchQuality = row.E
-                                ? parseFloat(String(row.E))
+                            const peakArea = row.D && row.D !== row[percentageColumnKey]
+                                ? Math.round(parseFloat(String(row.D)) * 100000) / 100000
+                                : undefined;
+                            const matchQuality = row.E && row.E !== row[percentageColumnKey]
+                                ? Math.round(parseFloat(String(row.E)) * 100000) / 100000
                                 : undefined;
 
                             // Try to match with available ingredients (case-insensitive)
@@ -249,8 +280,9 @@ export class AnalyticalCompositionService {
      */
     static validateComposition(
         composition: AnalyticalCompositionUpload
-    ): { isValid: boolean; errors: string[] } {
+    ): { isValid: boolean; errors: string[]; warnings: string[] } {
         const errors: string[] = [];
+        const warnings: string[] = [];
 
         // Check sample ID
         if (!composition.sampleID || composition.sampleID.trim() === "") {
@@ -262,28 +294,29 @@ export class AnalyticalCompositionService {
             errors.push("At least one ingredient is required");
         }
 
-        // Check percentage total (should be close to 100)
+        // Check percentage total (should be close to 100, but allow 10% tolerance)
         const totalPercentage = composition.ingredients.reduce(
             (sum, ing) => sum + ing.percentage,
             0
         );
-        if (Math.abs(totalPercentage - 100) > 5) {
-            errors.push(
-                `Total percentage is ${totalPercentage.toFixed(2)}%, should be close to 100%`
+        if (Math.abs(totalPercentage - 100) > 10) {
+            warnings.push(
+                `Total percentage is ${totalPercentage.toFixed(2)}%, expected close to 100%. Please verify the data.`
             );
         }
 
-        // Check for unmapped ingredients
+        // Check for unmapped ingredients - warn but don't fail
         const unmapped = composition.ingredients.filter(
             (ing) => ing.status === "unmatched"
         );
         if (unmapped.length > 0) {
-            errors.push(`${unmapped.length} ingredient(s) are not mapped to library`);
+            warnings.push(`${unmapped.length} ingredient(s) are not mapped to the ingredient library. You can still upload but manual mapping may be required later.`);
         }
 
         return {
             isValid: errors.length === 0,
             errors,
+            warnings,
         };
     }
 

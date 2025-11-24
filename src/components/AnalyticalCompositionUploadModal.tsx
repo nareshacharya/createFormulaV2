@@ -298,6 +298,14 @@ export const AnalyticalCompositionUploadModal: React.FC<
       return;
     }
 
+    // Show warnings if any
+    if (validation.warnings && validation.warnings.length > 0) {
+      setToast({
+        type: "info",
+        message: validation.warnings[0],
+      });
+    }
+
     onUpload(composition);
     setToast({
       type: "success",
@@ -539,7 +547,7 @@ export const AnalyticalCompositionUploadModal: React.FC<
                     <tbody>
                       {state.ingredients.map((ing, idx) => (
                         <tr
-                          key={`${ing.name}-${ing.percentage}`}
+                          key={`ingredient-${idx}-${ing.name}-${ing.percentage}`}
                           className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
                         >
                           <td className="px-4 py-2">
@@ -564,7 +572,7 @@ export const AnalyticalCompositionUploadModal: React.FC<
                             </select>
                           </td>
                           <td className="px-4 py-2 text-right">
-                            {ing.percentage.toFixed(2)}
+                            {ing.percentage.toFixed(5)}
                           </td>
                           <td className="px-4 py-2 text-center">
                             <span
