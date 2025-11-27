@@ -53,6 +53,7 @@ interface ColumnHeaderCellProps {
   onCreateVersion?: (columnId: string) => void;
   onNormalizeFormula?: (columnId: string) => void;
   onSendForCompounding?: (columnId: string) => void;
+  onShareFormula?: (columnId: string) => void;
   onEditFormulaDetails?: (columnId: string) => void;
   onViewFormulaDetails?: (columnId: string) => void;
   onUploadExcel?: (columnId: string) => void;
@@ -83,6 +84,7 @@ export const ColumnHeaderCell = ({
   onCreateVersion,
   onNormalizeFormula,
   onSendForCompounding,
+  onShareFormula,
   onEditFormulaDetails,
   onViewFormulaDetails,
   onUploadExcel,
@@ -480,6 +482,20 @@ export const ColumnHeaderCell = ({
                                   send
                                 </span>
                                 <span>Send for Compounding</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onShareFormula?.(column.id);
+                                  setShowColumnActions(null);
+                                }}
+                                className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                              >
+                                <span className="material-symbols-rounded text-xs">
+                                  share
+                                </span>
+                                <span>Share</span>
                               </button>
                             </>
                           )}

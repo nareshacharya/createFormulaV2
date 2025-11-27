@@ -78,6 +78,13 @@ export interface Formula {
   commentOnProduct?: string;
   briefCptTarget?: number;
   briefFragranceDosageTarget?: number;
+  
+  // Formula sharing fields
+  isShared?: boolean;           // True if formula has been shared with others
+  sharedWith?: string[];        // Array of user IDs who have access
+  sharedBy?: string;            // User ID of the original owner
+  sharedDate?: string;          // ISO timestamp when first shared
+  isReadOnly?: boolean;         // True for recipients (non-owners)
 }
 
 export interface FormulaIngredient {

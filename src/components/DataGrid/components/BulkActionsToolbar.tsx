@@ -42,12 +42,14 @@ interface BulkActionsToolbarProps {
   onMergeDuplicates?: () => void;
   onNormalize?: () => void;
   onSend?: () => void;
+  onShare?: () => void;  // Share formula function
   onUndo?: () => void;
   onComplianceCheck?: () => void;
   onExport?: () => void;
   canUndo?: boolean;
   undoCount?: number;
   canSend?: boolean;
+  canShare?: boolean;  // Enable/disable share button
   canComplianceCheck?: boolean;
 }
 
@@ -108,12 +110,14 @@ export const BulkActionsToolbar = ({
   onMergeDuplicates,
   onNormalize,
   onSend,
+  onShare,
   onUndo,
   onComplianceCheck,
   onExport,
   canUndo = false,
   undoCount = 0,
   canSend = false,
+  canShare = false,
   canComplianceCheck = false,
 }: BulkActionsToolbarProps) => {
   // Helper function to render secondary action buttons (Delete, Yield, Clear)
@@ -245,6 +249,21 @@ export const BulkActionsToolbar = ({
               canSend
                 ? "Send Active Formula for Compounding"
                 : "Select an active formula"
+            }
+          />
+        )}
+
+        {/* Share Formula Button */}
+        {onShare && (
+          <ToolbarButton
+            onClick={onShare}
+            disabled={!canShare}
+            icon="share"
+            label="Share"
+            title={
+              canShare
+                ? "Share Formula with Other Users"
+                : "Select a formula you own"
             }
           />
         )}
