@@ -43,6 +43,7 @@ interface FormulaModalProps {
 interface NewFormulaData {
   formulaType: FormulaType;
   name: string;
+  fragranceName: string;
   sampleID: string;
   category: string;
   region: string;
@@ -90,6 +91,7 @@ const FormulaModal = ({
   const [newFormulaData, setNewFormulaData] = useState<NewFormulaData>({
     formulaType: FORMULA_TYPES.BASE as FormulaType,
     name: "",
+    fragranceName: "",
     sampleID: "",
     category: "",
     region: "",
@@ -133,6 +135,7 @@ const FormulaModal = ({
     setNewFormulaData({
       formulaType: FORMULA_TYPES.BASE as FormulaType,
       name: "",
+      fragranceName: "",
       sampleID: "",
       category: "",
       region: "",
@@ -177,7 +180,7 @@ const FormulaModal = ({
     // Type-specific mandatory validation
     if (
       isFieldVisible("fragranceName", newFormulaData.formulaType) &&
-      !newFormulaData.fragranceName
+      !newFormulaData.name
     ) {
       toast.error("Fragrance name is required for this formula type");
       return;
@@ -274,7 +277,7 @@ const FormulaModal = ({
       if (response.success) {
         toast.success(
           `Formula "${
-            newFormulaData.name || newFormulaData.fragranceName
+            newFormulaData.name
           }" created successfully!`
         );
 
@@ -288,7 +291,7 @@ const FormulaModal = ({
         const formulaName =
           newFormulaData.formulaType === FORMULA_TYPES.ANALYTICAL
             ? `ANALYTICAL-${newFormulaData.sampleID}`
-            : newFormulaData.fragranceName;
+            : newFormulaData.name;
 
         const versionMatch = typeSpecificId.match(/v(\d+)$/);
         const extractedVersion = versionMatch
@@ -334,7 +337,7 @@ const FormulaModal = ({
           fragranceName: newFormulaData.fragranceName,
           sampleId: newFormulaData.sampleID,
           fragranceDosageActual: newFormulaData.fragranceDosage,
-          formulaVersion: newFormulaData.version,
+          formulaVersion: extractedVersion,
           productFormat: newFormulaData.productFormat,
           brand: newFormulaData.brand,
           supplier: newFormulaData.supplier,
@@ -354,7 +357,10 @@ const FormulaModal = ({
           handleClose();
         }, 1500);
       } else {
-        toast.error(response.error || "Failed to create formula");
+        const errorMessage = typeof response.error === "string" 
+          ? response.error 
+          : response.error?.message || "Failed to create formula";
+        toast.error(errorMessage);
       }
     } catch (error) {
       toast.error(
@@ -537,13 +543,13 @@ const FormulaModal = ({
         newFormulaData.country &&
         newFormulaData.productFormat &&
         (isFieldVisible("fragranceName", newFormulaData.formulaType)
-          ? newFormulaData.fragranceName.trim()
+          ? newFormulaData.name && newFormulaData.name.trim()
           : true) &&
         (isFieldVisible("sampleId", newFormulaData.formulaType)
-          ? newFormulaData.sampleID.trim()
+          ? newFormulaData.sampleID && newFormulaData.sampleID.trim()
           : true) &&
         (isFieldVisible("baseFormulaId", newFormulaData.formulaType)
-          ? newFormulaData.baseFormulaId.trim()
+          ? newFormulaData.baseFormulaId && newFormulaData.baseFormulaId.trim()
           : true) &&
         (isFieldVisible("dilutionPercentage", newFormulaData.formulaType)
           ? newFormulaData.dilutionPercentage
